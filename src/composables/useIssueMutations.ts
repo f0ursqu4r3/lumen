@@ -19,11 +19,12 @@ const UpdateIssueDocument = graphql(`
   }
 `)
 
-type Payload = { errors: string[] } | null | undefined
+// Only models the `errors[]` field that `run` inspects — not the full payload.
+type ErrorsCarrier = { errors: string[] } | null | undefined
 
 // Sends the request, normalizes transport errors, and rejects with a typed
 // GitLabError when the mutation payload carries errors[].
-async function run<P extends Payload>(
+async function run<P extends ErrorsCarrier>(
   send: () => Promise<unknown>,
   pick: (data: never) => P,
 ): Promise<NonNullable<P>> {
@@ -40,14 +41,17 @@ async function run<P extends Payload>(
   return payload as NonNullable<P>
 }
 
+type CreateIssuePayload = { issue?: { iid: string } | null; errors: string[] }
+type CreateNotePayload = { note?: { id: string } | null; errors: string[] }
+type UpdateIssuePayload = { issue?: { iid: string; state: string } | null; errors: string[] }
+
 export function useCreateIssue(fullPath: string) {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (input: { title: string; description?: string }) =>
+  return useMutation<CreateIssuePayload, GitLabError, { title: string; description?: string }>({
+    mutationFn: (input) =>
       run(
         () => gqlClient.request(CreateIssueDocument, { input: { projectPath: fullPath, ...input } }),
-        (d: { createIssue?: { issue?: { iid: string } | null; errors: string[] } | null }) =>
-          d.createIssue,
+        (d: { createIssue?: CreateIssuePayload | null }) => d.createIssue,
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['issues', fullPath] }),
   })
@@ -55,12 +59,11 @@ export function useCreateIssue(fullPath: string) {
 
 export function useAddNote(fullPath: string, iid: string) {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (input: { noteableId: string; body: string }) =>
+  return useMutation<CreateNotePayload, GitLabError, { noteableId: string; body: string }>({
+    mutationFn: (input) =>
       run(
         () => gqlClient.request(CreateNoteDocument, { input }),
-        (d: { createNote?: { note?: { id: string } | null; errors: string[] } | null }) =>
-          d.createNote,
+        (d: { createNote?: CreateNotePayload | null }) => d.createNote,
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['issue', fullPath, iid] }),
   })
@@ -68,20 +71,23 @@ export function useAddNote(fullPath: string, iid: string) {
 
 export function useUpdateIssue(fullPath: string, iid: string) {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (changes: {
+  return useMutation<
+    UpdateIssuePayload,
+    GitLabError,
+    {
       stateEvent?: 'CLOSE' | 'REOPEN'
       addLabelIds?: string[]
       removeLabelIds?: string[]
       assigneeUsernames?: string[]
-    }) =>
+    }
+  >({
+    mutationFn: (changes) =>
       run(
         () =>
           gqlClient.request(UpdateIssueDocument, {
             input: { projectPath: fullPath, iid, ...changes },
           }),
-        (d: { updateIssue?: { issue?: { iid: string; state: string } | null; errors: string[] } | null }) =>
-          d.updateIssue,
+        (d: { updateIssue?: UpdateIssuePayload | null }) => d.updateIssue,
       ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['issue', fullPath, iid] })

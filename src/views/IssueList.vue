@@ -80,6 +80,7 @@ function submitNew() {
         Create
       </button>
     </form>
+    <ErrorNotice v-if="createIssue.error.value" :error="createIssue.error.value" />
     <ErrorNotice v-if="error" :error="error" />
     <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
     <template v-else>

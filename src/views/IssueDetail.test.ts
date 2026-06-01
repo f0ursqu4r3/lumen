@@ -10,8 +10,8 @@ const { addNoteMutate, updateMutate } = vi.hoisted(() => ({
   updateMutate: vi.fn(),
 }))
 vi.mock('@/composables/useIssueMutations', () => ({
-  useAddNote: () => ({ mutate: addNoteMutate, isPending: { value: false } }),
-  useUpdateIssue: () => ({ mutate: updateMutate, isPending: { value: false } }),
+  useAddNote: () => ({ mutate: addNoteMutate, isPending: { value: false }, error: { value: null } }),
+  useUpdateIssue: () => ({ mutate: updateMutate, isPending: { value: false }, error: { value: null } }),
 }))
 
 import IssueDetail from './IssueDetail.vue'

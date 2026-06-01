@@ -12,6 +12,9 @@ const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toR
 const addNote = useAddNote(props.fullPath, props.iid)
 const updateIssue = useUpdateIssue(props.fullPath, props.iid)
 
+// Surfaces a failed comment/state mutation (otherwise the action fails silently).
+const actionError = computed(() => addNote.error.value ?? updateIssue.error.value)
+
 const labels = computed(
   () => issue.value?.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ?? [],
 )
@@ -53,6 +56,7 @@ function toggleState() {
         {{ issue.state === 'opened' ? 'Close issue' : 'Reopen issue' }}
       </button>
     </header>
+    <ErrorNotice v-if="actionError" :error="actionError" />
     <p v-if="issue.description" class="whitespace-pre-wrap text-sm">{{ issue.description }}</p>
     <div class="flex flex-wrap gap-2">
       <LabelChip v-for="l in labels" :key="l.id" :title="l.title" :color="l.color" />

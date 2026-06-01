@@ -38,4 +38,23 @@ describe('issue mutations', () => {
     await flushPromises()
     expect(spy).toHaveBeenCalledWith({ queryKey: ['issues', 'grp/proj'] })
   })
+
+  it('useCreateIssue rejects with a normalized error on GraphQL errors[]', async () => {
+    request.mockResolvedValue({ createIssue: { issue: null, errors: ['bad'] } })
+    const { result } = withQuery(() => useCreateIssue('grp/proj'))
+    await expect(
+      (result() as { mutateAsync: (v: unknown) => Promise<unknown> }).mutateAsync({ title: 'x' }),
+    ).rejects.toMatchObject({ kind: 'graphql', message: 'bad' })
+  })
+
+  it('useAddNote rejects with a normalized error on a transport failure', async () => {
+    request.mockRejectedValue(new Error('down'))
+    const { result } = withQuery(() => useAddNote('grp/proj', '9'))
+    await expect(
+      (result() as { mutateAsync: (v: unknown) => Promise<unknown> }).mutateAsync({
+        noteableId: 'gid://issue/9',
+        body: 'hi',
+      }),
+    ).rejects.toMatchObject({ kind: 'unknown', message: 'down' })
+  })
 })
