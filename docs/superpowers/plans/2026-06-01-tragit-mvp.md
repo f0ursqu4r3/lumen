@@ -334,7 +334,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useProjects } from './useProjects'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useProjects', () => {
   it('returns the projects nodes from the response', async () => {
@@ -531,7 +533,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useIssues } from './useIssues'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useIssues', () => {
   it('returns nodes and pageInfo for a project', async () => {
@@ -827,17 +831,22 @@ const { data, isLoading, error } = useIssues(toRef(props, 'fullPath'), filters)
     </div>
     <ErrorNotice v-if="error" :error="error" />
     <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
-    <ul v-else class="divide-y divide-neutral-200 rounded border border-neutral-200">
-      <li v-for="issue in data?.nodes" :key="issue.iid">
-        <IssueRow :issue="issue" :full-path="fullPath" />
-      </li>
-      <li v-if="!data?.nodes.length" class="px-3 py-2 text-sm text-neutral-500">No issues.</li>
-    </ul>
+    <template v-else>
+      <ul
+        v-if="data?.nodes.length"
+        class="divide-y divide-neutral-200 rounded border border-neutral-200"
+      >
+        <li v-for="issue in data.nodes" :key="issue.iid">
+          <IssueRow :issue="issue" :full-path="fullPath" />
+        </li>
+      </ul>
+      <p v-else class="text-sm text-neutral-500">No issues.</p>
+    </template>
   </section>
 </template>
 ```
 
-> `toRef(filters)` passes the reactive filters object as a single ref so the query key updates when any filter changes.
+> `filters` is a `computed` ref derived from the individual inputs, so its value identity changes whenever any input changes and the Vue Query key updates.
 
 - [ ] **Step 11: Regenerate types, run tests + typecheck**
 
@@ -878,7 +887,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useIssue } from './useIssue'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useIssue', () => {
   it('returns the issue with its notes', async () => {
@@ -1110,7 +1121,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useAddNote, useUpdateIssue, useCreateIssue } from './useIssueMutations'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('issue mutations', () => {
   it('useAddNote invalidates the issue query on success', async () => {
