@@ -21,7 +21,11 @@ const config: CodegenConfig = {
   generates: {
     'src/gitlab/generated/': {
       preset: 'client',
-      config: { useTypeImports: true },
+      // enumsAsTypes: GitLab's sort enums expose both deprecated lowercase and
+      // uppercase values that PascalCase-collapse to duplicate TS enum members
+      // (TS2300). Emitting string-literal unions avoids the collision and suits
+      // our usage (we pass plain string args).
+      config: { useTypeImports: true, enumsAsTypes: true },
     },
   },
 }
