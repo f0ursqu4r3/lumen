@@ -334,7 +334,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useProjects } from './useProjects'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useProjects', () => {
   it('returns the projects nodes from the response', async () => {
@@ -531,7 +533,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useIssues } from './useIssues'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useIssues', () => {
   it('returns nodes and pageInfo for a project', async () => {
@@ -878,7 +882,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useIssue } from './useIssue'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('useIssue', () => {
   it('returns the issue with its notes', async () => {
@@ -1110,7 +1116,9 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useAddNote, useUpdateIssue, useCreateIssue } from './useIssueMutations'
 
-beforeEach(() => request.mockReset())
+beforeEach(() => {
+  request.mockReset()
+})
 
 describe('issue mutations', () => {
   it('useAddNote invalidates the issue query on success', async () => {
