@@ -18,17 +18,22 @@ const { data: projects, isLoading, error } = useProjects(search)
     />
     <ErrorNotice v-if="error" :error="error" />
     <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
-    <ul v-else class="divide-y divide-neutral-200 rounded border border-neutral-200">
-      <li v-for="p in projects" :key="p.id">
-        <RouterLink
-          :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
-          class="block px-3 py-2 hover:bg-neutral-100"
-        >
-          <span class="font-medium">{{ p.name }}</span>
-          <span class="ml-2 text-xs text-neutral-500">{{ p.fullPath }}</span>
-        </RouterLink>
-      </li>
-      <li v-if="!projects?.length" class="px-3 py-2 text-sm text-neutral-500">No projects.</li>
-    </ul>
+    <template v-else>
+      <ul
+        v-if="projects?.length"
+        class="divide-y divide-neutral-200 rounded border border-neutral-200"
+      >
+        <li v-for="p in projects" :key="p.id">
+          <RouterLink
+            :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
+            class="block px-3 py-2 hover:bg-neutral-100"
+          >
+            <span class="font-medium">{{ p.name }}</span>
+            <span class="ml-2 text-xs text-neutral-500">{{ p.fullPath }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+      <p v-else class="text-sm text-neutral-500">No projects.</p>
+    </template>
   </section>
 </template>
