@@ -24,8 +24,8 @@ describe('useIssues', () => {
     })
     const { result } = withQuery(() => useIssues(ref('grp/proj'), ref({ state: 'opened' })))
     await flushPromises()
-    expect(result().data.value?.nodes).toHaveLength(1)
-    expect(result().data.value?.pageInfo.hasNextPage).toBe(false)
+    expect(result().issues.value).toHaveLength(1)
+    expect(result().hasNextPage.value).toBe(false)
   })
 
   it('passes mapped filter variables to the request', async () => {

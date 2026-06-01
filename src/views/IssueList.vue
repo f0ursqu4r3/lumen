@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
-import { Plus, Search, Tag, AtSign, Milestone } from '@lucide/vue'
+import { useIntersectionObserver } from '@vueuse/core'
+import { Plus, Search, Tag, AtSign, Milestone, LoaderCircle } from '@lucide/vue'
 import { useIssues } from '@/composables/useIssues'
 import { useCreateIssue } from '@/composables/useIssueMutations'
 import type { IssueFilters } from '@/gitlab/issueParams'
@@ -42,10 +43,22 @@ const filters = computed<IssueFilters>(() => ({
   milestone: milestone.value || undefined,
 }))
 
-const { data, isLoading, error } = useIssues(toRef(props, 'fullPath'), filters)
+const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
+  useIssues(toRef(props, 'fullPath'), filters)
 
-const count = computed(() => data.value?.nodes.length ?? 0)
-const hasMore = computed(() => data.value?.pageInfo.hasNextPage ?? false)
+const count = computed(() => issues.value.length)
+const hasMore = computed(() => hasNextPage.value ?? false)
+
+function loadMore() {
+  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
+}
+
+// Auto-load the next page when the sentinel scrolls into view; the button below
+// is the explicit fallback (and what shows when IntersectionObserver is absent).
+const sentinel = ref<HTMLElement | null>(null)
+useIntersectionObserver(sentinel, ([entry]) => {
+  if (entry?.isIntersecting) loadMore()
+})
 
 const createIssue = useCreateIssue(props.fullPath)
 const newTitle = ref('')
@@ -59,28 +72,35 @@ function submitNew() {
 </script>
 
 <template>
-  <section class="space-y-5">
+  <section class="space-y-6">
     <!-- Header -->
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
-        <p class="font-mono text-[11px] font-medium tracking-[0.2em] text-neutral-400 uppercase">
+        <p
+          class="font-mono text-[10px] font-medium tracking-[0.28em] text-muted-foreground/70 uppercase"
+        >
           Issues
         </p>
-        <h1 class="truncate text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
           {{ repoName }}
         </h1>
-        <p v-if="pathPrefix" class="truncate font-mono text-xs text-neutral-400">
+        <p
+          v-if="pathPrefix"
+          class="truncate font-mono text-xs text-muted-foreground/60"
+        >
           {{ pathPrefix }}/
         </p>
       </div>
       <div
-        class="hidden shrink-0 flex-col items-end sm:flex"
+        class="hidden shrink-0 flex-col items-end transition-opacity sm:flex"
         :class="isLoading ? 'opacity-0' : 'opacity-100'"
       >
-        <span class="font-mono text-3xl font-semibold tabular-nums text-neutral-900">
-          {{ count }}<span v-if="hasMore" class="text-neutral-300">+</span>
+        <span
+          class="font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+        >
+          {{ count }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
         </span>
-        <span class="text-xs text-neutral-400">
+        <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
           {{ count === 1 ? 'issue' : 'issues' }}
         </span>
       </div>
@@ -90,7 +110,7 @@ function submitNew() {
     <div class="space-y-2.5">
       <div class="flex flex-wrap items-center gap-2">
         <!-- Segmented state control -->
-        <div class="inline-flex rounded-lg border border-neutral-200 bg-neutral-100 p-0.5">
+        <div class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
           <button
             v-for="s in STATES"
             :key="s.value"
@@ -98,8 +118,8 @@ function submitNew() {
             class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors"
             :class="
               state === s.value
-                ? 'bg-white text-neutral-900 shadow-sm'
-                : 'text-neutral-500 hover:text-neutral-800'
+                ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+                : 'text-muted-foreground hover:text-foreground'
             "
             @click="state = s.value"
           >
@@ -110,7 +130,7 @@ function submitNew() {
         <!-- Search -->
         <div class="relative min-w-50 flex-1">
           <Search
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400"
+            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             v-model="search"
@@ -124,15 +144,25 @@ function submitNew() {
       <!-- Secondary filters -->
       <div class="flex flex-wrap items-center gap-2">
         <div class="relative w-56">
-          <Tag class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input v-model="labelsText" placeholder="Labels (comma-separated)" class="pl-9" />
+          <Tag
+            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            v-model="labelsText"
+            placeholder="Labels (comma-separated)"
+            class="pl-9"
+          />
         </div>
         <div class="relative w-48">
-          <AtSign class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+          <AtSign
+            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
           <Input v-model="assignee" placeholder="Assignee" class="pl-9" />
         </div>
         <div class="relative w-44">
-          <Milestone class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+          <Milestone
+            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
           <Input v-model="milestone" placeholder="Milestone" class="pl-9" />
         </div>
       </div>
@@ -140,13 +170,13 @@ function submitNew() {
 
     <!-- Quick create -->
     <form
-      class="flex gap-2 rounded-xl border border-dashed border-neutral-200 bg-neutral-50/60 p-2"
+      class="group flex gap-2 rounded-xl border border-dashed border-border bg-muted/20 p-2 transition-colors focus-within:border-primary/40 focus-within:bg-muted/30"
       @submit.prevent="submitNew"
     >
       <Input
         v-model="newTitle"
         placeholder="New issue title…"
-        class="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0"
+        class="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
       <Button type="submit" :disabled="createIssue.isPending.value">
         <Plus />
@@ -157,33 +187,60 @@ function submitNew() {
     <ErrorNotice v-if="createIssue.error.value" :error="createIssue.error.value" />
     <ErrorNotice v-if="error" :error="error" />
 
-    <div v-else-if="isLoading" class="space-y-px overflow-hidden rounded-xl border border-neutral-200 bg-white">
-      <Skeleton v-for="i in 6" :key="i" class="h-12 w-full rounded-none" />
+    <div
+      v-else-if="isLoading"
+      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
+    >
+      <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2.5">
+        <Skeleton class="size-2 rounded-full" />
+        <Skeleton class="size-5 rounded-md" />
+        <Skeleton class="h-3 w-8" />
+        <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
+        <Skeleton class="h-5 w-16 rounded-full" />
+      </div>
     </div>
 
     <template v-else>
-      <Card
-        v-if="count"
-        class="gap-0 divide-y divide-neutral-100 overflow-hidden p-0 shadow-sm"
-      >
-        <IssueRow
-          v-for="issue in data!.nodes"
-          :key="issue.iid"
-          :issue="issue"
-          :full-path="fullPath"
-        />
-      </Card>
+      <template v-if="count">
+        <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm">
+          <IssueRow
+            v-for="(issue, i) in issues"
+            :key="issue.iid"
+            :issue="issue"
+            :full-path="fullPath"
+            :index="i"
+          />
+        </Card>
+
+        <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
+        <div v-if="hasMore" ref="sentinel" class="flex justify-center pt-3">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+            :disabled="isFetchingNextPage"
+            @click="loadMore"
+          >
+            <LoaderCircle
+              v-if="isFetchingNextPage"
+              class="size-4 animate-spin text-primary"
+            />
+            {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
+          </button>
+        </div>
+      </template>
 
       <!-- Empty state -->
       <div
         v-else
-        class="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 py-16 text-center"
+        class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
       >
-        <div class="grid size-11 place-items-center rounded-full bg-neutral-100">
-          <Search class="size-5 text-neutral-400" />
+        <div class="grid size-11 place-items-center rounded-full bg-muted">
+          <Search class="size-5 text-muted-foreground" />
         </div>
-        <p class="text-sm font-medium text-neutral-700">No issues.</p>
-        <p class="text-xs text-neutral-400">Nothing matches the current filters.</p>
+        <p class="text-sm font-medium text-foreground">No issues.</p>
+        <p class="max-w-xs text-xs text-muted-foreground">
+          Nothing matches the current filters — adjust them above, or create one.
+        </p>
       </div>
     </template>
   </section>

@@ -23,6 +23,18 @@ const issue = {
   labels: { nodes: [] }, assignees: { nodes: [] },
 }
 
+// Mirrors the useIssues (useInfiniteQuery-backed) return contract.
+const mockQuery = (over: Record<string, unknown> = {}) =>
+  useIssues.mockReturnValue({
+    issues: ref([]),
+    isLoading: ref(false),
+    error: ref(null),
+    hasNextPage: ref(false),
+    isFetchingNextPage: ref(false),
+    fetchNextPage: vi.fn(),
+    ...over,
+  })
+
 beforeEach(() => {
   useIssues.mockReset()
   createMutate.mockReset()
@@ -30,47 +42,31 @@ beforeEach(() => {
 
 describe('IssueList', () => {
   it('renders a row per issue', async () => {
-    useIssues.mockReturnValue({
-      data: ref({ nodes: [issue], pageInfo: { hasNextPage: false, endCursor: null } }),
-      isLoading: ref(false),
-      error: ref(null),
-    })
+    mockQuery({ issues: ref([issue]) })
     const w = mountList()
     await flushPromises()
     expect(w.text()).toContain('Crash')
   })
 
   it('shows a loading state', () => {
-    useIssues.mockReturnValue({ data: ref(undefined), isLoading: ref(true), error: ref(null) })
+    mockQuery({ isLoading: ref(true) })
     expect(mountList().find('[data-slot="skeleton"]').exists()).toBe(true)
   })
 
   it('shows the error via ErrorNotice', () => {
-    useIssues.mockReturnValue({
-      data: ref(undefined),
-      isLoading: ref(false),
-      error: ref({ kind: 'unknown', message: 'boom' }),
-    })
+    mockQuery({ error: ref({ kind: 'unknown', message: 'boom' }) })
     expect(mountList().text()).toContain('boom')
   })
 
   it('shows the empty state when there are no issues', () => {
-    useIssues.mockReturnValue({
-      data: ref({ nodes: [], pageInfo: { hasNextPage: false, endCursor: null } }),
-      isLoading: ref(false),
-      error: ref(null),
-    })
+    mockQuery({ issues: ref([]) })
     const w = mountList()
     expect(w.text()).toContain('No issues')
     expect(w.findComponent(RouterLinkStub).exists()).toBe(false)
   })
 
   it('creates an issue from the new-issue form', async () => {
-    useIssues.mockReturnValue({
-      data: ref({ nodes: [], pageInfo: { hasNextPage: false, endCursor: null } }),
-      isLoading: ref(false),
-      error: ref(null),
-    })
+    mockQuery({ issues: ref([]) })
     const w = mountList()
     await w.find('input[placeholder="New issue title…"]').setValue('Brand new')
     await w.find('form').trigger('submit.prevent')

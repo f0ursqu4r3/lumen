@@ -15,7 +15,7 @@ const scopeText = computed(() => readableText(scopeBg.value))
 
 <template>
   <span
-    class="inline-flex h-5 items-center overflow-hidden rounded-full text-[11px] font-medium leading-none whitespace-nowrap"
+    class="inline-flex h-5 items-center overflow-hidden rounded-full text-[11px] font-medium leading-none whitespace-nowrap ring-1 ring-inset ring-white/8"
     :title="title"
   >
     <span

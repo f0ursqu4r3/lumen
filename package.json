@@ -12,6 +12,8 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@fontsource-variable/geist-mono": "^5.2.8",
+    "@fontsource-variable/hanken-grotesk": "^5.2.8",
     "@lucide/vue": "^1.17.0",
     "@tanstack/vue-query": "^5.62.0",
     "@vueuse/core": "^14.3.0",

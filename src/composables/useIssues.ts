@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/vue-query'
+import { useInfiniteQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { graphql } from '@/gitlab/generated'
 import { gqlClient } from '@/gitlab/client'
@@ -22,7 +22,7 @@ const IssuesDocument = graphql(`
         assigneeUsernames: $assigneeUsernames
         milestoneTitle: $milestoneTitle
         search: $search
-        first: 20
+        first: 50
         after: $after
         sort: UPDATED_DESC
       ) {
@@ -40,9 +40,9 @@ const IssuesDocument = graphql(`
   }
 `)
 
-async function fetchIssues(fullPath: string, filters: IssueFilters) {
+async function fetchIssues(fullPath: string, filters: IssueFilters, after?: string) {
   try {
-    const data = await gqlClient.request(IssuesDocument, toIssuesVars(fullPath, filters))
+    const data = await gqlClient.request(IssuesDocument, toIssuesVars(fullPath, filters, after))
     return {
       nodes:
         data.project?.issues?.nodes?.filter((n): n is NonNullable<typeof n> => !!n) ?? [],
@@ -53,11 +53,21 @@ async function fetchIssues(fullPath: string, filters: IssueFilters) {
   }
 }
 
-export type IssueListItem = Awaited<ReturnType<typeof fetchIssues>>['nodes'][number]
+type IssuesPage = Awaited<ReturnType<typeof fetchIssues>>
+export type IssueListItem = IssuesPage['nodes'][number]
 
 export function useIssues(fullPath: Ref<string>, filters: Ref<IssueFilters>) {
-  return useQuery<Awaited<ReturnType<typeof fetchIssues>>, GitLabError>({
+  const query = useInfiniteQuery<IssuesPage, GitLabError>({
     queryKey: computed(() => issuesKey(fullPath.value, filters.value)),
-    queryFn: () => fetchIssues(fullPath.value, filters.value),
+    queryFn: ({ pageParam }) =>
+      fetchIssues(fullPath.value, filters.value, pageParam as string | undefined),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) =>
+      last.pageInfo.hasNextPage ? (last.pageInfo.endCursor ?? undefined) : undefined,
   })
+
+  // Flatten the paged results so callers see one contiguous list.
+  const issues = computed(() => query.data.value?.pages.flatMap((p) => p.nodes) ?? [])
+
+  return Object.assign(query, { issues })
 }

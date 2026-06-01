@@ -13,11 +13,11 @@ const label = computed(() => (open.value ? 'Open' : 'Closed'))
     v-if="compact"
     :title="label"
     :aria-label="label"
-    class="inline-block size-2.5 shrink-0 rounded-full ring-2"
+    class="inline-block size-2 shrink-0 rounded-full"
     :class="
       open
-        ? 'bg-emerald-500 ring-emerald-500/20'
-        : 'bg-neutral-300 ring-neutral-300/30'
+        ? 'bg-emerald-400 shadow-[0_0_0_3px_oklch(0.7_0.15_162/0.18)]'
+        : 'bg-muted-foreground/50'
     "
   />
   <span
@@ -25,13 +25,13 @@ const label = computed(() => (open.value ? 'Open' : 'Closed'))
     class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
     :class="
       open
-        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-        : 'border-neutral-200 bg-neutral-100 text-neutral-600'
+        ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+        : 'border-border bg-muted text-muted-foreground'
     "
   >
     <span
       class="size-1.5 rounded-full"
-      :class="open ? 'bg-emerald-500' : 'bg-neutral-400'"
+      :class="open ? 'bg-emerald-400' : 'bg-muted-foreground'"
     />
     {{ label }}
   </span>
