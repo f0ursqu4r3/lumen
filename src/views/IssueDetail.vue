@@ -1,12 +1,61 @@
 <script setup lang="ts">
-defineProps<{ fullPath: string; iid: string }>()
+import { computed, toRef } from 'vue'
+import { useIssue } from '@/composables/useIssue'
+import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
+import LabelChip from '@/components/LabelChip.vue'
+import StateBadge from '@/components/StateBadge.vue'
+import ErrorNotice from '@/components/ErrorNotice.vue'
+
+const props = defineProps<{ fullPath: string; iid: string }>()
+const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
+
+const labels = computed(
+  () => issue.value?.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ?? [],
+)
+const assignees = computed(
+  () => issue.value?.assignees?.nodes?.filter((a): a is NonNullable<typeof a> => !!a) ?? [],
+)
+const notes = computed(
+  () => issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n) ?? [],
+)
 </script>
 
 <template>
-  <section>
-    <h1 class="text-lg font-semibold">Issue #{{ iid }}</h1>
-    <p class="mt-2 text-sm text-neutral-500">
-      Detail + notes for <code>{{ fullPath }}</code> — not yet implemented.
+  <ErrorNotice v-if="error" :error="error" />
+  <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
+  <article v-else-if="issue" class="space-y-4">
+    <header class="flex items-center gap-2">
+      <StateBadge :state="issue.state" />
+      <h1 class="text-lg font-semibold">#{{ issue.iid }} {{ issue.title }}</h1>
+    </header>
+    <p class="whitespace-pre-wrap text-sm">{{ issue.description }}</p>
+    <div class="flex flex-wrap gap-2">
+      <LabelChip v-for="l in labels" :key="l.id" :title="l.title" :color="l.color" />
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <AssigneeAvatar
+        v-for="a in assignees"
+        :key="a.id"
+        :username="a.username"
+        :avatar-url="a.avatarUrl"
+      />
+    </div>
+    <p v-if="issue.milestone" class="text-xs text-neutral-500">
+      Milestone: {{ issue.milestone.title }}
     </p>
-  </section>
+    <section class="space-y-2">
+      <h2 class="text-sm font-semibold">Notes</h2>
+      <ul class="space-y-2">
+        <li
+          v-for="n in notes"
+          :key="n.id"
+          class="rounded border border-neutral-200 p-2 text-sm"
+        >
+          <span class="font-medium">@{{ n.author?.username }}</span>
+          <span class="ml-2 text-xs text-neutral-400">{{ n.createdAt }}</span>
+          <p class="mt-1 whitespace-pre-wrap">{{ n.body }}</p>
+        </li>
+      </ul>
+    </section>
+  </article>
 </template>
