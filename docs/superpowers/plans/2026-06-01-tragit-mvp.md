@@ -831,17 +831,22 @@ const { data, isLoading, error } = useIssues(toRef(props, 'fullPath'), filters)
     </div>
     <ErrorNotice v-if="error" :error="error" />
     <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
-    <ul v-else class="divide-y divide-neutral-200 rounded border border-neutral-200">
-      <li v-for="issue in data?.nodes" :key="issue.iid">
-        <IssueRow :issue="issue" :full-path="fullPath" />
-      </li>
-      <li v-if="!data?.nodes.length" class="px-3 py-2 text-sm text-neutral-500">No issues.</li>
-    </ul>
+    <template v-else>
+      <ul
+        v-if="data?.nodes.length"
+        class="divide-y divide-neutral-200 rounded border border-neutral-200"
+      >
+        <li v-for="issue in data.nodes" :key="issue.iid">
+          <IssueRow :issue="issue" :full-path="fullPath" />
+        </li>
+      </ul>
+      <p v-else class="text-sm text-neutral-500">No issues.</p>
+    </template>
   </section>
 </template>
 ```
 
-> `toRef(filters)` passes the reactive filters object as a single ref so the query key updates when any filter changes.
+> `filters` is a `computed` ref derived from the individual inputs, so its value identity changes whenever any input changes and the Vue Query key updates.
 
 - [ ] **Step 11: Regenerate types, run tests + typecheck**
 
