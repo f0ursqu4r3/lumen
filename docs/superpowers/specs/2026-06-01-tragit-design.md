@@ -26,7 +26,7 @@ GitLab and injecting the access token so it never ships in client code.
 
 ## Architecture
 
-```
+```text
 Browser (Vue SPA)
    │  POST /gitlab/graphql
    ▼
@@ -46,15 +46,15 @@ Vite dev server  ── proxy: rewrite path, attach `PRIVATE-TOKEN` / Bearer hea
 
 ## Stack
 
-| Concern        | Choice |
-|----------------|--------|
-| Build/dev      | Vite |
-| Framework      | Vue 3 (`<script setup>`, Composition API) |
-| Language       | TypeScript |
-| Styling        | Tailwind v4 (`@tailwindcss/vite`, CSS-first config) |
-| Routing        | Vue Router |
-| Data/cache     | TanStack Query (Vue Query) |
-| GraphQL client | `graphql-request` (fetch wrapper) |
+| Concern        | Choice                                               |
+| -------------- | ---------------------------------------------------- |
+| Build/dev      | Vite                                                 |
+| Framework      | Vue 3 (`<script setup>`, Composition API)            |
+| Language       | TypeScript                                           |
+| Styling        | Tailwind v4 (`@tailwindcss/vite`, CSS-first config)  |
+| Routing        | Vue Router                                           |
+| Data/cache     | TanStack Query (Vue Query)                           |
+| GraphQL client | `graphql-request` (fetch wrapper)                    |
 | Typed queries  | GraphQL Code Generator against the instance's schema |
 
 **Why this split:** TanStack Query owns caching, background refetch, pagination,
@@ -98,7 +98,7 @@ caches would duplicate Vue Query.
 
 ## Project Layout
 
-```
+```text
 src/
   gitlab/
     client.ts        # graphql-request client pointed at /gitlab/graphql
@@ -130,7 +130,7 @@ vite.config.ts       # proxy /gitlab -> GITLAB_URL/api, token header
 
 `.env.example` documents required vars:
 
-```
+```text
 GITLAB_URL=https://gitlab.example-corp.com
 GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxx   # scope: api
 ```
