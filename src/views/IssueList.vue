@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useIssues } from '@/composables/useIssues'
+import { useCreateIssue } from '@/composables/useIssueMutations'
 import type { IssueFilters } from '@/gitlab/issueParams'
 import IssueRow from '@/components/IssueRow.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
@@ -26,6 +27,12 @@ const filters = computed<IssueFilters>(() => ({
 }))
 
 const { data, isLoading, error } = useIssues(toRef(props, 'fullPath'), filters)
+const createIssue = useCreateIssue(props.fullPath)
+const newTitle = ref('')
+function submitNew() {
+  if (!newTitle.value.trim()) return
+  createIssue.mutate({ title: newTitle.value }, { onSuccess: () => (newTitle.value = '') })
+}
 </script>
 
 <template>
@@ -59,6 +66,20 @@ const { data, isLoading, error } = useIssues(toRef(props, 'fullPath'), filters)
         class="rounded border border-neutral-300 px-3 py-1 text-sm"
       />
     </div>
+    <form class="flex gap-2" @submit.prevent="submitNew">
+      <input
+        v-model="newTitle"
+        placeholder="New issue title…"
+        class="flex-1 rounded border border-neutral-300 px-3 py-1 text-sm"
+      />
+      <button
+        type="submit"
+        class="rounded bg-neutral-900 px-3 py-1 text-sm text-white"
+        :disabled="createIssue.isPending.value"
+      >
+        Create
+      </button>
+    </form>
     <ErrorNotice v-if="error" :error="error" />
     <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
     <template v-else>
