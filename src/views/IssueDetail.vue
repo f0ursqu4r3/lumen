@@ -76,7 +76,7 @@ function toggleState() {
       <h2 class="text-sm font-semibold">Notes</h2>
       <ul class="space-y-2">
         <li v-for="n in notes" :key="n.id" class="rounded border border-neutral-200 p-2 text-sm">
-          <span class="font-medium">@{{ n.author?.username }}</span>
+          <span class="font-medium">{{ n.author ? '@' + n.author.username : '(deleted user)' }}</span>
           <span class="ml-2 text-xs text-neutral-400">{{ new Date(n.createdAt).toLocaleString() }}</span>
           <p class="mt-1 whitespace-pre-wrap">{{ n.body }}</p>
         </li>
@@ -98,4 +98,5 @@ function toggleState() {
       </form>
     </section>
   </article>
+  <p v-else class="text-sm text-neutral-500">Issue not found.</p>
 </template>

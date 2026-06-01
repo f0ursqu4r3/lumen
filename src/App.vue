@@ -6,7 +6,9 @@
       <RouterLink to="/" class="font-semibold">tragit</RouterLink>
     </header>
     <main class="mx-auto max-w-5xl p-4">
-      <RouterView />
+      <!-- Remount on every route (incl. param changes) so composables that
+           capture route params at setup never go stale. -->
+      <RouterView :key="$route.fullPath" />
     </main>
   </div>
 </template>

@@ -62,6 +62,11 @@ describe('IssueDetail', () => {
     expect(mountDetail().text()).toContain('boom')
   })
 
+  it('shows a not-found message when the issue is null', () => {
+    useIssue.mockReturnValue({ data: ref(null), isLoading: ref(false), error: ref(null) })
+    expect(mountDetail().text()).toContain('Issue not found')
+  })
+
   it('adds a note when the comment form is submitted', async () => {
     useIssue.mockReturnValue({ data: ref(fullIssue), isLoading: ref(false), error: ref(null) })
     const w = mountDetail()
