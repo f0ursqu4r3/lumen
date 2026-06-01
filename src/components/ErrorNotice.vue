@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { CircleAlert } from '@lucide/vue'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { GitLabError } from '@/gitlab/errors'
+
 defineProps<{ error: GitLabError }>()
 </script>
 
 <template>
-  <div role="alert" class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-    {{ error.message }}
-  </div>
+  <Alert variant="destructive">
+    <CircleAlert />
+    <AlertDescription>{{ error.message }}</AlertDescription>
+  </Alert>
 </template>

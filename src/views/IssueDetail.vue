@@ -6,6 +6,10 @@ import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
 import LabelChip from '@/components/LabelChip.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const props = defineProps<{ fullPath: string; iid: string }>()
 const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
@@ -42,26 +46,34 @@ function toggleState() {
 
 <template>
   <ErrorNotice v-if="error" :error="error" />
-  <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
+  <div v-else-if="isLoading" class="space-y-3">
+    <Skeleton class="h-7 w-2/3" />
+    <Skeleton class="h-24 w-full" />
+  </div>
   <article v-else-if="issue" class="space-y-4">
     <header class="flex items-center gap-2">
       <StateBadge :state="issue.state" />
       <h1 class="text-lg font-semibold">#{{ issue.iid }} {{ issue.title }}</h1>
-      <button
+      <Button
         type="button"
-        class="ml-auto rounded border border-neutral-300 px-2 py-1 text-xs"
+        variant="outline"
+        size="sm"
+        class="ml-auto"
         :disabled="updateIssue.isPending.value"
         @click="toggleState"
       >
         {{ issue.state === 'opened' ? 'Close issue' : 'Reopen issue' }}
-      </button>
+      </Button>
     </header>
+
     <ErrorNotice v-if="actionError" :error="actionError" />
+
     <p v-if="issue.description" class="whitespace-pre-wrap text-sm">{{ issue.description }}</p>
-    <div class="flex flex-wrap gap-2">
+
+    <div v-if="labels.length" class="flex flex-wrap gap-2">
       <LabelChip v-for="l in labels" :key="l.id" :title="l.title" :color="l.color" />
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div v-if="assignees.length" class="flex flex-wrap gap-2">
       <AssigneeAvatar
         v-for="a in assignees"
         :key="a.id"
@@ -69,34 +81,26 @@ function toggleState() {
         :avatar-url="a.avatarUrl"
       />
     </div>
-    <p v-if="issue.milestone" class="text-xs text-neutral-500">
+    <p v-if="issue.milestone" class="text-xs text-muted-foreground">
       Milestone: {{ issue.milestone.title }}
     </p>
-    <section class="space-y-2">
+
+    <section class="space-y-3">
       <h2 class="text-sm font-semibold">Notes</h2>
-      <ul class="space-y-2">
-        <li v-for="n in notes" :key="n.id" class="rounded border border-neutral-200 p-2 text-sm">
+      <Card v-for="n in notes" :key="n.id" class="py-0">
+        <CardContent class="px-3 py-2 text-sm">
           <span class="font-medium">{{ n.author ? '@' + n.author.username : '(deleted user)' }}</span>
-          <span class="ml-2 text-xs text-neutral-400">{{ new Date(n.createdAt).toLocaleString() }}</span>
+          <span class="ml-2 text-xs text-muted-foreground">
+            {{ new Date(n.createdAt).toLocaleString() }}
+          </span>
           <p class="mt-1 whitespace-pre-wrap">{{ n.body }}</p>
-        </li>
-      </ul>
+        </CardContent>
+      </Card>
       <form class="space-y-2" @submit.prevent="submitComment">
-        <textarea
-          v-model="comment"
-          rows="3"
-          placeholder="Add a comment…"
-          class="w-full rounded border border-neutral-300 p-2 text-sm"
-        ></textarea>
-        <button
-          type="submit"
-          class="rounded bg-neutral-900 px-3 py-1 text-sm text-white"
-          :disabled="addNote.isPending.value"
-        >
-          Comment
-        </button>
+        <Textarea v-model="comment" :rows="3" placeholder="Add a comment…" />
+        <Button type="submit" :disabled="addNote.isPending.value">Comment</Button>
       </form>
     </section>
   </article>
-  <p v-else class="text-sm text-neutral-500">Issue not found.</p>
+  <p v-else class="text-sm text-muted-foreground">Issue not found.</p>
 </template>

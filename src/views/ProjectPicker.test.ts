@@ -29,7 +29,7 @@ describe('ProjectPicker', () => {
 
   it('shows a loading state', () => {
     useProjects.mockReturnValue({ data: ref(undefined), isLoading: ref(true), error: ref(null) })
-    expect(mountPicker().text()).toContain('Loading')
+    expect(mountPicker().find('[data-slot="skeleton"]').exists()).toBe(true)
   })
 
   it('shows the error via ErrorNotice', () => {
