@@ -15,8 +15,9 @@ const labels = computed(
 const assignees = computed(
   () => issue.value?.assignees?.nodes?.filter((a): a is NonNullable<typeof a> => !!a) ?? [],
 )
+// User comments only — system notes ("changed milestone", "closed via …") are noise here.
 const notes = computed(
-  () => issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n) ?? [],
+  () => issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n && !n.system) ?? [],
 )
 </script>
 
@@ -28,7 +29,7 @@ const notes = computed(
       <StateBadge :state="issue.state" />
       <h1 class="text-lg font-semibold">#{{ issue.iid }} {{ issue.title }}</h1>
     </header>
-    <p class="whitespace-pre-wrap text-sm">{{ issue.description }}</p>
+    <p v-if="issue.description" class="whitespace-pre-wrap text-sm">{{ issue.description }}</p>
     <div class="flex flex-wrap gap-2">
       <LabelChip v-for="l in labels" :key="l.id" :title="l.title" :color="l.color" />
     </div>
@@ -52,7 +53,7 @@ const notes = computed(
           class="rounded border border-neutral-200 p-2 text-sm"
         >
           <span class="font-medium">@{{ n.author?.username }}</span>
-          <span class="ml-2 text-xs text-neutral-400">{{ n.createdAt }}</span>
+          <span class="ml-2 text-xs text-neutral-400">{{ new Date(n.createdAt).toLocaleString() }}</span>
           <p class="mt-1 whitespace-pre-wrap">{{ n.body }}</p>
         </li>
       </ul>

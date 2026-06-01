@@ -18,6 +18,7 @@ const IssueDocument = graphql(`
         milestone { title }
         labels { nodes { id title color } }
         assignees { nodes { id username avatarUrl } }
+        # capped at 100, no pagination — fine for a personal tool
         notes(first: 100) {
           nodes { id body system createdAt author { username avatarUrl } }
         }
