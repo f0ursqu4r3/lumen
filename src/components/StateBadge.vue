@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 const props = defineProps<{ state: string }>()
-const open = props.state === 'opened'
+const open = computed(() => props.state === 'opened')
 </script>
 <template>
   <span

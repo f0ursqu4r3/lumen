@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { graphql } from '@/gitlab/generated'
-import type { IssuesQueryVariables } from '@/gitlab/generated/graphql'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
 import { issuesKey, toIssuesVars, type IssueFilters } from '@/gitlab/issueParams'
@@ -43,7 +42,7 @@ const IssuesDocument = graphql(`
 
 async function fetchIssues(fullPath: string, filters: IssueFilters) {
   try {
-    const data = await gqlClient.request(IssuesDocument, toIssuesVars(fullPath, filters) as IssuesQueryVariables)
+    const data = await gqlClient.request(IssuesDocument, toIssuesVars(fullPath, filters))
     return {
       nodes:
         data.project?.issues?.nodes?.filter((n): n is NonNullable<typeof n> => !!n) ?? [],

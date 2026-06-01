@@ -1,3 +1,5 @@
+import type { IssuableState, IssuesQueryVariables } from '@/gitlab/generated/graphql'
+
 export interface IssueFilters {
   state?: 'opened' | 'closed' | 'all'
   labels?: string[]
@@ -12,13 +14,22 @@ export const issuesKey = (fullPath: string, filters: IssueFilters) =>
 export const issueKey = (fullPath: string, iid: string) =>
   ['issue', fullPath, iid] as const
 
-export function toIssuesVars(fullPath: string, filters: IssueFilters, after?: string) {
-  const vars: Record<string, unknown> = { fullPath }
-  if (filters.state && filters.state !== 'all') vars.state = filters.state
-  if (filters.labels?.length) vars.labelName = filters.labels
-  if (filters.assignee) vars.assigneeUsernames = [filters.assignee]
-  if (filters.milestone) vars.milestoneTitle = [filters.milestone]
-  if (filters.search) vars.search = filters.search
-  if (after) vars.after = after
-  return vars
+// Returns the generated IssuesQueryVariables so a GraphQL variable rename is a
+// compile error here, not a runtime surprise. Empty/`all` filters map to
+// undefined, which graphql-request omits from the request.
+export function toIssuesVars(
+  fullPath: string,
+  filters: IssueFilters,
+  after?: string,
+): IssuesQueryVariables {
+  return {
+    fullPath,
+    state:
+      filters.state && filters.state !== 'all' ? (filters.state as IssuableState) : undefined,
+    labelName: filters.labels?.length ? filters.labels : undefined,
+    assigneeUsernames: filters.assignee ? [filters.assignee] : undefined,
+    milestoneTitle: filters.milestone ? [filters.milestone] : undefined,
+    search: filters.search || undefined,
+    after: after || undefined,
+  }
 }
