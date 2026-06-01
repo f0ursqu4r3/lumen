@@ -54,7 +54,7 @@ describe('IssueDetail', () => {
 
   it('shows a loading state', () => {
     useIssue.mockReturnValue({ data: ref(undefined), isLoading: ref(true), error: ref(null) })
-    expect(mountDetail().text()).toContain('Loading')
+    expect(mountDetail().find('[data-slot="skeleton"]').exists()).toBe(true)
   })
 
   it('shows the error via ErrorNotice', () => {

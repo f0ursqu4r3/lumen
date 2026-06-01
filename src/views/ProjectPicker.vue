@@ -2,6 +2,9 @@
 import { ref } from 'vue'
 import { useProjects } from '@/composables/useProjects'
 import ErrorNotice from '@/components/ErrorNotice.vue'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const search = ref('')
 const { data: projects, isLoading, error } = useProjects(search)
@@ -10,30 +13,24 @@ const { data: projects, isLoading, error } = useProjects(search)
 <template>
   <section class="space-y-4">
     <h1 class="text-lg font-semibold">Projects</h1>
-    <input
-      v-model="search"
-      type="search"
-      placeholder="Search projects…"
-      class="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
-    />
+    <Input v-model="search" type="search" placeholder="Search projects…" />
     <ErrorNotice v-if="error" :error="error" />
-    <p v-else-if="isLoading" class="text-sm text-neutral-500">Loading…</p>
+    <div v-else-if="isLoading" class="space-y-2">
+      <Skeleton v-for="i in 4" :key="i" class="h-10 w-full" />
+    </div>
     <template v-else>
-      <ul
-        v-if="projects?.length"
-        class="divide-y divide-neutral-200 rounded border border-neutral-200"
-      >
-        <li v-for="p in projects" :key="p.id">
-          <RouterLink
-            :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
-            class="block px-3 py-2 hover:bg-neutral-100"
-          >
-            <span class="font-medium">{{ p.name }}</span>
-            <span class="ml-2 text-xs text-neutral-500">{{ p.fullPath }}</span>
-          </RouterLink>
-        </li>
-      </ul>
-      <p v-else class="text-sm text-neutral-500">No projects.</p>
+      <Card v-if="projects?.length" class="divide-y py-0">
+        <RouterLink
+          v-for="p in projects"
+          :key="p.id"
+          :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
+          class="flex items-baseline gap-2 px-4 py-3 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-accent"
+        >
+          <span class="font-medium">{{ p.name }}</span>
+          <span class="text-xs text-muted-foreground">{{ p.fullPath }}</span>
+        </RouterLink>
+      </Card>
+      <p v-else class="text-sm text-muted-foreground">No projects.</p>
     </template>
   </section>
 </template>
