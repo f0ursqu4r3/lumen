@@ -15,6 +15,8 @@ const IssuesDocument = graphql(`
     $state: IssuableState
     $labelName: [String]
     $assigneeUsernames: [String!]
+    $assigneeWildcardId: AssigneeWildcardId
+    $authorUsername: String
     $milestoneTitle: [String]
     $search: String
     $after: String
@@ -24,6 +26,8 @@ const IssuesDocument = graphql(`
         state: $state
         labelName: $labelName
         assigneeUsernames: $assigneeUsernames
+        assigneeWildcardId: $assigneeWildcardId
+        authorUsername: $authorUsername
         milestoneTitle: $milestoneTitle
         search: $search
         first: 50
