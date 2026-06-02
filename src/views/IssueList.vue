@@ -208,7 +208,8 @@ function onCreated(iid: string) {
 }
 
 // `C` opens the composer — but never while typing or with another surface open.
-onKeyStroke("c", (e) => {
+// Accept both cases so Caps Lock / Shift don't swallow the shortcut.
+onKeyStroke(["c", "C"], (e) => {
   const t = e.target as HTMLElement | null;
   if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return;
   if (composerOpen.value || openIid.value) return;

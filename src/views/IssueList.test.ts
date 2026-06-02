@@ -135,6 +135,25 @@ describe("IssueList", () => {
     expect(w.findComponent(IssueComposer).props('open')).toBe(false);
   });
 
+  it("opens the composer on C even with Caps Lock (uppercase key)", async () => {
+    mockQuery({ issues: ref([issue]) });
+    const w = mountList();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'C' }));
+    await flushPromises();
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+  });
+
+  it("does not reopen on C while the composer is already open", async () => {
+    mockQuery({ issues: ref([issue]) });
+    const w = mountList();
+    await w.get('[data-testid="new-issue"]').trigger('click');
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+    // Closing is driven by update:open; a second C press must not interfere.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c' }));
+    await flushPromises();
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+  });
+
   it("highlights the newly created issue when the composer emits created", async () => {
     mockQuery({ issues: ref([issue]) });
     const w = mountList();
