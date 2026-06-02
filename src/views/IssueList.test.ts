@@ -8,6 +8,7 @@ vi.mock('@/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 const { createMutate } = vi.hoisted(() => ({ createMutate: vi.fn() }))
 vi.mock('@/composables/useIssueMutations', () => ({
   useCreateIssue: () => ({ mutate: createMutate, isPending: { value: false }, error: { value: null } }),
+  useRetagIssue: () => ({ mutate: vi.fn() }),
 }))
 
 import IssueList from './IssueList.vue'

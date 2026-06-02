@@ -69,6 +69,63 @@ export function useAddNote(fullPath: string, iid: string) {
   })
 }
 
+type LabelNode = { id: string; title: string; color: string }
+type RetagVars = {
+  iid: string
+  addLabelIds: string[]
+  removeLabelIds: string[]
+  nextLabels: LabelNode[]
+}
+// Shape of the cached infinite-issues data we patch optimistically.
+type IssuesCache =
+  | { pages: { nodes: { iid: string; labels: { nodes: LabelNode[] } }[] }[] }
+  | null
+  | undefined
+
+/**
+ * Move an issue between board columns by swapping its scoped label. Optimistically
+ * patches the issues cache so the card jumps instantly, rolling back on error.
+ */
+export function useRetagIssue(fullPath: string) {
+  const qc = useQueryClient()
+  return useMutation<
+    UpdateIssuePayload,
+    GitLabError,
+    RetagVars,
+    { previous: [readonly unknown[], unknown][] }
+  >({
+    mutationFn: ({ iid, addLabelIds, removeLabelIds }) =>
+      run(
+        () =>
+          gqlClient.request(UpdateIssueDocument, {
+            input: { projectPath: fullPath, iid, addLabelIds, removeLabelIds },
+          }),
+        (d: { updateIssue?: UpdateIssuePayload | null }) => d.updateIssue,
+      ),
+    onMutate: async ({ iid, nextLabels }) => {
+      await qc.cancelQueries({ queryKey: ['issues', fullPath] })
+      const previous = qc.getQueriesData({ queryKey: ['issues', fullPath] })
+      qc.setQueriesData({ queryKey: ['issues', fullPath] }, (old: IssuesCache) => {
+        if (!old?.pages) return old
+        return {
+          ...old,
+          pages: old.pages.map((p) => ({
+            ...p,
+            nodes: p.nodes.map((n) =>
+              n.iid === iid ? { ...n, labels: { nodes: nextLabels } } : n,
+            ),
+          })),
+        }
+      })
+      return { previous }
+    },
+    onError: (_e, _v, ctx) => {
+      ctx?.previous.forEach(([key, data]) => qc.setQueryData(key, data))
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['issues', fullPath] }),
+  })
+}
+
 export function useUpdateIssue(fullPath: string, iid: string) {
   const qc = useQueryClient()
   return useMutation<

@@ -14,7 +14,15 @@ import {
 import LabelChip from './LabelChip.vue'
 import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { priorityOf, typeOf, statusOf, remainingLabels, tint } from '@/lib/labels'
+import {
+  priorityOf,
+  typeOf,
+  statusOf,
+  remainingLabels,
+  parseLabel,
+  tint,
+} from '@/lib/labels'
+import type { Facet } from '@/lib/issueView'
 import type { IssueListItem } from '@/composables/useIssues'
 
 const props = defineProps<{
@@ -22,6 +30,8 @@ const props = defineProps<{
   fullPath: string
   index?: number
 }>()
+
+const emit = defineEmits<{ filter: [facet: Facet] }>()
 
 const ICONS = {
   'arrow-up': ArrowUp,
@@ -48,46 +58,74 @@ const type = computed(() => typeOf(labels.value))
 const status = computed(() => statusOf(labels.value))
 const pills = computed(() => remainingLabels(labels.value))
 
+// The raw label objects behind the lifted signals, so a facet click filters by
+// the exact GitLab label (e.g. `priority::High`), not the display value.
+const rawLabel = (scope: string) =>
+  labels.value.find((l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope)
+const priorityLabel = computed(() => rawLabel('priority'))
+const typeLabel = computed(() => rawLabel('type'))
+
 const shownAssignees = computed(() => assignees.value.slice(0, 3))
 const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3))
 
 const initials = (username: string) => username.slice(0, 2).toUpperCase()
+
+const filterLabel = (l: { title: string; color: string }) =>
+  emit('filter', { kind: 'label', value: l.title, color: l.color })
+const filterAssignee = (username: string) =>
+  emit('filter', { kind: 'assignee', value: username })
 
 // Cap the cascade so a long list doesn't drag the last rows in late.
 const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
 </script>
 
 <template>
-  <RouterLink
-    :to="{ name: 'issue', params: { fullPath, iid: issue.iid } }"
-    class="group relative flex animate-row-in items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60"
+  <!-- Stretched-link row: the RouterLink is an overlay (keeps href / middle-click),
+       facet buttons sit above it so clicking a label/priority/assignee filters
+       instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
+  <div
+    class="group relative flex animate-row-in items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60 focus-within:bg-accent/60"
     :style="{ animationDelay: delay }"
   >
+    <RouterLink
+      :to="{ name: 'issue', params: { fullPath, iid: issue.iid } }"
+      :aria-label="`Issue #${issue.iid}: ${issue.title}`"
+      class="absolute inset-0 rounded-[inherit] outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+    />
+
     <StateBadge :state="issue.state" compact />
 
-    <!-- Type glyph -->
-    <span
-      v-if="type"
-      :title="type.label"
-      class="grid size-5 shrink-0 place-items-center rounded-md ring-1 ring-inset ring-white/5"
+    <!-- Type glyph (filters by type::) -->
+    <button
+      v-if="type && typeLabel"
+      type="button"
+      :title="`Filter: ${type.label}`"
+      class="relative z-10 grid size-5 shrink-0 cursor-pointer place-items-center rounded-md ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
       :style="{ backgroundColor: tint(type.color, 0.18), color: type.color }"
+      @click="filterLabel(typeLabel)"
     >
       <component :is="ICONS[type.icon]" class="size-3.5" :stroke-width="2.25" />
-    </span>
+    </button>
 
     <span class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70">
-      {{ issue.iid }}
+      <span class="text-muted-foreground/40">#</span>{{ issue.iid }}
     </span>
 
-    <!-- Priority as a leading caret (no side-stripe) — high/med/low read at a glance. -->
-    <component
-      :is="ICONS[priority.icon]"
-      v-if="priority"
-      :title="priority.label"
-      class="size-3.5 shrink-0"
-      :style="{ color: priority.color }"
-      :stroke-width="2.75"
-    />
+    <!-- Priority caret (filters by priority::) -->
+    <button
+      v-if="priority && priorityLabel"
+      type="button"
+      :title="`Filter: ${priority.label}`"
+      class="relative z-10 grid size-5 shrink-0 cursor-pointer place-items-center rounded outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
+      @click="filterLabel(priorityLabel)"
+    >
+      <component
+        :is="ICONS[priority.icon]"
+        class="size-3.5"
+        :style="{ color: priority.color }"
+        :stroke-width="2.75"
+      />
+    </button>
 
     <span
       class="min-w-0 flex-1 truncate text-sm text-foreground/85 transition-colors group-hover:text-foreground"
@@ -95,33 +133,49 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       {{ issue.title }}
     </span>
 
-    <!-- Workflow status, lifted out of the label soup into its own chip. -->
-    <span
+    <!-- Workflow status, lifted out of the label soup (filters by its label). -->
+    <button
       v-if="status"
-      class="hidden shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ring-white/5 sm:inline-flex"
+      type="button"
+      :title="`Filter: ${status.value}`"
+      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
       :style="{ backgroundColor: tint(status.color, 0.18), color: status.color }"
+      @click="filterLabel({ title: status.raw, color: status.color })"
     >
       <span class="size-1.5 rounded-full" :style="{ backgroundColor: status.color }" />
       {{ status.value }}
+    </button>
+
+    <span v-if="pills.length" class="relative z-10 hidden shrink-0 gap-1 lg:flex">
+      <button
+        v-for="l in pills"
+        :key="l.id"
+        type="button"
+        :title="`Filter: ${l.title}`"
+        class="cursor-pointer rounded-full outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95"
+        @click="filterLabel(l)"
+      >
+        <LabelChip :title="l.title" :color="l.color" />
+      </button>
     </span>
 
-    <span v-if="pills.length" class="hidden shrink-0 gap-1 lg:flex">
-      <LabelChip v-for="l in pills" :key="l.id" :title="l.title" :color="l.color" />
-    </span>
-
-    <!-- Assignee avatars (data was already fetched, just never shown). -->
-    <span v-if="shownAssignees.length" class="flex shrink-0 -space-x-1.5">
-      <Avatar
+    <!-- Assignee avatars — click to filter by that assignee. -->
+    <span v-if="shownAssignees.length" class="relative z-10 flex shrink-0 -space-x-1.5">
+      <button
         v-for="a in shownAssignees"
         :key="a.id"
-        :title="a.username"
-        class="size-6 ring-2 ring-card"
+        type="button"
+        :title="`Filter: ${a.username}`"
+        class="cursor-pointer rounded-full outline-none transition-[scale] hover:z-10 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
+        @click="filterAssignee(a.username)"
       >
-        <AvatarImage v-if="a.avatarUrl" :src="a.avatarUrl" :alt="a.username" />
-        <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
-          {{ initials(a.username) }}
-        </AvatarFallback>
-      </Avatar>
+        <Avatar class="size-6 ring-2 ring-card">
+          <AvatarImage v-if="a.avatarUrl" :src="a.avatarUrl" :alt="a.username" />
+          <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
+            {{ initials(a.username) }}
+          </AvatarFallback>
+        </Avatar>
+      </button>
       <span
         v-if="extraAssignees"
         class="grid size-6 place-items-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-2 ring-card"
@@ -129,5 +183,5 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         +{{ extraAssignees }}
       </span>
     </span>
-  </RouterLink>
+  </div>
 </template>

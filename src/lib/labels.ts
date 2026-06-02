@@ -61,6 +61,17 @@ export function readableText(bg: string): string {
   return luminance(bg) > 0.45 ? '#1f2328' : '#ffffff'
 }
 
+/** Mix `hex` toward `target` by `amount` (0..1). */
+export function mix(hex: string, target: string, amount: number): string {
+  const a = toRgb(hex)
+  const b = toRgb(target)
+  return toHex([
+    a[0] + (b[0] - a[0]) * amount,
+    a[1] + (b[1] - a[1]) * amount,
+    a[2] + (b[2] - a[2]) * amount,
+  ])
+}
+
 /** Mix `hex` toward black by `amount` (0..1). Used for the scope segment. */
 export function darken(hex: string, amount = 0.32): string {
   const rgb = toRgb(hex).map((v) => v * (1 - amount)) as [number, number, number]

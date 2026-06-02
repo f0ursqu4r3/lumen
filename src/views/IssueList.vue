@@ -1,78 +1,179 @@
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue'
-import { useIntersectionObserver } from '@vueuse/core'
-import { Plus, Search, Tag, AtSign, Milestone, LoaderCircle } from '@lucide/vue'
-import { useIssues } from '@/composables/useIssues'
-import { useCreateIssue } from '@/composables/useIssueMutations'
-import type { IssueFilters } from '@/gitlab/issueParams'
-import IssueRow from '@/components/IssueRow.vue'
-import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { computed, ref, toRef, watch } from 'vue';
+import { useIntersectionObserver } from '@vueuse/core';
+import {
+  Plus,
+  Search,
+  LoaderCircle,
+  List,
+  Columns3,
+  X,
+  GripVertical,
+} from '@lucide/vue';
+import { useIssues, type IssueListItem } from '@/composables/useIssues';
+import { useCreateIssue, useRetagIssue } from '@/composables/useIssueMutations';
+import type { IssueFilters } from '@/gitlab/issueParams';
+import {
+  sortIssues,
+  groupIssues,
+  groupByScope,
+  availableScopes,
+  planRetag,
+  SORTS,
+  GROUPS,
+  type SortKey,
+  type GroupKey,
+  type Facet,
+  type IssueGroup,
+} from '@/lib/issueView';
+import IssueRow from '@/components/IssueRow.vue';
+import IssueCard from '@/components/IssueCard.vue';
+import LabelChip from '@/components/LabelChip.vue';
+import ErrorNotice from '@/components/ErrorNotice.vue';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-const props = defineProps<{ fullPath: string }>()
+const props = defineProps<{ fullPath: string }>();
 
-// Raw text inputs; mapped into IssueFilters (labels is comma-separated).
-const state = ref<IssueFilters['state']>('opened')
-const search = ref('')
-const labelsText = ref('')
-const assignee = ref('')
-const milestone = ref('')
+const state = ref<IssueFilters['state']>('opened');
+const search = ref('');
+// Active facet filters, populated by clicking labels/assignees on rows & cards.
+const labelFilters = ref<{ title: string; color: string }[]>([]);
+const assignee = ref('');
+
+const view = ref<'list' | 'board'>('list');
+const sortKey = ref<SortKey>('updated');
+const groupKey = ref<GroupKey>('none');
+// Which scoped-label group defines the board columns (assigned / priority / team…).
+const boardScope = ref('assigned');
 
 const STATES: { value: IssueFilters['state']; label: string }[] = [
   { value: 'opened', label: 'Open' },
   { value: 'closed', label: 'Closed' },
   { value: 'all', label: 'All' },
-]
+];
 
 // Split the project path so the final segment (the repo) can be emphasized.
-const pathParts = computed(() => props.fullPath.split('/'))
-const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath)
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'))
+const pathParts = computed(() => props.fullPath.split('/'));
+const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath);
+const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'));
 
 const filters = computed<IssueFilters>(() => ({
   state: state.value,
   search: search.value || undefined,
-  labels: labelsText.value
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean),
+  labels: labelFilters.value.map((l) => l.title),
   assignee: assignee.value || undefined,
-  milestone: milestone.value || undefined,
-}))
+}));
 
-const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-  useIssues(toRef(props, 'fullPath'), filters)
+const {
+  issues,
+  isLoading,
+  error,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
+} = useIssues(toRef(props, 'fullPath'), filters);
 
-const count = computed(() => issues.value.length)
-const hasMore = computed(() => hasNextPage.value ?? false)
+const count = computed(() => issues.value.length);
+const hasMore = computed(() => hasNextPage.value ?? false);
 
-function loadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
+// Sort/group happen client-side on the loaded set — priority & status live in
+// scoped labels, which the server can't order by.
+const sorted = computed(() => sortIssues(issues.value, sortKey.value));
+const listGroups = computed(() => groupIssues(sorted.value, groupKey.value));
+
+const scopeOptions = computed(() => availableScopes(issues.value));
+const boardGroups = computed(() =>
+  groupByScope(sorted.value, boardScope.value)
+);
+// When the chosen scope isn't present (e.g. first load), fall back to the first.
+watch(scopeOptions, (opts) => {
+  if (opts.length && !opts.includes(boardScope.value))
+    boardScope.value = opts[0];
+});
+
+// --- drag to retag ----------------------------------------------------------
+const retag = useRetagIssue(props.fullPath);
+const dragging = ref<IssueListItem | null>(null);
+const draggingIid = ref<string | null>(null);
+const dragOverKey = ref<string | null>(null);
+
+function onDragStart(issue: IssueListItem, e: DragEvent) {
+  dragging.value = issue;
+  draggingIid.value = issue.iid;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(issue.iid));
+  }
+}
+function clearDrag() {
+  dragging.value = null;
+  draggingIid.value = null;
+  dragOverKey.value = null;
+}
+function onDrop(group: IssueGroup) {
+  const issue = dragging.value;
+  clearDrag();
+  if (!issue) return;
+  const plan = planRetag(issue, boardScope.value, group.repLabel ?? null);
+  if (plan) retag.mutate({ iid: issue.iid, ...plan });
 }
 
-// Auto-load the next page when the sentinel scrolls into view; the button below
-// is the explicit fallback (and what shows when IntersectionObserver is absent).
-const sentinel = ref<HTMLElement | null>(null)
-useIntersectionObserver(sentinel, ([entry]) => {
-  if (entry?.isIntersecting) loadMore()
-})
+// --- active filters ---------------------------------------------------------
+const activeCount = computed(
+  () => labelFilters.value.length + (assignee.value ? 1 : 0)
+);
 
-const createIssue = useCreateIssue(props.fullPath)
-const newTitle = ref('')
+function applyFacet(f: Facet) {
+  if (f.kind === 'assignee') {
+    assignee.value = assignee.value === f.value ? '' : f.value;
+    return;
+  }
+  const i = labelFilters.value.findIndex((l) => l.title === f.value);
+  if (i === -1)
+    labelFilters.value = [
+      ...labelFilters.value,
+      { title: f.value, color: f.color },
+    ];
+  else labelFilters.value = labelFilters.value.filter((_, idx) => idx !== i);
+}
+const removeLabel = (title: string) =>
+  (labelFilters.value = labelFilters.value.filter((l) => l.title !== title));
+function clearFilters() {
+  labelFilters.value = [];
+  assignee.value = '';
+}
+
+function loadMore() {
+  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage();
+}
+const sentinel = ref<HTMLElement | null>(null);
+useIntersectionObserver(sentinel, ([entry]) => {
+  if (entry?.isIntersecting) loadMore();
+});
+
+const createIssue = useCreateIssue(props.fullPath);
+const newTitle = ref('');
 function submitNew() {
-  if (!newTitle.value.trim()) return
+  if (!newTitle.value.trim()) return;
   createIssue.mutate(
     { title: newTitle.value },
-    { onSuccess: () => (newTitle.value = '') },
-  )
+    { onSuccess: () => (newTitle.value = '') }
+  );
 }
 </script>
 
 <template>
-  <section class="space-y-6">
+  <section class="space-y-5">
     <!-- Header -->
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
@@ -81,12 +182,14 @@ function submitNew() {
         >
           Issues
         </p>
-        <h1 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
+        <h1
+          class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground"
+        >
           {{ repoName }}
         </h1>
         <p
           v-if="pathPrefix"
-          class="truncate font-mono text-xs text-muted-foreground/60"
+          class="truncate font-mono text-xs text-muted-foreground/75"
         >
           {{ pathPrefix }}/
         </p>
@@ -98,74 +201,172 @@ function submitNew() {
         <span
           class="font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
         >
-          {{ count }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
+          {{ count
+          }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
         </span>
-        <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
+        <span
+          class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
+        >
           {{ count === 1 ? 'issue' : 'issues' }}
         </span>
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="space-y-2.5">
-      <div class="flex flex-wrap items-center gap-2">
-        <!-- Segmented state control -->
-        <div class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
-          <button
-            v-for="s in STATES"
-            :key="s.value"
-            type="button"
-            class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors"
-            :class="
-              state === s.value
-                ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="state = s.value"
-          >
+    <!-- Toolbar row 1: state · search · view -->
+    <div class="flex flex-wrap items-center gap-2">
+      <div
+        role="group"
+        aria-label="Filter issues by state"
+        class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+      >
+        <button
+          v-for="s in STATES"
+          :key="s.value"
+          type="button"
+          :aria-pressed="state === s.value"
+          class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          :class="
+            state === s.value
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          @click="state = s.value"
+        >
+          {{ s.label }}
+        </button>
+      </div>
+
+      <div class="relative min-w-50 flex-1">
+        <Search
+          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input
+          v-model="search"
+          type="search"
+          placeholder="Search issues…"
+          aria-label="Search issues"
+          class="pl-9"
+        />
+      </div>
+
+      <!-- View toggle -->
+      <div
+        role="group"
+        aria-label="Switch view"
+        class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+      >
+        <button
+          type="button"
+          aria-label="List view"
+          :aria-pressed="view === 'list'"
+          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          :class="
+            view === 'list'
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          @click="view = 'list'"
+        >
+          <List class="size-4" />
+        </button>
+        <button
+          type="button"
+          aria-label="Board view"
+          :aria-pressed="view === 'board'"
+          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          :class="
+            view === 'board'
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          @click="view = 'board'"
+        >
+          <Columns3 class="size-4" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Toolbar row 2: sort + group (list only) -->
+    <div v-if="view === 'list'" class="flex flex-wrap items-center gap-2">
+      <Select v-model="sortKey">
+        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Sort issues">
+          <span class="text-muted-foreground">Sort</span>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="s in SORTS" :key="s.value" :value="s.value">
             {{ s.label }}
-          </button>
-        </div>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <Select v-model="groupKey">
+        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Group issues">
+          <span class="text-muted-foreground">Group</span>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="g in GROUPS" :key="g.value" :value="g.value">
+            {{ g.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
 
-        <!-- Search -->
-        <div class="relative min-w-50 flex-1">
-          <Search
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            v-model="search"
-            type="search"
-            placeholder="Search issues…"
-            class="pl-9"
-          />
-        </div>
-      </div>
+    <!-- Toolbar row 2 (board): which scoped-label group becomes the columns -->
+    <div
+      v-else-if="scopeOptions.length"
+      class="flex flex-wrap items-center gap-2"
+    >
+      <Select v-model="boardScope">
+        <SelectTrigger class="h-8 w-52 text-xs" aria-label="Column grouping">
+          <span class="text-muted-foreground">Columns by</span>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="s in scopeOptions" :key="s" :value="s">
+            {{ s }}<span class="text-muted-foreground">::</span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <span class="text-xs text-muted-foreground/60">Drag cards to retag</span>
+    </div>
 
-      <!-- Secondary filters -->
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="relative w-56">
-          <Tag
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            v-model="labelsText"
-            placeholder="Labels (comma-separated)"
-            class="pl-9"
-          />
-        </div>
-        <div class="relative w-48">
-          <AtSign
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input v-model="assignee" placeholder="Assignee" class="pl-9" />
-        </div>
-        <div class="relative w-44">
-          <Milestone
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input v-model="milestone" placeholder="Milestone" class="pl-9" />
-        </div>
-      </div>
+    <!-- Active filter tokens -->
+    <div v-if="activeCount" class="flex flex-wrap items-center gap-2">
+      <span
+        class="text-[11px] tracking-wide text-muted-foreground/60 uppercase"
+      >
+        Filtering
+      </span>
+      <LabelChip
+        v-for="l in labelFilters"
+        :key="l.title"
+        :title="l.title"
+        :color="l.color"
+        closeable
+        @remove="removeLabel(l.title)"
+      />
+      <span
+        v-if="assignee"
+        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+      >
+        <span class="font-mono">@{{ assignee }}</span>
+        <button
+          type="button"
+          aria-label="Remove assignee filter"
+          class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+          @click="assignee = ''"
+        >
+          <X class="size-3" />
+        </button>
+      </span>
+      <button
+        type="button"
+        class="text-[11px] font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
+        @click="clearFilters"
+      >
+        Clear all
+      </button>
     </div>
 
     <!-- Quick create -->
@@ -176,47 +377,138 @@ function submitNew() {
       <Input
         v-model="newTitle"
         placeholder="New issue title…"
+        aria-label="New issue title"
         class="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
-      <Button type="submit" :disabled="createIssue.isPending.value">
-        <Plus />
+      <Button
+        type="submit"
+        :disabled="createIssue.isPending.value || !newTitle.trim()"
+      >
+        <LoaderCircle v-if="createIssue.isPending.value" class="animate-spin" />
+        <Plus v-else />
         Create
       </Button>
     </form>
 
-    <ErrorNotice v-if="createIssue.error.value" :error="createIssue.error.value" />
+    <ErrorNotice
+      v-if="createIssue.error.value"
+      :error="createIssue.error.value"
+    />
     <ErrorNotice v-if="error" :error="error" />
 
     <div
       v-else-if="isLoading"
       class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
     >
-      <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2.5">
+      <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2">
         <Skeleton class="size-2 rounded-full" />
         <Skeleton class="size-5 rounded-md" />
-        <Skeleton class="h-3 w-8" />
-        <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
+        <Skeleton class="h-3.5 w-6" />
+        <Skeleton
+          class="h-3.5 flex-1"
+          :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }"
+        />
         <Skeleton class="h-5 w-16 rounded-full" />
       </div>
     </div>
 
     <template v-else>
       <template v-if="count">
-        <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm">
-          <IssueRow
-            v-for="(issue, i) in issues"
-            :key="issue.iid"
-            :issue="issue"
-            :full-path="fullPath"
-            :index="i"
-          />
-        </Card>
+        <!-- List view -->
+        <div v-if="view === 'list'" class="space-y-5">
+          <section v-for="g in listGroups" :key="g.key" class="space-y-2">
+            <header
+              v-if="groupKey !== 'none'"
+              class="flex items-center gap-2 px-1"
+            >
+              <span
+                v-if="g.color"
+                class="size-2 rounded-full"
+                :style="{ backgroundColor: g.color }"
+              />
+              <h2 class="text-sm font-medium text-foreground">{{ g.label }}</h2>
+              <span
+                class="font-mono text-xs tabular-nums text-muted-foreground/60"
+              >
+                {{ g.issues.length }}
+              </span>
+            </header>
+            <Card
+              class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm"
+            >
+              <IssueRow
+                v-for="(issue, i) in g.issues"
+                :key="issue.iid"
+                :issue="issue"
+                :full-path="fullPath"
+                :index="i"
+                @filter="applyFacet"
+              />
+            </Card>
+          </section>
+        </div>
+
+        <!-- Board view: bounded height, each column scrolls on its own, drag to retag -->
+        <div class="-mx-4 flex h-[68vh] min-h-80 gap-3 overflow-x-auto px-4">
+          <section
+            v-for="g in boardGroups"
+            :key="g.key"
+            class="flex h-full w-72 shrink-0 flex-col rounded-xl border transition-colors duration-150"
+            :class="
+              dragOverKey === g.key
+                ? 'border-primary/50 bg-accent/30'
+                : 'border-transparent'
+            "
+            @dragover.prevent="dragOverKey = g.key"
+            @dragenter.prevent="dragOverKey = g.key"
+            @drop.prevent="onDrop(g)"
+          >
+            <header class="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5">
+              <span
+                v-if="g.color"
+                class="size-2 rounded-full"
+                :style="{ backgroundColor: g.color }"
+              />
+              <h2 class="truncate text-sm font-medium text-foreground">
+                {{ g.label }}
+              </h2>
+              <span
+                class="ml-auto font-mono text-xs tabular-nums text-muted-foreground/60"
+              >
+                {{ g.issues.length }}
+              </span>
+            </header>
+            <div
+              class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-1.5 pt-1 pb-2"
+            >
+              <div
+                v-for="issue in g.issues"
+                :key="issue.iid"
+                draggable="true"
+                class="group/card cursor-grab transition-opacity active:cursor-grabbing"
+                :class="draggingIid === issue.iid ? 'opacity-40' : ''"
+                @dragstart="onDragStart(issue, $event)"
+                @dragend="clearDrag"
+              >
+                <IssueCard
+                  :issue="issue"
+                  :full-path="fullPath"
+                  @filter="applyFacet"
+                >
+                  <GripVertical
+                    class="size-3.5 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover/card:opacity-100"
+                  />
+                </IssueCard>
+              </div>
+            </div>
+          </section>
+        </div>
 
         <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
-        <div v-if="hasMore" ref="sentinel" class="flex justify-center pt-3">
+        <div v-if="hasMore" ref="sentinel" class="flex justify-center pt-1">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+            class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.98] disabled:opacity-60"
             :disabled="isFetchingNextPage"
             @click="loadMore"
           >
@@ -239,7 +531,8 @@ function submitNew() {
         </div>
         <p class="text-sm font-medium text-foreground">No issues.</p>
         <p class="max-w-xs text-xs text-muted-foreground">
-          Nothing matches the current filters — adjust them above, or create one.
+          Nothing matches the current filters — adjust them above, or create
+          one.
         </p>
       </div>
     </template>
