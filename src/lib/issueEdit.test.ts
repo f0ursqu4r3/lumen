@@ -46,7 +46,7 @@ describe("issueEdit", () => {
   it("diff maps state opened->closed to CLOSE and closed->opened to REOPEN", () => {
     expect(diffIssueEdit(base(), { ...base(), state: "closed" }))
       .toEqual({ update: { stateEvent: "CLOSE" } });
-    const closed = { ...base(), state: "closed" };
+    const closed: IssueDraft = { ...base(), state: "closed" };
     expect(diffIssueEdit(closed, { ...closed, state: "opened" }))
       .toEqual({ update: { stateEvent: "REOPEN" } });
   });
@@ -59,5 +59,10 @@ describe("issueEdit", () => {
   it("diff emits the full next assignee list when changed", () => {
     expect(diffIssueEdit(base(), { ...base(), assigneeUsernames: ["ada", "bob"] }))
       .toEqual({ assignees: ["ada", "bob"] });
+  });
+
+  it("diff emits both update and assignees when both change", () => {
+    expect(diffIssueEdit(base(), { ...base(), title: "New", assigneeUsernames: ["bob"] }))
+      .toEqual({ update: { title: "New" }, assignees: ["bob"] });
   });
 });

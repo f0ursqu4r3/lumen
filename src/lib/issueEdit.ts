@@ -3,7 +3,7 @@
 export interface IssueDraft {
   title: string;
   description: string;
-  state: string; // "opened" | "closed"
+  state: "opened" | "closed";
   labelIds: string[];
   assigneeUsernames: string[];
 }
@@ -18,7 +18,7 @@ export function draftFromIssue(issue: {
   return {
     title: issue.title,
     description: issue.description ?? "",
-    state: issue.state,
+    state: issue.state as "opened" | "closed",
     labelIds: (issue.labels?.nodes ?? [])
       .filter((l): l is { id: string } => !!l)
       .map((l) => l.id),
@@ -28,9 +28,11 @@ export function draftFromIssue(issue: {
   };
 }
 
-const sameSet = (a: string[], b: string[]) =>
-  a.length === b.length &&
-  [...a].sort().join(" ") === [...b].sort().join(" ");
+const sameSet = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false;
+  const setA = new Set(a);
+  return b.every((x) => setA.has(x));
+};
 
 export function isDirty(o: IssueDraft, d: IssueDraft): boolean {
   return (
