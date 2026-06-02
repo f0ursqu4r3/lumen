@@ -26,7 +26,7 @@ const emit = defineEmits<{ 'update:open': [value: boolean]; expand: [] }>()
         </Button>
       </SheetHeader>
       <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        <IssueDetail v-if="iid" :full-path="fullPath" :iid="iid" />
+        <IssueDetail v-if="iid" :key="iid" :full-path="fullPath" :iid="iid" />
       </div>
     </SheetContent>
   </Sheet>

@@ -117,4 +117,15 @@ describe('IssueList', () => {
     expect(router.currentRoute.value.params.fullPath).toBe('grp/proj')
     expect(router.currentRoute.value.params.iid).toBe('7')
   })
+
+  it('removes ?issue from the URL when the drawer emits update:open false', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    w.findComponent(IssueDrawer).vm.$emit('update:open', false)
+    await flushPromises()
+    expect(router.currentRoute.value.query.issue).toBeUndefined()
+  })
 })
