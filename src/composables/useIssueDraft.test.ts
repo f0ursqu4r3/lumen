@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, nextTick } from "vue";
 import { withQuery } from "@/test/withQuery";
 
-const { updateAsync, setAsync } = vi.hoisted(() => ({
+const { updateAsync, setAsync, addNoteAsync } = vi.hoisted(() => ({
   updateAsync: vi.fn(),
   setAsync: vi.fn(),
+  addNoteAsync: vi.fn(),
 }));
 vi.mock("@/composables/useIssueMutations", () => ({
   useUpdateIssue: () => ({
@@ -17,11 +18,17 @@ vi.mock("@/composables/useIssueMutations", () => ({
     isPending: { value: false },
     error: { value: null },
   }),
+  useAddNote: () => ({
+    mutateAsync: addNoteAsync,
+    isPending: { value: false },
+    error: { value: null },
+  }),
 }));
 
 import { useIssueDraft } from "./useIssueDraft";
 
 const issue = {
+  id: "gid://issue/9",
   title: "Bug",
   description: "desc",
   state: "opened",
@@ -32,6 +39,7 @@ const issue = {
 beforeEach(() => {
   updateAsync.mockReset().mockResolvedValue({});
   setAsync.mockReset().mockResolvedValue({});
+  addNoteAsync.mockReset().mockResolvedValue({});
 });
 
 describe("useIssueDraft", () => {
@@ -127,5 +135,72 @@ describe("useIssueDraft", () => {
     issueRef.value = { ...issue, title: "Server2" };
     await nextTick();
     expect(result().draft.value?.title).toBe("Server2");
+  });
+
+  it("a pending comment marks the draft dirty", async () => {
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
+    expect(result().dirty.value).toBe(false);
+    result().comment.value = "hello";
+    await nextTick();
+    expect(result().dirty.value).toBe(true);
+  });
+
+  it("save posts the comment then clears it", async () => {
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
+    result().comment.value = "a note";
+    await nextTick();
+    await result().save();
+    expect(addNoteAsync).toHaveBeenCalledWith({
+      noteableId: "gid://issue/9",
+      body: "a note",
+    });
+    expect(result().comment.value).toBe("");
+    expect(result().dirty.value).toBe(false);
+  });
+
+  it("a comment-only save does not call field mutations", async () => {
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
+    result().comment.value = "a note";
+    await nextTick();
+    await result().save();
+    expect(updateAsync).not.toHaveBeenCalled();
+    expect(setAsync).not.toHaveBeenCalled();
+    expect(addNoteAsync).toHaveBeenCalled();
+  });
+
+  it("reset clears a pending comment", async () => {
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
+    result().comment.value = "draft note";
+    await nextTick();
+    result().reset();
+    await nextTick();
+    expect(result().comment.value).toBe("");
+    expect(result().dirty.value).toBe(false);
+  });
+
+  it("keeps the comment when the note post fails", async () => {
+    addNoteAsync.mockRejectedValueOnce(new Error("boom"));
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
+    result().comment.value = "a note";
+    await nextTick();
+    await result().save();
+    await nextTick();
+    expect(result().comment.value).toBe("a note");
+    expect(result().dirty.value).toBe(true);
   });
 });
