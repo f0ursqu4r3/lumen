@@ -3,6 +3,8 @@ import { mount, RouterLinkStub, flushPromises } from "@vue/test-utils";
 import { ref } from "vue";
 import { createRouter, createMemoryHistory } from "vue-router";
 import IssueDrawer from "@/components/IssueDrawer.vue";
+import IssueComposer from "@/components/IssueComposer.vue";
+import IssueRow from "@/components/IssueRow.vue";
 
 const router = createRouter({
   history: createMemoryHistory(),
@@ -31,6 +33,9 @@ vi.mock("@/composables/useIssueMutations", () => ({
 vi.mock("@/composables/useProjectLabels", () => ({
   useProjectLabels: () => ({ data: ref([]) }),
 }));
+vi.mock("@/composables/useProjectMembers", () => ({
+  useProjectMembers: () => ({ data: ref([]) }),
+}));
 
 import IssueList from "./IssueList.vue";
 
@@ -39,7 +44,7 @@ const mountList = () =>
     props: { fullPath: "grp/proj" },
     global: {
       plugins: [router],
-      stubs: { RouterLink: RouterLinkStub, IssueDrawer: true },
+      stubs: { RouterLink: RouterLinkStub, IssueDrawer: true, IssueComposer: true },
     },
   });
 
@@ -98,15 +103,45 @@ describe("IssueList", () => {
     expect(w.findComponent(RouterLinkStub).exists()).toBe(false);
   });
 
-  it("creates an issue from the new-issue form", async () => {
+  it("has no persistent quick-create bar", () => {
     mockQuery({ issues: ref([]) });
     const w = mountList();
-    await w.find('input[placeholder="New issue title…"]').setValue("Brand new");
-    await w.find("form").trigger("submit.prevent");
-    expect(createMutate).toHaveBeenCalledWith(
-      { title: "Brand new" },
-      expect.anything(),
-    );
+    expect(w.find('input[placeholder="New issue title…"]').exists()).toBe(false);
+  });
+
+  it("opens the composer from the header New issue button", async () => {
+    mockQuery({ issues: ref([issue]) });
+    const w = mountList();
+    await w.get('[data-testid="new-issue"]').trigger('click');
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+  });
+
+  it("opens the composer when the C key is pressed", async () => {
+    mockQuery({ issues: ref([issue]) });
+    const w = mountList();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c' }));
+    await flushPromises();
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+  });
+
+  it("does not open the composer on C while the drawer is open", async () => {
+    mockQuery({ issues: ref([issue]) });
+    await router.replace('/?issue=7');
+    await router.isReady();
+    const w = mountList();
+    await flushPromises();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c' }));
+    await flushPromises();
+    expect(w.findComponent(IssueComposer).props('open')).toBe(false);
+  });
+
+  it("highlights the newly created issue when the composer emits created", async () => {
+    mockQuery({ issues: ref([issue]) });
+    const w = mountList();
+    await flushPromises();
+    w.findComponent(IssueComposer).vm.$emit('created', '7');
+    await flushPromises();
+    expect(w.findComponent(IssueRow).props('highlight')).toBe(true);
   });
 
   it("opens the drawer when ?issue is present", async () => {

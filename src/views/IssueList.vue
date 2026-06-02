@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from "vue";
-import { useIntersectionObserver, useTitle } from "@vueuse/core";
+import { useIntersectionObserver, useTitle, onKeyStroke } from "@vueuse/core";
 import {
   Plus,
-  Check,
   Search,
   LoaderCircle,
   List,
@@ -13,7 +12,8 @@ import {
 } from "@lucide/vue";
 import { useIssues, type IssueListItem } from "@/composables/useIssues";
 import { useProjectLabels } from "@/composables/useProjectLabels";
-import { useCreateIssue, useRetagIssue } from "@/composables/useIssueMutations";
+import { useRetagIssue } from "@/composables/useIssueMutations";
+import IssueComposer from "@/components/IssueComposer.vue";
 import type { IssueFilters } from "@/gitlab/issueParams";
 import {
   sortIssues,
@@ -195,26 +195,26 @@ useIntersectionObserver(sentinel, ([entry]) => {
   if (entry?.isIntersecting) loadMore();
 });
 
-const createIssue = useCreateIssue(props.fullPath);
-const newTitle = ref("");
-// Brief check-flash on the Create button so a successful add registers without a
-// toast — the input clears, the button confirms, then quietly returns to ready.
-const justCreated = ref(false);
-let createdTimer: ReturnType<typeof setTimeout> | undefined;
-function submitNew() {
-  if (!newTitle.value.trim()) return;
-  createIssue.mutate(
-    { title: newTitle.value },
-    {
-      onSuccess: () => {
-        newTitle.value = "";
-        justCreated.value = true;
-        clearTimeout(createdTimer);
-        createdTimer = setTimeout(() => (justCreated.value = false), 1400);
-      },
-    },
-  );
+// --- composer + new-issue highlight -----------------------------------------
+const composerOpen = ref(false);
+const highlightIid = ref<string | null>(null);
+let highlightTimer: ReturnType<typeof setTimeout> | undefined;
+
+function onCreated(iid: string) {
+  highlightIid.value = iid;
+  clearTimeout(highlightTimer);
+  // Matches the 1.6s flash-in animation; clear so re-renders don't replay it.
+  highlightTimer = setTimeout(() => (highlightIid.value = null), 1600);
 }
+
+// `C` opens the composer — but never while typing or with another surface open.
+onKeyStroke("c", (e) => {
+  const t = e.target as HTMLElement | null;
+  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return;
+  if (composerOpen.value || openIid.value) return;
+  e.preventDefault();
+  composerOpen.value = true;
+});
 </script>
 
 <template>
@@ -239,22 +239,28 @@ function submitNew() {
           {{ pathPrefix }}/
         </p>
       </div>
-      <div
-        class="hidden shrink-0 flex-col items-end transition-opacity sm:flex"
-        :class="isLoading ? 'opacity-0' : 'opacity-100'"
-      >
-        <span
-          :key="count"
-          class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+      <div class="flex shrink-0 items-center gap-3">
+        <Button data-testid="new-issue" @click="composerOpen = true">
+          <Plus />
+          New issue
+        </Button>
+        <div
+          class="hidden shrink-0 flex-col items-end transition-opacity sm:flex"
+          :class="isLoading ? 'opacity-0' : 'opacity-100'"
         >
-          {{ count
-          }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
-        </span>
-        <span
-          class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
-        >
-          {{ count === 1 ? "issue" : "issues" }}
-        </span>
+          <span
+            :key="count"
+            class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+          >
+            {{ count
+            }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
+          </span>
+          <span
+            class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
+          >
+            {{ count === 1 ? "issue" : "issues" }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -415,35 +421,6 @@ function submitNew() {
       </button>
     </div>
 
-    <!-- Quick create -->
-    <form
-      class="group flex gap-2 rounded-xl border border-dashed border-border bg-muted/20 p-2 transition-colors focus-within:border-primary/40 focus-within:bg-muted/30"
-      @submit.prevent="submitNew"
-    >
-      <Input
-        v-model="newTitle"
-        placeholder="New issue title…"
-        aria-label="New issue title"
-        class="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
-      />
-      <!-- disabled:opacity is relaxed during the confirm flash so "Added ✓" stays
-           legible the moment after the input clears. -->
-      <Button
-        type="submit"
-        :class="justCreated && 'disabled:opacity-100'"
-        :disabled="createIssue.isPending.value || !newTitle.trim()"
-      >
-        <LoaderCircle v-if="createIssue.isPending.value" class="animate-spin" />
-        <Check v-else-if="justCreated" class="animate-status" />
-        <Plus v-else />
-        {{ justCreated ? "Added" : "Create" }}
-      </Button>
-    </form>
-
-    <ErrorNotice
-      v-if="createIssue.error.value"
-      :error="createIssue.error.value"
-    />
     <ErrorNotice v-if="error" :error="error" />
 
     <div
@@ -492,6 +469,7 @@ function submitNew() {
                 :issue="issue"
                 :full-path="fullPath"
                 :index="i"
+                :highlight="issue.iid === highlightIid"
                 @filter="applyFacet"
               />
             </Card>
@@ -547,6 +525,7 @@ function submitNew() {
                 <IssueCard
                   :issue="issue"
                   :full-path="fullPath"
+                  :highlight="issue.iid === highlightIid"
                   @filter="applyFacet"
                 >
                   <GripVertical
@@ -588,6 +567,10 @@ function submitNew() {
           Nothing matches the current filters — adjust them above, or create
           one.
         </p>
+        <Button data-testid="empty-new-issue" class="mt-1" @click="composerOpen = true">
+          <Plus />
+          Create issue
+        </Button>
       </div>
     </template>
 
@@ -597,6 +580,13 @@ function submitNew() {
       :iid="openIid"
       @update:open="setDrawerOpen"
       @expand="expandIssue"
+    />
+
+    <IssueComposer
+      :open="composerOpen"
+      :full-path="fullPath"
+      @update:open="composerOpen = $event"
+      @created="onCreated"
     />
   </section>
 </template>
