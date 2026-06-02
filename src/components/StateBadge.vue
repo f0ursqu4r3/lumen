@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 
-const props = defineProps<{ state: string; compact?: boolean }>()
-const open = computed(() => props.state === 'opened')
-const label = computed(() => (open.value ? 'Open' : 'Closed'))
+const props = defineProps<{ state: string; compact?: boolean }>();
+const open = computed(() => props.state === "opened");
+const label = computed(() => (open.value ? "Open" : "Closed"));
 </script>
 
 <template>

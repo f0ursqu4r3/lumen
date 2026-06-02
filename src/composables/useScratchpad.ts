@@ -1,5 +1,9 @@
-import { useLocalStorage, StorageSerializers, type RemovableRef } from '@vueuse/core'
-import type { Ref } from 'vue'
+import {
+  useLocalStorage,
+  StorageSerializers,
+  type RemovableRef,
+} from "@vueuse/core";
+import type { Ref } from "vue";
 
 // Local-only note for a single issue, stored in this browser only — never sent
 // to GitLab. Keyed by fullPath + iid to mirror `issueKey` and stay isolated
@@ -15,7 +19,7 @@ export function useScratchpad(
 ): RemovableRef<string> {
   return useLocalStorage(
     () => `tragit:scratchpad:${fullPath.value}#${iid.value}`,
-    '',
+    "",
     { serializer: StorageSerializers.object },
-  )
+  );
 }

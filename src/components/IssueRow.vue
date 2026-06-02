@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 import {
   ArrowUp,
   Equal,
@@ -10,10 +10,10 @@ import {
   Plug,
   FlaskConical,
   Tag,
-} from '@lucide/vue'
-import LabelChip from './LabelChip.vue'
-import StateBadge from './StateBadge.vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+} from "@lucide/vue";
+import LabelChip from "./LabelChip.vue";
+import StateBadge from "./StateBadge.vue";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   priorityOf,
   typeOf,
@@ -21,62 +21,68 @@ import {
   remainingLabels,
   parseLabel,
   tint,
-} from '@/lib/labels'
-import type { Facet } from '@/lib/issueView'
-import type { IssueListItem } from '@/composables/useIssues'
+} from "@/lib/labels";
+import type { Facet } from "@/lib/issueView";
+import type { IssueListItem } from "@/composables/useIssues";
 
 const props = defineProps<{
-  issue: IssueListItem
-  fullPath: string
-  index?: number
-}>()
+  issue: IssueListItem;
+  fullPath: string;
+  index?: number;
+}>();
 
-const emit = defineEmits<{ filter: [facet: Facet] }>()
+const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
-  'arrow-up': ArrowUp,
+  "arrow-up": ArrowUp,
   equal: Equal,
   minus: Minus,
   bug: Bug,
   sparkles: Sparkles,
   recycle: Recycle,
   plug: Plug,
-  'flask-conical': FlaskConical,
+  "flask-conical": FlaskConical,
   tag: Tag,
-} as const
+} as const;
 
 const labels = computed(
-  () => props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ?? [],
-)
+  () =>
+    props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ??
+    [],
+);
 const assignees = computed(
   () =>
-    props.issue.assignees?.nodes?.filter((a): a is NonNullable<typeof a> => !!a) ?? [],
-)
+    props.issue.assignees?.nodes?.filter(
+      (a): a is NonNullable<typeof a> => !!a,
+    ) ?? [],
+);
 
-const priority = computed(() => priorityOf(labels.value))
-const type = computed(() => typeOf(labels.value))
-const status = computed(() => statusOf(labels.value))
-const pills = computed(() => remainingLabels(labels.value))
+const priority = computed(() => priorityOf(labels.value));
+const type = computed(() => typeOf(labels.value));
+const status = computed(() => statusOf(labels.value));
+const pills = computed(() => remainingLabels(labels.value));
 
 // The raw label objects behind the lifted signals, so a facet click filters by
 // the exact GitLab label (e.g. `priority::High`), not the display value.
 const rawLabel = (scope: string) =>
-  labels.value.find((l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope)
-const priorityLabel = computed(() => rawLabel('priority'))
-const typeLabel = computed(() => rawLabel('type'))
+  labels.value.find(
+    (l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope,
+  );
+const priorityLabel = computed(() => rawLabel("priority"));
+const typeLabel = computed(() => rawLabel("type"));
 
-const shownAssignees = computed(() => assignees.value.slice(0, 3))
-const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3))
+const shownAssignees = computed(() => assignees.value.slice(0, 3));
+const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3));
 
-const initials = (username: string) => username.slice(0, 2).toUpperCase()
+const initials = (username: string) => username.slice(0, 2).toUpperCase();
 
 const filterLabel = (l: { title: string; color: string }) =>
-  emit('filter', { kind: 'label', value: l.title, color: l.color })
+  emit("filter", { kind: "label", value: l.title, color: l.color });
 const filterAssignee = (username: string) =>
-  emit('filter', { kind: 'assignee', value: username })
+  emit("filter", { kind: "assignee", value: username });
 
 // Cap the cascade so a long list doesn't drag the last rows in late.
-const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
+const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
 </script>
 
 <template>
@@ -107,7 +113,9 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       <component :is="ICONS[type.icon]" class="size-3.5" :stroke-width="2.25" />
     </button>
 
-    <span class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70">
+    <span
+      class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70"
+    >
       <span class="text-muted-foreground/40">#</span>{{ issue.iid }}
     </span>
 
@@ -139,14 +147,23 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       type="button"
       :title="`Filter: ${status.value}`"
       class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
-      :style="{ backgroundColor: tint(status.color, 0.18), color: status.color }"
+      :style="{
+        backgroundColor: tint(status.color, 0.18),
+        color: status.color,
+      }"
       @click="filterLabel({ title: status.raw, color: status.color })"
     >
-      <span class="size-1.5 rounded-full" :style="{ backgroundColor: status.color }" />
+      <span
+        class="size-1.5 rounded-full"
+        :style="{ backgroundColor: status.color }"
+      />
       {{ status.value }}
     </button>
 
-    <span v-if="pills.length" class="relative z-10 hidden shrink-0 gap-1 lg:flex">
+    <span
+      v-if="pills.length"
+      class="relative z-10 hidden shrink-0 gap-1 lg:flex"
+    >
       <button
         v-for="l in pills"
         :key="l.id"
@@ -160,7 +177,10 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
     </span>
 
     <!-- Assignee avatars — click to filter by that assignee. -->
-    <span v-if="shownAssignees.length" class="relative z-10 flex shrink-0 -space-x-1.5">
+    <span
+      v-if="shownAssignees.length"
+      class="relative z-10 flex shrink-0 -space-x-1.5"
+    >
       <button
         v-for="a in shownAssignees"
         :key="a.id"
@@ -170,7 +190,9 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         @click="filterAssignee(a.username)"
       >
         <Avatar class="size-6 ring-2 ring-card">
-          <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
+          <AvatarFallback
+            class="bg-muted text-[10px] font-medium text-muted-foreground"
+          >
             {{ initials(a.username) }}
           </AvatarFallback>
         </Avatar>

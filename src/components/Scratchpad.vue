@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, toRef, watch } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import { useScratchpad } from '@/composables/useScratchpad'
-import { Textarea } from '@/components/ui/textarea'
+import { ref, toRef, watch } from "vue";
+import { useDebounceFn } from "@vueuse/core";
+import { useScratchpad } from "@/composables/useScratchpad";
+import { Textarea } from "@/components/ui/textarea";
 
-const props = defineProps<{ fullPath: string; iid: string }>()
-const note = useScratchpad(toRef(props, 'fullPath'), toRef(props, 'iid'))
+const props = defineProps<{ fullPath: string; iid: string }>();
+const note = useScratchpad(toRef(props, "fullPath"), toRef(props, "iid"));
 
 // `note` writes to localStorage synchronously; this flag is purely a UX
 // affordance. It hides while typing and reappears 500ms after the last edit.
-const saved = ref(false)
-const flagSaved = useDebounceFn(() => (saved.value = true), 500)
+const saved = ref(false);
+const flagSaved = useDebounceFn(() => (saved.value = true), 500);
 watch(note, () => {
-  saved.value = false
-  flagSaved()
-})
+  saved.value = false;
+  flagSaved();
+});
 </script>
 
 <template>

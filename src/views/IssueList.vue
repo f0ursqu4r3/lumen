@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from 'vue';
-import { useIntersectionObserver, useTitle } from '@vueuse/core';
+import { computed, ref, toRef, watch } from "vue";
+import { useIntersectionObserver, useTitle } from "@vueuse/core";
 import {
   Plus,
   Check,
@@ -10,11 +10,11 @@ import {
   Columns3,
   X,
   GripVertical,
-} from '@lucide/vue';
-import { useIssues, type IssueListItem } from '@/composables/useIssues';
-import { useProjectLabels } from '@/composables/useProjectLabels';
-import { useCreateIssue, useRetagIssue } from '@/composables/useIssueMutations';
-import type { IssueFilters } from '@/gitlab/issueParams';
+} from "@lucide/vue";
+import { useIssues, type IssueListItem } from "@/composables/useIssues";
+import { useProjectLabels } from "@/composables/useProjectLabels";
+import { useCreateIssue, useRetagIssue } from "@/composables/useIssueMutations";
+import type { IssueFilters } from "@/gitlab/issueParams";
 import {
   sortIssues,
   groupIssues,
@@ -27,24 +27,24 @@ import {
   type GroupKey,
   type Facet,
   type IssueGroup,
-} from '@/lib/issueView';
-import { useRoute, useRouter } from 'vue-router';
-import IssueRow from '@/components/IssueRow.vue';
-import IssueCard from '@/components/IssueCard.vue';
-import IssueDrawer from '@/components/IssueDrawer.vue';
-import LabelChip from '@/components/LabelChip.vue';
-import ErrorNotice from '@/components/ErrorNotice.vue';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/lib/issueView";
+import { useRoute, useRouter } from "vue-router";
+import IssueRow from "@/components/IssueRow.vue";
+import IssueCard from "@/components/IssueCard.vue";
+import IssueDrawer from "@/components/IssueDrawer.vue";
+import LabelChip from "@/components/LabelChip.vue";
+import ErrorNotice from "@/components/ErrorNotice.vue";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 const props = defineProps<{ fullPath: string }>();
 
@@ -54,7 +54,7 @@ const router = useRouter();
 // Drawer is driven by ?issue=<iid> on this route, so back/refresh/links all work.
 const openIid = computed(() => {
   const q = route.query.issue;
-  return typeof q === 'string' && q ? q : null;
+  return typeof q === "string" && q ? q : null;
 });
 
 function setDrawerOpen(value: boolean) {
@@ -65,32 +65,35 @@ function setDrawerOpen(value: boolean) {
 
 function expandIssue() {
   if (openIid.value) {
-    router.push({ name: 'issue', params: { fullPath: props.fullPath, iid: openIid.value } });
+    router.push({
+      name: "issue",
+      params: { fullPath: props.fullPath, iid: openIid.value },
+    });
   }
 }
 
-const state = ref<IssueFilters['state']>('opened');
-const search = ref('');
+const state = ref<IssueFilters["state"]>("opened");
+const search = ref("");
 // Active facet filters, populated by clicking labels/assignees on rows & cards.
 const labelFilters = ref<{ title: string; color: string }[]>([]);
-const assignee = ref('');
+const assignee = ref("");
 
-const view = ref<'list' | 'board'>('list');
-const sortKey = ref<SortKey>('updated');
-const groupKey = ref<GroupKey>('none');
+const view = ref<"list" | "board">("list");
+const sortKey = ref<SortKey>("updated");
+const groupKey = ref<GroupKey>("none");
 // Which scoped-label group defines the board columns (assigned / priority / team…).
-const boardScope = ref('assigned');
+const boardScope = ref("assigned");
 
-const STATES: { value: IssueFilters['state']; label: string }[] = [
-  { value: 'opened', label: 'Open' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'all', label: 'All' },
+const STATES: { value: IssueFilters["state"]; label: string }[] = [
+  { value: "opened", label: "Open" },
+  { value: "closed", label: "Closed" },
+  { value: "all", label: "All" },
 ];
 
 // Split the project path so the final segment (the repo) can be emphasized.
-const pathParts = computed(() => props.fullPath.split('/'));
+const pathParts = computed(() => props.fullPath.split("/"));
 const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath);
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'));
+const pathPrefix = computed(() => pathParts.value.slice(0, -1).join("/"));
 
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
@@ -110,7 +113,7 @@ const {
   hasNextPage,
   fetchNextPage,
   isFetchingNextPage,
-} = useIssues(toRef(props, 'fullPath'), filters);
+} = useIssues(toRef(props, "fullPath"), filters);
 
 const count = computed(() => issues.value.length);
 const hasMore = computed(() => hasNextPage.value ?? false);
@@ -120,11 +123,11 @@ const hasMore = computed(() => hasNextPage.value ?? false);
 const sorted = computed(() => sortIssues(issues.value, sortKey.value));
 const listGroups = computed(() => groupIssues(sorted.value, groupKey.value));
 
-const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'));
+const { data: projectLabels } = useProjectLabels(toRef(props, "fullPath"));
 const labelCatalog = computed(() => projectLabels.value ?? []);
 const scopeOptions = computed(() => labelScopes(labelCatalog.value));
 const boardGroups = computed(() =>
-  groupByScope(sorted.value, boardScope.value, labelCatalog.value)
+  groupByScope(sorted.value, boardScope.value, labelCatalog.value),
 );
 // When the chosen scope isn't present (e.g. first load), fall back to the first.
 watch(scopeOptions, (opts) => {
@@ -142,8 +145,8 @@ function onDragStart(issue: IssueListItem, e: DragEvent) {
   dragging.value = issue;
   draggingIid.value = issue.iid;
   if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', String(issue.iid));
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(issue.iid));
   }
 }
 function clearDrag() {
@@ -161,12 +164,12 @@ function onDrop(group: IssueGroup) {
 
 // --- active filters ---------------------------------------------------------
 const activeCount = computed(
-  () => labelFilters.value.length + (assignee.value ? 1 : 0)
+  () => labelFilters.value.length + (assignee.value ? 1 : 0),
 );
 
 function applyFacet(f: Facet) {
-  if (f.kind === 'assignee') {
-    assignee.value = assignee.value === f.value ? '' : f.value;
+  if (f.kind === "assignee") {
+    assignee.value = assignee.value === f.value ? "" : f.value;
     return;
   }
   const i = labelFilters.value.findIndex((l) => l.title === f.value);
@@ -181,7 +184,7 @@ const removeLabel = (title: string) =>
   (labelFilters.value = labelFilters.value.filter((l) => l.title !== title));
 function clearFilters() {
   labelFilters.value = [];
-  assignee.value = '';
+  assignee.value = "";
 }
 
 function loadMore() {
@@ -193,7 +196,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
 });
 
 const createIssue = useCreateIssue(props.fullPath);
-const newTitle = ref('');
+const newTitle = ref("");
 // Brief check-flash on the Create button so a successful add registers without a
 // toast — the input clears, the button confirms, then quietly returns to ready.
 const justCreated = ref(false);
@@ -204,12 +207,12 @@ function submitNew() {
     { title: newTitle.value },
     {
       onSuccess: () => {
-        newTitle.value = '';
+        newTitle.value = "";
         justCreated.value = true;
         clearTimeout(createdTimer);
         createdTimer = setTimeout(() => (justCreated.value = false), 1400);
       },
-    }
+    },
   );
 }
 </script>
@@ -250,7 +253,7 @@ function submitNew() {
         <span
           class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
         >
-          {{ count === 1 ? 'issue' : 'issues' }}
+          {{ count === 1 ? "issue" : "issues" }}
         </span>
       </div>
     </div>
@@ -433,7 +436,7 @@ function submitNew() {
         <LoaderCircle v-if="createIssue.isPending.value" class="animate-spin" />
         <Check v-else-if="justCreated" class="animate-status" />
         <Plus v-else />
-        {{ justCreated ? 'Added' : 'Create' }}
+        {{ justCreated ? "Added" : "Create" }}
       </Button>
     </form>
 
@@ -567,7 +570,7 @@ function submitNew() {
               v-if="isFetchingNextPage"
               class="size-4 animate-spin text-primary"
             />
-            {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
+            {{ isFetchingNextPage ? "Loading…" : "Load more" }}
           </button>
         </div>
       </template>

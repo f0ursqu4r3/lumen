@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useTitle } from '@vueuse/core'
-import { Search, ArrowRight, FolderGit2 } from '@lucide/vue'
-import { useProjects } from '@/composables/useProjects'
-import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { computed, ref } from "vue";
+import { useTitle } from "@vueuse/core";
+import { Search, ArrowRight, FolderGit2 } from "@lucide/vue";
+import { useProjects } from "@/composables/useProjects";
+import ErrorNotice from "@/components/ErrorNotice.vue";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-useTitle('Projects · tragit')
+useTitle("Projects · tragit");
 
-const search = ref('')
-const { data: projects, isLoading, error } = useProjects(search)
-const count = computed(() => projects.value?.length ?? 0)
+const search = ref("");
+const { data: projects, isLoading, error } = useProjects(search);
+const count = computed(() => projects.value?.length ?? 0);
 
 // Split each path so the repo (final segment) reads as the name and the rest
 // trails as muted mono context — same emphasis the issues header uses.
 const namespace = (fullPath: string) => {
-  const parts = fullPath.split('/')
-  return parts.slice(0, -1).join('/')
-}
+  const parts = fullPath.split("/");
+  return parts.slice(0, -1).join("/");
+};
 </script>
 
 <template>
@@ -32,9 +32,7 @@ const namespace = (fullPath: string) => {
         >
           Workspace
         </p>
-        <h1
-          class="mt-1 text-2xl font-semibold tracking-tight text-foreground"
-        >
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
           Projects
         </h1>
       </div>
@@ -51,7 +49,7 @@ const namespace = (fullPath: string) => {
         <span
           class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
         >
-          {{ count === 1 ? 'project' : 'projects' }}
+          {{ count === 1 ? "project" : "projects" }}
         </span>
       </div>
     </div>
@@ -77,7 +75,10 @@ const namespace = (fullPath: string) => {
     >
       <div v-for="i in 5" :key="i" class="flex items-center gap-3 px-4 py-3">
         <Skeleton class="size-4 rounded-md" />
-        <Skeleton class="h-3.5" :style="{ width: `${30 + ((i * 17) % 40)}%` }" />
+        <Skeleton
+          class="h-3.5"
+          :style="{ width: `${30 + ((i * 17) % 40)}%` }"
+        />
         <Skeleton class="h-3 w-24" />
       </div>
     </div>
@@ -124,13 +125,13 @@ const namespace = (fullPath: string) => {
           />
         </div>
         <p class="text-sm font-medium text-foreground">
-          {{ search ? 'No matches.' : 'No projects.' }}
+          {{ search ? "No matches." : "No projects." }}
         </p>
         <p class="max-w-xs text-xs text-muted-foreground">
           {{
             search
               ? `Nothing matches “${search}”. Try a different term.`
-              : 'Projects from your GitLab instance will appear here as you gain access.'
+              : "Projects from your GitLab instance will appear here as you gain access."
           }}
         </p>
       </div>

@@ -138,7 +138,9 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    font-feature-settings: "cv05" 1, "ss01" 1;
+    font-feature-settings:
+      "cv05" 1,
+      "ss01" 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
