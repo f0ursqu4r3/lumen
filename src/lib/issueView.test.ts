@@ -4,6 +4,7 @@ import {
   groupIssues,
   groupByScope,
   availableScopes,
+  labelScopes,
   planRetag,
 } from './issueView'
 import type { IssueListItem } from '@/composables/useIssues'
@@ -92,6 +93,17 @@ describe('availableScopes', () => {
   })
 })
 
+describe('labelScopes', () => {
+  it('reads scopes straight from a label catalog, preferred first', () => {
+    const catalog = [
+      { id: '1', title: 'team::HMI', color: '#00f' },
+      { id: '2', title: 'assigned::stalled', color: '#888' },
+      { id: '3', title: 'plain', color: '#111' },
+    ]
+    expect(labelScopes(catalog)).toEqual(['assigned', 'team'])
+  })
+})
+
 describe('groupByScope', () => {
   const issues = [
     mk('1', 'a', [{ title: 'team::HMI', color: '#3b82f6' }]),
@@ -112,6 +124,20 @@ describe('groupByScope', () => {
       'on-deck',
       'in-review',
     ])
+  })
+
+  it('seeds empty columns from the label catalog', () => {
+    const used = [mk('1', 'a', [{ title: 'assigned::on-deck', color: '#0f0' }])]
+    const catalog = [
+      { id: 'l1', title: 'assigned::on-deck', color: '#0f0' },
+      { id: 'l2', title: 'assigned::in-review', color: '#0f0' },
+      { id: 'l3', title: 'assigned::stalled', color: '#888' },
+      { id: 'l9', title: 'team::HMI', color: '#00f' },
+    ]
+    const cols = groupByScope(used, 'assigned', catalog)
+    expect(cols.map((c) => c.label)).toEqual(['on-deck', 'in-review', 'stalled'])
+    expect(cols.find((c) => c.label === 'in-review')!.issues).toHaveLength(0)
+    expect(cols.find((c) => c.label === 'stalled')!.repLabel).toMatchObject({ id: 'l3' })
   })
 })
 
