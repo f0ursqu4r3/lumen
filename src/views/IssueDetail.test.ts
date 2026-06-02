@@ -5,28 +5,32 @@ import { ref } from "vue";
 const useIssue = vi.fn();
 vi.mock("@/composables/useIssue", () => ({ useIssue: () => useIssue() }));
 
-const { addNoteMutate, updateMutate } = vi.hoisted(() => ({
+const { addNoteMutate, updateMutate, setAssigneesError } = vi.hoisted(() => ({
   addNoteMutate: vi.fn(),
   updateMutate: vi.fn(),
+  setAssigneesError: { ref: null as null | { value: unknown } },
 }));
-vi.mock("@/composables/useIssueMutations", () => ({
-  useAddNote: () => ({
-    mutate: addNoteMutate,
-    isPending: { value: false },
-    error: { value: null },
-  }),
-  useUpdateIssue: () => ({
-    mutate: updateMutate,
-    isPending: { value: false },
-    error: { value: null },
-  }),
-  // Rendered by the QuickAssign child; mocked so it doesn't hit the network.
-  useSetAssignees: () => ({
-    mutate: vi.fn(),
-    isPending: { value: false },
-    error: { value: null },
-  }),
-}));
+vi.mock("@/composables/useIssueMutations", async () => {
+  const { ref } = await import("vue");
+  setAssigneesError.ref = ref(null);
+  return {
+    useAddNote: () => ({
+      mutate: addNoteMutate,
+      isPending: { value: false },
+      error: { value: null },
+    }),
+    useUpdateIssue: () => ({
+      mutate: updateMutate,
+      isPending: { value: false },
+      error: { value: null },
+    }),
+    useSetAssignees: () => ({
+      mutate: vi.fn(),
+      isPending: { value: false },
+      error: setAssigneesError.ref,
+    }),
+  };
+});
 
 vi.mock("@/composables/useProjectMembers", () => ({
   useProjectMembers: () => ({ data: ref([]) }),
@@ -75,6 +79,7 @@ beforeEach(() => {
   useIssue.mockReset();
   addNoteMutate.mockReset();
   updateMutate.mockReset();
+  if (setAssigneesError.ref) setAssigneesError.ref.value = null;
 });
 
 describe("IssueDetail", () => {
@@ -90,8 +95,7 @@ describe("IssueDetail", () => {
     expect(w.text()).toContain("the description");
     expect(w.text()).toContain("me too");
     expect(w.text()).toContain("Scratchpad");
-    await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
-    expect(w.text()).toContain("@a");
+    expect(w.text()).toContain("Ada Lovelace");
   });
 
   it("shows the issue originator", async () => {
@@ -173,5 +177,21 @@ describe("IssueDetail", () => {
     await flushPromises();
     await w.find('button[type="button"]').trigger("click");
     expect(updateMutate).toHaveBeenCalledWith({ stateEvent: "CLOSE" });
+  });
+
+  it("surfaces a child assignee mutation error via ErrorNotice", async () => {
+    useIssue.mockReturnValue({
+      data: ref(fullIssue),
+      isLoading: ref(false),
+      error: ref(null),
+    });
+    const w = mountDetail();
+    await flushPromises();
+    setAssigneesError.ref!.value = {
+      kind: "graphql",
+      message: "Insufficient permissions",
+    };
+    await flushPromises();
+    expect(w.text()).toContain("Insufficient permissions");
   });
 });

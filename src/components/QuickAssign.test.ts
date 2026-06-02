@@ -61,28 +61,23 @@ beforeEach(() => {
 });
 
 describe("QuickAssign", () => {
-  it("assigns a member as the sole assignee on click", async () => {
+  it("shows a 'Quick assign' label on the trigger (no avatars/usernames)", () => {
+    const w = mountQA();
+    const trigger = w.get('[data-testid="quick-assign-trigger"]');
+    expect(trigger.text()).toContain("Quick assign");
+    expect(trigger.text()).not.toContain("@");
+  });
+
+  it("replaces all assignees with the clicked member and closes", async () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     await w.get('[data-testid="quick-assign-option-dee"]').trigger("click");
+    await nextTick();
     expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: ["dee"] });
+    expect(w.find('[role="menu"]').exists()).toBe(false);
   });
 
-  it("removes a single current assignee", async () => {
-    const w = mountQA();
-    await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
-    await w.get('[data-testid="quick-assign-remove-ada"]').trigger("click");
-    expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
-  });
-
-  it("unassigns everyone", async () => {
-    const w = mountQA();
-    await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
-    await w.get('[data-testid="quick-assign-unassign-all"]').trigger("click");
-    expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
-  });
-
-  it("dedups people to one option and shows group labels", async () => {
+  it("shows grouped, labelled, deduped options", async () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     expect(w.findAll('[data-testid="quick-assign-option-ada"]')).toHaveLength(1);
@@ -93,16 +88,12 @@ describe("QuickAssign", () => {
     expect(w.text()).toContain("Project members");
   });
 
-  it("hides Unassign all when there are no assignees", async () => {
-    const w = mount(QuickAssign, {
-      props: {
-        fullPath: "grp/proj",
-        iid: "9",
-        issue: { ...issue, assignees: { nodes: [] } } as never,
-        members,
-      },
-    });
+  it("no longer renders remove or unassign-all controls", async () => {
+    const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
+    expect(w.find('[data-testid="quick-assign-remove-ada"]').exists()).toBe(
+      false,
+    );
     expect(w.find('[data-testid="quick-assign-unassign-all"]').exists()).toBe(
       false,
     );

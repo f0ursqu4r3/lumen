@@ -6,6 +6,7 @@ import { useIssue } from "@/composables/useIssue";
 import { useAddNote, useUpdateIssue } from "@/composables/useIssueMutations";
 import { useProjectMembers } from "@/composables/useProjectMembers";
 import QuickAssign from "@/components/QuickAssign.vue";
+import AssigneeEditor from "@/components/AssigneeEditor.vue";
 import LabelChip from "@/components/LabelChip.vue";
 import StateBadge from "@/components/StateBadge.vue";
 import ErrorNotice from "@/components/ErrorNotice.vue";
@@ -33,10 +34,10 @@ const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const addNote = useAddNote(props.fullPath, props.iid);
 const updateIssue = useUpdateIssue(props.fullPath, props.iid);
 
-const quickAssignError = ref<GitLabError | null>(null);
+const assigneeError = ref<GitLabError | null>(null);
 // Surfaces a failed comment/state mutation (otherwise the action fails silently).
 const actionError = computed(
-  () => addNote.error.value ?? updateIssue.error.value ?? quickAssignError.value,
+  () => addNote.error.value ?? updateIssue.error.value ?? assigneeError.value,
 );
 
 const labels = computed(
@@ -143,12 +144,19 @@ function toggleState() {
         :color="l.color"
       />
     </div>
+    <AssigneeEditor
+      :full-path="fullPath"
+      :iid="iid"
+      :issue="issue"
+      :members="members ?? []"
+      @error="assigneeError = $event"
+    />
     <QuickAssign
       :full-path="fullPath"
       :iid="iid"
       :issue="issue"
       :members="members ?? []"
-      @error="quickAssignError = $event"
+      @error="assigneeError = $event"
     />
     <p v-if="issue.milestone" class="text-xs text-muted-foreground">
       Milestone: {{ issue.milestone.title }}
