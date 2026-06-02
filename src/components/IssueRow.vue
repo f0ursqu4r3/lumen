@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import {
-  ChevronsUp,
-  ChevronUp,
-  Minus,
+  AlertOctagon,
+  Zap,
+  ArrowUpCircle,
+  MinusCircle,
+  ArrowDownCircle,
   Bug,
   Sparkles,
   Recycle,
@@ -35,9 +37,11 @@ const props = defineProps<{
 const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
-  'chevrons-up': ChevronsUp,
-  'chevron-up': ChevronUp,
-  minus: Minus,
+  AlertOctagon,
+  Zap,
+  ArrowUpCircle,
+  MinusCircle,
+  ArrowDownCircle,
   bug: Bug,
   sparkles: Sparkles,
   recycle: Recycle,
@@ -121,7 +125,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
       <component :is="ICONS[type.icon]" class="size-3.5" :stroke-width="2.25" />
     </button>
 
-    <!-- Priority caret (filters by priority::) -->
+    <!-- Priority glyph (filters by priority::) -->
     <button
       v-if="priority && priorityLabel"
       type="button"

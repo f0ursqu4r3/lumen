@@ -64,8 +64,28 @@ describe("semantic scopes", () => {
   it("lifts priority with consistent semantics", () => {
     expect(priorityOf(labels)).toMatchObject({
       level: "medium",
-      icon: "chevron-up",
+      icon: "MinusCircle",
     });
+  });
+
+  it("maps the priority label set to its requested icons", () => {
+    expect(
+      [
+        "Critical",
+        "FastTrack",
+        "High",
+        "Medium",
+        "Low",
+      ].map((level) =>
+        priorityOf([{ title: `priority::${level}`, color: "#fff" }])?.icon,
+      ),
+    ).toEqual([
+      "AlertOctagon",
+      "Zap",
+      "ArrowUpCircle",
+      "MinusCircle",
+      "ArrowDownCircle",
+    ]);
   });
 
   it("maps known type codes to an icon", () => {
