@@ -4,7 +4,8 @@ import { useTitle } from "@vueuse/core";
 import { Check } from "@lucide/vue";
 import { useIssue } from "@/composables/useIssue";
 import { useAddNote, useUpdateIssue } from "@/composables/useIssueMutations";
-import AssigneeAvatar from "@/components/AssigneeAvatar.vue";
+import { useProjectMembers } from "@/composables/useProjectMembers";
+import QuickAssign from "@/components/QuickAssign.vue";
 import LabelChip from "@/components/LabelChip.vue";
 import StateBadge from "@/components/StateBadge.vue";
 import ErrorNotice from "@/components/ErrorNotice.vue";
@@ -27,6 +28,7 @@ const {
   isLoading,
   error,
 } = useIssue(toRef(props, "fullPath"), toRef(props, "iid"));
+const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const addNote = useAddNote(props.fullPath, props.iid);
 const updateIssue = useUpdateIssue(props.fullPath, props.iid);
 
@@ -39,12 +41,6 @@ const labels = computed(
   () =>
     issue.value?.labels?.nodes?.filter(
       (l): l is NonNullable<typeof l> => !!l,
-    ) ?? [],
-);
-const assignees = computed(
-  () =>
-    issue.value?.assignees?.nodes?.filter(
-      (a): a is NonNullable<typeof a> => !!a,
     ) ?? [],
 );
 // User comments only — system notes ("changed milestone", "closed via …") are noise here.
@@ -145,15 +141,12 @@ function toggleState() {
         :color="l.color"
       />
     </div>
-    <div v-if="assignees.length" class="flex flex-wrap gap-2">
-      <AssigneeAvatar
-        v-for="a in assignees"
-        :key="a.id"
-        :name="a.name"
-        :username="a.username"
-        :avatar-url="a.avatarUrl"
-      />
-    </div>
+    <QuickAssign
+      :full-path="fullPath"
+      :iid="iid"
+      :issue="issue"
+      :members="members ?? []"
+    />
     <p v-if="issue.milestone" class="text-xs text-muted-foreground">
       Milestone: {{ issue.milestone.title }}
     </p>

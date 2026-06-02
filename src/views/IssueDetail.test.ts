@@ -22,6 +22,10 @@ vi.mock("@/composables/useIssueMutations", () => ({
   }),
 }));
 
+vi.mock("@/composables/useProjectMembers", () => ({
+  useProjectMembers: () => ({ data: ref([]) }),
+}));
+
 import IssueDetail from "./IssueDetail.vue";
 
 const mountDetail = () =>
@@ -78,9 +82,10 @@ describe("IssueDetail", () => {
     await flushPromises();
     expect(w.text()).toContain("Bug");
     expect(w.text()).toContain("the description");
-    expect(w.text()).toContain("@a");
     expect(w.text()).toContain("me too");
     expect(w.text()).toContain("Scratchpad");
+    await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
+    expect(w.text()).toContain("@a");
   });
 
   it("shows the issue originator", async () => {
