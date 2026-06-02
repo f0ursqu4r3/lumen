@@ -75,6 +75,28 @@ describe("useIssueDraft", () => {
     expect(setAsync).not.toHaveBeenCalled();
   });
 
+  it("clears dirty after a successful save", async () => {
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    result().draft.value!.title = "New";
+    await nextTick();
+    expect(result().dirty.value).toBe(true);
+    await result().save();
+    await nextTick();
+    expect(result().dirty.value).toBe(false);
+  });
+
+  it("keeps dirty when a save mutation fails", async () => {
+    updateAsync.mockRejectedValueOnce(new Error("boom"));
+    const issueRef = ref({ ...issue });
+    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    result().draft.value!.title = "New";
+    await nextTick();
+    await result().save();
+    await nextTick();
+    expect(result().dirty.value).toBe(true);
+  });
+
   it("re-syncs from the server only while clean", async () => {
     const issueRef = ref({ ...issue });
     const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));

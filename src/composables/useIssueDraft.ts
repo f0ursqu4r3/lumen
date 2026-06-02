@@ -29,6 +29,12 @@ export function useIssueDraft(
   const original = ref<IssueDraft | null>(null);
   const draft = ref<IssueDraft | null>(null);
 
+  const cloneDraft = (d: IssueDraft): IssueDraft => ({
+    ...d,
+    labelIds: [...d.labelIds],
+    assigneeUsernames: [...d.assigneeUsernames],
+  });
+
   function sync() {
     if (!issue.value) return;
     original.value = draftFromIssue(issue.value);
@@ -60,6 +66,10 @@ export function useIssueDraft(
       if (diff.update) await update.mutateAsync(diff.update);
       if (diff.assignees)
         await setAssignees.mutateAsync({ assigneeUsernames: diff.assignees });
+      // Mark clean immediately so the Save/Cancel footer hides; the mutations
+      // invalidate the issue query, and the resulting refetch then re-syncs the
+      // buffer normally (it is no longer dirty, so the watcher's guard allows it).
+      original.value = cloneDraft(draft.value);
     } catch {
       // Surfaced via the `error` computed; leave the draft intact so the user
       // can retry or cancel.
