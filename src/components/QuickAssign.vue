@@ -15,6 +15,8 @@ const props = defineProps<{
   members: ProjectMember[];
 }>();
 
+// fullPath/iid are captured once; QuickAssign mounts per issue route, so the
+// props are stable for its lifetime (same assumption as IssueDetail's useUpdateIssue).
 const update = useUpdateIssue(props.fullPath, props.iid);
 
 const open = ref(false);
@@ -67,6 +69,8 @@ function assignOnly(username: string) {
   update.mutate({ assigneeUsernames: [username] });
   open.value = false;
 }
+// Unlike assignOnly/unassignAll, this leaves the menu open so several
+// assignees can be trimmed in a row; the row disappears once the issue refetches.
 function removeOne(username: string) {
   update.mutate({
     assigneeUsernames: assignees.value
@@ -143,7 +147,7 @@ function unassignAll() {
             type="button"
             :data-testid="`quick-assign-remove-${p.username}`"
             class="shrink-0 rounded p-0.5 text-muted-foreground outline-none hover:text-foreground focus-visible:text-foreground"
-            aria-label="Remove assignee"
+            :aria-label="`Remove ${p.name || p.username} as assignee`"
             @click="removeOne(p.username)"
           >
             <X class="size-3.5" />
