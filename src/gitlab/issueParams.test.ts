@@ -47,4 +47,19 @@ describe("issueParams", () => {
       after: "CURSOR",
     });
   });
+
+  it("maps author to authorUsername", () => {
+    const vars = toIssuesVars("grp/proj", { author: "kdougan" });
+    expect(vars).toEqual({ fullPath: "grp/proj", authorUsername: "kdougan" });
+  });
+
+  it("maps a normal assignee to assigneeUsernames", () => {
+    const vars = toIssuesVars("grp/proj", { assignee: "ada" });
+    expect(vars).toEqual({ fullPath: "grp/proj", assigneeUsernames: ["ada"] });
+  });
+
+  it("maps the Unassigned sentinel to assigneeWildcardId NONE", () => {
+    const vars = toIssuesVars("grp/proj", { assignee: "__none__" });
+    expect(vars).toEqual({ fullPath: "grp/proj", assigneeWildcardId: "NONE" });
+  });
 });
