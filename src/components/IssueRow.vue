@@ -29,6 +29,7 @@ const props = defineProps<{
   issue: IssueListItem;
   fullPath: string;
   index?: number;
+  highlight?: boolean;
 }>();
 
 const emit = defineEmits<{ filter: [facet: Facet] }>();
@@ -97,6 +98,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
        instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
   <div
     class="group relative flex animate-row-in items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60 focus-within:bg-accent/60"
+    :class="{ 'animate-flash': highlight }"
     :style="{ animationDelay: delay }"
   >
     <RouterLink

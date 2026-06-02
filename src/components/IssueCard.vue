@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import {
   ArrowUp,
+  ChevronUp,
+  ChevronsUp,
   Equal,
   Minus,
   Bug,
@@ -16,11 +18,13 @@ import { priorityOf, typeOf, parseLabel, tint } from "@/lib/labels";
 import type { Facet } from "@/lib/issueView";
 import type { IssueListItem } from "@/composables/useIssues";
 
-const props = defineProps<{ issue: IssueListItem; fullPath: string }>();
+const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: boolean }>();
 const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
   "arrow-up": ArrowUp,
+  "chevron-up": ChevronUp,
+  "chevrons-up": ChevronsUp,
   equal: Equal,
   minus: Minus,
   bug: Bug,
@@ -64,6 +68,7 @@ const filterAssignee = (u: string) =>
 <template>
   <div
     class="group relative flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 transition-colors duration-150 hover:border-border/0 hover:bg-accent/50 focus-within:bg-accent/50"
+    :class="{ 'animate-flash': highlight }"
   >
     <RouterLink
       :to="{ query: { issue: issue.iid } }"

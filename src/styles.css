@@ -222,3 +222,20 @@
     animation: status-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+
+/* New-issue confirmation: a brief amber wash that fades, so a freshly created
+   issue announces itself in the list without a toast. Kin to .animate-status. */
+@keyframes flash-in {
+  0% {
+    background-color: oklch(0.82 0.142 81 / 0.16);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-flash {
+    animation: flash-in 1.6s ease-out both;
+  }
+}

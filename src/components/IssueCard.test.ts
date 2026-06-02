@@ -22,4 +22,12 @@ describe("IssueCard", () => {
       query: { issue: "7" },
     });
   });
+
+  it("applies the flash-highlight class when highlight is true", () => {
+    const w = mount(IssueCard, {
+      props: { issue, fullPath: "grp/proj", highlight: true },
+      global: { stubs: { RouterLink: RouterLinkStub } },
+    });
+    expect(w.get("div").classes()).toContain("animate-flash");
+  });
 });
