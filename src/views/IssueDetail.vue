@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import MarkdownText from '@/components/MarkdownText.vue'
+import Scratchpad from '@/components/Scratchpad.vue'
 
 const props = defineProps<{ fullPath: string; iid: string }>()
 const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
@@ -102,6 +103,7 @@ function toggleState() {
         <Button type="submit" :disabled="addNote.isPending.value">Comment</Button>
       </form>
     </section>
+    <Scratchpad :full-path="fullPath" :iid="iid" />
   </article>
   <p v-else class="text-sm text-muted-foreground">Issue not found.</p>
 </template>
