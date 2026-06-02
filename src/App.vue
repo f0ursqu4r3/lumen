@@ -13,7 +13,7 @@ const busy = computed(() => fetching.value > 0);
     <header
       class="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-md"
     >
-      <div class="mx-auto flex h-8 max-w-5xl items-center px-4">
+      <div class="mx-auto flex h-14 max-w-5xl items-center px-4">
         <RouterLink
           to="/"
           class="group inline-flex items-center gap-2 text-sm font-semibold tracking-tight"

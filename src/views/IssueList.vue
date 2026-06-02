@@ -231,7 +231,7 @@ onKeyStroke(["c", "C"], (e) => {
           Issues
         </p>
         <h1
-          class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground"
+          class="vt-project-title mt-1 truncate text-2xl font-semibold tracking-tight text-foreground"
         >
           {{ repoName }}
         </h1>

@@ -239,3 +239,23 @@
     animation: flash-in 1.6s ease-out both;
   }
 }
+
+/* Picker → issues handoff: the chosen project's name is the shared element, so
+   it morphs into the issues header while the rest of the page cross-fades. The
+   View Transition itself is only invoked when motion is allowed (see
+   ProjectPicker.launch); naming the header is inert until then. */
+.vt-project-title {
+  view-transition-name: project-title;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(project-title) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.26s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
