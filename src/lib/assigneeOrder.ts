@@ -48,3 +48,80 @@ export function orderAssignees(input: {
 
   return out;
 }
+
+export interface AssigneeSection {
+  rel: Relationship;
+  label: string;
+  people: OrderedPerson[];
+}
+
+export interface AssigneeView {
+  assignees: Person[];
+  sections: AssigneeSection[];
+}
+
+type IssueLike = {
+  author?: Person | null;
+  assignees?: { nodes?: (Person | null)[] | null } | null;
+  notes?: {
+    nodes?:
+      | ({
+          system?: boolean | null;
+          createdAt: string;
+          author?: Person | null;
+        } | null)[]
+      | null;
+  } | null;
+};
+
+const SECTION_LABEL: Record<Relationship, string> = {
+  originator: "Reporter",
+  assignee: "Assigned",
+  commenter: "Commented",
+  member: "Project members",
+};
+const SECTION_ORDER: Relationship[] = [
+  "originator",
+  "assignee",
+  "commenter",
+  "member",
+];
+
+/**
+ * Derive the current assignees and the relationship-grouped, labelled sections
+ * for an issue, so the assignee editor and quick-assign share one ordering.
+ * `issue` is accepted structurally to keep this module free of generated types.
+ */
+export function assigneeSections(
+  issue: IssueLike,
+  members: Person[],
+): AssigneeView {
+  const assignees = (issue.assignees?.nodes ?? []).filter(
+    (a): a is Person => !!a,
+  );
+  const noteAuthors = (issue.notes?.nodes ?? [])
+    .filter(
+      (
+        n,
+      ): n is { system?: boolean | null; createdAt: string; author: Person } =>
+        !!n && !n.system && !!n.author,
+    )
+    .slice()
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map((n) => n.author);
+
+  const ordered = orderAssignees({
+    author: issue.author ?? null,
+    assignees,
+    noteAuthors,
+    members,
+  });
+
+  const sections = SECTION_ORDER.map((rel) => ({
+    rel,
+    label: SECTION_LABEL[rel],
+    people: ordered.filter((p) => p.relationship === rel),
+  })).filter((s) => s.people.length);
+
+  return { assignees, sections };
+}
