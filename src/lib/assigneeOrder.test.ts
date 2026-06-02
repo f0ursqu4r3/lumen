@@ -43,9 +43,9 @@ describe("orderAssignees", () => {
       noteAuthors: [],
       members: [m("dee")],
     });
-    const byName = Object.fromEntries(out.map((p) => [p.username, p]));
-    expect(byName.ada.isAssigned).toBe(true);
-    expect(byName.dee.isAssigned).toBe(false);
+    const byUsername = Object.fromEntries(out.map((p) => [p.username, p]));
+    expect(byUsername.ada.isAssigned).toBe(true);
+    expect(byUsername.dee.isAssigned).toBe(false);
   });
 
   it("keeps caller-supplied note-author order (most recent first)", () => {
@@ -76,5 +76,15 @@ describe("orderAssignees", () => {
       members: [],
     });
     expect(out[0].name).toBeNull();
+  });
+
+  it("deduplicates within a single group", () => {
+    const out = orderAssignees({
+      author: null,
+      assignees: [],
+      noteAuthors: [],
+      members: [m("dee"), m("dee")],
+    });
+    expect(out).toHaveLength(1);
   });
 });
