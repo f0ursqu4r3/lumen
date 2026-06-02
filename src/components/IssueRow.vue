@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import {
-  ArrowUp,
-  Equal,
+  ChevronsUp,
+  ChevronUp,
   Minus,
   Bug,
   Sparkles,
@@ -34,8 +34,8 @@ const props = defineProps<{
 const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
-  'arrow-up': ArrowUp,
-  equal: Equal,
+  'chevrons-up': ChevronsUp,
+  'chevron-up': ChevronUp,
   minus: Minus,
   bug: Bug,
   sparkles: Sparkles,
@@ -119,12 +119,6 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
       <component :is="ICONS[type.icon]" class="size-3.5" :stroke-width="2.25" />
     </button>
 
-    <span
-      class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70"
-    >
-      <span class="text-muted-foreground/40">#</span>{{ issue.iid }}
-    </span>
-
     <!-- Priority caret (filters by priority::) -->
     <button
       v-if="priority && priorityLabel"
@@ -140,6 +134,12 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
         :stroke-width="2.75"
       />
     </button>
+
+    <span
+      class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70 w-6 text-right"
+    >
+      <span class="text-muted-foreground/40">#</span>{{ issue.iid }}
+    </span>
 
     <span
       class="min-w-0 flex-1 truncate text-sm text-foreground/85 transition-colors group-hover:text-foreground"
