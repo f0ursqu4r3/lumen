@@ -69,7 +69,7 @@ export function useCreateIssue(fullPath: string) {
   return useMutation<
     CreateIssuePayload,
     GitLabError,
-    { title: string; description?: string }
+    { title: string; description?: string; labels?: string[]; assigneeIds?: string[] }
   >({
     mutationFn: (input) =>
       run(

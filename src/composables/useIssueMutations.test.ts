@@ -67,6 +67,27 @@ describe("issue mutations", () => {
     ).rejects.toMatchObject({ kind: "graphql", message: "bad" });
   });
 
+  it('useCreateIssue forwards labels and assigneeIds in the input', async () => {
+    request.mockResolvedValue({ createIssue: { issue: { iid: '11' }, errors: [] } })
+    const { result } = withQuery(() => useCreateIssue('grp/proj'))
+    result().mutate({
+      title: 'New',
+      description: 'body',
+      labels: ['bug', 'priority::high'],
+      assigneeIds: ['gid://user/1'],
+    })
+    await flushPromises()
+    expect(request).toHaveBeenCalledWith(expect.anything(), {
+      input: {
+        projectPath: 'grp/proj',
+        title: 'New',
+        description: 'body',
+        labels: ['bug', 'priority::high'],
+        assigneeIds: ['gid://user/1'],
+      },
+    })
+  })
+
   it("useAddNote rejects with a normalized error on a transport failure", async () => {
     request.mockRejectedValue(new Error("down"));
     const { result } = withQuery(() => useAddNote("grp/proj", "9"));
