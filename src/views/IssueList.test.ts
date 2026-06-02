@@ -116,6 +116,13 @@ describe("IssueList", () => {
     expect(w.findComponent(IssueComposer).props('open')).toBe(true);
   });
 
+  it("opens the composer from the empty-state Create issue button", async () => {
+    mockQuery({ issues: ref([]) });
+    const w = mountList();
+    await w.get('[data-testid="empty-new-issue"]').trigger('click');
+    expect(w.findComponent(IssueComposer).props('open')).toBe(true);
+  });
+
   it("opens the composer when the C key is pressed", async () => {
     mockQuery({ issues: ref([issue]) });
     const w = mountList();

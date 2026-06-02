@@ -97,8 +97,8 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
        facet buttons sit above it so clicking a label/priority/assignee filters
        instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
   <div
-    class="group relative flex animate-row-in items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60 focus-within:bg-accent/60"
-    :class="{ 'animate-flash': highlight }"
+    class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60 focus-within:bg-accent/60"
+    :class="highlight ? 'animate-flash' : 'animate-row-in'"
     :style="{ animationDelay: delay }"
   >
     <RouterLink

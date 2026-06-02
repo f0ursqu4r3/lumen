@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from "vue";
+import { computed, onUnmounted, ref, toRef, watch } from "vue";
 import { useIntersectionObserver, useTitle, onKeyStroke } from "@vueuse/core";
 import {
   Plus,
@@ -206,6 +206,8 @@ function onCreated(iid: string) {
   // Matches the 1.6s flash-in animation; clear so re-renders don't replay it.
   highlightTimer = setTimeout(() => (highlightIid.value = null), 1600);
 }
+
+onUnmounted(() => clearTimeout(highlightTimer));
 
 // `C` opens the composer — but never while typing or with another surface open.
 // Accept both cases so Caps Lock / Shift don't swallow the shortcut.
