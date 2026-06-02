@@ -124,3 +124,6 @@ export function assigneeSections(
 
   return { assignees, sections };
 }
+
+export const personInitial = (p: Pick<Person, "name" | "username">): string =>
+  (p.name || p.username).charAt(0).toUpperCase();

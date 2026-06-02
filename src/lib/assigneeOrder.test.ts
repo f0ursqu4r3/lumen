@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { orderAssignees, assigneeSections } from "./assigneeOrder";
+import { orderAssignees, assigneeSections, personInitial } from "./assigneeOrder";
 
 const m = (username: string, name = username) => ({
   username,
@@ -151,5 +151,14 @@ describe("assigneeSections", () => {
       [{ username: "evan", name: "Evan", avatarUrl: null }],
     );
     expect(sections.map((s) => s.rel)).toEqual(["member"]);
+  });
+});
+
+describe("personInitial", () => {
+  it("uses the first letter of the name, uppercased", () => {
+    expect(personInitial({ name: "ada", username: "x" })).toBe("A");
+  });
+  it("falls back to the username when name is null", () => {
+    expect(personInitial({ name: null, username: "bob" })).toBe("B");
   });
 });

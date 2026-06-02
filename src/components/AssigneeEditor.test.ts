@@ -94,4 +94,12 @@ describe("AssigneeEditor", () => {
     await nextTick();
     expect(w.emitted("error")?.at(-1)).toEqual([failure]);
   });
+
+  it("reflects the pending selection on the dropdown checkmark before refetch", async () => {
+    const w = mountEditor();
+    await w.get('[data-testid="assignee-add-trigger"]').trigger("click");
+    expect(w.find('[data-testid="assignee-checked-dee"]').exists()).toBe(false);
+    await w.get('[data-testid="assignee-option-dee"]').trigger("click");
+    expect(w.find('[data-testid="assignee-checked-dee"]').exists()).toBe(true);
+  });
 });

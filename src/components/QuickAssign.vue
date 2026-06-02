@@ -4,7 +4,7 @@ import { onClickOutside } from "@vueuse/core";
 import { Check, UserPlus } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useSetAssignees } from "@/composables/useIssueMutations";
-import { assigneeSections } from "@/lib/assigneeOrder";
+import { assigneeSections, personInitial } from "@/lib/assigneeOrder";
 import type { GitLabError } from "@/gitlab/errors";
 import type { IssueDetail } from "@/composables/useIssue";
 import type { ProjectMember } from "@/composables/useProjectMembers";
@@ -32,9 +32,6 @@ const root = ref<HTMLElement | null>(null);
 onClickOutside(root, () => (open.value = false));
 
 const view = computed(() => assigneeSections(props.issue, props.members));
-
-const initial = (p: { name?: string | null; username: string }) =>
-  (p.name || p.username).charAt(0).toUpperCase();
 
 // Quick assign replaces the whole assignee set with the chosen person; granular
 // add/remove lives in AssigneeEditor.
@@ -82,7 +79,7 @@ function assignOnly(username: string) {
           @click="assignOnly(p.username)"
         >
           <Avatar class="size-5 text-[10px]">
-            <AvatarFallback>{{ initial(p) }}</AvatarFallback>
+            <AvatarFallback>{{ personInitial(p) }}</AvatarFallback>
           </Avatar>
           <span class="min-w-0 flex-1 truncate text-foreground">
             {{ p.name || p.username }}

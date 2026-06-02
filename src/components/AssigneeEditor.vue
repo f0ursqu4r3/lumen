@@ -5,7 +5,7 @@ import { Check, UserPlus, X } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AssigneeAvatar from "@/components/AssigneeAvatar.vue";
 import { useSetAssignees } from "@/composables/useIssueMutations";
-import { assigneeSections } from "@/lib/assigneeOrder";
+import { assigneeSections, personInitial } from "@/lib/assigneeOrder";
 import type { GitLabError } from "@/gitlab/errors";
 import type { IssueDetail } from "@/composables/useIssue";
 import type { ProjectMember } from "@/composables/useProjectMembers";
@@ -44,9 +44,6 @@ watch(
     pendingUsernames.value = assignees.map((a) => a.username);
   },
 );
-
-const initial = (p: { name?: string | null; username: string }) =>
-  (p.name || p.username).charAt(0).toUpperCase();
 
 function removeOne(username: string) {
   const next = pendingUsernames.value.filter((u) => u !== username);
@@ -126,13 +123,17 @@ function toggle(username: string) {
             @click="toggle(p.username)"
           >
             <Avatar class="size-5 text-[10px]">
-              <AvatarFallback>{{ initial(p) }}</AvatarFallback>
+              <AvatarFallback>{{ personInitial(p) }}</AvatarFallback>
             </Avatar>
             <span class="min-w-0 flex-1 truncate text-foreground">
               {{ p.name || p.username }}
               <span class="text-muted-foreground">@{{ p.username }}</span>
             </span>
-            <Check v-if="p.isAssigned" class="size-3.5 shrink-0 text-primary" />
+            <Check
+              v-if="pendingUsernames.includes(p.username)"
+              :data-testid="`assignee-checked-${p.username}`"
+              class="size-3.5 shrink-0 text-primary"
+            />
           </button>
         </template>
       </div>
