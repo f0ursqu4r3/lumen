@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import MarkdownText from "@/components/MarkdownText.vue";
 import Scratchpad from "@/components/Scratchpad.vue";
+import type { GitLabError } from "@/gitlab/errors";
 
 // `embedded` = rendered inside the slide-over drawer; the list owns the tab title
 // there, so only the standalone full-page route reflects the issue in document.title.
@@ -32,9 +33,10 @@ const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const addNote = useAddNote(props.fullPath, props.iid);
 const updateIssue = useUpdateIssue(props.fullPath, props.iid);
 
+const quickAssignError = ref<GitLabError | null>(null);
 // Surfaces a failed comment/state mutation (otherwise the action fails silently).
 const actionError = computed(
-  () => addNote.error.value ?? updateIssue.error.value,
+  () => addNote.error.value ?? updateIssue.error.value ?? quickAssignError.value,
 );
 
 const labels = computed(
@@ -146,6 +148,7 @@ function toggleState() {
       :iid="iid"
       :issue="issue"
       :members="members ?? []"
+      @error="quickAssignError = $event"
     />
     <p v-if="issue.milestone" class="text-xs text-muted-foreground">
       Milestone: {{ issue.milestone.title }}
