@@ -64,7 +64,7 @@ describe("semantic scopes", () => {
   it("lifts priority with consistent semantics", () => {
     expect(priorityOf(labels)).toMatchObject({
       level: "medium",
-      icon: "equal",
+      icon: "chevron-up",
     });
   });
 

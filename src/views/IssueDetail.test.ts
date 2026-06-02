@@ -38,7 +38,9 @@ const fullIssue = {
   author: { username: "reporter", avatarUrl: null },
   milestone: { title: "v1" },
   labels: { nodes: [] },
-  assignees: { nodes: [{ id: "u1", username: "a", avatarUrl: null }] },
+  assignees: {
+    nodes: [{ id: "u1", name: "Ada Lovelace", username: "a", avatarUrl: null }],
+  },
   notes: {
     nodes: [
       {
