@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue';
 import {
   ArrowUp,
   Equal,
@@ -10,10 +10,10 @@ import {
   Plug,
   FlaskConical,
   Tag,
-} from "@lucide/vue";
-import LabelChip from "./LabelChip.vue";
-import StateBadge from "./StateBadge.vue";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+} from '@lucide/vue';
+import LabelChip from './LabelChip.vue';
+import StateBadge from './StateBadge.vue';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   priorityOf,
   typeOf,
@@ -21,9 +21,9 @@ import {
   remainingLabels,
   parseLabel,
   tint,
-} from "@/lib/labels";
-import type { Facet } from "@/lib/issueView";
-import type { IssueListItem } from "@/composables/useIssues";
+} from '@/lib/labels';
+import type { Facet } from '@/lib/issueView';
+import type { IssueListItem } from '@/composables/useIssues';
 
 const props = defineProps<{
   issue: IssueListItem;
@@ -34,27 +34,27 @@ const props = defineProps<{
 const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
-  "arrow-up": ArrowUp,
+  'arrow-up': ArrowUp,
   equal: Equal,
   minus: Minus,
   bug: Bug,
   sparkles: Sparkles,
   recycle: Recycle,
   plug: Plug,
-  "flask-conical": FlaskConical,
+  'flask-conical': FlaskConical,
   tag: Tag,
 } as const;
 
 const labels = computed(
   () =>
     props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ??
-    [],
+    []
 );
 const assignees = computed(
   () =>
     props.issue.assignees?.nodes?.filter(
-      (a): a is NonNullable<typeof a> => !!a,
-    ) ?? [],
+      (a): a is NonNullable<typeof a> => !!a
+    ) ?? []
 );
 
 const priority = computed(() => priorityOf(labels.value));
@@ -66,20 +66,26 @@ const pills = computed(() => remainingLabels(labels.value));
 // the exact GitLab label (e.g. `priority::High`), not the display value.
 const rawLabel = (scope: string) =>
   labels.value.find(
-    (l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope,
+    (l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope
   );
-const priorityLabel = computed(() => rawLabel("priority"));
-const typeLabel = computed(() => rawLabel("type"));
+const priorityLabel = computed(() => rawLabel('priority'));
+const typeLabel = computed(() => rawLabel('type'));
 
 const shownAssignees = computed(() => assignees.value.slice(0, 3));
 const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3));
 
-const initials = (username: string) => username.slice(0, 2).toUpperCase();
+// For assignee avatars, we use the `name` initials as a fallback
+const initials = (name: string) => {
+  const parts = name.split(/[\s.-]+/);
+  return parts.length > 1
+    ? parts[0][0] + parts[parts.length - 1][0]
+    : name.slice(0, 2);
+};
 
 const filterLabel = (l: { title: string; color: string }) =>
-  emit("filter", { kind: "label", value: l.title, color: l.color });
+  emit('filter', { kind: 'label', value: l.title, color: l.color });
 const filterAssignee = (username: string) =>
-  emit("filter", { kind: "assignee", value: username });
+  emit('filter', { kind: 'assignee', value: username });
 
 // Cap the cascade so a long list doesn't drag the last rows in late.
 const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
@@ -193,7 +199,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
           <AvatarFallback
             class="bg-muted text-[10px] font-medium text-muted-foreground"
           >
-            {{ initials(a.username) }}
+            {{ initials(a.name) }}
           </AvatarFallback>
         </Avatar>
       </button>
