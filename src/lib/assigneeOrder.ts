@@ -106,7 +106,6 @@ export function assigneeSections(
       ): n is { system?: boolean | null; createdAt: string; author: Person } =>
         !!n && !n.system && !!n.author,
     )
-    .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((n) => n.author);
 
