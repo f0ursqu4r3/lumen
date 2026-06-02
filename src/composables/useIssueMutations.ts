@@ -183,6 +183,8 @@ export function useUpdateIssue(fullPath: string, iid: string) {
     UpdateIssuePayload,
     GitLabError,
     {
+      title?: string;
+      description?: string;
       stateEvent?: "CLOSE" | "REOPEN";
       addLabelIds?: string[];
       removeLabelIds?: string[];
