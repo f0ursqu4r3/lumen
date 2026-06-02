@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useIsFetching } from '@tanstack/vue-query';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 // The signal lamp breathes while any query is in flight — a quiet liveness
 // readout for an instrument that's meant to feel alive without being noisy.
@@ -37,4 +38,6 @@ const busy = computed(() => fetching.value > 0);
       <RouterView :key="$route.path" />
     </main>
   </div>
+  <!-- Single confirm dialog instance shared across the whole app -->
+  <ConfirmDialog />
 </template>
