@@ -22,6 +22,10 @@ const useIssues = vi.fn();
 vi.mock("@/composables/useIssues", () => ({ useIssues: () => useIssues() }));
 
 const { createMutate } = vi.hoisted(() => ({ createMutate: vi.fn() }));
+const { confirmMock } = vi.hoisted(() => ({ confirmMock: vi.fn() }));
+vi.mock("@/composables/useConfirm", () => ({
+  useConfirm: () => ({ confirm: confirmMock }),
+}));
 vi.mock("@/composables/useIssueMutations", () => ({
   useCreateIssue: () => ({
     mutate: createMutate,
@@ -72,6 +76,7 @@ const mockQuery = (over: Record<string, unknown> = {}) =>
 beforeEach(() => {
   useIssues.mockReset();
   createMutate.mockReset();
+  confirmMock.mockReset();
 });
 
 afterEach(async () => {
@@ -203,5 +208,80 @@ describe("IssueList", () => {
     w.findComponent(IssueDrawer).vm.$emit("update:open", false);
     await flushPromises();
     expect(router.currentRoute.value.query.issue).toBeUndefined();
+  });
+});
+
+describe("IssueList — drawer dirty-guard", () => {
+  const DrawerStub = {
+    name: "IssueDrawer",
+    emits: ["update:open", "update:dirty", "expand"],
+    template: `<div>
+      <button data-testid="stub-dirty" @click="$emit('update:dirty', true)" />
+      <button data-testid="stub-close" @click="$emit('update:open', false)" />
+      <button data-testid="stub-expand" @click="$emit('expand')" />
+    </div>`,
+  };
+
+  const mountDirtyGuard = async (query = "/?issue=9") => {
+    mockQuery({ issues: ref([]) });
+    await router.replace(query);
+    await router.isReady();
+    const w = mount(IssueList, {
+      props: { fullPath: "grp/proj" },
+      global: {
+        plugins: [router],
+        stubs: { RouterLink: RouterLinkStub, IssueDrawer: DrawerStub, IssueComposer: true },
+      },
+    });
+    await flushPromises();
+    return w;
+  };
+
+  it("keeps the drawer open when discarding is cancelled", async () => {
+    const w = await mountDirtyGuard("/?issue=9");
+    await w.get('[data-testid="stub-dirty"]').trigger("click");
+    confirmMock.mockResolvedValue(false);
+    await w.get('[data-testid="stub-close"]').trigger("click");
+    await flushPromises();
+    expect(router.currentRoute.value.query.issue).toBe("9");
+    expect(confirmMock).toHaveBeenCalledOnce();
+  });
+
+  it("closes the drawer when discard is confirmed", async () => {
+    const w = await mountDirtyGuard("/?issue=9");
+    await w.get('[data-testid="stub-dirty"]').trigger("click");
+    confirmMock.mockResolvedValue(true);
+    await w.get('[data-testid="stub-close"]').trigger("click");
+    await flushPromises();
+    expect(router.currentRoute.value.query.issue).toBeUndefined();
+  });
+
+  it("does not confirm when closing a clean drawer", async () => {
+    confirmMock.mockResolvedValue(true);
+    const w = await mountDirtyGuard("/?issue=9");
+    await w.get('[data-testid="stub-close"]').trigger("click");
+    await flushPromises();
+    expect(confirmMock).not.toHaveBeenCalled();
+    expect(router.currentRoute.value.query.issue).toBeUndefined();
+  });
+
+  it("guards expand when dirty — blocks navigation when discard is cancelled", async () => {
+    const w = await mountDirtyGuard("/?issue=9");
+    await w.get('[data-testid="stub-dirty"]').trigger("click");
+    confirmMock.mockResolvedValue(false);
+    await w.get('[data-testid="stub-expand"]').trigger("click");
+    await flushPromises();
+    expect(router.currentRoute.value.name).not.toBe("issue");
+    expect(confirmMock).toHaveBeenCalledOnce();
+  });
+
+  it("guards expand when dirty — navigates when discard is confirmed", async () => {
+    const w = await mountDirtyGuard("/?issue=9");
+    await w.get('[data-testid="stub-dirty"]').trigger("click");
+    confirmMock.mockResolvedValue(true);
+    await w.get('[data-testid="stub-expand"]').trigger("click");
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe("issue");
+    expect(router.currentRoute.value.params.iid).toBe("9");
   });
 });

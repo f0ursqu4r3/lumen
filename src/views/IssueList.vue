@@ -77,13 +77,20 @@ async function setDrawerOpen(value: boolean) {
   router.replace({ query: rest });
 }
 
-function expandIssue() {
-  if (openIid.value) {
-    router.push({
-      name: "issue",
-      params: { fullPath: props.fullPath, iid: openIid.value },
+async function expandIssue() {
+  if (!openIid.value) return;
+  if (drawerDirty.value) {
+    const ok = await confirm({
+      title: 'Discard unsaved changes?',
+      description: "Your edits to this issue haven't been saved.",
     });
+    if (!ok) return;
   }
+  drawerDirty.value = false;
+  router.push({
+    name: "issue",
+    params: { fullPath: props.fullPath, iid: openIid.value },
+  });
 }
 
 const {
