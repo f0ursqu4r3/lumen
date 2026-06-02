@@ -1,6 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, RouterLinkStub, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import IssueDrawer from '@/components/IssueDrawer.vue'
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { path: '/', name: 'issues', component: { template: '<div />' } },
+    { path: '/projects/:fullPath(.*)/issues/:iid', name: 'issue', component: { template: '<div />' } },
+  ],
+})
 
 const useIssues = vi.fn()
 vi.mock('@/composables/useIssues', () => ({ useIssues: () => useIssues() }))
@@ -10,13 +20,19 @@ vi.mock('@/composables/useIssueMutations', () => ({
   useCreateIssue: () => ({ mutate: createMutate, isPending: { value: false }, error: { value: null } }),
   useRetagIssue: () => ({ mutate: vi.fn() }),
 }))
+vi.mock('@/composables/useProjectLabels', () => ({
+  useProjectLabels: () => ({ data: ref([]) }),
+}))
 
 import IssueList from './IssueList.vue'
 
 const mountList = () =>
   mount(IssueList, {
     props: { fullPath: 'grp/proj' },
-    global: { stubs: { RouterLink: RouterLinkStub } },
+    global: {
+      plugins: [router],
+      stubs: { RouterLink: RouterLinkStub, IssueDrawer: true },
+    },
   })
 
 const issue = {
@@ -39,6 +55,10 @@ const mockQuery = (over: Record<string, unknown> = {}) =>
 beforeEach(() => {
   useIssues.mockReset()
   createMutate.mockReset()
+})
+
+afterEach(async () => {
+  await router.replace('/')
 })
 
 describe('IssueList', () => {
@@ -72,5 +92,40 @@ describe('IssueList', () => {
     await w.find('input[placeholder="New issue title…"]').setValue('Brand new')
     await w.find('form').trigger('submit.prevent')
     expect(createMutate).toHaveBeenCalledWith({ title: 'Brand new' }, expect.anything())
+  })
+
+  it('opens the drawer when ?issue is present', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    const drawer = w.findComponent(IssueDrawer)
+    expect(drawer.props('open')).toBe(true)
+    expect(drawer.props('iid')).toBe('7')
+  })
+
+  it('expands to the full issue route when the drawer emits expand', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    w.findComponent(IssueDrawer).vm.$emit('expand')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('issue')
+    expect(router.currentRoute.value.params.fullPath).toBe('grp/proj')
+    expect(router.currentRoute.value.params.iid).toBe('7')
+  })
+
+  it('removes ?issue from the URL when the drawer emits update:open false', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    w.findComponent(IssueDrawer).vm.$emit('update:open', false)
+    await flushPromises()
+    expect(router.currentRoute.value.query.issue).toBeUndefined()
   })
 })

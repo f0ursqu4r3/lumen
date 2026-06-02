@@ -59,7 +59,7 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
     class="group relative flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 transition-colors duration-150 hover:border-border/0 hover:bg-accent/50 focus-within:bg-accent/50"
   >
     <RouterLink
-      :to="{ name: 'issue', params: { fullPath, iid: issue.iid } }"
+      :to="{ query: { issue: issue.iid } }"
       :aria-label="`Issue #${issue.iid}: ${issue.title}`"
       draggable="false"
       class="absolute inset-0 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"

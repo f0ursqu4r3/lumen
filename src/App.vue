@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="min-h-screen overflow-x-clip bg-background text-foreground">
     <header
       class="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-md"
     >

@@ -143,14 +143,13 @@ export function groupIssues(
 const scopeOf = (l: LabelNode) => parseLabel(l.title, l.color).scope?.toLowerCase() ?? null
 const valueOf = (l: LabelNode) => parseLabel(l.title, l.color).value
 
-/** Distinct label scopes present across the issues, preferred ones first. */
-export function availableScopes(issues: readonly IssueListItem[]): string[] {
+/** Distinct label scopes in a label set, preferred ones first. */
+export function labelScopes(labels: readonly LabelNode[]): string[] {
   const set = new Set<string>()
-  for (const issue of issues)
-    for (const l of labelsOf(issue)) {
-      const s = scopeOf(l)
-      if (s) set.add(s)
-    }
+  for (const l of labels) {
+    const s = scopeOf(l)
+    if (s) set.add(s)
+  }
   const preferred = ['assigned', 'priority', 'team', 'type']
   return [...set].sort((a, b) => {
     const ia = preferred.indexOf(a)
@@ -160,16 +159,40 @@ export function availableScopes(issues: readonly IssueListItem[]): string[] {
   })
 }
 
+/** Distinct label scopes present across the issues, preferred ones first. */
+export function availableScopes(issues: readonly IssueListItem[]): string[] {
+  return labelScopes(issues.flatMap((i) => labelsOf(i)))
+}
+
 const priorityRank = (label: string) =>
   ['high', 'medium', 'low'].indexOf(label.toLowerCase().replace(' priority', ''))
 
-/** Columns for the board: one per distinct value of `scope`, plus a "No …" column. */
+/**
+ * Columns for the board: one per distinct value of `scope`, plus a "No …" column.
+ * When `catalog` (all project labels) is given, every label in the scope gets a
+ * column even if no loaded issue uses it yet — so empty columns are draggable into.
+ */
 export function groupByScope(
   issues: readonly IssueListItem[],
   scope: string,
+  catalog?: readonly LabelNode[],
 ): IssueGroup[] {
   const s = scope.toLowerCase()
   const map = new Map<string, IssueGroup>()
+  // Seed empty columns from the full label catalog first.
+  if (catalog)
+    for (const l of catalog) {
+      if (scopeOf(l) !== s) continue
+      const value = valueOf(l)
+      if (!map.has(value))
+        map.set(value, {
+          key: value,
+          label: value,
+          color: l.color,
+          repLabel: { id: l.id, title: l.title, color: l.color },
+          issues: [],
+        })
+    }
   for (const issue of issues) {
     const match = labelsOf(issue).find((l) => scopeOf(l) === s)
     const value = match ? valueOf(match) : null
