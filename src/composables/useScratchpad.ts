@@ -1,9 +1,5 @@
-import {
-  useLocalStorage,
-  StorageSerializers,
-  type RemovableRef,
-} from "@vueuse/core";
-import type { Ref } from "vue";
+import { useLocalStorage, StorageSerializers } from "@vueuse/core";
+import { computed, type Ref } from "vue";
 
 // Local-only note for a single issue, stored in this browser only — never sent
 // to GitLab. Keyed by fullPath + iid to mirror `issueKey` and stay isolated
@@ -16,10 +12,20 @@ import type { Ref } from "vue";
 export function useScratchpad(
   fullPath: Ref<string>,
   iid: Ref<string>,
-): RemovableRef<string> {
-  return useLocalStorage(
-    () => `tragit:scratchpad:${fullPath.value}#${iid.value}`,
-    "",
-    { serializer: StorageSerializers.object },
+): Ref<string> {
+  const stored = useLocalStorage<string | null>(
+    () => `lumen:scratchpad:${fullPath.value}#${iid.value}`,
+    null,
+    {
+      serializer: StorageSerializers.object,
+      writeDefaults: false,
+    },
   );
+
+  return computed({
+    get: () => stored.value ?? "",
+    set: (value) => {
+      stored.value = value.trim() ? value : null;
+    },
+  });
 }

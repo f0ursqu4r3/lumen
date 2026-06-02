@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "tragit",
+      "name": "lumen",
       "dependencies": {
         "@fontsource-variable/geist-mono": "^5.2.8",
         "@fontsource-variable/hanken-grotesk": "^5.2.8",

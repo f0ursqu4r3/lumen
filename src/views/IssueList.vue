@@ -97,7 +97,7 @@ const pathPrefix = computed(() => pathParts.value.slice(0, -1).join("/"));
 
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
-useTitle(computed(() => `${repoName.value} · tragit`));
+useTitle(computed(() => `${repoName.value} · lumen`));
 
 const filters = computed<IssueFilters>(() => ({
   state: state.value,

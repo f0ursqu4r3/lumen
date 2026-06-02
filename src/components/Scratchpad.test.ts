@@ -16,7 +16,7 @@ describe("Scratchpad", () => {
 
   it("renders a previously saved value into the textarea", () => {
     localStorage.setItem(
-      "tragit:scratchpad:grp/proj#9",
+      "lumen:scratchpad:grp/proj#9",
       JSON.stringify("saved note"),
     );
     const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
@@ -29,9 +29,20 @@ describe("Scratchpad", () => {
     const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
     await w.get("textarea").setValue("typed note");
     await nextTick();
-    expect(localStorage.getItem("tragit:scratchpad:grp/proj#9")).toBe(
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#9")).toBe(
       JSON.stringify("typed note"),
     );
+  });
+
+  it("removes the localStorage entry when cleared", async () => {
+    localStorage.setItem(
+      "lumen:scratchpad:grp/proj#9",
+      JSON.stringify("saved note"),
+    );
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    await w.get("textarea").setValue("");
+    await nextTick();
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#9")).toBeNull();
   });
 
   it("shows a Saved indicator after an edit settles", async () => {

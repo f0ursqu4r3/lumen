@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-useTitle("Projects · tragit");
+useTitle("Projects · lumen");
 
 const search = ref("");
 const { data: projects, isLoading, error } = useProjects(search);

@@ -1,11 +1,11 @@
-# tragit — Personal GitLab Issue Tracker
+# lumen — Personal GitLab Issue Tracker
 
 **Date:** 2026-06-01
 **Status:** Approved design, pending implementation plan
 
 ## Summary
 
-`tragit` is a personal, locally-run single-page app that provides a custom UI
+`lumen` is a personal, locally-run single-page app that provides a custom UI
 over a **self-hosted (enterprise) GitLab** instance's issues. GitLab remains the
 single source of truth — there is no local database and no separate deployed
 backend. The Vite dev server itself acts as the runtime, proxying API calls to

@@ -16,7 +16,7 @@ already exist in the UI.
 - Auto-saves to `localStorage` as the user types, debounced ~500ms. A subtle,
   transient "Saved" indicator confirms the write. No save button.
 - Never sent to GitLab. Purely browser-local state.
-- Empty string is a valid value (an issue with no notes).
+- Empty/whitespace-only content removes the `localStorage` entry.
 
 ## Architecture
 
@@ -27,10 +27,11 @@ Two small, independently testable units plus one edit to an existing file.
 Wraps `useLocalStorage` from `@vueuse/core` (already a dependency).
 
 - Signature: `useScratchpad(fullPath: Ref<string>, iid: Ref<string>): Ref<string>`
-- Storage key: `tragit:scratchpad:${fullPath}#${iid}`
+- Storage key: `lumen:scratchpad:${fullPath}#${iid}`
 - Keying by `fullPath` + `iid` keeps every issue independent and mirrors the
   existing `issueKey(fullPath, iid)` convention in `src/gitlab/issueParams.ts`.
-- Returns a reactive `Ref<string>` bound two-way to storage; default `''`.
+- Returns a reactive `Ref<string>` bound two-way to storage; default `''`, with
+  no storage entry until content exists.
 - When `fullPath`/`iid` change, the composable re-keys so the returned ref tracks
   the correct issue's notes.
 - Depends on: `@vueuse/core`, Vue refs. No network, no GitLab client.

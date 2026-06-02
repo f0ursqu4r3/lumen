@@ -4,7 +4,7 @@
 
 **Goal:** Add a browser-local, per-issue free-form note area ("Scratchpad") that auto-saves to `localStorage` and never reaches GitLab.
 
-**Architecture:** A `useScratchpad` composable wraps `@vueuse/core`'s `useLocalStorage` with a reactive getter key (`tragit:scratchpad:${fullPath}#${iid}`) so it re-keys when the viewed issue changes. A self-contained `Scratchpad.vue` binds a `Textarea` to that ref and flashes a debounced "Saved" hint. `IssueDetail.vue` renders the component below the GitLab Notes section; because `IssueDrawer` embeds `IssueDetail`, the drawer gets it for free.
+**Architecture:** A `useScratchpad` composable wraps `@vueuse/core`'s `useLocalStorage` with a reactive getter key (`lumen:scratchpad:${fullPath}#${iid}`) so it re-keys when the viewed issue changes. It only creates storage when content exists and removes the entry when cleared. A self-contained `Scratchpad.vue` binds a `Textarea` to that ref and flashes a debounced "Saved" hint. `IssueDetail.vue` renders the component below the GitLab Notes section; because `IssueDrawer` embeds `IssueDetail`, the drawer gets it for free.
 
 **Tech Stack:** Vue 3 `<script setup lang="ts">`, `@vueuse/core` (`useLocalStorage`, `useDebounceFn`), Vitest + `@vue/test-utils`, existing `Textarea` ui component.
 
@@ -23,6 +23,7 @@
 ## Task 1: `useScratchpad` composable
 
 **Files:**
+
 - Create: `src/composables/useScratchpad.ts`
 - Test: `src/composables/useScratchpad.test.ts`
 
@@ -31,55 +32,58 @@
 Create `src/composables/useScratchpad.test.ts`:
 
 ```ts
-import { describe, it, expect, beforeEach } from 'vitest'
-import { ref, nextTick } from 'vue'
-import { useScratchpad } from './useScratchpad'
+import { describe, it, expect, beforeEach } from "vitest";
+import { ref, nextTick } from "vue";
+import { useScratchpad } from "./useScratchpad";
 
 beforeEach(() => {
-  localStorage.clear()
-})
+  localStorage.clear();
+});
 
-describe('useScratchpad', () => {
-  it('reads an existing localStorage value on init', () => {
-    localStorage.setItem('tragit:scratchpad:grp/proj#9', JSON.stringify('hello'))
-    const note = useScratchpad(ref('grp/proj'), ref('9'))
-    expect(note.value).toBe('hello')
-  })
+describe("useScratchpad", () => {
+  it("reads an existing localStorage value on init", () => {
+    localStorage.setItem(
+      "lumen:scratchpad:grp/proj#9",
+      JSON.stringify("hello"),
+    );
+    const note = useScratchpad(ref("grp/proj"), ref("9"));
+    expect(note.value).toBe("hello");
+  });
 
-  it('defaults to an empty string when nothing is stored', () => {
-    const note = useScratchpad(ref('grp/proj'), ref('9'))
-    expect(note.value).toBe('')
-  })
+  it("defaults to an empty string when nothing is stored", () => {
+    const note = useScratchpad(ref("grp/proj"), ref("9"));
+    expect(note.value).toBe("");
+  });
 
-  it('persists writes to localStorage under the issue key', async () => {
-    const note = useScratchpad(ref('grp/proj'), ref('9'))
-    note.value = 'remember this'
-    await nextTick()
-    expect(localStorage.getItem('tragit:scratchpad:grp/proj#9')).toBe(
-      JSON.stringify('remember this'),
-    )
-  })
+  it("persists writes to localStorage under the issue key", async () => {
+    const note = useScratchpad(ref("grp/proj"), ref("9"));
+    note.value = "remember this";
+    await nextTick();
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#9")).toBe(
+      JSON.stringify("remember this"),
+    );
+  });
 
-  it('does not collide across different iids', async () => {
-    const iid = ref('9')
-    const note = useScratchpad(ref('grp/proj'), iid)
-    note.value = 'note for nine'
-    await nextTick()
+  it("does not collide across different iids", async () => {
+    const iid = ref("9");
+    const note = useScratchpad(ref("grp/proj"), iid);
+    note.value = "note for nine";
+    await nextTick();
 
-    iid.value = '10'
-    await nextTick()
-    expect(note.value).toBe('')
+    iid.value = "10";
+    await nextTick();
+    expect(note.value).toBe("");
 
-    note.value = 'note for ten'
-    await nextTick()
-    expect(localStorage.getItem('tragit:scratchpad:grp/proj#9')).toBe(
-      JSON.stringify('note for nine'),
-    )
-    expect(localStorage.getItem('tragit:scratchpad:grp/proj#10')).toBe(
-      JSON.stringify('note for ten'),
-    )
-  })
-})
+    note.value = "note for ten";
+    await nextTick();
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#9")).toBe(
+      JSON.stringify("note for nine"),
+    );
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#10")).toBe(
+      JSON.stringify("note for ten"),
+    );
+  });
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -92,8 +96,8 @@ Expected: FAIL — cannot resolve `./useScratchpad` (module not found).
 Create `src/composables/useScratchpad.ts`:
 
 ```ts
-import { useLocalStorage, type RemovableRef } from '@vueuse/core'
-import type { Ref } from 'vue'
+import { useLocalStorage, type RemovableRef } from "@vueuse/core";
+import type { Ref } from "vue";
 
 // Local-only note for a single issue, stored in this browser only — never sent
 // to GitLab. Keyed by fullPath + iid to mirror `issueKey` and stay isolated
@@ -104,9 +108,9 @@ export function useScratchpad(
   iid: Ref<string>,
 ): RemovableRef<string> {
   return useLocalStorage(
-    () => `tragit:scratchpad:${fullPath.value}#${iid.value}`,
-    '',
-  )
+    () => `lumen:scratchpad:${fullPath.value}#${iid.value}`,
+    "",
+  );
 }
 ```
 
@@ -127,6 +131,7 @@ git commit -m "feat: add useScratchpad composable for local-only issue notes"
 ## Task 2: `Scratchpad.vue` component
 
 **Files:**
+
 - Create: `src/components/Scratchpad.vue`
 - Test: `src/components/Scratchpad.test.ts`
 
@@ -135,42 +140,47 @@ git commit -m "feat: add useScratchpad composable for local-only issue notes"
 Create `src/components/Scratchpad.test.ts`:
 
 ```ts
-import { describe, it, expect, beforeEach } from 'vitest'
-import { nextTick } from 'vue'
-import { mount } from '@vue/test-utils'
-import Scratchpad from './Scratchpad.vue'
+import { describe, it, expect, beforeEach } from "vitest";
+import { nextTick } from "vue";
+import { mount } from "@vue/test-utils";
+import Scratchpad from "./Scratchpad.vue";
 
 beforeEach(() => {
-  localStorage.clear()
-})
+  localStorage.clear();
+});
 
-describe('Scratchpad', () => {
-  it('renders a previously saved value into the textarea', () => {
-    localStorage.setItem('tragit:scratchpad:grp/proj#9', JSON.stringify('saved note'))
-    const w = mount(Scratchpad, { props: { fullPath: 'grp/proj', iid: '9' } })
-    expect((w.get('textarea').element as HTMLTextAreaElement).value).toBe('saved note')
-  })
+describe("Scratchpad", () => {
+  it("renders a previously saved value into the textarea", () => {
+    localStorage.setItem(
+      "lumen:scratchpad:grp/proj#9",
+      JSON.stringify("saved note"),
+    );
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    expect((w.get("textarea").element as HTMLTextAreaElement).value).toBe(
+      "saved note",
+    );
+  });
 
-  it('persists typing to localStorage', async () => {
-    const w = mount(Scratchpad, { props: { fullPath: 'grp/proj', iid: '9' } })
-    await w.get('textarea').setValue('typed note')
-    await nextTick()
-    expect(localStorage.getItem('tragit:scratchpad:grp/proj#9')).toBe(
-      JSON.stringify('typed note'),
-    )
-  })
+  it("persists typing to localStorage", async () => {
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    await w.get("textarea").setValue("typed note");
+    await nextTick();
+    expect(localStorage.getItem("lumen:scratchpad:grp/proj#9")).toBe(
+      JSON.stringify("typed note"),
+    );
+  });
 
-  it('shows a Saved indicator after an edit', async () => {
-    vi.useFakeTimers()
-    const w = mount(Scratchpad, { props: { fullPath: 'grp/proj', iid: '9' } })
-    expect(w.text()).not.toContain('Saved')
-    await w.get('textarea').setValue('edit')
-    vi.advanceTimersByTime(600)
-    await nextTick()
-    expect(w.text()).toContain('Saved')
-    vi.useRealTimers()
-  })
-})
+  it("shows a Saved indicator after an edit", async () => {
+    vi.useFakeTimers();
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    expect(w.text()).not.toContain("Saved");
+    await w.get("textarea").setValue("edit");
+    vi.advanceTimersByTime(600);
+    await nextTick();
+    expect(w.text()).toContain("Saved");
+    vi.useRealTimers();
+  });
+});
 ```
 
 Add `vi` to the import line: `import { describe, it, expect, beforeEach, vi } from 'vitest'`.
@@ -186,22 +196,22 @@ Create `src/components/Scratchpad.vue`:
 
 ```vue
 <script setup lang="ts">
-import { ref, toRef, watch } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import { useScratchpad } from '@/composables/useScratchpad'
-import { Textarea } from '@/components/ui/textarea'
+import { ref, toRef, watch } from "vue";
+import { useDebounceFn } from "@vueuse/core";
+import { useScratchpad } from "@/composables/useScratchpad";
+import { Textarea } from "@/components/ui/textarea";
 
-const props = defineProps<{ fullPath: string; iid: string }>()
-const note = useScratchpad(toRef(props, 'fullPath'), toRef(props, 'iid'))
+const props = defineProps<{ fullPath: string; iid: string }>();
+const note = useScratchpad(toRef(props, "fullPath"), toRef(props, "iid"));
 
 // `note` writes to localStorage synchronously; this flag is purely a UX
 // affordance. It hides while typing and reappears 500ms after the last edit.
-const saved = ref(false)
-const flagSaved = useDebounceFn(() => (saved.value = true), 500)
+const saved = ref(false);
+const flagSaved = useDebounceFn(() => (saved.value = true), 500);
 watch(note, () => {
-  saved.value = false
-  flagSaved()
-})
+  saved.value = false;
+  flagSaved();
+});
 </script>
 
 <template>
@@ -236,6 +246,7 @@ git commit -m "feat: add Scratchpad component with debounced Saved indicator"
 ## Task 3: Render Scratchpad in IssueDetail
 
 **Files:**
+
 - Modify: `src/views/IssueDetail.vue`
 
 - [ ] **Step 1: Add the import**
@@ -243,7 +254,7 @@ git commit -m "feat: add Scratchpad component with debounced Saved indicator"
 In the `<script setup>` block of `src/views/IssueDetail.vue`, add alongside the other component imports (e.g. after the `MarkdownText` import):
 
 ```ts
-import Scratchpad from '@/components/Scratchpad.vue'
+import Scratchpad from "@/components/Scratchpad.vue";
 ```
 
 - [ ] **Step 2: Render the component**
@@ -251,7 +262,7 @@ import Scratchpad from '@/components/Scratchpad.vue'
 In the template, add this immediately after the closing `</section>` of the existing Notes section (the `<section class="space-y-3">` that contains the comment form), still inside the `<article>`:
 
 ```html
-    <Scratchpad :full-path="fullPath" :iid="iid" />
+<Scratchpad :full-path="fullPath" :iid="iid" />
 ```
 
 - [ ] **Step 3: Verify existing tests still pass and types check**

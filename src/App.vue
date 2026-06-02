@@ -25,7 +25,7 @@ const busy = computed(() => fetching.value > 0);
             :class="busy && 'lamp-busy'"
             :title="busy ? 'Syncing…' : 'Idle'"
           />
-          <span class="font-mono lowercase">tragit</span>
+          <span class="font-mono lowercase">lumen</span>
         </RouterLink>
       </div>
     </header>
