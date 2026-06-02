@@ -11,7 +11,11 @@ import { Button } from '@/components/ui/button';
 import IssueDetail from '@/views/IssueDetail.vue';
 
 defineProps<{ open: boolean; fullPath: string; iid: string | null }>();
-const emit = defineEmits<{ 'update:open': [value: boolean]; expand: [] }>();
+const emit = defineEmits<{
+  'update:open': [value: boolean];
+  expand: [];
+  'update:dirty': [value: boolean];
+}>();
 </script>
 
 <template>
@@ -38,6 +42,7 @@ const emit = defineEmits<{ 'update:open': [value: boolean]; expand: [] }>();
           :full-path="fullPath"
           :iid="iid"
           embedded
+          @update:dirty="emit('update:dirty', $event)"
         />
       </div>
     </SheetContent>

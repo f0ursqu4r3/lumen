@@ -29,6 +29,7 @@ import {
   type IssueGroup,
 } from '@/lib/issueView';
 import { useRoute, useRouter } from 'vue-router';
+import { useConfirm } from '@/composables/useConfirm';
 import IssueRow from '@/components/IssueRow.vue';
 import IssueCard from '@/components/IssueCard.vue';
 import IssueDrawer from '@/components/IssueDrawer.vue';
@@ -50,6 +51,8 @@ const props = defineProps<{ fullPath: string }>();
 
 const route = useRoute();
 const router = useRouter();
+const { confirm } = useConfirm();
+const drawerDirty = ref(false);
 
 // Drawer is driven by ?issue=<iid> on this route, so back/refresh/links all work.
 const openIid = computed(() => {
@@ -57,10 +60,18 @@ const openIid = computed(() => {
   return typeof q === 'string' && q ? q : null;
 });
 
-function setDrawerOpen(value: boolean) {
-  if (value) return; // opening is driven by the issue links, not this handler
+async function setDrawerOpen(value: boolean) {
+  if (value) return; // opening is driven by issue links, not this handler
+  if (drawerDirty.value) {
+    const ok = await confirm({
+      title: 'Discard unsaved changes?',
+      description: "Your edits to this issue haven't been saved.",
+    });
+    if (!ok) return;
+  }
+  drawerDirty.value = false;
   const { issue: _issue, ...rest } = route.query;
-  router.replace({ query: rest }); // replace: closing should not add a history entry
+  router.replace({ query: rest });
 }
 
 function expandIssue() {
@@ -587,6 +598,7 @@ onKeyStroke(['c', 'C'], (e) => {
       :full-path="fullPath"
       :iid="openIid"
       @update:open="setDrawerOpen"
+      @update:dirty="drawerDirty = $event"
       @expand="expandIssue"
     />
 
