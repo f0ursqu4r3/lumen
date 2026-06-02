@@ -4,16 +4,16 @@ import { nextTick } from "vue";
 
 // errorHolder.ref is a real reactive ref so a test can flip the mutation into an
 // error state and assert the component re-emits it.
-const { updateMutate, errorHolder } = vi.hoisted(() => ({
-  updateMutate: vi.fn(),
+const { setMutate, errorHolder } = vi.hoisted(() => ({
+  setMutate: vi.fn(),
   errorHolder: { ref: null as null | { value: unknown } },
 }));
 vi.mock("@/composables/useIssueMutations", async () => {
   const { ref } = await import("vue");
   errorHolder.ref = ref(null);
   return {
-    useUpdateIssue: () => ({
-      mutate: updateMutate,
+    useSetAssignees: () => ({
+      mutate: setMutate,
       isPending: { value: false },
       error: errorHolder.ref,
     }),
@@ -56,7 +56,7 @@ const mountQA = () =>
   });
 
 beforeEach(() => {
-  updateMutate.mockReset();
+  setMutate.mockReset();
   if (errorHolder.ref) errorHolder.ref.value = null;
 });
 
@@ -65,21 +65,21 @@ describe("QuickAssign", () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     await w.get('[data-testid="quick-assign-option-dee"]').trigger("click");
-    expect(updateMutate).toHaveBeenCalledWith({ assigneeUsernames: ["dee"] });
+    expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: ["dee"] });
   });
 
   it("removes a single current assignee", async () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     await w.get('[data-testid="quick-assign-remove-ada"]').trigger("click");
-    expect(updateMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
+    expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
   });
 
   it("unassigns everyone", async () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     await w.get('[data-testid="quick-assign-unassign-all"]').trigger("click");
-    expect(updateMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
+    expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: [] });
   });
 
   it("dedups people to one option and shows group labels", async () => {

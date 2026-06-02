@@ -3,7 +3,7 @@ import { computed, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { Check, UserPlus, X } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useUpdateIssue } from "@/composables/useIssueMutations";
+import { useSetAssignees } from "@/composables/useIssueMutations";
 import { orderAssignees, type Relationship } from "@/lib/assigneeOrder";
 import type { GitLabError } from "@/gitlab/errors";
 import type { IssueDetail } from "@/composables/useIssue";
@@ -19,11 +19,11 @@ const emit = defineEmits<{ error: [GitLabError | null] }>();
 
 // fullPath/iid are captured once; QuickAssign mounts per issue route, so the
 // props are stable for its lifetime (same assumption as IssueDetail's useUpdateIssue).
-const update = useUpdateIssue(props.fullPath, props.iid);
+const assign = useSetAssignees(props.fullPath, props.iid);
 // QuickAssign has no error UI of its own; bubble mutation failures (and their
 // clearing, on the next successful mutate) up to IssueDetail's ErrorNotice.
 watch(
-  () => update.error.value,
+  () => assign.error.value,
   (e) => emit("error", e),
 );
 
@@ -74,20 +74,20 @@ const initial = (p: { name?: string | null; username: string }) =>
   (p.name || p.username).charAt(0).toUpperCase();
 
 function assignOnly(username: string) {
-  update.mutate({ assigneeUsernames: [username] });
+  assign.mutate({ assigneeUsernames: [username] });
   open.value = false;
 }
 // Unlike assignOnly/unassignAll, this leaves the menu open so several
 // assignees can be trimmed in a row; the row disappears once the issue refetches.
 function removeOne(username: string) {
-  update.mutate({
+  assign.mutate({
     assigneeUsernames: assignees.value
       .map((a) => a.username)
       .filter((u) => u !== username),
   });
 }
 function unassignAll() {
-  update.mutate({ assigneeUsernames: [] });
+  assign.mutate({ assigneeUsernames: [] });
   open.value = false;
 }
 </script>
@@ -100,7 +100,7 @@ function unassignAll() {
       aria-haspopup="menu"
       data-testid="quick-assign-trigger"
       class="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-      :disabled="update.isPending.value"
+      :disabled="assign.isPending.value"
       @click="open = !open"
     >
       <UserPlus class="size-3.5" />

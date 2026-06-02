@@ -34,6 +34,19 @@ const UpdateIssueDocument = graphql(`
     }
   }
 `);
+// Assignees live on a dedicated mutation — UpdateIssueInput has no assignee
+// field on this instance. Defaults to REPLACE, so the username list we send
+// becomes the full assignee set (an empty list clears all assignees).
+const SetAssigneesDocument = graphql(`
+  mutation SetAssignees($input: IssueSetAssigneesInput!) {
+    issueSetAssignees(input: $input) {
+      issue {
+        iid
+      }
+      errors
+    }
+  }
+`);
 
 // Only models the `errors[]` field that `run` inspects — not the full payload.
 type ErrorsCarrier = { errors: string[] } | null | undefined;
@@ -61,6 +74,10 @@ type CreateIssuePayload = { issue?: { iid: string } | null; errors: string[] };
 type CreateNotePayload = { note?: { id: string } | null; errors: string[] };
 type UpdateIssuePayload = {
   issue?: { iid: string; state: string } | null;
+  errors: string[];
+};
+type SetAssigneesPayload = {
+  issue?: { iid: string } | null;
   errors: string[];
 };
 
@@ -169,7 +186,6 @@ export function useUpdateIssue(fullPath: string, iid: string) {
       stateEvent?: "CLOSE" | "REOPEN";
       addLabelIds?: string[];
       removeLabelIds?: string[];
-      assigneeUsernames?: string[];
     }
   >({
     mutationFn: (changes) =>
@@ -179,6 +195,32 @@ export function useUpdateIssue(fullPath: string, iid: string) {
             input: { projectPath: fullPath, iid, ...changes },
           }),
         (d: { updateIssue?: UpdateIssuePayload | null }) => d.updateIssue,
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["issue", fullPath, iid] });
+      qc.invalidateQueries({ queryKey: ["issues", fullPath] });
+    },
+  });
+}
+
+// Replace an issue's assignees with the given usernames (empty list unassigns
+// everyone). Separate from useUpdateIssue because GitLab models assignment as a
+// distinct mutation, not a field on UpdateIssueInput.
+export function useSetAssignees(fullPath: string, iid: string) {
+  const qc = useQueryClient();
+  return useMutation<
+    SetAssigneesPayload,
+    GitLabError,
+    { assigneeUsernames: string[] }
+  >({
+    mutationFn: ({ assigneeUsernames }) =>
+      run(
+        () =>
+          gqlClient.request(SetAssigneesDocument, {
+            input: { projectPath: fullPath, iid, assigneeUsernames },
+          }),
+        (d: { issueSetAssignees?: SetAssigneesPayload | null }) =>
+          d.issueSetAssignees,
       ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["issue", fullPath, iid] });

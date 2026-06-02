@@ -20,6 +20,12 @@ vi.mock("@/composables/useIssueMutations", () => ({
     isPending: { value: false },
     error: { value: null },
   }),
+  // Rendered by the QuickAssign child; mocked so it doesn't hit the network.
+  useSetAssignees: () => ({
+    mutate: vi.fn(),
+    isPending: { value: false },
+    error: { value: null },
+  }),
 }));
 
 vi.mock("@/composables/useProjectMembers", () => ({

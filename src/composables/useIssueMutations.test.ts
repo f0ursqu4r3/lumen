@@ -11,6 +11,7 @@ import {
   useAddNote,
   useUpdateIssue,
   useCreateIssue,
+  useSetAssignees,
 } from "./useIssueMutations";
 
 beforeEach(() => {
@@ -41,6 +42,38 @@ describe("issue mutations", () => {
       (
         result() as { mutateAsync: (v: unknown) => Promise<unknown> }
       ).mutateAsync({ stateEvent: "CLOSE" }),
+    ).rejects.toMatchObject({ kind: "graphql", message: "nope" });
+  });
+
+  it("useSetAssignees sends issueSetAssignees input and invalidates the issue", async () => {
+    request.mockResolvedValue({
+      issueSetAssignees: { issue: { iid: "9" }, errors: [] },
+    });
+    const { result, queryClient } = withQuery(() =>
+      useSetAssignees("grp/proj", "9"),
+    );
+    const spy = vi.spyOn(queryClient, "invalidateQueries");
+    result().mutate({ assigneeUsernames: ["kdougan"] });
+    await flushPromises();
+    expect(request).toHaveBeenCalledWith(expect.anything(), {
+      input: {
+        projectPath: "grp/proj",
+        iid: "9",
+        assigneeUsernames: ["kdougan"],
+      },
+    });
+    expect(spy).toHaveBeenCalledWith({ queryKey: ["issue", "grp/proj", "9"] });
+  });
+
+  it("useSetAssignees throws normalized error on GraphQL errors[]", async () => {
+    request.mockResolvedValue({
+      issueSetAssignees: { issue: null, errors: ["nope"] },
+    });
+    const { result } = withQuery(() => useSetAssignees("grp/proj", "9"));
+    await expect(
+      (
+        result() as { mutateAsync: (v: unknown) => Promise<unknown> }
+      ).mutateAsync({ assigneeUsernames: [] }),
     ).rejects.toMatchObject({ kind: "graphql", message: "nope" });
   });
 
