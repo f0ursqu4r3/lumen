@@ -72,6 +72,7 @@ describe("QuickAssign", () => {
     const w = mountQA();
     await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
     await w.get('[data-testid="quick-assign-option-dee"]').trigger("click");
+    await nextTick();
     expect(setMutate).toHaveBeenCalledWith({ assigneeUsernames: ["dee"] });
     expect(w.find('[role="menu"]').exists()).toBe(false);
   });

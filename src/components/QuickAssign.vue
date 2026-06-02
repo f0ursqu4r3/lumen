@@ -62,6 +62,7 @@ function assignOnly(username: string) {
     <div
       v-if="open"
       role="menu"
+      aria-label="Quick assign"
       class="absolute z-50 mt-1 max-h-72 w-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-md"
     >
       <template v-for="section in view.sections" :key="section.rel">
