@@ -12,8 +12,11 @@ import {
 } from '@lucide/vue';
 import { useIssues, type IssueListItem } from '@/composables/useIssues';
 import { useProjectLabels } from '@/composables/useProjectLabels';
+import { useProjectMembers } from '@/composables/useProjectMembers';
+import { useIssueFilters } from '@/composables/useIssueFilters';
 import { useRetagIssue } from '@/composables/useIssueMutations';
 import IssueComposer from '@/components/IssueComposer.vue';
+import IssueFilterPanel from '@/components/IssueFilterPanel.vue';
 import type { IssueFilters } from '@/gitlab/issueParams';
 import {
   sortIssues,
@@ -83,11 +86,18 @@ function expandIssue() {
   }
 }
 
-const state = ref<IssueFilters['state']>('opened');
-const search = ref('');
-// Active facet filters, populated by clicking labels/assignees on rows & cards.
-const labelFilters = ref<{ title: string; color: string }[]>([]);
-const assignee = ref('');
+const {
+  state,
+  search,
+  labels: labelTitles,
+  assignee,
+  author,
+  activeCount,
+  toggleLabel,
+  clearAll,
+  filters,
+} = useIssueFilters();
+const { data: members } = useProjectMembers(toRef(props, 'fullPath'));
 
 const view = ref<'list' | 'board'>('list');
 const sortKey = ref<SortKey>('updated');
@@ -95,7 +105,8 @@ const groupKey = ref<GroupKey>('none');
 // Which scoped-label group defines the board columns (assigned / priority / team…).
 const boardScope = ref('assigned');
 
-const STATES: { value: IssueFilters['state']; label: string }[] = [
+type StateValue = NonNullable<IssueFilters['state']>;
+const STATES: { value: StateValue; label: string }[] = [
   { value: 'opened', label: 'Open' },
   { value: 'closed', label: 'Closed' },
   { value: 'all', label: 'All' },
@@ -109,13 +120,6 @@ const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'));
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
 useTitle(computed(() => `${repoName.value} · lumen`));
-
-const filters = computed<IssueFilters>(() => ({
-  state: state.value,
-  search: search.value || undefined,
-  labels: labelFilters.value.map((l) => l.title),
-  assignee: assignee.value || undefined,
-}));
 
 const {
   issues,
@@ -174,29 +178,25 @@ function onDrop(group: IssueGroup) {
 }
 
 // --- active filters ---------------------------------------------------------
-const activeCount = computed(
-  () => labelFilters.value.length + (assignee.value ? 1 : 0)
-);
-
 function applyFacet(f: Facet) {
   if (f.kind === 'assignee') {
     assignee.value = assignee.value === f.value ? '' : f.value;
     return;
   }
-  const i = labelFilters.value.findIndex((l) => l.title === f.value);
-  if (i === -1)
-    labelFilters.value = [
-      ...labelFilters.value,
-      { title: f.value, color: f.color },
-    ];
-  else labelFilters.value = labelFilters.value.filter((_, idx) => idx !== i);
+  toggleLabel(f.value);
 }
-const removeLabel = (title: string) =>
-  (labelFilters.value = labelFilters.value.filter((l) => l.title !== title));
+const removeLabel = (title: string) => toggleLabel(title);
 function clearFilters() {
-  labelFilters.value = [];
-  assignee.value = '';
+  clearAll();
 }
+
+// Resolved label chips with color from the catalog (titles no longer carry color)
+const labelChips = computed(() =>
+  labelTitles.value.map((title) => ({
+    title,
+    color: labelCatalog.value.find((l) => l.title === title)?.color ?? '#888',
+  })),
+);
 
 function loadMore() {
   if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage();
@@ -316,6 +316,15 @@ onKeyStroke(['c', 'C'], (e) => {
         />
       </div>
 
+      <IssueFilterPanel
+        v-model:labels="labelTitles"
+        v-model:assignee="assignee"
+        v-model:author="author"
+        :catalog="labelCatalog"
+        :members="members ?? []"
+        :active-count="activeCount"
+      />
+
       <!-- View toggle -->
       <div
         role="group"
@@ -406,7 +415,7 @@ onKeyStroke(['c', 'C'], (e) => {
         Filtering
       </span>
       <LabelChip
-        v-for="l in labelFilters"
+        v-for="l in labelChips"
         :key="l.title"
         :title="l.title"
         :color="l.color"
@@ -417,12 +426,26 @@ onKeyStroke(['c', 'C'], (e) => {
         v-if="assignee"
         class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
-        <span class="font-mono">@{{ assignee }}</span>
+        <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
         <button
           type="button"
           aria-label="Remove assignee filter"
           class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
           @click="assignee = ''"
+        >
+          <X class="size-3" />
+        </button>
+      </span>
+      <span
+        v-if="author"
+        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+      >
+        <span class="font-mono">author:@{{ author }}</span>
+        <button
+          type="button"
+          aria-label="Remove author filter"
+          class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+          @click="author = ''"
         >
           <X class="size-3" />
         </button>
