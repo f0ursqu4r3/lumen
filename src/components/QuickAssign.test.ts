@@ -1,14 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 
-const { updateMutate } = vi.hoisted(() => ({ updateMutate: vi.fn() }));
-vi.mock("@/composables/useIssueMutations", () => ({
-  useUpdateIssue: () => ({
-    mutate: updateMutate,
-    isPending: { value: false },
-    error: { value: null },
-  }),
+// errorHolder.ref is a real reactive ref so a test can flip the mutation into an
+// error state and assert the component re-emits it.
+const { updateMutate, errorHolder } = vi.hoisted(() => ({
+  updateMutate: vi.fn(),
+  errorHolder: { ref: null as null | { value: unknown } },
 }));
+vi.mock("@/composables/useIssueMutations", async () => {
+  const { ref } = await import("vue");
+  errorHolder.ref = ref(null);
+  return {
+    useUpdateIssue: () => ({
+      mutate: updateMutate,
+      isPending: { value: false },
+      error: errorHolder.ref,
+    }),
+  };
+});
 
 import QuickAssign from "./QuickAssign.vue";
 
@@ -45,7 +55,10 @@ const mountQA = () =>
     props: { fullPath: "grp/proj", iid: "9", issue: issue as never, members },
   });
 
-beforeEach(() => updateMutate.mockReset());
+beforeEach(() => {
+  updateMutate.mockReset();
+  if (errorHolder.ref) errorHolder.ref.value = null;
+});
 
 describe("QuickAssign", () => {
   it("assigns a member as the sole assignee on click", async () => {
@@ -93,5 +106,13 @@ describe("QuickAssign", () => {
     expect(w.find('[data-testid="quick-assign-unassign-all"]').exists()).toBe(
       false,
     );
+  });
+
+  it("re-emits its mutation error so the parent can surface it", async () => {
+    const w = mountQA();
+    const failure = { kind: "graphql", message: "Insufficient permissions" };
+    errorHolder.ref!.value = failure;
+    await nextTick();
+    expect(w.emitted("error")?.at(-1)).toEqual([failure]);
   });
 });
