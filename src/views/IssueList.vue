@@ -11,13 +11,14 @@ import {
   GripVertical,
 } from '@lucide/vue';
 import { useIssues, type IssueListItem } from '@/composables/useIssues';
+import { useProjectLabels } from '@/composables/useProjectLabels';
 import { useCreateIssue, useRetagIssue } from '@/composables/useIssueMutations';
 import type { IssueFilters } from '@/gitlab/issueParams';
 import {
   sortIssues,
   groupIssues,
   groupByScope,
-  availableScopes,
+  labelScopes,
   planRetag,
   SORTS,
   GROUPS,
@@ -26,8 +27,10 @@ import {
   type Facet,
   type IssueGroup,
 } from '@/lib/issueView';
+import { useRoute, useRouter } from 'vue-router';
 import IssueRow from '@/components/IssueRow.vue';
 import IssueCard from '@/components/IssueCard.vue';
+import IssueDrawer from '@/components/IssueDrawer.vue';
 import LabelChip from '@/components/LabelChip.vue';
 import ErrorNotice from '@/components/ErrorNotice.vue';
 import { Input } from '@/components/ui/input';
@@ -43,6 +46,27 @@ import {
 } from '@/components/ui/select';
 
 const props = defineProps<{ fullPath: string }>();
+
+const route = useRoute();
+const router = useRouter();
+
+// Drawer is driven by ?issue=<iid> on this route, so back/refresh/links all work.
+const openIid = computed(() => {
+  const q = route.query.issue;
+  return typeof q === 'string' && q ? q : null;
+});
+
+function setDrawerOpen(value: boolean) {
+  if (value) return; // opening is driven by the issue links, not this handler
+  const { issue: _issue, ...rest } = route.query;
+  router.replace({ query: rest }); // replace: closing should not add a history entry
+}
+
+function expandIssue() {
+  if (openIid.value) {
+    router.push({ name: 'issue', params: { fullPath: props.fullPath, iid: openIid.value } });
+  }
+}
 
 const state = ref<IssueFilters['state']>('opened');
 const search = ref('');
@@ -91,9 +115,11 @@ const hasMore = computed(() => hasNextPage.value ?? false);
 const sorted = computed(() => sortIssues(issues.value, sortKey.value));
 const listGroups = computed(() => groupIssues(sorted.value, groupKey.value));
 
-const scopeOptions = computed(() => availableScopes(issues.value));
+const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'));
+const labelCatalog = computed(() => projectLabels.value ?? []);
+const scopeOptions = computed(() => labelScopes(labelCatalog.value));
 const boardGroups = computed(() =>
-  groupByScope(sorted.value, boardScope.value)
+  groupByScope(sorted.value, boardScope.value, labelCatalog.value)
 );
 // When the chosen scope isn't present (e.g. first load), fall back to the first.
 watch(scopeOptions, (opts) => {
@@ -448,22 +474,26 @@ function submitNew() {
           </section>
         </div>
 
-        <!-- Board view: bounded height, each column scrolls on its own, drag to retag -->
-        <div class="-mx-4 flex h-[68vh] min-h-80 gap-3 overflow-x-auto px-4">
+        <!-- Board view: full-bleed (breaks out of the centered column), bounded
+             height, each column scrolls on its own, drag to retag. -->
+        <div
+          v-else
+          class="relative left-1/2 flex h-[72vh] min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
+        >
           <section
             v-for="g in boardGroups"
             :key="g.key"
-            class="flex h-full w-72 shrink-0 flex-col rounded-xl border transition-colors duration-150"
+            class="flex h-full w-72 shrink-0 flex-col rounded-xl ring-1 ring-inset transition-colors duration-150"
             :class="
               dragOverKey === g.key
-                ? 'border-primary/50 bg-accent/30'
-                : 'border-transparent'
+                ? 'bg-primary/[0.06] ring-primary/40'
+                : 'bg-card/40 ring-white/[0.05]'
             "
             @dragover.prevent="dragOverKey = g.key"
             @dragenter.prevent="dragOverKey = g.key"
             @drop.prevent="onDrop(g)"
           >
-            <header class="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5">
+            <header class="flex shrink-0 items-center gap-2 px-3 pt-2.5 pb-2">
               <span
                 v-if="g.color"
                 class="size-2 rounded-full"
@@ -479,7 +509,7 @@ function submitNew() {
               </span>
             </header>
             <div
-              class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-1.5 pt-1 pb-2"
+              class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5"
             >
               <div
                 v-for="issue in g.issues"
@@ -536,5 +566,13 @@ function submitNew() {
         </p>
       </div>
     </template>
+
+    <IssueDrawer
+      :open="!!openIid"
+      :full-path="fullPath"
+      :iid="openIid"
+      @update:open="setDrawerOpen"
+      @expand="expandIssue"
+    />
   </section>
 </template>
