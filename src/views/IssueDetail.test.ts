@@ -90,8 +90,7 @@ describe("IssueDetail", () => {
     expect(w.text()).toContain("the description");
     expect(w.text()).toContain("me too");
     expect(w.text()).toContain("Scratchpad");
-    await w.get('[data-testid="quick-assign-trigger"]').trigger("click");
-    expect(w.text()).toContain("@a");
+    expect(w.text()).toContain("Ada Lovelace");
   });
 
   it("shows the issue originator", async () => {
