@@ -31,25 +31,36 @@ const root = ref<HTMLElement | null>(null);
 onClickOutside(root, () => (open.value = false));
 
 const view = computed(() => assigneeSections(props.issue, props.members));
-const currentUsernames = () => view.value.assignees.map((a) => a.username);
+
+// Local working list so rapid multi-selects stay additive before the issue
+// refetches; re-synced whenever the server view changes. Display (rows + ✓)
+// stays prop-derived, matching the no-optimistic-patching idiom elsewhere.
+const pendingUsernames = ref<string[]>(
+  view.value.assignees.map((a) => a.username),
+);
+watch(
+  () => view.value.assignees,
+  (assignees) => {
+    pendingUsernames.value = assignees.map((a) => a.username);
+  },
+);
 
 const initial = (p: { name?: string | null; username: string }) =>
   (p.name || p.username).charAt(0).toUpperCase();
 
 function removeOne(username: string) {
-  set.mutate({
-    assigneeUsernames: currentUsernames().filter((u) => u !== username),
-  });
+  const next = pendingUsernames.value.filter((u) => u !== username);
+  pendingUsernames.value = next;
+  set.mutate({ assigneeUsernames: next });
 }
 // Additive toggle: clicking a member adds them, clicking an assigned one removes
-// them. Recomputes the full username list each time (REPLACE semantics).
+// them. REPLACE semantics over the local working list.
 function toggle(username: string) {
-  const cur = currentUsernames();
-  set.mutate({
-    assigneeUsernames: cur.includes(username)
-      ? cur.filter((u) => u !== username)
-      : [...cur, username],
-  });
+  const next = pendingUsernames.value.includes(username)
+    ? pendingUsernames.value.filter((u) => u !== username)
+    : [...pendingUsernames.value, username];
+  pendingUsernames.value = next;
+  set.mutate({ assigneeUsernames: next });
 }
 </script>
 
@@ -99,6 +110,7 @@ function toggle(username: string) {
       >
         <template v-for="section in view.sections" :key="section.rel">
           <p
+            role="presentation"
             class="px-2 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
           >
             {{ section.label }}
@@ -107,6 +119,7 @@ function toggle(username: string) {
             v-for="p in section.people"
             :key="p.username"
             type="button"
+            role="menuitem"
             :data-testid="`assignee-option-${p.username}`"
             class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
             @click="toggle(p.username)"
