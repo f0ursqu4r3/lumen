@@ -1,31 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { Check, UserPlus } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useSetAssignees } from "@/composables/useIssueMutations";
 import { assigneeSections, personInitial } from "@/lib/assigneeOrder";
-import type { GitLabError } from "@/gitlab/errors";
 import type { IssueDetail } from "@/composables/useIssue";
 import type { ProjectMember } from "@/composables/useProjectMembers";
 
 const props = defineProps<{
-  fullPath: string;
-  iid: string;
   issue: IssueDetail;
   members: ProjectMember[];
+  usernames: string[];
 }>();
-const emit = defineEmits<{ error: [GitLabError | null] }>();
-
-// fullPath/iid are captured once; QuickAssign mounts per issue route, so the
-// props are stable for its lifetime (same assumption as IssueDetail's useUpdateIssue).
-const assign = useSetAssignees(props.fullPath, props.iid);
-// QuickAssign has no error UI of its own; bubble mutation failures (and their
-// clearing, on the next successful mutate) up to IssueDetail's ErrorNotice.
-watch(
-  () => assign.error.value,
-  (e) => emit("error", e),
-);
+const emit = defineEmits<{ "update:usernames": [usernames: string[]] }>();
 
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
@@ -33,10 +20,9 @@ onClickOutside(root, () => (open.value = false));
 
 const view = computed(() => assigneeSections(props.issue, props.members));
 
-// Quick assign replaces the whole assignee set with the chosen person; granular
-// add/remove lives in AssigneeEditor.
+// Quick assign replaces the whole assignee set with the chosen person.
 function assignOnly(username: string) {
-  assign.mutate({ assigneeUsernames: [username] });
+  emit("update:usernames", [username]);
   open.value = false;
 }
 </script>
@@ -49,7 +35,6 @@ function assignOnly(username: string) {
       aria-haspopup="menu"
       data-testid="quick-assign-trigger"
       class="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-      :disabled="assign.isPending.value"
       @click="open = !open"
     >
       <UserPlus class="size-3.5" />
@@ -85,7 +70,10 @@ function assignOnly(username: string) {
             {{ p.name || p.username }}
             <span class="text-muted-foreground">@{{ p.username }}</span>
           </span>
-          <Check v-if="p.isAssigned" class="size-3.5 shrink-0 text-primary" />
+          <Check
+              v-if="usernames.includes(p.username)"
+              class="size-3.5 shrink-0 text-primary"
+            />
         </button>
       </template>
     </div>
