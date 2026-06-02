@@ -18,10 +18,12 @@
         </RouterLink>
       </div>
     </header>
-    <!-- Remount on every route (incl. param changes) so composables that
-         capture route params at setup never go stale. -->
+    <!-- Key on path (not fullPath) so route/param changes remount the view —
+         keeping composables that capture route params at setup from going
+         stale — while query-only changes (e.g. the ?issue drawer) overlay the
+         list without remounting or refetching it. -->
     <main class="mx-auto max-w-5xl px-4 py-6">
-      <RouterView :key="$route.fullPath" />
+      <RouterView :key="$route.path" />
     </main>
   </div>
 </template>
