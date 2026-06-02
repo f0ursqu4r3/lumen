@@ -1,71 +1,69 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { Check, UserPlus, X } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AssigneeAvatar from "@/components/AssigneeAvatar.vue";
-import { useSetAssignees } from "@/composables/useIssueMutations";
-import { assigneeSections, personInitial } from "@/lib/assigneeOrder";
-import type { GitLabError } from "@/gitlab/errors";
+import {
+  assigneeSections,
+  personInitial,
+  type OrderedPerson,
+} from "@/lib/assigneeOrder";
 import type { IssueDetail } from "@/composables/useIssue";
 import type { ProjectMember } from "@/composables/useProjectMembers";
 
 const props = defineProps<{
-  fullPath: string;
-  iid: string;
   issue: IssueDetail;
   members: ProjectMember[];
+  usernames: string[];
 }>();
-const emit = defineEmits<{ error: [GitLabError | null] }>();
-
-// fullPath/iid are captured once; mounts per issue route, so props are stable.
-const set = useSetAssignees(props.fullPath, props.iid);
-// No error UI of its own; bubble mutation failures up to IssueDetail's ErrorNotice.
-watch(
-  () => set.error.value,
-  (e) => emit("error", e),
-);
+const emit = defineEmits<{ "update:usernames": [usernames: string[]] }>();
 
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 onClickOutside(root, () => (open.value = false));
 
 const view = computed(() => assigneeSections(props.issue, props.members));
-
-// Local working list so rapid multi-selects stay additive before the issue
-// refetches; re-synced whenever the server view changes. Display (rows + ✓)
-// stays prop-derived, matching the no-optimistic-patching idiom elsewhere.
-const pendingUsernames = ref<string[]>(
-  view.value.assignees.map((a) => a.username),
+// Flat index so a username from the buffer resolves to a display name/avatar.
+const peopleByUsername = computed(() => {
+  const map = new Map<string, OrderedPerson>();
+  for (const s of view.value.sections)
+    for (const p of s.people) map.set(p.username, p);
+  return map;
+});
+const currentRows = computed(() =>
+  props.usernames.map(
+    (u) =>
+      peopleByUsername.value.get(u) ?? {
+        username: u,
+        name: null,
+        avatarUrl: null,
+      },
+  ),
 );
-watch(
-  () => view.value.assignees,
-  (assignees) => {
-    pendingUsernames.value = assignees.map((a) => a.username);
-  },
-);
 
+const isSelected = (u: string) => props.usernames.includes(u);
 function removeOne(username: string) {
-  const next = pendingUsernames.value.filter((u) => u !== username);
-  pendingUsernames.value = next;
-  set.mutate({ assigneeUsernames: next });
+  emit(
+    "update:usernames",
+    props.usernames.filter((u) => u !== username),
+  );
 }
-// Additive toggle: clicking a member adds them, clicking an assigned one removes
-// them. REPLACE semantics over the local working list.
 function toggle(username: string) {
-  const next = pendingUsernames.value.includes(username)
-    ? pendingUsernames.value.filter((u) => u !== username)
-    : [...pendingUsernames.value, username];
-  pendingUsernames.value = next;
-  set.mutate({ assigneeUsernames: next });
+  emit(
+    "update:usernames",
+    isSelected(username)
+      ? props.usernames.filter((u) => u !== username)
+      : [...props.usernames, username],
+  );
 }
 </script>
 
 <template>
   <div ref="root" class="space-y-2" @keydown.escape="open = false">
-    <div v-if="view.assignees.length" class="space-y-1">
+    <div v-if="currentRows.length" class="space-y-1">
       <div
-        v-for="a in view.assignees"
+        v-for="a in currentRows"
         :key="a.username"
         class="flex items-center gap-2"
       >
@@ -93,7 +91,6 @@ function toggle(username: string) {
         :aria-expanded="open"
         aria-haspopup="menu"
         class="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-        :disabled="set.isPending.value"
         @click="open = !open"
       >
         <UserPlus class="size-3.5" />
@@ -130,7 +127,7 @@ function toggle(username: string) {
               <span class="text-muted-foreground">@{{ p.username }}</span>
             </span>
             <Check
-              v-if="pendingUsernames.includes(p.username)"
+              v-if="isSelected(p.username)"
               :data-testid="`assignee-checked-${p.username}`"
               class="size-3.5 shrink-0 text-primary"
             />

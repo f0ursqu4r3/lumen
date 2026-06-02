@@ -3,10 +3,14 @@ import type {
   IssuesQueryVariables,
 } from "@/gitlab/generated/graphql";
 
+// `assignee` carries either a username or the `__none__` sentinel (Unassigned).
+export const UNASSIGNED = "__none__";
+
 export interface IssueFilters {
   state?: "opened" | "closed" | "all";
   labels?: string[];
   assignee?: string;
+  author?: string;
   milestone?: string;
   search?: string;
 }
@@ -25,6 +29,10 @@ export function toIssuesVars(
   filters: IssueFilters,
   after?: string,
 ): IssuesQueryVariables {
+  const assigned =
+    filters.assignee && filters.assignee !== UNASSIGNED
+      ? [filters.assignee]
+      : undefined;
   return {
     fullPath,
     state:
@@ -32,7 +40,13 @@ export function toIssuesVars(
         ? (filters.state as IssuableState)
         : undefined,
     labelName: filters.labels?.length ? filters.labels : undefined,
-    assigneeUsernames: filters.assignee ? [filters.assignee] : undefined,
+    assigneeUsernames: assigned,
+    // GitLab models "unassigned" as a wildcard, not an empty username list.
+    assigneeWildcardId:
+      filters.assignee === UNASSIGNED
+        ? ("NONE" as IssuesQueryVariables["assigneeWildcardId"])
+        : undefined,
+    authorUsername: filters.author || undefined,
     milestoneTitle: filters.milestone ? [filters.milestone] : undefined,
     search: filters.search || undefined,
     after: after || undefined,

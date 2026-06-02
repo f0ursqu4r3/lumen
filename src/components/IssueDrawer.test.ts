@@ -45,4 +45,24 @@ describe("IssueDrawer", () => {
     await w.vm.$nextTick();
     expect(w.emitted("expand")).toHaveLength(1);
   });
+
+  it("forwards the embedded detail's dirty state", async () => {
+    const w = mount(IssueDrawer, {
+      props: { open: true, fullPath: "grp/proj", iid: "9" },
+      attachTo: document.body,
+      global: {
+        stubs: {
+          IssueDetail: {
+            emits: ["update:dirty"],
+            mounted() {
+              (this as any).$emit("update:dirty", true);
+            },
+            template: "<div />",
+          },
+        },
+      },
+    });
+    await w.vm.$nextTick();
+    expect(w.emitted("update:dirty")?.at(-1)).toEqual([true]);
+  });
 });

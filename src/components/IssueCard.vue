@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import {
-  ArrowUp,
-  ChevronUp,
-  ChevronsUp,
-  Equal,
-  Minus,
+  AlertOctagon,
+  Zap,
+  ArrowUpCircle,
+  MinusCircle,
+  ArrowDownCircle,
   Bug,
   Sparkles,
   Recycle,
@@ -22,11 +22,11 @@ const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: 
 const emit = defineEmits<{ filter: [facet: Facet] }>();
 
 const ICONS = {
-  "arrow-up": ArrowUp,
-  "chevron-up": ChevronUp,
-  "chevrons-up": ChevronsUp,
-  equal: Equal,
-  minus: Minus,
+  AlertOctagon,
+  Zap,
+  ArrowUpCircle,
+  MinusCircle,
+  ArrowDownCircle,
   bug: Bug,
   sparkles: Sparkles,
   recycle: Recycle,

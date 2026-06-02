@@ -91,7 +91,7 @@ function groupByStatus(issues: readonly IssueListItem[]): IssueGroup[] {
 }
 
 function groupByPriority(issues: readonly IssueListItem[]): IssueGroup[] {
-  const order = ["high", "medium", "low", "__none"];
+  const order = ["critical", "fasttrack", "high", "medium", "low", "__none"];
   const map = new Map<string, IssueGroup>();
   for (const issue of issues) {
     const p = priorityOf(labelsOf(issue));
@@ -171,8 +171,8 @@ export function availableScopes(issues: readonly IssueListItem[]): string[] {
 }
 
 const priorityRank = (label: string) =>
-  ["high", "medium", "low"].indexOf(
-    label.toLowerCase().replace(" priority", ""),
+  ["critical", "fasttrack", "high", "medium", "low"].indexOf(
+    label.toLowerCase().replace(" priority", "").replace(/[\s_-]/g, ""),
   );
 
 /**

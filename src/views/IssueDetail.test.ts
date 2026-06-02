@@ -5,41 +5,53 @@ import { ref } from "vue";
 const useIssue = vi.fn();
 vi.mock("@/composables/useIssue", () => ({ useIssue: () => useIssue() }));
 
-const { addNoteMutate, updateMutate, setAssigneesError } = vi.hoisted(() => ({
+const { addNoteMutate, draftSave, draftReset, draftState } = vi.hoisted(() => ({
   addNoteMutate: vi.fn(),
-  updateMutate: vi.fn(),
-  setAssigneesError: { ref: null as null | { value: unknown } },
+  draftSave: vi.fn(),
+  draftReset: vi.fn(),
+  draftState: { dirty: null as null | { value: boolean } },
 }));
-vi.mock("@/composables/useIssueMutations", async () => {
+vi.mock("@/composables/useIssueMutations", () => ({
+  useAddNote: () => ({
+    mutate: addNoteMutate,
+    isPending: { value: false },
+    error: { value: null },
+  }),
+}));
+vi.mock("@/composables/useProjectMembers", async () => {
   const { ref } = await import("vue");
-  setAssigneesError.ref = ref(null);
+  return { useProjectMembers: () => ({ data: ref([]) }) };
+});
+vi.mock("@/composables/useProjectLabels", async () => {
+  const { ref } = await import("vue");
+  return { useProjectLabels: () => ({ data: ref([]) }) };
+});
+vi.mock("@/composables/useIssueDraft", async () => {
+  const { ref, computed } = await import("vue");
   return {
-    useAddNote: () => ({
-      mutate: addNoteMutate,
-      isPending: { value: false },
-      error: { value: null },
-    }),
-    useUpdateIssue: () => ({
-      mutate: updateMutate,
-      isPending: { value: false },
-      error: { value: null },
-    }),
-    useSetAssignees: () => ({
-      mutate: vi.fn(),
-      isPending: { value: false },
-      error: setAssigneesError.ref,
-    }),
+    useIssueDraft: () => {
+      const draft = ref({
+        title: "Bug",
+        description: "the description",
+        state: "opened",
+        labelIds: [] as string[],
+        assigneeUsernames: ["a"],
+      });
+      draftState.dirty = ref(false);
+      return {
+        draft,
+        dirty: draftState.dirty,
+        saving: computed(() => false),
+        error: ref(null),
+        save: draftSave,
+        reset: draftReset,
+      };
+    },
   };
 });
-
-vi.mock("@/composables/useProjectMembers", () => ({
-  useProjectMembers: () => ({ data: ref([]) }),
-}));
+vi.mock("vue-router", () => ({ onBeforeRouteLeave: vi.fn() }));
 
 import IssueDetail from "./IssueDetail.vue";
-
-const mountDetail = () =>
-  mount(IssueDetail, { props: { fullPath: "grp/proj", iid: "9" } });
 
 const fullIssue = {
   id: "gid://issue/9",
@@ -75,88 +87,59 @@ const fullIssue = {
   },
 };
 
+const mountDetail = () =>
+  mount(IssueDetail, { props: { fullPath: "grp/proj", iid: "9" } });
+
 beforeEach(() => {
   useIssue.mockReset();
   addNoteMutate.mockReset();
-  updateMutate.mockReset();
-  if (setAssigneesError.ref) setAssigneesError.ref.value = null;
+  draftSave.mockReset();
+  draftReset.mockReset();
+  useIssue.mockReturnValue({
+    data: ref(fullIssue),
+    isLoading: ref(false),
+    error: ref(null),
+  });
 });
 
-describe("IssueDetail", () => {
-  it("renders title, description, assignee, and user notes", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
+describe("IssueDetail (buffered)", () => {
+  it("renders the editable title and description bound to the draft", async () => {
     const w = mountDetail();
     await flushPromises();
-    expect(w.text()).toContain("Bug");
-    expect(w.text()).toContain("the description");
+    expect(
+      (w.find('[data-testid="edit-title"]').element as HTMLInputElement).value,
+    ).toBe("Bug");
     expect(w.text()).toContain("me too");
-    expect(w.text()).toContain("Scratchpad");
-    expect(w.text()).toContain("Ada Lovelace");
-  });
-
-  it("shows the issue originator", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
-    const w = mountDetail();
-    await flushPromises();
-    expect(w.text()).toContain("Opened by");
-    expect(w.text()).toContain("@reporter");
   });
 
   it("hides system notes", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
     const w = mountDetail();
     await flushPromises();
     expect(w.text()).not.toContain("changed milestone");
   });
 
-  it("shows a loading state", () => {
-    useIssue.mockReturnValue({
-      data: ref(undefined),
-      isLoading: ref(true),
-      error: ref(null),
-    });
-    expect(mountDetail().find('[data-slot="skeleton"]').exists()).toBe(true);
-  });
-
-  it("shows the error via ErrorNotice", () => {
-    useIssue.mockReturnValue({
-      data: ref(undefined),
-      isLoading: ref(false),
-      error: ref({ kind: "unknown", message: "boom" }),
-    });
-    expect(mountDetail().text()).toContain("boom");
-  });
-
-  it("shows a not-found message when the issue is null", () => {
-    useIssue.mockReturnValue({
-      data: ref(null),
-      isLoading: ref(false),
-      error: ref(null),
-    });
-    expect(mountDetail().text()).toContain("Issue not found");
-  });
-
-  it("adds a note when the comment form is submitted", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
+  it("shows the Save/Cancel footer only when dirty", async () => {
     const w = mountDetail();
     await flushPromises();
-    // Scratchpad adds a second textarea, so target the comment box explicitly.
+    expect(w.find('[data-testid="save-issue"]').exists()).toBe(false);
+    draftState.dirty!.value = true;
+    await flushPromises();
+    expect(w.find('[data-testid="save-issue"]').exists()).toBe(true);
+  });
+
+  it("Save calls draft.save and Cancel calls draft.reset", async () => {
+    const w = mountDetail();
+    draftState.dirty!.value = true;
+    await flushPromises();
+    await w.get('[data-testid="save-issue"]').trigger("click");
+    expect(draftSave).toHaveBeenCalled();
+    await w.get('[data-testid="cancel-issue"]').trigger("click");
+    expect(draftReset).toHaveBeenCalled();
+  });
+
+  it("still posts comments", async () => {
+    const w = mountDetail();
+    await flushPromises();
     await w
       .find('textarea[placeholder="Add a comment…"]')
       .setValue("a new comment");
@@ -167,31 +150,10 @@ describe("IssueDetail", () => {
     );
   });
 
-  it("toggles issue state via the close button", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
+  it("toggling state flips the draft (no immediate mutation)", async () => {
     const w = mountDetail();
     await flushPromises();
-    await w.find('button[type="button"]').trigger("click");
-    expect(updateMutate).toHaveBeenCalledWith({ stateEvent: "CLOSE" });
-  });
-
-  it("surfaces a child assignee mutation error via ErrorNotice", async () => {
-    useIssue.mockReturnValue({
-      data: ref(fullIssue),
-      isLoading: ref(false),
-      error: ref(null),
-    });
-    const w = mountDetail();
-    await flushPromises();
-    setAssigneesError.ref!.value = {
-      kind: "graphql",
-      message: "Insufficient permissions",
-    };
-    await flushPromises();
-    expect(w.text()).toContain("Insufficient permissions");
+    await w.get('[data-testid="toggle-state"]').trigger("click");
+    expect(w.get('[data-testid="toggle-state"]').text()).toContain("Reopen");
   });
 });

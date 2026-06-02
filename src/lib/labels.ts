@@ -90,38 +90,57 @@ export function tint(hex: string, alpha = 0.14): string {
 
 // --- semantic scopes --------------------------------------------------------
 
-export type Priority = 'high' | 'medium' | 'low';
+export type Priority = 'critical' | 'fasttrack' | 'high' | 'medium' | 'low';
 
 export interface PriorityMeta {
   level: Priority;
   /** Semantic color, independent of the label's hex, for consistent scanning. */
   color: string;
   /** lucide icon name. */
-  icon: 'chevrons-up' | 'chevron-up' | 'minus';
+  icon:
+    | 'AlertOctagon'
+    | 'Zap'
+    | 'ArrowUpCircle'
+    | 'MinusCircle'
+    | 'ArrowDownCircle';
   label: string;
   /** Sort weight, higher = more urgent. */
   weight: number;
 }
 
 const PRIORITY: Record<Priority, PriorityMeta> = {
+  critical: {
+    level: 'critical',
+    color: '#dc2626',
+    icon: 'AlertOctagon',
+    label: 'Critical priority',
+    weight: 5,
+  },
+  fasttrack: {
+    level: 'fasttrack',
+    color: '#f97316',
+    icon: 'Zap',
+    label: 'FastTrack priority',
+    weight: 4,
+  },
   high: {
     level: 'high',
-    color: '#ef4444',
-    icon: 'chevrons-up',
+    color: '#eab308',
+    icon: 'ArrowUpCircle',
     label: 'High priority',
     weight: 3,
   },
   medium: {
     level: 'medium',
-    color: '#f59e0b',
-    icon: 'chevron-up',
+    color: '#64748b',
+    icon: 'MinusCircle',
     label: 'Medium priority',
     weight: 2,
   },
   low: {
     level: 'low',
     color: '#94a3b8',
-    icon: 'minus',
+    icon: 'ArrowDownCircle',
     label: 'Low priority',
     weight: 1,
   },
@@ -166,7 +185,7 @@ export function priorityOf(labels: readonly LabelLike[]): PriorityMeta | null {
   for (const l of labels) {
     const p = parseLabel(l.title, l.color);
     if (scopeIs(p, 'priority')) {
-      const k = p.value.toLowerCase() as Priority;
+      const k = p.value.toLowerCase().replace(/[\s_-]/g, '') as Priority;
       if (k in PRIORITY) return PRIORITY[k];
     }
   }

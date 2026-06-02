@@ -86,7 +86,12 @@ export function useCreateIssue(fullPath: string) {
   return useMutation<
     CreateIssuePayload,
     GitLabError,
-    { title: string; description?: string; labels?: string[]; assigneeIds?: string[] }
+    {
+      title: string;
+      description?: string;
+      labels?: string[];
+      assigneeIds?: string[];
+    }
   >({
     mutationFn: (input) =>
       run(
@@ -183,6 +188,8 @@ export function useUpdateIssue(fullPath: string, iid: string) {
     UpdateIssuePayload,
     GitLabError,
     {
+      title?: string;
+      description?: string;
       stateEvent?: "CLOSE" | "REOPEN";
       addLabelIds?: string[];
       removeLabelIds?: string[];
