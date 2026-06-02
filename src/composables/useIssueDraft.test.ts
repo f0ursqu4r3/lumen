@@ -37,14 +37,18 @@ beforeEach(() => {
 describe("useIssueDraft", () => {
   it("seeds the draft from the issue and starts clean", () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     expect(result().draft.value?.title).toBe("Bug");
     expect(result().dirty.value).toBe(false);
   });
 
   it("becomes dirty on edit and clean after reset", async () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     result().draft.value!.title = "New";
     await nextTick();
     expect(result().dirty.value).toBe(true);
@@ -56,18 +60,24 @@ describe("useIssueDraft", () => {
 
   it("save dispatches only the changed mutations", async () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     result().draft.value!.title = "New";
     result().draft.value!.assigneeUsernames = ["ada", "bob"];
     await nextTick();
     await result().save();
     expect(updateAsync).toHaveBeenCalledWith({ title: "New" });
-    expect(setAsync).toHaveBeenCalledWith({ assigneeUsernames: ["ada", "bob"] });
+    expect(setAsync).toHaveBeenCalledWith({
+      assigneeUsernames: ["ada", "bob"],
+    });
   });
 
   it("save with only metadata change does not call setAssignees", async () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     result().draft.value!.description = "d2";
     await nextTick();
     await result().save();
@@ -77,7 +87,9 @@ describe("useIssueDraft", () => {
 
   it("clears dirty after a successful save", async () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     result().draft.value!.title = "New";
     await nextTick();
     expect(result().dirty.value).toBe(true);
@@ -89,7 +101,9 @@ describe("useIssueDraft", () => {
   it("keeps dirty when a save mutation fails", async () => {
     updateAsync.mockRejectedValueOnce(new Error("boom"));
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     result().draft.value!.title = "New";
     await nextTick();
     await result().save();
@@ -99,7 +113,9 @@ describe("useIssueDraft", () => {
 
   it("re-syncs from the server only while clean", async () => {
     const issueRef = ref({ ...issue });
-    const { result } = withQuery(() => useIssueDraft("grp/proj", "9", issueRef));
+    const { result } = withQuery(() =>
+      useIssueDraft("grp/proj", "9", issueRef),
+    );
     // dirty edit must survive a background refetch
     result().draft.value!.title = "Mine";
     await nextTick();

@@ -42,7 +42,8 @@ export function useIssueDraft(
   }
 
   const dirty = computed(
-    () => !!original.value && !!draft.value && isDirty(original.value, draft.value),
+    () =>
+      !!original.value && !!draft.value && isDirty(original.value, draft.value),
   );
   const saving = computed(
     () => update.isPending.value || setAssignees.isPending.value,

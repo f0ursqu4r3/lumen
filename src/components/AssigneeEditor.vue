@@ -4,7 +4,11 @@ import { onClickOutside } from "@vueuse/core";
 import { Check, UserPlus, X } from "@lucide/vue";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import AssigneeAvatar from "@/components/AssigneeAvatar.vue";
-import { assigneeSections, personInitial, type OrderedPerson } from "@/lib/assigneeOrder";
+import {
+  assigneeSections,
+  personInitial,
+  type OrderedPerson,
+} from "@/lib/assigneeOrder";
 import type { IssueDetail } from "@/composables/useIssue";
 import type { ProjectMember } from "@/composables/useProjectMembers";
 
@@ -40,7 +44,10 @@ const currentRows = computed(() =>
 
 const isSelected = (u: string) => props.usernames.includes(u);
 function removeOne(username: string) {
-  emit("update:usernames", props.usernames.filter((u) => u !== username));
+  emit(
+    "update:usernames",
+    props.usernames.filter((u) => u !== username),
+  );
 }
 function toggle(username: string) {
   emit(
@@ -55,7 +62,11 @@ function toggle(username: string) {
 <template>
   <div ref="root" class="space-y-2" @keydown.escape="open = false">
     <div v-if="currentRows.length" class="space-y-1">
-      <div v-for="a in currentRows" :key="a.username" class="flex items-center gap-2">
+      <div
+        v-for="a in currentRows"
+        :key="a.username"
+        class="flex items-center gap-2"
+      >
         <AssigneeAvatar
           :name="a.name || a.username"
           :username="a.username"

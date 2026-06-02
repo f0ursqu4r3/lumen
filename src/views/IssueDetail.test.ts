@@ -12,7 +12,11 @@ const { addNoteMutate, draftSave, draftReset, draftState } = vi.hoisted(() => ({
   draftState: { dirty: null as null | { value: boolean } },
 }));
 vi.mock("@/composables/useIssueMutations", () => ({
-  useAddNote: () => ({ mutate: addNoteMutate, isPending: { value: false }, error: { value: null } }),
+  useAddNote: () => ({
+    mutate: addNoteMutate,
+    isPending: { value: false },
+    error: { value: null },
+  }),
 }));
 vi.mock("@/composables/useProjectMembers", async () => {
   const { ref } = await import("vue");
@@ -60,11 +64,25 @@ const fullIssue = {
   author: { username: "reporter", avatarUrl: null },
   milestone: { title: "v1" },
   labels: { nodes: [] },
-  assignees: { nodes: [{ id: "u1", name: "Ada Lovelace", username: "a", avatarUrl: null }] },
+  assignees: {
+    nodes: [{ id: "u1", name: "Ada Lovelace", username: "a", avatarUrl: null }],
+  },
   notes: {
     nodes: [
-      { id: "n1", body: "me too", system: false, createdAt: "2026-01-01T00:00:00Z", author: { username: "a", avatarUrl: null } },
-      { id: "n2", body: "changed milestone", system: true, createdAt: "2026-01-01T00:00:00Z", author: { username: "bot", avatarUrl: null } },
+      {
+        id: "n1",
+        body: "me too",
+        system: false,
+        createdAt: "2026-01-01T00:00:00Z",
+        author: { username: "a", avatarUrl: null },
+      },
+      {
+        id: "n2",
+        body: "changed milestone",
+        system: true,
+        createdAt: "2026-01-01T00:00:00Z",
+        author: { username: "bot", avatarUrl: null },
+      },
     ],
   },
 };
@@ -77,14 +95,20 @@ beforeEach(() => {
   addNoteMutate.mockReset();
   draftSave.mockReset();
   draftReset.mockReset();
-  useIssue.mockReturnValue({ data: ref(fullIssue), isLoading: ref(false), error: ref(null) });
+  useIssue.mockReturnValue({
+    data: ref(fullIssue),
+    isLoading: ref(false),
+    error: ref(null),
+  });
 });
 
 describe("IssueDetail (buffered)", () => {
   it("renders the editable title and description bound to the draft", async () => {
     const w = mountDetail();
     await flushPromises();
-    expect((w.find('[data-testid="edit-title"]').element as HTMLInputElement).value).toBe("Bug");
+    expect(
+      (w.find('[data-testid="edit-title"]').element as HTMLInputElement).value,
+    ).toBe("Bug");
     expect(w.text()).toContain("me too");
   });
 
@@ -116,7 +140,9 @@ describe("IssueDetail (buffered)", () => {
   it("still posts comments", async () => {
     const w = mountDetail();
     await flushPromises();
-    await w.find('textarea[placeholder="Add a comment…"]').setValue("a new comment");
+    await w
+      .find('textarea[placeholder="Add a comment…"]')
+      .setValue("a new comment");
     await w.find("form").trigger("submit.prevent");
     expect(addNoteMutate).toHaveBeenCalledWith(
       { noteableId: "gid://issue/9", body: "a new comment" },

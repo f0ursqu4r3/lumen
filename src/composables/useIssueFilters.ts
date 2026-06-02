@@ -26,9 +26,7 @@ export function useIssueFilters() {
   // Single-element arrays are normalized to a plain string so vue-router stores
   // them as `?key=value` rather than `?key[0]=value`, matching what the URL
   // looks like after a page reload and what `asArray` can hydrate back.
-  function patch(
-    next: Partial<Record<string, string | string[] | undefined>>,
-  ) {
+  function patch(next: Partial<Record<string, string | string[] | undefined>>) {
     const query: LocationQueryRaw = { ...route.query };
     for (const [k, v] of Object.entries(next)) {
       if (v === undefined || v === "" || (Array.isArray(v) && !v.length))
@@ -58,7 +56,9 @@ export function useIssueFilters() {
   // Search: local ref bound to the input, debounced out to the URL, hydrated
   // back in on external query changes (back/forward, clearAll).
   const search = ref(asString(route.query.q));
-  watchDebounced(search, (v) => patch({ q: v || undefined }), { debounce: 250 });
+  watchDebounced(search, (v) => patch({ q: v || undefined }), {
+    debounce: 250,
+  });
   watch(
     () => route.query.q,
     (v) => {

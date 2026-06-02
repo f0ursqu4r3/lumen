@@ -28,7 +28,9 @@ const labelSelected = (t: string) => props.labels.includes(t);
 function toggleLabel(t: string) {
   emit(
     "update:labels",
-    labelSelected(t) ? props.labels.filter((x) => x !== t) : [...props.labels, t],
+    labelSelected(t)
+      ? props.labels.filter((x) => x !== t)
+      : [...props.labels, t],
   );
 }
 // Single-select with toggle-off: re-picking the active value clears it.
@@ -63,7 +65,9 @@ const pickAuthor = (v: string) =>
       class="absolute z-50 mt-1 w-72 space-y-3 rounded-lg border border-border bg-popover p-3 shadow-md"
     >
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p
+          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+        >
           Labels
         </p>
         <div class="max-h-40 overflow-y-auto">
@@ -75,18 +79,29 @@ const pickAuthor = (v: string) =>
             class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
             @click="toggleLabel(l.title)"
           >
-            <span class="size-2.5 shrink-0 rounded-full" :style="{ backgroundColor: l.color }" />
+            <span
+              class="size-2.5 shrink-0 rounded-full"
+              :style="{ backgroundColor: l.color }"
+            />
             <span class="flex-1 truncate text-foreground">{{ l.title }}</span>
-            <Check v-if="labelSelected(l.title)" class="size-3.5 text-primary" />
+            <Check
+              v-if="labelSelected(l.title)"
+              class="size-3.5 text-primary"
+            />
           </button>
-          <p v-if="!catalog.length" class="px-2 py-1.5 text-xs text-muted-foreground">
+          <p
+            v-if="!catalog.length"
+            class="px-2 py-1.5 text-xs text-muted-foreground"
+          >
             No labels.
           </p>
         </div>
       </section>
 
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p
+          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+        >
           Assignee
         </p>
         <button
@@ -111,13 +126,18 @@ const pickAuthor = (v: string) =>
               {{ m.name || m.username }}
               <span class="text-muted-foreground">@{{ m.username }}</span>
             </span>
-            <Check v-if="assignee === m.username" class="size-3.5 text-primary" />
+            <Check
+              v-if="assignee === m.username"
+              class="size-3.5 text-primary"
+            />
           </button>
         </div>
       </section>
 
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p
+          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+        >
           Author
         </p>
         <div class="max-h-32 overflow-y-auto">

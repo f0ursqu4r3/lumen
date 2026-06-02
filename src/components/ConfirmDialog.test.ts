@@ -16,7 +16,9 @@ describe("ConfirmDialog", () => {
     const p = confirm({ title: "Discard changes?" });
     await nextTick();
     expect(document.body.textContent).toContain("Discard changes?");
-    document.querySelector<HTMLElement>('[data-testid="confirm-accept"]')!.click();
+    document
+      .querySelector<HTMLElement>('[data-testid="confirm-accept"]')!
+      .click();
     await expect(p).resolves.toBe(true);
     w.unmount();
   });

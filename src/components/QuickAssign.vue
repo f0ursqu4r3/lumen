@@ -71,9 +71,9 @@ function assignOnly(username: string) {
             <span class="text-muted-foreground">@{{ p.username }}</span>
           </span>
           <Check
-              v-if="usernames.includes(p.username)"
-              class="size-3.5 shrink-0 text-primary"
-            />
+            v-if="usernames.includes(p.username)"
+            class="size-3.5 shrink-0 text-primary"
+          />
         </button>
       </template>
     </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useIsFetching } from '@tanstack/vue-query';
-import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import { computed } from "vue";
+import { useIsFetching } from "@tanstack/vue-query";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 
 // The signal lamp breathes while any query is in flight — a quiet liveness
 // readout for an instrument that's meant to feel alive without being noisy.

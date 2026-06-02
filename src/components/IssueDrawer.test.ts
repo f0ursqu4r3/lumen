@@ -54,7 +54,9 @@ describe("IssueDrawer", () => {
         stubs: {
           IssueDetail: {
             emits: ["update:dirty"],
-            mounted() { (this as any).$emit("update:dirty", true); },
+            mounted() {
+              (this as any).$emit("update:dirty", true);
+            },
             template: "<div />",
           },
         },

@@ -41,7 +41,9 @@ describe("AssigneeEditor (controlled)", () => {
     const w = mountEditor();
     await w.get('[data-testid="assignee-add-trigger"]').trigger("click");
     await w.get('[data-testid="assignee-option-dee"]').trigger("click");
-    expect(w.emitted("update:usernames")?.at(-1)).toEqual([["ada", "bob", "dee"]]);
+    expect(w.emitted("update:usernames")?.at(-1)).toEqual([
+      ["ada", "bob", "dee"],
+    ]);
   });
 
   it("checkmark reflects the usernames prop", async () => {

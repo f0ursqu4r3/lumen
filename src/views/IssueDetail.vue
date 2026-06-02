@@ -29,10 +29,11 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ "update:dirty": [value: boolean] }>();
 
-const { data: issue, isLoading, error } = useIssue(
-  toRef(props, "fullPath"),
-  toRef(props, "iid"),
-);
+const {
+  data: issue,
+  isLoading,
+  error,
+} = useIssue(toRef(props, "fullPath"), toRef(props, "iid"));
 const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const { data: labelCatalog } = useProjectLabels(toRef(props, "fullPath"));
 const addNote = useAddNote(props.fullPath, props.iid);
@@ -70,7 +71,9 @@ const notes = computed(
 if (!props.embedded) {
   useTitle(
     computed(() =>
-      issue.value ? `#${issue.value.iid} ${issue.value.title} · lumen` : "lumen",
+      issue.value
+        ? `#${issue.value.iid} ${issue.value.title} · lumen`
+        : "lumen",
     ),
   );
 }
@@ -78,7 +81,9 @@ if (!props.embedded) {
 const comment = ref("");
 const posted = ref(false);
 let postedTimer: ReturnType<typeof setTimeout> | undefined;
-function nameOrUsername(user?: { name?: string | null; username: string } | null) {
+function nameOrUsername(
+  user?: { name?: string | null; username: string } | null,
+) {
   return user?.name || `@${user?.username}` || "(deleted user)";
 }
 function submitComment() {
@@ -123,7 +128,9 @@ if (!props.embedded) {
   <article v-else-if="issue && draft" class="space-y-4 pb-20">
     <header class="flex items-center gap-2">
       <StateBadge :state="draft.state" />
-      <span class="font-mono text-sm text-muted-foreground">#{{ issue.iid }}</span>
+      <span class="font-mono text-sm text-muted-foreground"
+        >#{{ issue.iid }}</span
+      >
       <Button
         type="button"
         data-testid="toggle-state"
@@ -145,7 +152,9 @@ if (!props.embedded) {
 
     <p class="text-xs text-muted-foreground">
       Opened by
-      <span class="font-medium text-foreground">{{ nameOrUsername(issue.author) }}</span>
+      <span class="font-medium text-foreground">{{
+        nameOrUsername(issue.author)
+      }}</span>
       · {{ new Date(issue.createdAt).toLocaleString() }}
     </p>
 
@@ -182,15 +191,24 @@ if (!props.embedded) {
           <span class="ml-2 text-xs text-muted-foreground">
             {{ new Date(n.createdAt).toLocaleString() }}
           </span>
-          <MarkdownText :source="n.body" :project-path="fullPath" class="mt-1" />
+          <MarkdownText
+            :source="n.body"
+            :project-path="fullPath"
+            class="mt-1"
+          />
         </CardContent>
       </Card>
       <form class="space-y-2" @submit.prevent="submitComment">
         <Textarea v-model="comment" :rows="3" placeholder="Add a comment…" />
         <div class="flex items-center gap-3">
-          <Button type="submit" :disabled="addNote.isPending.value">Comment</Button>
+          <Button type="submit" :disabled="addNote.isPending.value"
+            >Comment</Button
+          >
           <span aria-live="polite" class="text-xs text-muted-foreground">
-            <span v-if="posted" class="animate-status inline-flex items-center gap-1">
+            <span
+              v-if="posted"
+              class="animate-status inline-flex items-center gap-1"
+            >
               <Check class="size-3.5 text-emerald-400" />Posted
             </span>
           </span>
@@ -213,7 +231,12 @@ if (!props.embedded) {
       >
         Cancel
       </Button>
-      <Button type="button" data-testid="save-issue" :disabled="saving" @click="save">
+      <Button
+        type="button"
+        data-testid="save-issue"
+        :disabled="saving"
+        @click="save"
+      >
         {{ saving ? "Saving…" : "Save changes" }}
       </Button>
     </div>

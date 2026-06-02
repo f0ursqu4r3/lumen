@@ -16,13 +16,16 @@ function setup(initialQuery: Record<string, string | string[]> = {}) {
       return () => h("div");
     },
   });
-  return { router, mountIt: async () => {
-    await router.replace({ path: "/", query: initialQuery });
-    await router.isReady();
-    mount(Comp, { global: { plugins: [router] } });
-    await nextTick();
-    return api;
-  }};
+  return {
+    router,
+    mountIt: async () => {
+      await router.replace({ path: "/", query: initialQuery });
+      await router.isReady();
+      mount(Comp, { global: { plugins: [router] } });
+      await nextTick();
+      return api;
+    },
+  };
 }
 
 describe("useIssueFilters", () => {
@@ -30,7 +33,12 @@ describe("useIssueFilters", () => {
   afterEach(() => vi.useRealTimers());
 
   it("hydrates labels/assignee/author/state from the query", async () => {
-    const { mountIt } = setup({ label: ["bug", "ui"], assignee: "ada", author: "bob", state: "closed" });
+    const { mountIt } = setup({
+      label: ["bug", "ui"],
+      assignee: "ada",
+      author: "bob",
+      state: "closed",
+    });
     const api = await mountIt();
     expect(api.labels.value).toEqual(["bug", "ui"]);
     expect(api.assignee.value).toBe("ada");
@@ -55,7 +63,12 @@ describe("useIssueFilters", () => {
   });
 
   it("clearAll removes label/assignee/author but keeps unrelated query keys", async () => {
-    const { router, mountIt } = setup({ label: "bug", assignee: "ada", author: "bob", issue: "9" });
+    const { router, mountIt } = setup({
+      label: "bug",
+      assignee: "ada",
+      author: "bob",
+      issue: "9",
+    });
     const api = await mountIt();
     api.clearAll();
     await flushPromises();

@@ -46,10 +46,7 @@ function onOpenChange(open: boolean) {
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel
-          data-testid="confirm-cancel"
-          @click="handleCancel"
-        >
+        <AlertDialogCancel data-testid="confirm-cancel" @click="handleCancel">
           {{ confirmState.cancelLabel }}
         </AlertDialogCancel>
         <AlertDialogAction

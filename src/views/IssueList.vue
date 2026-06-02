@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, toRef, watch } from 'vue';
-import { useIntersectionObserver, useTitle, onKeyStroke } from '@vueuse/core';
+import { computed, onUnmounted, ref, toRef, watch } from "vue";
+import { useIntersectionObserver, useTitle, onKeyStroke } from "@vueuse/core";
 import {
   Plus,
   Search,
@@ -9,15 +9,15 @@ import {
   Columns3,
   X,
   GripVertical,
-} from '@lucide/vue';
-import { useIssues, type IssueListItem } from '@/composables/useIssues';
-import { useProjectLabels } from '@/composables/useProjectLabels';
-import { useProjectMembers } from '@/composables/useProjectMembers';
-import { useIssueFilters } from '@/composables/useIssueFilters';
-import { useRetagIssue } from '@/composables/useIssueMutations';
-import IssueComposer from '@/components/IssueComposer.vue';
-import IssueFilterPanel from '@/components/IssueFilterPanel.vue';
-import type { IssueFilters } from '@/gitlab/issueParams';
+} from "@lucide/vue";
+import { useIssues, type IssueListItem } from "@/composables/useIssues";
+import { useProjectLabels } from "@/composables/useProjectLabels";
+import { useProjectMembers } from "@/composables/useProjectMembers";
+import { useIssueFilters } from "@/composables/useIssueFilters";
+import { useRetagIssue } from "@/composables/useIssueMutations";
+import IssueComposer from "@/components/IssueComposer.vue";
+import IssueFilterPanel from "@/components/IssueFilterPanel.vue";
+import type { IssueFilters } from "@/gitlab/issueParams";
 import {
   sortIssues,
   groupIssues,
@@ -30,25 +30,25 @@ import {
   type GroupKey,
   type Facet,
   type IssueGroup,
-} from '@/lib/issueView';
-import { useRoute, useRouter } from 'vue-router';
-import { useConfirm } from '@/composables/useConfirm';
-import IssueRow from '@/components/IssueRow.vue';
-import IssueCard from '@/components/IssueCard.vue';
-import IssueDrawer from '@/components/IssueDrawer.vue';
-import LabelChip from '@/components/LabelChip.vue';
-import ErrorNotice from '@/components/ErrorNotice.vue';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/lib/issueView";
+import { useRoute, useRouter } from "vue-router";
+import { useConfirm } from "@/composables/useConfirm";
+import IssueRow from "@/components/IssueRow.vue";
+import IssueCard from "@/components/IssueCard.vue";
+import IssueDrawer from "@/components/IssueDrawer.vue";
+import LabelChip from "@/components/LabelChip.vue";
+import ErrorNotice from "@/components/ErrorNotice.vue";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 const props = defineProps<{ fullPath: string }>();
 
@@ -60,14 +60,14 @@ const drawerDirty = ref(false);
 // Drawer is driven by ?issue=<iid> on this route, so back/refresh/links all work.
 const openIid = computed(() => {
   const q = route.query.issue;
-  return typeof q === 'string' && q ? q : null;
+  return typeof q === "string" && q ? q : null;
 });
 
 async function setDrawerOpen(value: boolean) {
   if (value) return; // opening is driven by issue links, not this handler
   if (drawerDirty.value) {
     const ok = await confirm({
-      title: 'Discard unsaved changes?',
+      title: "Discard unsaved changes?",
       description: "Your edits to this issue haven't been saved.",
     });
     if (!ok) return;
@@ -80,7 +80,7 @@ async function setDrawerOpen(value: boolean) {
 function expandIssue() {
   if (openIid.value) {
     router.push({
-      name: 'issue',
+      name: "issue",
       params: { fullPath: props.fullPath, iid: openIid.value },
     });
   }
@@ -97,25 +97,25 @@ const {
   clearAll,
   filters,
 } = useIssueFilters();
-const { data: members } = useProjectMembers(toRef(props, 'fullPath'));
+const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 
-const view = ref<'list' | 'board'>('list');
-const sortKey = ref<SortKey>('updated');
-const groupKey = ref<GroupKey>('none');
+const view = ref<"list" | "board">("list");
+const sortKey = ref<SortKey>("updated");
+const groupKey = ref<GroupKey>("none");
 // Which scoped-label group defines the board columns (assigned / priority / team…).
-const boardScope = ref('assigned');
+const boardScope = ref("assigned");
 
-type StateValue = NonNullable<IssueFilters['state']>;
+type StateValue = NonNullable<IssueFilters["state"]>;
 const STATES: { value: StateValue; label: string }[] = [
-  { value: 'opened', label: 'Open' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'all', label: 'All' },
+  { value: "opened", label: "Open" },
+  { value: "closed", label: "Closed" },
+  { value: "all", label: "All" },
 ];
 
 // Split the project path so the final segment (the repo) can be emphasized.
-const pathParts = computed(() => props.fullPath.split('/'));
+const pathParts = computed(() => props.fullPath.split("/"));
 const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath);
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'));
+const pathPrefix = computed(() => pathParts.value.slice(0, -1).join("/"));
 
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
@@ -128,7 +128,7 @@ const {
   hasNextPage,
   fetchNextPage,
   isFetchingNextPage,
-} = useIssues(toRef(props, 'fullPath'), filters);
+} = useIssues(toRef(props, "fullPath"), filters);
 
 const count = computed(() => issues.value.length);
 const hasMore = computed(() => hasNextPage.value ?? false);
@@ -138,11 +138,11 @@ const hasMore = computed(() => hasNextPage.value ?? false);
 const sorted = computed(() => sortIssues(issues.value, sortKey.value));
 const listGroups = computed(() => groupIssues(sorted.value, groupKey.value));
 
-const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'));
+const { data: projectLabels } = useProjectLabels(toRef(props, "fullPath"));
 const labelCatalog = computed(() => projectLabels.value ?? []);
 const scopeOptions = computed(() => labelScopes(labelCatalog.value));
 const boardGroups = computed(() =>
-  groupByScope(sorted.value, boardScope.value, labelCatalog.value)
+  groupByScope(sorted.value, boardScope.value, labelCatalog.value),
 );
 // When the chosen scope isn't present (e.g. first load), fall back to the first.
 watch(scopeOptions, (opts) => {
@@ -160,8 +160,8 @@ function onDragStart(issue: IssueListItem, e: DragEvent) {
   dragging.value = issue;
   draggingIid.value = issue.iid;
   if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', String(issue.iid));
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(issue.iid));
   }
 }
 function clearDrag() {
@@ -179,8 +179,8 @@ function onDrop(group: IssueGroup) {
 
 // --- active filters ---------------------------------------------------------
 function applyFacet(f: Facet) {
-  if (f.kind === 'assignee') {
-    assignee.value = assignee.value === f.value ? '' : f.value;
+  if (f.kind === "assignee") {
+    assignee.value = assignee.value === f.value ? "" : f.value;
     return;
   }
   toggleLabel(f.value);
@@ -194,7 +194,7 @@ function clearFilters() {
 const labelChips = computed(() =>
   labelTitles.value.map((title) => ({
     title,
-    color: labelCatalog.value.find((l) => l.title === title)?.color ?? '#888',
+    color: labelCatalog.value.find((l) => l.title === title)?.color ?? "#888",
   })),
 );
 
@@ -222,7 +222,7 @@ onUnmounted(() => clearTimeout(highlightTimer));
 
 // `C` opens the composer — but never while typing or with another surface open.
 // Accept both cases so Caps Lock / Shift don't swallow the shortcut.
-onKeyStroke(['c', 'C'], (e) => {
+onKeyStroke(["c", "C"], (e) => {
   const t = e.target as HTMLElement | null;
   if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable))
     return;
@@ -273,7 +273,7 @@ onKeyStroke(['c', 'C'], (e) => {
           <span
             class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
           >
-            {{ count === 1 ? 'issue' : 'issues' }}
+            {{ count === 1 ? "issue" : "issues" }}
           </span>
         </div>
       </div>
@@ -426,7 +426,9 @@ onKeyStroke(['c', 'C'], (e) => {
         v-if="assignee"
         class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
-        <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
+        <span class="font-mono">{{
+          assignee === "__none__" ? "Unassigned" : "@" + assignee
+        }}</span>
         <button
           type="button"
           aria-label="Remove assignee filter"
@@ -587,7 +589,7 @@ onKeyStroke(['c', 'C'], (e) => {
               v-if="isFetchingNextPage"
               class="size-4 animate-spin text-primary"
             />
-            {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
+            {{ isFetchingNextPage ? "Loading…" : "Load more" }}
           </button>
         </div>
       </template>
