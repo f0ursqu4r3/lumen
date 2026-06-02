@@ -43,6 +43,7 @@ describe('IssueDetail', () => {
     expect(w.text()).toContain('the description')
     expect(w.text()).toContain('@a')
     expect(w.text()).toContain('me too')
+    expect(w.text()).toContain('Scratchpad')
   })
 
   it('hides system notes', async () => {
@@ -71,7 +72,8 @@ describe('IssueDetail', () => {
     useIssue.mockReturnValue({ data: ref(fullIssue), isLoading: ref(false), error: ref(null) })
     const w = mountDetail()
     await flushPromises()
-    await w.find('textarea').setValue('a new comment')
+    // Scratchpad adds a second textarea, so target the comment box explicitly.
+    await w.find('textarea[placeholder="Add a comment…"]').setValue('a new comment')
     await w.find('form').trigger('submit.prevent')
     expect(addNoteMutate).toHaveBeenCalledWith(
       { noteableId: 'gid://issue/9', body: 'a new comment' },
