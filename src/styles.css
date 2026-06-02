@@ -167,3 +167,56 @@
     animation: row-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+
+/* The header signal lamp doubles as a liveness readout: steady when idle, a slow
+   amber breath while the instrument is fetching. This is a loading affordance
+   (kin to the existing spinners), not decorative perpetual motion — it only runs
+   while a query is in flight, and reduced-motion keeps it perfectly still. */
+@keyframes lamp-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 6px oklch(0.82 0.142 81 / 0.45);
+    opacity: 0.8;
+  }
+  50% {
+    box-shadow: 0 0 13px oklch(0.82 0.142 81 / 0.95);
+    opacity: 1;
+  }
+}
+
+/* Hero count: a 3px rise + fade when the number changes, so filtering feels like
+   the readout settling rather than snapping. Keyed remount re-triggers it. */
+@keyframes count-settle {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A quiet confirmation flash — used for "Posted" / "Saved" style status text. */
+@keyframes status-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lamp-busy {
+    animation: lamp-breathe 1.6s ease-in-out infinite;
+  }
+  .animate-count {
+    animation: count-settle 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-status {
+    animation: status-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}

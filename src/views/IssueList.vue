@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from 'vue';
-import { useIntersectionObserver } from '@vueuse/core';
+import { useIntersectionObserver, useTitle } from '@vueuse/core';
 import {
   Plus,
+  Check,
   Search,
   LoaderCircle,
   List,
@@ -90,6 +91,10 @@ const STATES: { value: IssueFilters['state']; label: string }[] = [
 const pathParts = computed(() => props.fullPath.split('/'));
 const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath);
 const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'));
+
+// Reflect the active repo in the tab title — quiet polish for a daily driver
+// that lives across many tabs.
+useTitle(computed(() => `${repoName.value} · tragit`));
 
 const filters = computed<IssueFilters>(() => ({
   state: state.value,
@@ -189,11 +194,22 @@ useIntersectionObserver(sentinel, ([entry]) => {
 
 const createIssue = useCreateIssue(props.fullPath);
 const newTitle = ref('');
+// Brief check-flash on the Create button so a successful add registers without a
+// toast — the input clears, the button confirms, then quietly returns to ready.
+const justCreated = ref(false);
+let createdTimer: ReturnType<typeof setTimeout> | undefined;
 function submitNew() {
   if (!newTitle.value.trim()) return;
   createIssue.mutate(
     { title: newTitle.value },
-    { onSuccess: () => (newTitle.value = '') }
+    {
+      onSuccess: () => {
+        newTitle.value = '';
+        justCreated.value = true;
+        clearTimeout(createdTimer);
+        createdTimer = setTimeout(() => (justCreated.value = false), 1400);
+      },
+    }
   );
 }
 </script>
@@ -225,7 +241,8 @@ function submitNew() {
         :class="isLoading ? 'opacity-0' : 'opacity-100'"
       >
         <span
-          class="font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+          :key="count"
+          class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
         >
           {{ count
           }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
@@ -406,13 +423,17 @@ function submitNew() {
         aria-label="New issue title"
         class="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
+      <!-- disabled:opacity is relaxed during the confirm flash so "Added ✓" stays
+           legible the moment after the input clears. -->
       <Button
         type="submit"
+        :class="justCreated && 'disabled:opacity-100'"
         :disabled="createIssue.isPending.value || !newTitle.trim()"
       >
         <LoaderCircle v-if="createIssue.isPending.value" class="animate-spin" />
+        <Check v-else-if="justCreated" class="animate-status" />
         <Plus v-else />
-        Create
+        {{ justCreated ? 'Added' : 'Create' }}
       </Button>
     </form>
 

@@ -11,7 +11,7 @@ import {
   FlaskConical,
   Tag,
 } from '@lucide/vue'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { priorityOf, typeOf, parseLabel, tint } from '@/lib/labels'
 import type { Facet } from '@/lib/issueView'
 import type { IssueListItem } from '@/composables/useIssues'
@@ -114,7 +114,6 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
           @click="filterAssignee(a.username)"
         >
           <Avatar class="size-5 ring-2 ring-card">
-            <AvatarImage v-if="a.avatarUrl" :src="a.avatarUrl" :alt="a.username" />
             <AvatarFallback class="bg-muted text-[9px] font-medium text-muted-foreground">
               {{ initials(a.username) }}
             </AvatarFallback>

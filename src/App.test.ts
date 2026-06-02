@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 
 // Counts how many times the routed view is mounted, so we can assert when the
@@ -40,7 +41,7 @@ describe('App routed-view keying', () => {
   it('does not remount the view on a query-only change (drawer open/close)', async () => {
     await router.replace('/projects/grp/proj/issues')
     await router.isReady()
-    wrapper = mount(App, { global: { plugins: [router] } })
+    wrapper = mount(App, { global: { plugins: [router, VueQueryPlugin] } })
     expect(mounts).toBe(1)
 
     await router.replace('/projects/grp/proj/issues?issue=7') // open drawer
@@ -57,7 +58,7 @@ describe('App routed-view keying', () => {
   it('remounts the view when the path changes (full-page issue navigation)', async () => {
     await router.replace('/projects/grp/proj/issues')
     await router.isReady()
-    wrapper = mount(App, { global: { plugins: [router] } })
+    wrapper = mount(App, { global: { plugins: [router, VueQueryPlugin] } })
     expect(mounts).toBe(1)
 
     await router.replace('/projects/grp/proj/issues/7') // expand to full page

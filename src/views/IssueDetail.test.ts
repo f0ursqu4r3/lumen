@@ -20,6 +20,7 @@ const mountDetail = () => mount(IssueDetail, { props: { fullPath: 'grp/proj', ii
 
 const fullIssue = {
   id: 'gid://issue/9', iid: '9', title: 'Bug', description: 'the description', state: 'opened', webUrl: '#',
+  createdAt: '2026-01-01T00:00:00Z', author: { username: 'reporter', avatarUrl: null },
   milestone: { title: 'v1' }, labels: { nodes: [] },
   assignees: { nodes: [{ id: 'u1', username: 'a', avatarUrl: null }] },
   notes: { nodes: [
@@ -44,6 +45,14 @@ describe('IssueDetail', () => {
     expect(w.text()).toContain('@a')
     expect(w.text()).toContain('me too')
     expect(w.text()).toContain('Scratchpad')
+  })
+
+  it('shows the issue originator', async () => {
+    useIssue.mockReturnValue({ data: ref(fullIssue), isLoading: ref(false), error: ref(null) })
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.text()).toContain('Opened by')
+    expect(w.text()).toContain('@reporter')
   })
 
   it('hides system notes', async () => {

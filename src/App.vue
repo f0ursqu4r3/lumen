@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useIsFetching } from '@tanstack/vue-query';
+
+// The signal lamp breathes while any query is in flight — a quiet liveness
+// readout for an instrument that's meant to feel alive without being noisy.
+const fetching = useIsFetching();
+const busy = computed(() => fetching.value > 0);
+</script>
 
 <template>
   <div class="min-h-screen overflow-x-clip bg-background text-foreground">
@@ -10,9 +18,12 @@
           to="/"
           class="group inline-flex items-center gap-2 text-sm font-semibold tracking-tight"
         >
-          <!-- Amber signal lamp — a quiet operational/telemetry nod. -->
+          <!-- Amber signal lamp — a quiet operational/telemetry nod. Steady when
+               idle; a slow breath while fetching (see .lamp-busy in styles.css). -->
           <span
             class="size-2 rounded-full bg-primary shadow-[0_0_8px_oklch(0.82_0.142_81/0.6)] transition-shadow group-hover:shadow-[0_0_12px_oklch(0.82_0.142_81/0.9)]"
+            :class="busy && 'lamp-busy'"
+            :title="busy ? 'Syncing…' : 'Idle'"
           />
           <span class="font-mono lowercase">tragit</span>
         </RouterLink>

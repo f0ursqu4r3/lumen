@@ -15,6 +15,8 @@ const IssueDocument = graphql(`
         description
         state
         webUrl
+        createdAt
+        author { username avatarUrl }
         milestone { title }
         labels { nodes { id title color } }
         assignees { nodes { id username avatarUrl } }

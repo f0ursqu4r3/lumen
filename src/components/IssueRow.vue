@@ -13,7 +13,7 @@ import {
 } from '@lucide/vue'
 import LabelChip from './LabelChip.vue'
 import StateBadge from './StateBadge.vue'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   priorityOf,
   typeOf,
@@ -170,7 +170,6 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         @click="filterAssignee(a.username)"
       >
         <Avatar class="size-6 ring-2 ring-card">
-          <AvatarImage v-if="a.avatarUrl" :src="a.avatarUrl" :alt="a.username" />
           <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
             {{ initials(a.username) }}
           </AvatarFallback>
