@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from "vue";
+import { computed, toRef, watch } from "vue";
 import { useTitle } from "@vueuse/core";
 import { onBeforeRouteLeave } from "vue-router";
-import { Check } from "@lucide/vue";
 import { useIssue } from "@/composables/useIssue";
-import { useAddNote } from "@/composables/useIssueMutations";
 import { useIssueDraft } from "@/composables/useIssueDraft";
 import { useProjectMembers } from "@/composables/useProjectMembers";
 import { useProjectLabels } from "@/composables/useProjectLabels";
@@ -36,9 +34,8 @@ const {
 } = useIssue(toRef(props, "fullPath"), toRef(props, "iid"));
 const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const { data: labelCatalog } = useProjectLabels(toRef(props, "fullPath"));
-const addNote = useAddNote(props.fullPath, props.iid);
 const draftApi = useIssueDraft(props.fullPath, props.iid, issue);
-const { draft, dirty, saving, save, reset, error: saveError } = draftApi;
+const { draft, comment, dirty, saving, save, reset, error: saveError } = draftApi;
 const { confirm } = useConfirm();
 
 // Surface the dirty state to a host (the drawer) so it can guard closing.
@@ -59,7 +56,7 @@ const draftLabelTitles = computed<string[]>({
   },
 });
 
-const actionError = computed(() => addNote.error.value ?? saveError.value);
+const actionError = computed(() => saveError.value);
 
 const notes = computed(
   () =>
@@ -78,30 +75,11 @@ if (!props.embedded) {
   );
 }
 
-const comment = ref("");
-const posted = ref(false);
-let postedTimer: ReturnType<typeof setTimeout> | undefined;
 function nameOrUsername(
   user?: { name?: string | null; username: string } | null,
 ) {
   return user?.name || `@${user?.username}` || "(deleted user)";
 }
-function submitComment() {
-  if (!issue.value || !comment.value.trim()) return;
-  addNote.mutate(
-    { noteableId: issue.value.id, body: comment.value },
-    {
-      onSuccess: () => {
-        comment.value = "";
-        posted.value = true;
-        clearTimeout(postedTimer);
-        postedTimer = setTimeout(() => (posted.value = false), 2200);
-      },
-    },
-  );
-}
-watch(comment, (v) => v && (posted.value = false));
-
 function toggleState() {
   if (!draft.value) return;
   draft.value.state = draft.value.state === "opened" ? "closed" : "opened";
@@ -198,22 +176,12 @@ if (!props.embedded) {
           />
         </CardContent>
       </Card>
-      <form class="space-y-2" @submit.prevent="submitComment">
-        <Textarea v-model="comment" :rows="3" placeholder="Add a comment…" />
-        <div class="flex items-center gap-3">
-          <Button type="submit" :disabled="addNote.isPending.value"
-            >Comment</Button
-          >
-          <span aria-live="polite" class="text-xs text-muted-foreground">
-            <span
-              v-if="posted"
-              class="animate-status inline-flex items-center gap-1"
-            >
-              <Check class="size-3.5 text-emerald-400" />Posted
-            </span>
-          </span>
-        </div>
-      </form>
+      <Textarea
+        v-model="comment"
+        :rows="3"
+        placeholder="Add a comment…"
+        aria-label="Add a comment"
+      />
     </section>
     <Scratchpad :full-path="fullPath" :iid="iid" />
 
