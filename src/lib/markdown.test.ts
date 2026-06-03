@@ -121,3 +121,39 @@ describe('classifyUpload', () => {
     expect(classifyUpload('/uploads/x/noext')).toBe('file')
   })
 })
+
+describe('extractMedia', () => {
+  const sec = (c: string) => c.repeat(32)
+
+  it('collects images and videos in document order, excluding audio/files', () => {
+    const s = sec('a')
+    const md = [
+      `![one](/uploads/${s}/a.png)`,
+      `![two](/uploads/${s}/b.mp4)`,
+      `![skip-audio](/uploads/${s}/c.mp3)`,
+      `![skip-file](/uploads/${s}/d.pdf)`,
+    ].join('\n\n')
+    const items = extractMedia(md, { projectPath: 'g/r' })
+    expect(items.map((i) => i.kind)).toEqual(['image', 'video'])
+    expect(items[0].src).toBe(`/gitlab/v4/projects/g%2Fr/uploads/${s}/a.png`)
+    expect(items[1].alt).toBe('two')
+    expect(items[0].href).toBe(`/uploads/${s}/a.png`)
+  })
+
+  it('skips media inside code fences', () => {
+    const s = sec('b')
+    const md = '```\n' + `![x](/uploads/${s}/a.png)` + '\n```'
+    expect(extractMedia(md, { projectPath: 'g/r' })).toEqual([])
+  })
+
+  it('skips media inside inline code spans', () => {
+    const s = sec('c')
+    expect(extractMedia(`\`![x](/uploads/${s}/a.png)\``, { projectPath: 'g/r' })).toEqual([])
+  })
+
+  it('returns an empty array for empty/null input', () => {
+    expect(extractMedia('')).toEqual([])
+    expect(extractMedia(null)).toEqual([])
+    expect(extractMedia(undefined)).toEqual([])
+  })
+})

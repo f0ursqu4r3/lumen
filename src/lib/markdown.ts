@@ -168,7 +168,28 @@ export function renderMarkdown(src: string | null | undefined, opts: RenderOptio
   })
 }
 
-// Implemented fully in a later task; stub keeps the module's exports stable.
-export function extractMedia(): MediaItem[] {
-  return []
+// Collect slideshow-eligible media (images + videos) in document order, reusing
+// the same tokenizer as rendering so code spans/fences are skipped identically.
+export function extractMedia(
+  src: string | null | undefined,
+  opts: RenderOptions = {},
+): MediaItem[] {
+  if (!src) return []
+  const marked = new Marked()
+  marked.use({ extensions: [gitlabImageExtension(opts.projectPath)] })
+  const items: MediaItem[] = []
+  marked.walkTokens(marked.lexer(src), (token) => {
+    if (token.type !== 'gitlabImage') return
+    const t = token as unknown as { href: string; alt?: string; title?: string }
+    const kind = classifyUpload(t.href)
+    if (kind !== 'image' && kind !== 'video') return
+    items.push({
+      kind,
+      src: rewriteUploadSrc(t.href, opts.projectPath),
+      href: t.href,
+      alt: t.alt ?? '',
+      title: t.title ?? '',
+    })
+  })
+  return items
 }
