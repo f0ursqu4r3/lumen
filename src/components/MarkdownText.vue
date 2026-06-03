@@ -83,7 +83,53 @@ const html = computed(() => renderMarkdown(props.source, { projectPath: props.pr
   border: 1px solid var(--border);
   padding: 0.25rem 0.5rem;
 }
-.markdown :deep(img) {
+.markdown :deep(img),
+.markdown :deep(video),
+.markdown :deep(audio) {
   max-width: 100%;
+}
+.markdown :deep(img[data-media-trigger]) {
+  cursor: zoom-in;
+}
+.markdown :deep(.media-frame) {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+.markdown :deep(.media-expand) {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+.markdown :deep(.media-frame:hover) .media-expand,
+.markdown :deep(.media-frame:focus-within) .media-expand {
+  opacity: 1;
+}
+.markdown :deep(.file-card) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--muted);
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 0.85em;
+}
+.markdown :deep(.file-card:hover) {
+  border-color: var(--primary);
 }
 </style>
