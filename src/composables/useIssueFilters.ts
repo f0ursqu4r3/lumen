@@ -45,7 +45,7 @@ export function useIssueFilters() {
         if (v === undefined || v === '' || (Array.isArray(v) && !v.length)) delete query[k]
         else query[k] = Array.isArray(v) && v.length === 1 ? v[0] : v
       }
-      router.replace({ query })
+      void router.replace({ query })
     })
   }
 
@@ -102,6 +102,7 @@ export function useIssueFilters() {
       ? labels.value.filter((t) => t !== title)
       : [...labels.value, title]
   }
+  // Clears only the filter chips; sort/group/view/scope/state/search are left as-is.
   function clearAll() {
     patch({ label: undefined, assignee: undefined, author: undefined })
   }

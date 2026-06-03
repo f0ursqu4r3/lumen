@@ -124,13 +124,33 @@ describe('useIssueFilters', () => {
     const api = await mountIt()
     api.sort.value = 'title'
     api.view.value = 'board'
+    api.group.value = 'status'
+    api.scope.value = 'team'
     await flushPromises()
     expect(router.currentRoute.value.query.sort).toBe('title')
     expect(router.currentRoute.value.query.view).toBe('board')
+    expect(router.currentRoute.value.query.group).toBe('status')
+    expect(router.currentRoute.value.query.scope).toBe('team')
     api.sort.value = 'updated'
     api.view.value = 'list'
+    api.group.value = 'none'
+    api.scope.value = 'assigned'
     await flushPromises()
     expect(router.currentRoute.value.query.sort).toBeUndefined()
     expect(router.currentRoute.value.query.view).toBeUndefined()
+    expect(router.currentRoute.value.query.group).toBeUndefined()
+    expect(router.currentRoute.value.query.scope).toBeUndefined()
+  })
+
+  it('coalesces synchronous setter calls into one router.replace', async () => {
+    const { router, mountIt } = setup()
+    const api = await mountIt()
+    const spy = vi.spyOn(router, 'replace')
+    api.sort.value = 'priority'
+    api.view.value = 'board'
+    await flushPromises()
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(router.currentRoute.value.query.sort).toBe('priority')
+    expect(router.currentRoute.value.query.view).toBe('board')
   })
 })
