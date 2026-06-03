@@ -11,13 +11,14 @@ export interface LabelNode {
   color: string;
 }
 
-export type SortKey = "priority" | "title" | "updated";
+export type SortKey = "priority" | "title" | "updated" | "created";
 export type GroupKey = "none" | "status" | "priority" | "assignee";
 
 export const SORTS: { value: SortKey; label: string }[] = [
   { value: "updated", label: "Recently updated" },
   { value: "priority", label: "Priority" },
   { value: "title", label: "Title" },
+  { value: "created", label: "Recently created" },
 ];
 
 export const GROUPS: { value: GroupKey; label: string }[] = [
@@ -48,6 +49,12 @@ export function sortIssues(
       .map((issue, i) => ({ issue, i }))
       .sort((a, b) => rank(b.issue) - rank(a.issue) || a.i - b.i)
       .map((x) => x.issue);
+  }
+  if (key === "created") {
+    return arr.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
   return arr;
 }
@@ -172,7 +179,10 @@ export function availableScopes(issues: readonly IssueListItem[]): string[] {
 
 const priorityRank = (label: string) =>
   ["critical", "fasttrack", "high", "medium", "low"].indexOf(
-    label.toLowerCase().replace(" priority", "").replace(/[\s_-]/g, ""),
+    label
+      .toLowerCase()
+      .replace(" priority", "")
+      .replace(/[\s_-]/g, ""),
   );
 
 /**

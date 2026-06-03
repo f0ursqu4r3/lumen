@@ -7,6 +7,7 @@ const issue = {
   title: "Crash on save",
   state: "opened" as const,
   webUrl: "#",
+  createdAt: "2026-01-01T00:00:00Z",
   labels: { nodes: [{ id: "l1", title: "bug", color: "#f00" }] },
   assignees: { nodes: [] },
 };

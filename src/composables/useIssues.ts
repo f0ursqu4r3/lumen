@@ -39,6 +39,7 @@ const IssuesDocument = graphql(`
           title
           state
           webUrl
+          createdAt
           labels {
             nodes {
               id

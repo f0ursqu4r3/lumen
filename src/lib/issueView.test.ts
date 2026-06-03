@@ -15,12 +15,14 @@ const mk = (
   title: string,
   labels: { title: string; color: string }[] = [],
   assignees: string[] = [],
+  createdAt = "2026-01-01T00:00:00Z",
 ): IssueListItem =>
   ({
     iid,
     title,
     state: "opened",
     webUrl: "#",
+    createdAt,
     labels: { nodes: labels.map((l, i) => ({ id: `${iid}-${i}`, ...l })) },
     assignees: {
       nodes: assignees.map((u) => ({ id: u, username: u, avatarUrl: null })),
@@ -58,6 +60,19 @@ describe("sortIssues", () => {
       "1",
       "2",
       "3",
+    ]);
+  });
+
+  it("orders by created, newest first", () => {
+    const byCreated = [
+      mk("1", "old", [], [], "2026-01-01T00:00:00Z"),
+      mk("2", "new", [], [], "2026-03-01T00:00:00Z"),
+      mk("3", "mid", [], [], "2026-02-01T00:00:00Z"),
+    ];
+    expect(sortIssues(byCreated, "created").map((i) => i.iid)).toEqual([
+      "2",
+      "3",
+      "1",
     ]);
   });
 });
