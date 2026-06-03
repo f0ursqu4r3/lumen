@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRef, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { useTitle } from "@vueuse/core";
 import { onBeforeRouteLeave } from "vue-router";
 import { useIssue } from "@/composables/useIssue";
@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import MarkdownText from "@/components/MarkdownText.vue";
+import EditableField from "@/components/EditableField.vue";
 import Scratchpad from "@/components/Scratchpad.vue";
 
 const props = defineProps<{
@@ -93,6 +94,26 @@ function toggleState() {
   draft.value.state = draft.value.state === "opened" ? "closed" : "opened";
 }
 
+const editingTitle = ref(false);
+const editingDescription = ref(false);
+
+// After a successful save (buffer cleared) collapse edited fields back to their
+// rendered view; if the save failed (still dirty), stay in edit mode so unsaved
+// changes are not hidden.
+async function onSave() {
+  await save();
+  if (!dirty.value) {
+    editingTitle.value = false;
+    editingDescription.value = false;
+  }
+}
+// Cancel discards the buffer and returns both fields to rendered.
+function onCancel() {
+  reset();
+  editingTitle.value = false;
+  editingDescription.value = false;
+}
+
 // Dirty guard on full-page navigation (the drawer handles its own close).
 if (!props.embedded) {
   onBeforeRouteLeave(async () => {
@@ -129,12 +150,23 @@ if (!props.embedded) {
       </Button>
     </header>
 
-    <Input
-      v-model="draft.title"
-      data-testid="edit-title"
-      aria-label="Issue title"
-      class="text-lg font-semibold"
-    />
+    <EditableField
+      v-model:editing="editingTitle"
+      label="Title"
+      toggle-testid="edit-title-toggle"
+    >
+      <template #view>
+        <h1 class="text-lg font-semibold text-foreground">{{ draft.title }}</h1>
+      </template>
+      <template #edit>
+        <Input
+          v-model="draft.title"
+          data-testid="edit-title"
+          aria-label="Issue title"
+          class="text-lg font-semibold"
+        />
+      </template>
+    </EditableField>
 
     <p class="text-xs text-muted-foreground">
       Opened by
@@ -146,12 +178,29 @@ if (!props.embedded) {
 
     <ErrorNotice v-if="actionError" :error="actionError" />
 
-    <Textarea
-      v-model="draft.description"
-      :rows="6"
-      aria-label="Issue description"
-      placeholder="Add a description…"
-    />
+    <EditableField
+      v-model:editing="editingDescription"
+      label="Description"
+      toggle-testid="edit-description-toggle"
+    >
+      <template #view>
+        <MarkdownText
+          v-if="draft.description.trim()"
+          :source="draft.description"
+          :project-path="fullPath"
+          class="text-sm"
+        />
+        <p v-else class="text-sm text-muted-foreground">No description</p>
+      </template>
+      <template #edit>
+        <Textarea
+          v-model="draft.description"
+          :rows="6"
+          aria-label="Issue description"
+          placeholder="Add a description…"
+        />
+      </template>
+    </EditableField>
 
     <LabelPicker v-model="draftLabelTitles" :catalog="catalog" />
 
@@ -203,7 +252,7 @@ if (!props.embedded) {
         data-testid="cancel-issue"
         variant="ghost"
         :disabled="saving"
-        @click="reset"
+        @click="onCancel"
       >
         Cancel
       </Button>
@@ -211,7 +260,7 @@ if (!props.embedded) {
         type="button"
         data-testid="save-issue"
         :disabled="saving"
-        @click="save"
+        @click="onSave"
       >
         {{ saving ? "Saving…" : "Save changes" }}
       </Button>
