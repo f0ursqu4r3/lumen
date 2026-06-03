@@ -154,22 +154,24 @@ describe('useIssueFilters', () => {
     expect(router.currentRoute.value.query.view).toBe('board')
   })
 
+  const keyFor = (p: string) => `tragit:issue-filters:${p}`
+
   it('persists the filter slice to localStorage per project', async () => {
     const { mountIt } = setup({}, 'grp/proj')
     const api = await mountIt()
     api.sort.value = 'title'
     api.assignee.value = 'ada'
     await flushPromises()
-    const saved = JSON.parse(localStorage.getItem('tragit:issue-filters:grp/proj')!)
-    expect(saved).toMatchObject({ sort: 'title', assignee: 'ada' })
+    const saved = JSON.parse(localStorage.getItem(keyFor('grp/proj'))!)
+    expect(saved).toStrictEqual({ sort: 'title', assignee: 'ada' })
   })
 
   it('clears the storage entry when all keys return to default', async () => {
     const { mountIt } = setup({ sort: 'title' }, 'grp/proj')
     const api = await mountIt()
-    expect(localStorage.getItem('tragit:issue-filters:grp/proj')).not.toBeNull()
+    expect(localStorage.getItem(keyFor('grp/proj'))).not.toBeNull()
     api.sort.value = 'updated'
     await flushPromises()
-    expect(localStorage.getItem('tragit:issue-filters:grp/proj')).toBeNull()
+    expect(localStorage.getItem(keyFor('grp/proj'))).toBeNull()
   })
 })

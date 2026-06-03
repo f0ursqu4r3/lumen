@@ -147,19 +147,30 @@ export function useIssueFilters() {
   const fullPath = computed(() => asString(route.params.fullPath))
 
   // Mirror the URL's filter slice into per-project storage on every change.
+  // On the initial mount pass we skip an empty slice so we don't clobber any
+  // saved state before it can be restored; later resets to default still clear.
+  let firstPersist = true
   watch(
     () => FILTER_KEYS.map((k) => route.query[k]),
     () => {
       const path = fullPath.value
-      if (!path) return
+      if (!path) {
+        firstPersist = false
+        return
+      }
       const slice: Record<string, string | string[]> = {}
       for (const k of FILTER_KEYS) {
         const v = route.query[k]
         if (v != null) slice[k] = v as string | string[]
       }
+      if (firstPersist && !Object.keys(slice).length) {
+        firstPersist = false
+        return
+      }
+      firstPersist = false
       writeSaved(path, slice)
     },
-    { deep: true, immediate: true },
+    { immediate: true },
   )
 
   return {
