@@ -130,7 +130,7 @@ describe('assigneeSections', () => {
   it('groups people into labelled, non-empty sections in canonical order', () => {
     const { sections } = assigneeSections(issue, members)
     expect(sections.map((s) => s.label)).toEqual([
-      'Reporter',
+      'Originator',
       'Assigned',
       'Commented',
       'Project members',
@@ -143,6 +143,50 @@ describe('assigneeSections', () => {
     // ada + cory already shown in higher groups; only evan remains
     expect(sections.find((s) => s.rel === 'member')!.people.map((p) => p.username)).toEqual([
       'evan',
+    ])
+  })
+
+  it('alphabetizes assignees and members by name but keeps commenters by recency', () => {
+    const issue2 = {
+      author: { username: 'rita', name: 'Rita', avatarUrl: null },
+      assignees: {
+        nodes: [
+          { username: 'zoe', name: 'Zoe', avatarUrl: null },
+          { username: 'amy', name: 'Amy', avatarUrl: null },
+        ],
+      },
+      notes: {
+        nodes: [
+          {
+            system: false,
+            createdAt: '2026-01-01T00:00:00Z',
+            author: { username: 'cory', name: 'Cory', avatarUrl: null },
+          },
+          {
+            system: false,
+            createdAt: '2026-01-05T00:00:00Z',
+            author: { username: 'dee', name: 'Dee', avatarUrl: null },
+          },
+        ],
+      },
+    }
+    const members2 = [
+      { username: 'tom', name: 'Tom', avatarUrl: null },
+      { username: 'bea', name: 'Bea', avatarUrl: null },
+    ]
+    const { sections } = assigneeSections(issue2, members2)
+    expect(sections.find((s) => s.rel === 'assignee')!.people.map((p) => p.username)).toEqual([
+      'amy',
+      'zoe',
+    ])
+    expect(sections.find((s) => s.rel === 'member')!.people.map((p) => p.username)).toEqual([
+      'bea',
+      'tom',
+    ])
+    // commenters stay most-recent-first, not alphabetical
+    expect(sections.find((s) => s.rel === 'commenter')!.people.map((p) => p.username)).toEqual([
+      'dee',
+      'cory',
     ])
   })
 

@@ -75,7 +75,7 @@ type IssueLike = {
 }
 
 const SECTION_LABEL: Record<Relationship, string> = {
-  originator: 'Reporter',
+  originator: 'Originator',
   assignee: 'Assigned',
   commenter: 'Commented',
   member: 'Project members',
@@ -104,11 +104,16 @@ export function assigneeSections(issue: IssueLike, members: Person[]): AssigneeV
     members,
   })
 
-  const sections = SECTION_ORDER.map((rel) => ({
-    rel,
-    label: SECTION_LABEL[rel],
-    people: ordered.filter((p) => p.relationship === rel),
-  })).filter((s) => s.people.length)
+  // Roster-style sections read best alphabetically by name; Commented keeps its
+  // most-recent-first order and Originator is always a single person.
+  const ALPHABETIZED: Relationship[] = ['assignee', 'member']
+  const sections = SECTION_ORDER.map((rel) => {
+    const people = ordered.filter((p) => p.relationship === rel)
+    if (ALPHABETIZED.includes(rel)) {
+      people.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
+    }
+    return { rel, label: SECTION_LABEL[rel], people }
+  }).filter((s) => s.people.length)
 
   return { assignees, sections }
 }
