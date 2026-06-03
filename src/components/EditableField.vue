@@ -10,12 +10,21 @@ const props = withDefaults(
   { toggleTestid: "editable-toggle" },
 );
 const emit = defineEmits<{ "update:editing": [value: boolean] }>();
+
+// Escape leaves edit mode. Stop propagation only while editing so the keystroke
+// doesn't also bubble to an enclosing dialog/drawer and close it; a non-editing
+// Escape is left to bubble (e.g. to close the drawer).
+function onEscape(e: KeyboardEvent) {
+  if (!props.editing) return;
+  e.stopPropagation();
+  emit("update:editing", false);
+}
 </script>
 
 <template>
   <div
     class="space-y-1.5"
-    @keydown.escape="props.editing && emit('update:editing', false)"
+    @keydown.escape="onEscape"
   >
     <div class="flex items-center justify-end">
       <button

@@ -47,4 +47,16 @@ describe("EditableField", () => {
     await w.get('[data-testid="x-toggle"]').trigger("click");
     expect(w.emitted("update:editing")?.at(-1)).toEqual([true]);
   });
+
+  it("Escape while editing emits update:editing false", async () => {
+    const w = mountField(true);
+    await w.trigger("keydown", { key: "Escape" });
+    expect(w.emitted("update:editing")?.at(-1)).toEqual([false]);
+  });
+
+  it("Escape while not editing does not emit", async () => {
+    const w = mountField(false);
+    await w.trigger("keydown", { key: "Escape" });
+    expect(w.emitted("update:editing")).toBeUndefined();
+  });
 });
