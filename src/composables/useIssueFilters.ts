@@ -45,7 +45,13 @@ function readSaved(fullPath: string): Record<string, string | string[]> {
     const raw = localStorage.getItem(storageKey(fullPath))
     if (!raw) return {}
     const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === 'object' ? parsed : {}
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    const out: Record<string, string | string[]> = {}
+    for (const k of FILTER_KEYS) {
+      const v = (parsed as Record<string, unknown>)[k]
+      if (typeof v === 'string' || Array.isArray(v)) out[k] = v as string | string[]
+    }
+    return out
   } catch {
     return {}
   }
@@ -166,7 +172,7 @@ export function useIssueFilters() {
       if (FILTER_KEYS.some((k) => route.query[k] != null)) return
       const saved = readSaved(path)
       if (Object.keys(saved).length)
-        router.replace({ query: { ...route.query, ...saved } })
+        void router.replace({ query: { ...route.query, ...saved } })
     },
     { immediate: true },
   )

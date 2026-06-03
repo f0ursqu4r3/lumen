@@ -210,4 +210,31 @@ describe('useIssueFilters', () => {
     expect(router.currentRoute.value.query.sort).toBe('title')
     expect(router.currentRoute.value.query.issue).toBe('9')
   })
+
+  it('does not seed-navigate when no saved state exists', async () => {
+    const { router, mountIt } = setup({ issue: '9' }, 'grp/proj')
+    const api = await mountIt()
+    const spy = vi.spyOn(router, 'replace')
+    await flushPromises()
+    void api
+    expect(spy).not.toHaveBeenCalled()
+    expect(router.currentRoute.value.query.issue).toBe('9')
+  })
+
+  it('restores the new project\'s saved state on project switch', async () => {
+    localStorage.setItem(
+      'tragit:issue-filters:grp/proj-b',
+      JSON.stringify({ sort: 'priority' }),
+    )
+    const { router, mountIt } = setup({}, 'grp/proj-a')
+    const api = await mountIt()
+    await flushPromises()
+    expect(api.sort.value).toBe('updated') // proj-a has no saved state
+    await router.push('/p/grp/proj-b')
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBe('priority')
+    expect(api.sort.value).toBe('priority')
+    // proj-a storage not contaminated by proj-b's values
+    expect(localStorage.getItem('tragit:issue-filters:grp/proj-a')).toBeNull()
+  })
 })
