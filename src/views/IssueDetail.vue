@@ -35,7 +35,15 @@ const {
 const { data: members } = useProjectMembers(toRef(props, "fullPath"));
 const { data: labelCatalog } = useProjectLabels(toRef(props, "fullPath"));
 const draftApi = useIssueDraft(props.fullPath, props.iid, issue);
-const { draft, comment, dirty, saving, save, reset, error: saveError } = draftApi;
+const {
+  draft,
+  comment,
+  dirty,
+  saving,
+  save,
+  reset,
+  error: saveError,
+} = draftApi;
 const { confirm } = useConfirm();
 
 // Surface the dirty state to a host (the drawer) so it can guard closing.

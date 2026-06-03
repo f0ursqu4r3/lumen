@@ -24,7 +24,14 @@ export interface ScopeGroup {
 
 // Well-known scopes sort to the front, in this order; everything else alpha,
 // and the unscoped "Other" group always last.
-const PREFERRED = ["priority", "type", "workflow", "status", "assigned", "team"];
+const PREFERRED = [
+  "priority",
+  "type",
+  "workflow",
+  "status",
+  "assigned",
+  "team",
+];
 
 export function groupLabelsByScope(labels: readonly LabelLike[]): ScopeGroup[] {
   const map = new Map<string, ScopeGroup>();

@@ -21,9 +21,13 @@ describe("LabelGroupMenu", () => {
 
   it("hides options until a scope row is opened, then shows them", async () => {
     const w = mountMenu();
-    expect(w.find('[data-testid="lgm-opt-priority::high"]').exists()).toBe(false);
+    expect(w.find('[data-testid="lgm-opt-priority::high"]').exists()).toBe(
+      false,
+    );
     await w.get('[data-testid="lgm-scope-priority"]').trigger("click");
-    expect(w.find('[data-testid="lgm-opt-priority::high"]').exists()).toBe(true);
+    expect(w.find('[data-testid="lgm-opt-priority::high"]').exists()).toBe(
+      true,
+    );
     expect(w.find('[data-testid="lgm-opt-priority::low"]').exists()).toBe(true);
   });
 
@@ -37,7 +41,11 @@ describe("LabelGroupMenu", () => {
   it("marks selected options with a check", async () => {
     const w = mountMenu(["priority::high"]);
     await w.get('[data-testid="lgm-scope-priority"]').trigger("click");
-    expect(w.find('[data-testid="lgm-check-priority::high"]').exists()).toBe(true);
-    expect(w.find('[data-testid="lgm-check-priority::low"]').exists()).toBe(false);
+    expect(w.find('[data-testid="lgm-check-priority::high"]').exists()).toBe(
+      true,
+    );
+    expect(w.find('[data-testid="lgm-check-priority::low"]').exists()).toBe(
+      false,
+    );
   });
 });

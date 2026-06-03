@@ -40,10 +40,9 @@ describe("toggleScoped", () => {
   });
 
   it("replaces another value in the same scope (exclusivity)", () => {
-    expect(toggleScoped(["priority::low", "type::bug"], "priority::high")).toEqual([
-      "type::bug",
-      "priority::high",
-    ]);
+    expect(
+      toggleScoped(["priority::low", "type::bug"], "priority::high"),
+    ).toEqual(["type::bug", "priority::high"]);
   });
 
   it("toggles a scoped label off when re-selected", () => {

@@ -50,7 +50,11 @@ const chipFor = (title: string) =>
       v-if="open"
       class="absolute z-50 mt-1 w-56 rounded-lg border border-border bg-popover p-1 shadow-md"
     >
-      <LabelGroupMenu :groups="groups" :selected="modelValue" @toggle="onToggle" />
+      <LabelGroupMenu
+        :groups="groups"
+        :selected="modelValue"
+        @toggle="onToggle"
+      />
     </div>
   </div>
 </template>

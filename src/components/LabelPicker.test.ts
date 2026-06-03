@@ -24,7 +24,9 @@ describe("LabelPicker", () => {
     await w.get('[data-testid="label-picker-trigger"]').trigger("click");
     await w.get('[data-testid="lgm-scope-priority"]').trigger("click");
     await w.get('[data-testid="lgm-opt-priority::high"]').trigger("click");
-    expect(w.emitted("update:modelValue")?.at(-1)).toEqual([["priority::high"]]);
+    expect(w.emitted("update:modelValue")?.at(-1)).toEqual([
+      ["priority::high"],
+    ]);
   });
 
   it("deselects an already-selected label", async () => {

@@ -92,7 +92,9 @@ describe("Scratchpad", () => {
     const empty = mount(Scratchpad, {
       props: { fullPath: "grp/proj", iid: "9" },
     });
-    expect(empty.find('[data-testid="scratchpad-marker"]').exists()).toBe(false);
+    expect(empty.find('[data-testid="scratchpad-marker"]').exists()).toBe(
+      false,
+    );
 
     localStorage.setItem(
       "lumen:scratchpad:grp/proj#8",
@@ -101,9 +103,9 @@ describe("Scratchpad", () => {
     const withContent = mount(Scratchpad, {
       props: { fullPath: "grp/proj", iid: "8" },
     });
-    expect(
-      withContent.find('[data-testid="scratchpad-marker"]').exists(),
-    ).toBe(true);
+    expect(withContent.find('[data-testid="scratchpad-marker"]').exists()).toBe(
+      true,
+    );
   });
 
   it("persists the open state per issue", async () => {
