@@ -1,13 +1,9 @@
-import { useInfiniteQuery } from "@tanstack/vue-query";
-import { computed, type Ref } from "vue";
-import { graphql } from "@/gitlab/generated";
-import { gqlClient } from "@/gitlab/client";
-import { normalizeError, type GitLabError } from "@/gitlab/errors";
-import {
-  issuesKey,
-  toIssuesVars,
-  type IssueFilters,
-} from "@/gitlab/issueParams";
+import { useInfiniteQuery } from '@tanstack/vue-query'
+import { computed, type Ref } from 'vue'
+import { graphql } from '@/gitlab/generated'
+import { gqlClient } from '@/gitlab/client'
+import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { issuesKey, toIssuesVars, type IssueFilters } from '@/gitlab/issueParams'
 
 const IssuesDocument = graphql(`
   query Issues(
@@ -63,56 +59,38 @@ const IssuesDocument = graphql(`
       }
     }
   }
-`);
+`)
 
-async function fetchIssues(
-  fullPath: string,
-  filters: IssueFilters,
-  after?: string,
-) {
+async function fetchIssues(fullPath: string, filters: IssueFilters, after?: string) {
   try {
-    const data = await gqlClient.request(
-      IssuesDocument,
-      toIssuesVars(fullPath, filters, after),
-    );
+    const data = await gqlClient.request(IssuesDocument, toIssuesVars(fullPath, filters, after))
     return {
-      nodes:
-        data.project?.issues?.nodes?.filter(
-          (n): n is NonNullable<typeof n> => !!n,
-        ) ?? [],
+      nodes: data.project?.issues?.nodes?.filter((n): n is NonNullable<typeof n> => !!n) ?? [],
       pageInfo: data.project?.issues?.pageInfo ?? {
         hasNextPage: false,
         endCursor: null,
       },
-    };
+    }
   } catch (e) {
-    throw normalizeError(e);
+    throw normalizeError(e)
   }
 }
 
-type IssuesPage = Awaited<ReturnType<typeof fetchIssues>>;
-export type IssueListItem = IssuesPage["nodes"][number];
+type IssuesPage = Awaited<ReturnType<typeof fetchIssues>>
+export type IssueListItem = IssuesPage['nodes'][number]
 
 export function useIssues(fullPath: Ref<string>, filters: Ref<IssueFilters>) {
   const query = useInfiniteQuery<IssuesPage, GitLabError>({
     queryKey: computed(() => issuesKey(fullPath.value, filters.value)),
     queryFn: ({ pageParam }) =>
-      fetchIssues(
-        fullPath.value,
-        filters.value,
-        pageParam as string | undefined,
-      ),
+      fetchIssues(fullPath.value, filters.value, pageParam as string | undefined),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) =>
-      last.pageInfo.hasNextPage
-        ? (last.pageInfo.endCursor ?? undefined)
-        : undefined,
-  });
+      last.pageInfo.hasNextPage ? (last.pageInfo.endCursor ?? undefined) : undefined,
+  })
 
   // Flatten the paged results so callers see one contiguous list.
-  const issues = computed(
-    () => query.data.value?.pages.flatMap((p) => p.nodes) ?? [],
-  );
+  const issues = computed(() => query.data.value?.pages.flatMap((p) => p.nodes) ?? [])
 
-  return Object.assign(query, { issues });
+  return Object.assign(query, { issues })
 }

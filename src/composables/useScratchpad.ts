@@ -1,5 +1,5 @@
-import { useLocalStorage, StorageSerializers } from "@vueuse/core";
-import { computed, type Ref } from "vue";
+import { useLocalStorage, StorageSerializers } from '@vueuse/core'
+import { computed, type Ref } from 'vue'
 
 // Local-only note for a single issue, stored in this browser only — never sent
 // to GitLab. Keyed by fullPath + iid to mirror `issueKey` and stay isolated
@@ -9,10 +9,7 @@ import { computed, type Ref } from "vue";
 // We pass the `object` serializer explicitly so values are JSON-encoded in
 // localStorage (consistent with other structured data in the store and easy
 // to inspect/migrate in the future).
-export function useScratchpad(
-  fullPath: Ref<string>,
-  iid: Ref<string>,
-): Ref<string> {
+export function useScratchpad(fullPath: Ref<string>, iid: Ref<string>): Ref<string> {
   const stored = useLocalStorage<string | null>(
     () => `lumen:scratchpad:${fullPath.value}#${iid.value}`,
     null,
@@ -20,12 +17,12 @@ export function useScratchpad(
       serializer: StorageSerializers.object,
       writeDefaults: false,
     },
-  );
+  )
 
   return computed({
-    get: () => stored.value ?? "",
+    get: () => stored.value ?? '',
     set: (value) => {
-      stored.value = value.trim() ? value : null;
+      stored.value = value.trim() ? value : null
     },
-  });
+  })
 }

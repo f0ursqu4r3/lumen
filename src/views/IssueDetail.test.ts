@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount, flushPromises } from "@vue/test-utils";
-import { ref } from "vue";
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
+import { ref } from 'vue'
 
-const useIssue = vi.fn();
-vi.mock("@/composables/useIssue", () => ({ useIssue: () => useIssue() }));
+const useIssue = vi.fn()
+vi.mock('@/composables/useIssue', () => ({ useIssue: () => useIssue() }))
 
 const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
   draftSave: vi.fn(),
@@ -12,30 +12,30 @@ const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
     dirty: null as null | { value: boolean },
     comment: null as null | { value: string },
   },
-}));
-vi.mock("@/composables/useProjectMembers", async () => {
-  const { ref } = await import("vue");
-  return { useProjectMembers: () => ({ data: ref([]) }) };
-});
-vi.mock("@/composables/useProjectLabels", async () => {
-  const { ref } = await import("vue");
-  return { useProjectLabels: () => ({ data: ref([]) }) };
-});
-vi.mock("@/composables/useIssueDraft", async () => {
-  const { ref, computed } = await import("vue");
+}))
+vi.mock('@/composables/useProjectMembers', async () => {
+  const { ref } = await import('vue')
+  return { useProjectMembers: () => ({ data: ref([]) }) }
+})
+vi.mock('@/composables/useProjectLabels', async () => {
+  const { ref } = await import('vue')
+  return { useProjectLabels: () => ({ data: ref([]) }) }
+})
+vi.mock('@/composables/useIssueDraft', async () => {
+  const { ref, computed } = await import('vue')
   return {
     useIssueDraft: () => {
       const draft = ref({
-        title: "Bug",
-        description: "the description",
-        state: "opened",
+        title: 'Bug',
+        description: 'the description',
+        state: 'opened',
         labelIds: [] as string[],
-        assigneeUsernames: ["a"],
-      });
+        assigneeUsernames: ['a'],
+      })
       // Reuse the existing refs so external mutations (draftState.dirty!.value = true)
       // made before mount are visible to the component.
-      if (!draftState.dirty) draftState.dirty = ref(false);
-      if (!draftState.comment) draftState.comment = ref("");
+      if (!draftState.dirty) draftState.dirty = ref(false)
+      if (!draftState.comment) draftState.comment = ref('')
       return {
         draft,
         comment: draftState.comment,
@@ -44,158 +44,147 @@ vi.mock("@/composables/useIssueDraft", async () => {
         error: ref(null),
         save: draftSave,
         reset: draftReset,
-      };
+      }
     },
-  };
-});
-vi.mock("vue-router", () => ({ onBeforeRouteLeave: vi.fn() }));
+  }
+})
+vi.mock('vue-router', () => ({ onBeforeRouteLeave: vi.fn() }))
 
-import IssueDetail from "./IssueDetail.vue";
+import IssueDetail from './IssueDetail.vue'
 
 const fullIssue = {
-  id: "gid://issue/9",
-  iid: "9",
-  title: "Bug",
-  description: "the description",
-  state: "opened",
-  webUrl: "#",
-  createdAt: "2026-01-01T00:00:00Z",
-  author: { username: "reporter", avatarUrl: null },
-  milestone: { title: "v1" },
+  id: 'gid://issue/9',
+  iid: '9',
+  title: 'Bug',
+  description: 'the description',
+  state: 'opened',
+  webUrl: '#',
+  createdAt: '2026-01-01T00:00:00Z',
+  author: { username: 'reporter', avatarUrl: null },
+  milestone: { title: 'v1' },
   labels: { nodes: [] },
   assignees: {
-    nodes: [{ id: "u1", name: "Ada Lovelace", username: "a", avatarUrl: null }],
+    nodes: [{ id: 'u1', name: 'Ada Lovelace', username: 'a', avatarUrl: null }],
   },
   notes: {
     nodes: [
       {
-        id: "n1",
-        body: "me too",
+        id: 'n1',
+        body: 'me too',
         system: false,
-        createdAt: "2026-01-01T00:00:00Z",
-        author: { username: "a", avatarUrl: null },
+        createdAt: '2026-01-01T00:00:00Z',
+        author: { username: 'a', avatarUrl: null },
       },
       {
-        id: "n2",
-        body: "changed milestone",
+        id: 'n2',
+        body: 'changed milestone',
         system: true,
-        createdAt: "2026-01-01T00:00:00Z",
-        author: { username: "bot", avatarUrl: null },
+        createdAt: '2026-01-01T00:00:00Z',
+        author: { username: 'bot', avatarUrl: null },
       },
     ],
   },
-};
+}
 
-const mountDetail = () =>
-  mount(IssueDetail, { props: { fullPath: "grp/proj", iid: "9" } });
+const mountDetail = () => mount(IssueDetail, { props: { fullPath: 'grp/proj', iid: '9' } })
 
 beforeEach(() => {
-  useIssue.mockReset();
-  draftSave.mockReset();
-  draftReset.mockReset();
+  useIssue.mockReset()
+  draftSave.mockReset()
+  draftReset.mockReset()
   // Reset shared draft state between tests so mutations from one test don't
   // bleed into the next.
-  if (draftState.dirty) draftState.dirty.value = false;
-  if (draftState.comment) draftState.comment.value = "";
+  if (draftState.dirty) draftState.dirty.value = false
+  if (draftState.comment) draftState.comment.value = ''
   useIssue.mockReturnValue({
     data: ref(fullIssue),
     isLoading: ref(false),
     error: ref(null),
-  });
-});
+  })
+})
 
-describe("IssueDetail (buffered)", () => {
-  it("renders title and description (no editors) by default", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    expect(w.text()).toContain("Bug");
-    expect(w.text()).toContain("the description");
-    expect(w.text()).toContain("me too");
-    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false);
-    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
-      false,
-    );
-  });
+describe('IssueDetail (buffered)', () => {
+  it('renders title and description (no editors) by default', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.text()).toContain('Bug')
+    expect(w.text()).toContain('the description')
+    expect(w.text()).toContain('me too')
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false)
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(false)
+  })
 
-  it("reveals the title input when its Edit toggle is clicked", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    await w.get('[data-testid="edit-title-toggle"]').trigger("click");
-    expect(
-      (w.find('[data-testid="edit-title"]').element as HTMLInputElement).value,
-    ).toBe("Bug");
-  });
+  it('reveals the title input when its Edit toggle is clicked', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    await w.get('[data-testid="edit-title-toggle"]').trigger('click')
+    expect((w.find('[data-testid="edit-title"]').element as HTMLInputElement).value).toBe('Bug')
+  })
 
-  it("reveals the description textarea when its Edit toggle is clicked", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    await w.get('[data-testid="edit-description-toggle"]').trigger("click");
-    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
-      true,
-    );
-  });
+  it('reveals the description textarea when its Edit toggle is clicked', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    await w.get('[data-testid="edit-description-toggle"]').trigger('click')
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(true)
+  })
 
-  it("returns fields to rendered after a successful save", async () => {
-    draftState.dirty!.value = true;
+  it('returns fields to rendered after a successful save', async () => {
+    draftState.dirty!.value = true
     draftSave.mockImplementation(() => {
-      draftState.dirty!.value = false;
-    });
-    const w = mountDetail();
-    await flushPromises();
-    await w.get('[data-testid="edit-title-toggle"]').trigger("click");
-    expect(w.find('[data-testid="edit-title"]').exists()).toBe(true);
-    await w.get('[data-testid="save-issue"]').trigger("click");
-    await flushPromises();
-    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false);
-  });
+      draftState.dirty!.value = false
+    })
+    const w = mountDetail()
+    await flushPromises()
+    await w.get('[data-testid="edit-title-toggle"]').trigger('click')
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(true)
+    await w.get('[data-testid="save-issue"]').trigger('click')
+    await flushPromises()
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false)
+  })
 
-  it("hides system notes", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    expect(w.text()).not.toContain("changed milestone");
-  });
+  it('hides system notes', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.text()).not.toContain('changed milestone')
+  })
 
-  it("shows the Save/Cancel footer only when dirty", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    expect(w.find('[data-testid="save-issue"]').exists()).toBe(false);
-    draftState.dirty!.value = true;
-    await flushPromises();
-    expect(w.find('[data-testid="save-issue"]').exists()).toBe(true);
-  });
+  it('shows the Save/Cancel footer only when dirty', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.find('[data-testid="save-issue"]').exists()).toBe(false)
+    draftState.dirty!.value = true
+    await flushPromises()
+    expect(w.find('[data-testid="save-issue"]').exists()).toBe(true)
+  })
 
-  it("Save calls draft.save and Cancel calls draft.reset", async () => {
-    const w = mountDetail();
-    draftState.dirty!.value = true;
-    await flushPromises();
-    await w.get('[data-testid="save-issue"]').trigger("click");
-    expect(draftSave).toHaveBeenCalled();
-    await w.get('[data-testid="cancel-issue"]').trigger("click");
-    expect(draftReset).toHaveBeenCalled();
-  });
+  it('Save calls draft.save and Cancel calls draft.reset', async () => {
+    const w = mountDetail()
+    draftState.dirty!.value = true
+    await flushPromises()
+    await w.get('[data-testid="save-issue"]').trigger('click')
+    expect(draftSave).toHaveBeenCalled()
+    await w.get('[data-testid="cancel-issue"]').trigger('click')
+    expect(draftReset).toHaveBeenCalled()
+  })
 
-  it("binds the comment textarea to the draft", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    await w
-      .find('textarea[placeholder="Add a comment…"]')
-      .setValue("a new comment");
-    expect(draftState.comment!.value).toBe("a new comment");
-  });
+  it('binds the comment textarea to the draft', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    await w.find('textarea[placeholder="Add a comment…"]').setValue('a new comment')
+    expect(draftState.comment!.value).toBe('a new comment')
+  })
 
-  it("has no standalone Comment button (Save posts the comment)", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    const hasCommentButton = w
-      .findAll("button")
-      .some((b) => b.text() === "Comment");
-    expect(hasCommentButton).toBe(false);
-  });
+  it('has no standalone Comment button (Save posts the comment)', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    const hasCommentButton = w.findAll('button').some((b) => b.text() === 'Comment')
+    expect(hasCommentButton).toBe(false)
+  })
 
-  it("toggling state flips the draft (no immediate mutation)", async () => {
-    const w = mountDetail();
-    await flushPromises();
-    await w.get('[data-testid="toggle-state"]').trigger("click");
-    expect(w.get('[data-testid="toggle-state"]').text()).toContain("Reopen");
-  });
-});
+  it('toggling state flips the draft (no immediate mutation)', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    await w.get('[data-testid="toggle-state"]').trigger('click')
+    expect(w.get('[data-testid="toggle-state"]').text()).toContain('Reopen')
+  })
+})

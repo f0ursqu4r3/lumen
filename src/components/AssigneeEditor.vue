@@ -1,36 +1,31 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
-import { Check, UserPlus, X } from "@lucide/vue";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import AssigneeAvatar from "@/components/AssigneeAvatar.vue";
-import {
-  assigneeSections,
-  personInitial,
-  type OrderedPerson,
-} from "@/lib/assigneeOrder";
-import type { IssueDetail } from "@/composables/useIssue";
-import type { ProjectMember } from "@/composables/useProjectMembers";
+import { computed, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { Check, UserPlus, X } from '@lucide/vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
+import { assigneeSections, personInitial, type OrderedPerson } from '@/lib/assigneeOrder'
+import type { IssueDetail } from '@/composables/useIssue'
+import type { ProjectMember } from '@/composables/useProjectMembers'
 
 const props = defineProps<{
-  issue: IssueDetail;
-  members: ProjectMember[];
-  usernames: string[];
-}>();
-const emit = defineEmits<{ "update:usernames": [usernames: string[]] }>();
+  issue: IssueDetail
+  members: ProjectMember[]
+  usernames: string[]
+}>()
+const emit = defineEmits<{ 'update:usernames': [usernames: string[]] }>()
 
-const open = ref(false);
-const root = ref<HTMLElement | null>(null);
-onClickOutside(root, () => (open.value = false));
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+onClickOutside(root, () => (open.value = false))
 
-const view = computed(() => assigneeSections(props.issue, props.members));
+const view = computed(() => assigneeSections(props.issue, props.members))
 // Flat index so a username from the buffer resolves to a display name/avatar.
 const peopleByUsername = computed(() => {
-  const map = new Map<string, OrderedPerson>();
-  for (const s of view.value.sections)
-    for (const p of s.people) map.set(p.username, p);
-  return map;
-});
+  const map = new Map<string, OrderedPerson>()
+  for (const s of view.value.sections) for (const p of s.people) map.set(p.username, p)
+  return map
+})
 const currentRows = computed(() =>
   props.usernames.map(
     (u) =>
@@ -40,33 +35,29 @@ const currentRows = computed(() =>
         avatarUrl: null,
       },
   ),
-);
+)
 
-const isSelected = (u: string) => props.usernames.includes(u);
+const isSelected = (u: string) => props.usernames.includes(u)
 function removeOne(username: string) {
   emit(
-    "update:usernames",
+    'update:usernames',
     props.usernames.filter((u) => u !== username),
-  );
+  )
 }
 function toggle(username: string) {
   emit(
-    "update:usernames",
+    'update:usernames',
     isSelected(username)
       ? props.usernames.filter((u) => u !== username)
       : [...props.usernames, username],
-  );
+  )
 }
 </script>
 
 <template>
   <div ref="root" class="space-y-2" @keydown.escape="open = false">
     <div v-if="currentRows.length" class="space-y-1">
-      <div
-        v-for="a in currentRows"
-        :key="a.username"
-        class="flex items-center gap-2"
-      >
+      <div v-for="a in currentRows" :key="a.username" class="flex items-center gap-2">
         <AssigneeAvatar
           :name="a.name || a.username"
           :username="a.username"

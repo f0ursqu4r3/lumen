@@ -5,23 +5,23 @@
 // are not in its allow-list of keys. We patch the globals here so tests see
 // jsdom's fully-functional Storage objects instead of Node's stub.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const w = (globalThis as any).jsdom?.window ?? (global as any).window;
+const w = (globalThis as any).jsdom?.window ?? (global as any).window
 if (w?.localStorage && w?.sessionStorage) {
-  Object.defineProperty(globalThis, "localStorage", {
+  Object.defineProperty(globalThis, 'localStorage', {
     value: w.localStorage,
     writable: true,
     configurable: true,
-  });
-  Object.defineProperty(globalThis, "sessionStorage", {
+  })
+  Object.defineProperty(globalThis, 'sessionStorage', {
     value: w.sessionStorage,
     writable: true,
     configurable: true,
-  });
+  })
 } else {
   // Fail loud: this file exists solely to provide a working Storage. A silent
   // no-op here would surface later as a cryptic "localStorage.clear is not a
   // function" in whatever test ran first, hiding the real cause.
   throw new Error(
     "test setup: could not locate jsdom's localStorage/sessionStorage to patch onto globalThis",
-  );
+  )
 }

@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { renderMarkdown } from "@/lib/markdown";
+import { computed } from 'vue'
+import { renderMarkdown } from '@/lib/markdown'
 
-const props = defineProps<{ source?: string | null; projectPath?: string }>();
-const html = computed(() =>
-  renderMarkdown(props.source, { projectPath: props.projectPath }),
-);
+const props = defineProps<{ source?: string | null; projectPath?: string }>()
+const html = computed(() => renderMarkdown(props.source, { projectPath: props.projectPath }))
 </script>
 
 <template>

@@ -1,65 +1,60 @@
-import { describe, it, expect } from "vitest";
-import {
-  issuesKey,
-  issueKey,
-  toIssuesVars,
-  type IssueFilters,
-} from "./issueParams";
+import { describe, it, expect } from 'vitest'
+import { issuesKey, issueKey, toIssuesVars, type IssueFilters } from './issueParams'
 
-describe("issueParams", () => {
-  it("builds a stable, filter-aware list key", () => {
-    const f: IssueFilters = { state: "opened" };
-    expect(issuesKey("grp/proj", f)).toEqual(["issues", "grp/proj", f]);
-  });
+describe('issueParams', () => {
+  it('builds a stable, filter-aware list key', () => {
+    const f: IssueFilters = { state: 'opened' }
+    expect(issuesKey('grp/proj', f)).toEqual(['issues', 'grp/proj', f])
+  })
 
-  it("builds a detail key from path + iid", () => {
-    expect(issueKey("grp/proj", "42")).toEqual(["issue", "grp/proj", "42"]);
-  });
+  it('builds a detail key from path + iid', () => {
+    expect(issueKey('grp/proj', '42')).toEqual(['issue', 'grp/proj', '42'])
+  })
 
-  it("omits empty filters and drops state=all", () => {
-    const vars = toIssuesVars("grp/proj", {
-      state: "all",
+  it('omits empty filters and drops state=all', () => {
+    const vars = toIssuesVars('grp/proj', {
+      state: 'all',
       labels: [],
-      search: "",
-    });
-    expect(vars).toEqual({ fullPath: "grp/proj" });
-  });
+      search: '',
+    })
+    expect(vars).toEqual({ fullPath: 'grp/proj' })
+  })
 
-  it("maps populated filters to GraphQL args", () => {
+  it('maps populated filters to GraphQL args', () => {
     const vars = toIssuesVars(
-      "grp/proj",
+      'grp/proj',
       {
-        state: "closed",
-        labels: ["bug"],
-        assignee: "kdougan",
-        milestone: "v1",
-        search: "crash",
+        state: 'closed',
+        labels: ['bug'],
+        assignee: 'kdougan',
+        milestone: 'v1',
+        search: 'crash',
       },
-      "CURSOR",
-    );
+      'CURSOR',
+    )
     expect(vars).toEqual({
-      fullPath: "grp/proj",
-      state: "closed",
-      labelName: ["bug"],
-      assigneeUsernames: ["kdougan"],
-      milestoneTitle: ["v1"],
-      search: "crash",
-      after: "CURSOR",
-    });
-  });
+      fullPath: 'grp/proj',
+      state: 'closed',
+      labelName: ['bug'],
+      assigneeUsernames: ['kdougan'],
+      milestoneTitle: ['v1'],
+      search: 'crash',
+      after: 'CURSOR',
+    })
+  })
 
-  it("maps author to authorUsername", () => {
-    const vars = toIssuesVars("grp/proj", { author: "kdougan" });
-    expect(vars).toEqual({ fullPath: "grp/proj", authorUsername: "kdougan" });
-  });
+  it('maps author to authorUsername', () => {
+    const vars = toIssuesVars('grp/proj', { author: 'kdougan' })
+    expect(vars).toEqual({ fullPath: 'grp/proj', authorUsername: 'kdougan' })
+  })
 
-  it("maps a normal assignee to assigneeUsernames", () => {
-    const vars = toIssuesVars("grp/proj", { assignee: "ada" });
-    expect(vars).toEqual({ fullPath: "grp/proj", assigneeUsernames: ["ada"] });
-  });
+  it('maps a normal assignee to assigneeUsernames', () => {
+    const vars = toIssuesVars('grp/proj', { assignee: 'ada' })
+    expect(vars).toEqual({ fullPath: 'grp/proj', assigneeUsernames: ['ada'] })
+  })
 
-  it("maps the Unassigned sentinel to assigneeWildcardId NONE", () => {
-    const vars = toIssuesVars("grp/proj", { assignee: "__none__" });
-    expect(vars).toEqual({ fullPath: "grp/proj", assigneeWildcardId: "NONE" });
-  });
-});
+  it('maps the Unassigned sentinel to assigneeWildcardId NONE', () => {
+    const vars = toIssuesVars('grp/proj', { assignee: '__none__' })
+    expect(vars).toEqual({ fullPath: 'grp/proj', assigneeWildcardId: 'NONE' })
+  })
+})

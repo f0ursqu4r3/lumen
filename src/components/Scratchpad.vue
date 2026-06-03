@@ -1,30 +1,27 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from "vue";
-import { useDebounceFn, useLocalStorage } from "@vueuse/core";
-import { ChevronRight } from "@lucide/vue";
-import { useScratchpad } from "@/composables/useScratchpad";
-import { Textarea } from "@/components/ui/textarea";
+import { computed, ref, toRef, watch } from 'vue'
+import { useDebounceFn, useLocalStorage } from '@vueuse/core'
+import { ChevronRight } from '@lucide/vue'
+import { useScratchpad } from '@/composables/useScratchpad'
+import { Textarea } from '@/components/ui/textarea'
 
-const props = defineProps<{ fullPath: string; iid: string }>();
-const note = useScratchpad(toRef(props, "fullPath"), toRef(props, "iid"));
+const props = defineProps<{ fullPath: string; iid: string }>()
+const note = useScratchpad(toRef(props, 'fullPath'), toRef(props, 'iid'))
 
 // Open/closed state persisted per issue (mirrors the note's per-issue keying),
 // default collapsed. Key getter re-keys when the viewed issue changes.
-const open = useLocalStorage(
-  () => `lumen:scratchpad-open:${props.fullPath}#${props.iid}`,
-  false,
-);
+const open = useLocalStorage(() => `lumen:scratchpad-open:${props.fullPath}#${props.iid}`, false)
 
-const hasContent = computed(() => note.value.trim() !== "");
+const hasContent = computed(() => note.value.trim() !== '')
 
 // `note` writes to localStorage synchronously; this flag is purely a UX
 // affordance. It hides while typing and reappears 500ms after the last edit.
-const saved = ref(false);
-const flagSaved = useDebounceFn(() => (saved.value = true), 500);
+const saved = ref(false)
+const flagSaved = useDebounceFn(() => (saved.value = true), 500)
 watch(note, () => {
-  saved.value = false;
-  flagSaved();
-});
+  saved.value = false
+  flagSaved()
+})
 </script>
 
 <template>

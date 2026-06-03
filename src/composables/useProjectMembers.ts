@@ -12,7 +12,12 @@ const ProjectMembersDocument = graphql(`
     project(fullPath: $fullPath) {
       projectMembers(first: 100) {
         nodes {
-          user { id username name avatarUrl }
+          user {
+            id
+            username
+            name
+            avatarUrl
+          }
         }
       }
     }
