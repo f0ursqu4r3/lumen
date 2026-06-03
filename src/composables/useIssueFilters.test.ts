@@ -4,11 +4,14 @@ import { defineComponent, h, nextTick } from 'vue'
 import { createRouter, createMemoryHistory, type Router } from 'vue-router'
 import { useIssueFilters } from './useIssueFilters'
 
-function setup(initialQuery: Record<string, string | string[]> = {}) {
+function setup(
+  initialQuery: Record<string, string | string[]> = {},
+  fullPath = 'grp/proj',
+) {
   let api!: ReturnType<typeof useIssueFilters>
   const router: Router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', component: { render: () => null } }],
+    routes: [{ path: '/p/:fullPath(.*)', component: { render: () => null } }],
   })
   const Comp = defineComponent({
     setup() {
@@ -19,7 +22,7 @@ function setup(initialQuery: Record<string, string | string[]> = {}) {
   return {
     router,
     mountIt: async () => {
-      await router.replace({ path: '/', query: initialQuery })
+      await router.replace({ path: `/p/${fullPath}`, query: initialQuery })
       await router.isReady()
       mount(Comp, { global: { plugins: [router] } })
       await nextTick()
@@ -29,7 +32,10 @@ function setup(initialQuery: Record<string, string | string[]> = {}) {
 }
 
 describe('useIssueFilters', () => {
-  beforeEach(() => vi.useFakeTimers())
+  beforeEach(() => {
+    vi.useFakeTimers()
+    localStorage.clear()
+  })
   afterEach(() => vi.useRealTimers())
 
   it('hydrates labels/assignee/author/state from the query', async () => {
@@ -88,5 +94,43 @@ describe('useIssueFilters', () => {
     vi.advanceTimersByTime(300)
     await flushPromises()
     expect(router.currentRoute.value.query.q).toBe('crash')
+  })
+
+  it('hydrates sort/group/view/scope from the query', async () => {
+    const { mountIt } = setup({
+      sort: 'priority',
+      group: 'status',
+      view: 'board',
+      scope: 'team',
+    })
+    const api = await mountIt()
+    expect(api.sort.value).toBe('priority')
+    expect(api.group.value).toBe('status')
+    expect(api.view.value).toBe('board')
+    expect(api.scope.value).toBe('team')
+  })
+
+  it('defaults sort/group/view/scope when the keys are absent', async () => {
+    const { mountIt } = setup()
+    const api = await mountIt()
+    expect(api.sort.value).toBe('updated')
+    expect(api.group.value).toBe('none')
+    expect(api.view.value).toBe('list')
+    expect(api.scope.value).toBe('assigned')
+  })
+
+  it('writes non-default sort/group/view/scope and omits defaults', async () => {
+    const { router, mountIt } = setup()
+    const api = await mountIt()
+    api.sort.value = 'title'
+    api.view.value = 'board'
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBe('title')
+    expect(router.currentRoute.value.query.view).toBe('board')
+    api.sort.value = 'updated'
+    api.view.value = 'list'
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBeUndefined()
+    expect(router.currentRoute.value.query.view).toBeUndefined()
   })
 })
