@@ -88,7 +88,7 @@ export function useIssueDraft(
       if (body && issue.value?.id)
         await addNote.mutateAsync({
           noteableId: issue.value.id,
-          body: comment.value,
+          body,
         });
       // Mark clean immediately so the Save/Cancel footer hides; the mutations
       // invalidate the issue query, and the resulting refetch then re-syncs the
