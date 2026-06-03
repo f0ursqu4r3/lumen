@@ -36,8 +36,13 @@ describe('EditableField', () => {
   })
 
   it('toggle reads Edit when rendered and Preview when editing', () => {
-    expect(mountField(false).get('[data-testid="editable-toggle"]').text()).toContain('Edit')
-    expect(mountField(true).get('[data-testid="editable-toggle"]').text()).toContain('Preview')
+    // The toggle is icon-only; the action word lives in the aria-label.
+    expect(
+      mountField(false).get('[data-testid="editable-toggle"]').attributes('aria-label'),
+    ).toContain('Edit')
+    expect(
+      mountField(true).get('[data-testid="editable-toggle"]').attributes('aria-label'),
+    ).toContain('Preview')
   })
 
   it('honors a custom toggle testid', async () => {
