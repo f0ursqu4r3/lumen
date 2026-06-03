@@ -135,7 +135,10 @@ const scopeOptions = computed(() => labelScopes(labelCatalog.value))
 const boardGroups = computed(() => groupByScope(sorted.value, boardScope.value, labelCatalog.value))
 // When the chosen scope isn't present (e.g. first load), fall back to the first.
 watch(scopeOptions, (opts) => {
-  if (opts.length && !opts.includes(boardScope.value)) boardScope.value = opts[0]
+  if (!opts.length) return
+  const raw = typeof route.query.scope === 'string' ? route.query.scope : ''
+  const effective = raw || 'assigned'
+  if (!opts.includes(effective)) boardScope.value = opts[0]
 })
 
 // --- drag to retag ----------------------------------------------------------
