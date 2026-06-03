@@ -112,7 +112,9 @@ describe("IssueDetail (buffered)", () => {
     expect(w.text()).toContain("the description");
     expect(w.text()).toContain("me too");
     expect(w.find('[data-testid="edit-title"]').exists()).toBe(false);
-    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(false);
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
+      false,
+    );
   });
 
   it("reveals the title input when its Edit toggle is clicked", async () => {
@@ -128,9 +130,9 @@ describe("IssueDetail (buffered)", () => {
     const w = mountDetail();
     await flushPromises();
     await w.get('[data-testid="edit-description-toggle"]').trigger("click");
-    expect(
-      w.find('textarea[aria-label="Issue description"]').exists(),
-    ).toBe(true);
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
+      true,
+    );
   });
 
   it("returns fields to rendered after a successful save", async () => {

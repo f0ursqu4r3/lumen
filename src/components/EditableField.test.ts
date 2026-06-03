@@ -31,8 +31,12 @@ describe("EditableField", () => {
   });
 
   it("toggle reads Edit when rendered and Preview when editing", () => {
-    expect(mountField(false).get('[data-testid="editable-toggle"]').text()).toContain("Edit");
-    expect(mountField(true).get('[data-testid="editable-toggle"]').text()).toContain("Preview");
+    expect(
+      mountField(false).get('[data-testid="editable-toggle"]').text(),
+    ).toContain("Edit");
+    expect(
+      mountField(true).get('[data-testid="editable-toggle"]').text(),
+    ).toContain("Preview");
   });
 
   it("honors a custom toggle testid", async () => {
