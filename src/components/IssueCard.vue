@@ -63,7 +63,7 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
     :class="{ 'animate-flash': highlight }"
   >
     <RouterLink
-      :to="{ query: { issue: issue.iid } }"
+      :to="{ query: { ...($route?.query ?? {}), issue: issue.iid } }"
       :aria-label="`Issue #${issue.iid}: ${issue.title}`"
       draggable="false"
       class="absolute inset-0 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"

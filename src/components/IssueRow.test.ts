@@ -25,6 +25,19 @@ describe('IssueRow', () => {
     })
   })
 
+  it('preserves the current filters when opening the drawer', () => {
+    const w = mount(IssueRow, {
+      props: { issue, fullPath: 'grp/proj' },
+      global: {
+        stubs: { RouterLink: RouterLinkStub },
+        mocks: { $route: { query: { sort: 'title', label: 'bug' } } },
+      },
+    })
+    expect(w.findComponent(RouterLinkStub).props('to')).toEqual({
+      query: { sort: 'title', label: 'bug', issue: '7' },
+    })
+  })
+
   it('applies the flash-highlight class when highlight is true', () => {
     const w = mount(IssueRow, {
       props: { issue, fullPath: 'grp/proj', highlight: true },

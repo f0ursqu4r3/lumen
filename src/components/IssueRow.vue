@@ -89,7 +89,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
     :style="{ animationDelay: delay }"
   >
     <RouterLink
-      :to="{ query: { issue: issue.iid } }"
+      :to="{ query: { ...($route?.query ?? {}), issue: issue.iid } }"
       :aria-label="`Issue #${issue.iid}: ${issue.title}`"
       class="absolute inset-0 rounded-[inherit] outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
     />
