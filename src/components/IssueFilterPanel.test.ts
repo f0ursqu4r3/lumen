@@ -30,18 +30,20 @@ describe("IssueFilterPanel", () => {
     expect(w.get('[data-testid="filter-count"]').text()).toBe("2");
   });
 
-  it("opens the panel and lists labels, assignees, authors", async () => {
+  it("opens the panel and lists grouped labels, assignees, authors", async () => {
     const w = mountPanel();
     await w.get('[data-testid="filter-trigger"]').trigger("click");
-    expect(w.find('[data-testid="filter-label-bug"]').exists()).toBe(true);
+    // bug + ui are unscoped -> under the Other group row
+    expect(w.find('[data-testid="lgm-scope-__none"]').exists()).toBe(true);
     expect(w.find('[data-testid="filter-assignee-ada"]').exists()).toBe(true);
     expect(w.find('[data-testid="filter-author-bob"]').exists()).toBe(true);
   });
 
-  it("toggling a label emits the next label list", async () => {
+  it("toggling a label emits the next label list (multi)", async () => {
     const w = mountPanel({ labels: ["ui"] });
     await w.get('[data-testid="filter-trigger"]').trigger("click");
-    await w.get('[data-testid="filter-label-bug"]').trigger("click");
+    await w.get('[data-testid="lgm-scope-__none"]').trigger("click");
+    await w.get('[data-testid="lgm-opt-bug"]').trigger("click");
     expect(w.emitted("update:labels")?.at(-1)).toEqual([["ui", "bug"]]);
   });
 

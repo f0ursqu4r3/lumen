@@ -5,18 +5,13 @@ import { ref } from "vue";
 const useIssue = vi.fn();
 vi.mock("@/composables/useIssue", () => ({ useIssue: () => useIssue() }));
 
-const { addNoteMutate, draftSave, draftReset, draftState } = vi.hoisted(() => ({
-  addNoteMutate: vi.fn(),
+const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
   draftSave: vi.fn(),
   draftReset: vi.fn(),
-  draftState: { dirty: null as null | { value: boolean } },
-}));
-vi.mock("@/composables/useIssueMutations", () => ({
-  useAddNote: () => ({
-    mutate: addNoteMutate,
-    isPending: { value: false },
-    error: { value: null },
-  }),
+  draftState: {
+    dirty: null as null | { value: boolean },
+    comment: null as null | { value: string },
+  },
 }));
 vi.mock("@/composables/useProjectMembers", async () => {
   const { ref } = await import("vue");
@@ -38,8 +33,10 @@ vi.mock("@/composables/useIssueDraft", async () => {
         assigneeUsernames: ["a"],
       });
       draftState.dirty = ref(false);
+      draftState.comment = ref("");
       return {
         draft,
+        comment: draftState.comment,
         dirty: draftState.dirty,
         saving: computed(() => false),
         error: ref(null),
@@ -92,7 +89,6 @@ const mountDetail = () =>
 
 beforeEach(() => {
   useIssue.mockReset();
-  addNoteMutate.mockReset();
   draftSave.mockReset();
   draftReset.mockReset();
   useIssue.mockReturnValue({
@@ -137,17 +133,22 @@ describe("IssueDetail (buffered)", () => {
     expect(draftReset).toHaveBeenCalled();
   });
 
-  it("still posts comments", async () => {
+  it("binds the comment textarea to the draft", async () => {
     const w = mountDetail();
     await flushPromises();
     await w
       .find('textarea[placeholder="Add a comment…"]')
       .setValue("a new comment");
-    await w.find("form").trigger("submit.prevent");
-    expect(addNoteMutate).toHaveBeenCalledWith(
-      { noteableId: "gid://issue/9", body: "a new comment" },
-      expect.anything(),
-    );
+    expect(draftState.comment!.value).toBe("a new comment");
+  });
+
+  it("has no standalone Comment button (Save posts the comment)", async () => {
+    const w = mountDetail();
+    await flushPromises();
+    const hasCommentButton = w
+      .findAll("button")
+      .some((b) => b.text() === "Comment");
+    expect(hasCommentButton).toBe(false);
   });
 
   it("toggling state flips the draft (no immediate mutation)", async () => {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { Check, SlidersHorizontal } from "@lucide/vue";
 import { UNASSIGNED } from "@/gitlab/issueParams";
 import type { ProjectLabel } from "@/composables/useProjectLabels";
 import type { ProjectMember } from "@/composables/useProjectMembers";
+import LabelGroupMenu from "@/components/LabelGroupMenu.vue";
+import { groupLabelsByScope } from "@/lib/labelGroups";
 
 const props = defineProps<{
   labels: string[];
@@ -23,6 +25,8 @@ const emit = defineEmits<{
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 onClickOutside(root, () => (open.value = false));
+
+const labelGroups = computed(() => groupLabelsByScope(props.catalog));
 
 const labelSelected = (t: string) => props.labels.includes(t);
 function toggleLabel(t: string) {
@@ -70,32 +74,12 @@ const pickAuthor = (v: string) =>
         >
           Labels
         </p>
-        <div class="max-h-40 overflow-y-auto">
-          <button
-            v-for="l in catalog"
-            :key="l.id"
-            type="button"
-            :data-testid="`filter-label-${l.title}`"
-            class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
-            @click="toggleLabel(l.title)"
-          >
-            <span
-              class="size-2.5 shrink-0 rounded-full"
-              :style="{ backgroundColor: l.color }"
-            />
-            <span class="flex-1 truncate text-foreground">{{ l.title }}</span>
-            <Check
-              v-if="labelSelected(l.title)"
-              class="size-3.5 text-primary"
-            />
-          </button>
-          <p
-            v-if="!catalog.length"
-            class="px-2 py-1.5 text-xs text-muted-foreground"
-          >
-            No labels.
-          </p>
-        </div>
+        <LabelGroupMenu
+          :groups="labelGroups"
+          :selected="labels"
+          flyout-side="left"
+          @toggle="toggleLabel"
+        />
       </section>
 
       <section class="space-y-1">
