@@ -24,16 +24,47 @@ describe('orderAssignees', () => {
     ])
   })
 
+  it('orders contributors after assignees and before commenters', () => {
+    const out = orderAssignees({
+      author: m('rita'),
+      assignees: [m('ada')],
+      contributors: [m('mia')],
+      noteAuthors: [m('cory')],
+      members: [m('dee')],
+    })
+    expect(out.map((p) => p.username)).toEqual(['rita', 'ada', 'mia', 'cory', 'dee'])
+    expect(out.map((p) => p.relationship)).toEqual([
+      'originator',
+      'assignee',
+      'contributor',
+      'commenter',
+      'member',
+    ])
+  })
+
   it('dedups a person to their highest-priority group', () => {
     const out = orderAssignees({
       author: m('ada'),
       assignees: [m('ada')],
+      contributors: [m('ada')],
       noteAuthors: [m('ada')],
       members: [m('ada')],
     })
     expect(out).toHaveLength(1)
     expect(out[0].relationship).toBe('originator')
     expect(out[0].isAssigned).toBe(true)
+  })
+
+  it('keeps a contributor out of the commenter group when they also commented', () => {
+    const out = orderAssignees({
+      author: null,
+      assignees: [],
+      contributors: [m('mia')],
+      noteAuthors: [m('mia')],
+      members: [],
+    })
+    expect(out).toHaveLength(1)
+    expect(out[0].relationship).toBe('contributor')
   })
 
   it('flags current assignees with isAssigned regardless of group', () => {
@@ -187,6 +218,26 @@ describe('assigneeSections', () => {
     expect(sections.find((s) => s.rel === 'commenter')!.people.map((p) => p.username)).toEqual([
       'dee',
       'cory',
+    ])
+  })
+
+  it('inserts an alphabetized Contributors section before Commented', () => {
+    const contributors = [
+      { username: 'wes', name: 'Wes', avatarUrl: null },
+      { username: 'gil', name: 'Gil', avatarUrl: null },
+    ]
+    const { sections } = assigneeSections(issue, members, contributors)
+    expect(sections.map((s) => s.label)).toEqual([
+      'Originator',
+      'Assigned',
+      'Contributors',
+      'Commented',
+      'Project members',
+    ])
+    // contributors are roster-style: alphabetized by name
+    expect(sections.find((s) => s.rel === 'contributor')!.people.map((p) => p.username)).toEqual([
+      'gil',
+      'wes',
     ])
   })
 

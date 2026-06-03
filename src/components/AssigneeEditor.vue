@@ -7,15 +7,17 @@ import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
 import { assigneeSections, personInitial, type OrderedPerson } from '@/lib/assigneeOrder'
 import type { IssueDetail } from '@/composables/useIssue'
 import type { ProjectMember } from '@/composables/useProjectMembers'
+import type { ProjectContributor } from '@/composables/useProjectContributors'
 
 const props = withDefaults(
   defineProps<{
     issue: IssueDetail
     members: ProjectMember[]
+    contributors?: ProjectContributor[]
     usernames: string[]
     label?: string
   }>(),
-  { label: 'Assignees' },
+  { label: 'Assignees', contributors: () => [] },
 )
 const emit = defineEmits<{ 'update:usernames': [usernames: string[]] }>()
 
@@ -23,7 +25,7 @@ const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 onClickOutside(root, () => (open.value = false))
 
-const view = computed(() => assigneeSections(props.issue, props.members))
+const view = computed(() => assigneeSections(props.issue, props.members, props.contributors))
 // Flat index so a username from the buffer resolves to a display name/avatar.
 const peopleByUsername = computed(() => {
   const map = new Map<string, OrderedPerson>()

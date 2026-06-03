@@ -1,4 +1,4 @@
-export type Relationship = 'originator' | 'assignee' | 'commenter' | 'member'
+export type Relationship = 'originator' | 'assignee' | 'contributor' | 'commenter' | 'member'
 
 export interface Person {
   username: string
@@ -22,6 +22,7 @@ export interface OrderedPerson extends Person {
 export function orderAssignees(input: {
   author?: Person | null
   assignees: Person[]
+  contributors?: Person[]
   noteAuthors: Person[]
   members: Person[]
 }): OrderedPerson[] {
@@ -43,6 +44,7 @@ export function orderAssignees(input: {
 
   push(input.author, 'originator')
   input.assignees.forEach((a) => push(a, 'assignee'))
+  ;(input.contributors ?? []).forEach((c) => push(c, 'contributor'))
   input.noteAuthors.forEach((n) => push(n, 'commenter'))
   input.members.forEach((mb) => push(mb, 'member'))
 
@@ -63,6 +65,7 @@ export interface AssigneeView {
 type IssueLike = {
   author?: Person | null
   assignees?: { nodes?: (Person | null)[] | null } | null
+  // notes carry the commenter signal; contributors are passed in separately.
   notes?: {
     nodes?:
       | ({
@@ -77,17 +80,28 @@ type IssueLike = {
 const SECTION_LABEL: Record<Relationship, string> = {
   originator: 'Originator',
   assignee: 'Assigned',
+  contributor: 'Contributors',
   commenter: 'Commented',
   member: 'Project members',
 }
-const SECTION_ORDER: Relationship[] = ['originator', 'assignee', 'commenter', 'member']
+const SECTION_ORDER: Relationship[] = [
+  'originator',
+  'assignee',
+  'contributor',
+  'commenter',
+  'member',
+]
 
 /**
  * Derive the current assignees and the relationship-grouped, labelled sections
  * for an issue, so the assignee editor and quick-assign share one ordering.
  * `issue` is accepted structurally to keep this module free of generated types.
  */
-export function assigneeSections(issue: IssueLike, members: Person[]): AssigneeView {
+export function assigneeSections(
+  issue: IssueLike,
+  members: Person[],
+  contributors: Person[] = [],
+): AssigneeView {
   const assignees = (issue.assignees?.nodes ?? []).filter((a): a is Person => !!a)
   const noteAuthors = (issue.notes?.nodes ?? [])
     .filter(
@@ -100,13 +114,14 @@ export function assigneeSections(issue: IssueLike, members: Person[]): AssigneeV
   const ordered = orderAssignees({
     author: issue.author ?? null,
     assignees,
+    contributors,
     noteAuthors,
     members,
   })
 
   // Roster-style sections read best alphabetically by name; Commented keeps its
   // most-recent-first order and Originator is always a single person.
-  const ALPHABETIZED: Relationship[] = ['assignee', 'member']
+  const ALPHABETIZED: Relationship[] = ['assignee', 'contributor', 'member']
   const sections = SECTION_ORDER.map((rel) => {
     const people = ordered.filter((p) => p.relationship === rel)
     if (ALPHABETIZED.includes(rel)) {

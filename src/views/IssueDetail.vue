@@ -5,6 +5,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/composables/useIssue'
 import { useIssueDraft } from '@/composables/useIssueDraft'
 import { useProjectMembers } from '@/composables/useProjectMembers'
+import { useProjectContributors } from '@/composables/useProjectContributors'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useConfirm } from '@/composables/useConfirm'
 import QuickAssign from '@/components/QuickAssign.vue'
@@ -31,6 +32,7 @@ const emit = defineEmits<{ 'update:dirty': [value: boolean] }>()
 
 const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
+const { data: contributors } = useProjectContributors(toRef(props, 'fullPath'))
 const { data: labelCatalog } = useProjectLabels(toRef(props, 'fullPath'))
 const draftApi = useIssueDraft(props.fullPath, props.iid, issue)
 const { draft, comment, dirty, saving, save, reset, error: saveError } = draftApi
@@ -302,6 +304,7 @@ if (!props.embedded) {
           v-model:usernames="draft.assigneeUsernames"
           :issue="issue"
           :members="members ?? []"
+          :contributors="contributors ?? []"
           label="Assignees"
         >
           <template #actions>
@@ -309,6 +312,7 @@ if (!props.embedded) {
               v-model:usernames="draft.assigneeUsernames"
               :issue="issue"
               :members="members ?? []"
+              :contributors="contributors ?? []"
             />
           </template>
         </AssigneeEditor>

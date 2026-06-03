@@ -6,19 +6,24 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { assigneeSections, personInitial } from '@/lib/assigneeOrder'
 import type { IssueDetail } from '@/composables/useIssue'
 import type { ProjectMember } from '@/composables/useProjectMembers'
+import type { ProjectContributor } from '@/composables/useProjectContributors'
 
-const props = defineProps<{
-  issue: IssueDetail
-  members: ProjectMember[]
-  usernames: string[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    issue: IssueDetail
+    members: ProjectMember[]
+    contributors?: ProjectContributor[]
+    usernames: string[]
+  }>(),
+  { contributors: () => [] },
+)
 const emit = defineEmits<{ 'update:usernames': [usernames: string[]] }>()
 
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 onClickOutside(root, () => (open.value = false))
 
-const view = computed(() => assigneeSections(props.issue, props.members))
+const view = computed(() => assigneeSections(props.issue, props.members, props.contributors))
 
 // Quick assign replaces the whole assignee set with the chosen person.
 function assignOnly(username: string) {
