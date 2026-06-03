@@ -129,6 +129,9 @@ if (!props.embedded) {
     </header>
 
     <EditableField v-model:editing="editingTitle" label="Title" toggle-testid="edit-title-toggle">
+      <template #label>
+        <h2 class="text-sm font-semibold">Title</h2>
+      </template>
       <template #view>
         <h1 class="text-lg font-semibold text-foreground">{{ draft.title }}</h1>
       </template>
@@ -158,6 +161,9 @@ if (!props.embedded) {
         label="Description"
         toggle-testid="edit-description-toggle"
       >
+        <template #label>
+          <h2 class="text-sm font-semibold">Description</h2>
+        </template>
         <template #view>
           <MarkdownText
             v-if="draft.description.trim()"

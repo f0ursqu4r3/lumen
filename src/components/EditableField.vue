@@ -23,10 +23,14 @@ function onEscape(e: KeyboardEvent) {
 
 <template>
   <div class="space-y-1.5" @keydown.escape="onEscape">
-    <div class="flex items-center justify-between">
-      <span class="text-sm font-medium text-muted-foreground">
-        {{ props.label }}
-      </span>
+    <div class="flex items-center gap-2">
+      <div class="flex-1">
+        <slot name="label">
+          <span class="text-sm font-medium text-muted-foreground">
+            {{ props.label }}
+          </span>
+        </slot>
+      </div>
       <button
         type="button"
         :data-testid="props.toggleTestid"
@@ -35,7 +39,6 @@ function onEscape(e: KeyboardEvent) {
         @click="emit('update:editing', !props.editing)"
       >
         <component :is="props.editing ? Eye : Pencil" class="size-3.5" />
-        {{ props.editing ? 'Preview' : 'Edit' }}
       </button>
     </div>
     <slot v-if="props.editing" name="edit" />
