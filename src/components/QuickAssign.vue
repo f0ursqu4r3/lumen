@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-import { Check, UserPlus } from '@lucide/vue'
+import { Check, UserStar } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { assigneeSections, personInitial } from '@/lib/assigneeOrder'
 import type { IssueDetail } from '@/composables/useIssue'
@@ -37,7 +37,7 @@ function assignOnly(username: string) {
       class="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
       @click="open = !open"
     >
-      <UserPlus class="size-3.5" />
+      <UserStar class="size-3.5" />
       Quick assign
     </button>
 
@@ -45,7 +45,7 @@ function assignOnly(username: string) {
       v-if="open"
       role="menu"
       aria-label="Quick assign"
-      class="absolute z-50 mt-1 max-h-72 w-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-md"
+      class="absolute right-0 z-50 mt-1 max-h-72 w-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-md"
     >
       <template v-for="section in view.sections" :key="section.rel">
         <p

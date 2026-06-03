@@ -264,24 +264,22 @@ if (!props.embedded) {
 
       <!-- Details rail: the issue's attributes, grouped. -->
       <aside class="issue__meta space-y-6 animate-row-in" style="animation-delay: 90ms">
-        <div class="space-y-2">
-          <span class="field-label">Labels</span>
-          <LabelPicker v-model="draftLabelTitles" :catalog="catalog" />
-        </div>
+        <LabelPicker v-model="draftLabelTitles" :catalog="catalog" label="Labels" />
 
-        <div class="space-y-2">
-          <span class="field-label">Assignees</span>
-          <AssigneeEditor
-            v-model:usernames="draft.assigneeUsernames"
-            :issue="issue"
-            :members="members ?? []"
-          />
-          <QuickAssign
-            v-model:usernames="draft.assigneeUsernames"
-            :issue="issue"
-            :members="members ?? []"
-          />
-        </div>
+        <AssigneeEditor
+          v-model:usernames="draft.assigneeUsernames"
+          :issue="issue"
+          :members="members ?? []"
+          label="Assignees"
+        >
+          <template #actions>
+            <QuickAssign
+              v-model:usernames="draft.assigneeUsernames"
+              :issue="issue"
+              :members="members ?? []"
+            />
+          </template>
+        </AssigneeEditor>
 
         <div class="space-y-1.5">
           <span class="field-label">Milestone</span>
@@ -307,7 +305,9 @@ if (!props.embedded) {
             </Avatar>
             <div class="min-w-0 flex-1">
               <div class="flex items-baseline gap-2">
-                <span class="text-sm font-medium text-foreground">{{ nameOrUsername(n.author) }}</span>
+                <span class="text-sm font-medium text-foreground">{{
+                  nameOrUsername(n.author)
+                }}</span>
                 <span class="font-mono text-xs text-muted-foreground">
                   {{ new Date(n.createdAt).toLocaleDateString() }}
                 </span>
@@ -369,18 +369,6 @@ if (!props.embedded) {
 </template>
 
 <style scoped>
-/* Quiet field tag — a consistent second tier under the big title, so every
-   attribute and section reads as a labeled field rather than a stray widget. */
-.field-label {
-  display: block;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
 /* The article is its own query context so the layout responds to the space it
    actually occupies (narrow drawer vs. full page), not the viewport. */
 .issue {
@@ -411,6 +399,16 @@ if (!props.embedded) {
 .issue__body {
   display: grid;
   gap: 2rem;
+}
+
+/* The details rail hosts the Labels/Assignees popovers, which overflow downward
+   past the rail. animate-row-in leaves every body section as its own stacking
+   context, so without this the later-in-DOM discussion would paint over an open
+   menu (the menu's z-index is trapped inside the rail's context). Lift the whole
+   rail above its siblings so its popovers win. */
+.issue__meta {
+  position: relative;
+  z-index: 1;
 }
 
 /* Past ~768px (full page, never the ~608px drawer) the attributes lift out of
