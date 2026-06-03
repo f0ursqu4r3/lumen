@@ -15,6 +15,31 @@ const asArray = (v: unknown): string[] =>
       : []
 const asString = (v: unknown): string => (typeof v === 'string' ? v : '')
 
+// URL keys that make up the persisted, per-project view-state slice.
+const FILTER_KEYS = [
+  'state',
+  'label',
+  'assignee',
+  'author',
+  'q',
+  'sort',
+  'group',
+  'view',
+  'scope',
+] as const
+
+const storageKey = (fullPath: string) => `tragit:issue-filters:${fullPath}`
+
+function writeSaved(fullPath: string, slice: Record<string, string | string[]>) {
+  try {
+    if (Object.keys(slice).length)
+      localStorage.setItem(storageKey(fullPath), JSON.stringify(slice))
+    else localStorage.removeItem(storageKey(fullPath))
+  } catch {
+    // storage unavailable (quota / disabled) — degrade silently
+  }
+}
+
 /**
  * Single source of truth for the issue filters, round-tripped through the route
  * query so links are shareable and back/forward works. Search is held locally
@@ -118,6 +143,24 @@ export function useIssueFilters() {
     assignee: assignee.value || undefined,
     author: author.value || undefined,
   }))
+
+  const fullPath = computed(() => asString(route.params.fullPath))
+
+  // Mirror the URL's filter slice into per-project storage on every change.
+  watch(
+    () => FILTER_KEYS.map((k) => route.query[k]),
+    () => {
+      const path = fullPath.value
+      if (!path) return
+      const slice: Record<string, string | string[]> = {}
+      for (const k of FILTER_KEYS) {
+        const v = route.query[k]
+        if (v != null) slice[k] = v as string | string[]
+      }
+      writeSaved(path, slice)
+    },
+    { deep: true, immediate: true },
+  )
 
   return {
     state,
