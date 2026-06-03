@@ -23,7 +23,10 @@ function onEscape(e: KeyboardEvent) {
 
 <template>
   <div class="space-y-1.5" @keydown.escape="onEscape">
-    <div class="flex items-center justify-end">
+    <div class="flex items-center justify-between">
+      <span class="text-sm font-medium text-muted-foreground">
+        {{ props.label }}
+      </span>
       <button
         type="button"
         :data-testid="props.toggleTestid"

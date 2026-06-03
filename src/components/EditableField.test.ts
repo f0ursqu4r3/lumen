@@ -12,6 +12,11 @@ const mountField = (editing = false) =>
   })
 
 describe('EditableField', () => {
+  it('renders the field label', () => {
+    expect(mountField(false).text()).toContain('Title')
+    expect(mountField(true).text()).toContain('Title')
+  })
+
   it('shows the view slot and hides edit when not editing', () => {
     const w = mountField(false)
     expect(w.find('[data-testid="v"]').exists()).toBe(true)
