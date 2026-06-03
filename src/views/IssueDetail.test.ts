@@ -32,8 +32,10 @@ vi.mock("@/composables/useIssueDraft", async () => {
         labelIds: [] as string[],
         assigneeUsernames: ["a"],
       });
-      draftState.dirty = ref(false);
-      draftState.comment = ref("");
+      // Reuse the existing refs so external mutations (draftState.dirty!.value = true)
+      // made before mount are visible to the component.
+      if (!draftState.dirty) draftState.dirty = ref(false);
+      if (!draftState.comment) draftState.comment = ref("");
       return {
         draft,
         comment: draftState.comment,
@@ -91,6 +93,10 @@ beforeEach(() => {
   useIssue.mockReset();
   draftSave.mockReset();
   draftReset.mockReset();
+  // Reset shared draft state between tests so mutations from one test don't
+  // bleed into the next.
+  if (draftState.dirty) draftState.dirty.value = false;
+  if (draftState.comment) draftState.comment.value = "";
   useIssue.mockReturnValue({
     data: ref(fullIssue),
     isLoading: ref(false),
@@ -99,13 +105,48 @@ beforeEach(() => {
 });
 
 describe("IssueDetail (buffered)", () => {
-  it("renders the editable title and description bound to the draft", async () => {
+  it("renders title and description (no editors) by default", async () => {
     const w = mountDetail();
     await flushPromises();
+    expect(w.text()).toContain("Bug");
+    expect(w.text()).toContain("the description");
+    expect(w.text()).toContain("me too");
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false);
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
+      false,
+    );
+  });
+
+  it("reveals the title input when its Edit toggle is clicked", async () => {
+    const w = mountDetail();
+    await flushPromises();
+    await w.get('[data-testid="edit-title-toggle"]').trigger("click");
     expect(
       (w.find('[data-testid="edit-title"]').element as HTMLInputElement).value,
     ).toBe("Bug");
-    expect(w.text()).toContain("me too");
+  });
+
+  it("reveals the description textarea when its Edit toggle is clicked", async () => {
+    const w = mountDetail();
+    await flushPromises();
+    await w.get('[data-testid="edit-description-toggle"]').trigger("click");
+    expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(
+      true,
+    );
+  });
+
+  it("returns fields to rendered after a successful save", async () => {
+    draftState.dirty!.value = true;
+    draftSave.mockImplementation(() => {
+      draftState.dirty!.value = false;
+    });
+    const w = mountDetail();
+    await flushPromises();
+    await w.get('[data-testid="edit-title-toggle"]').trigger("click");
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(true);
+    await w.get('[data-testid="save-issue"]').trigger("click");
+    await flushPromises();
+    expect(w.find('[data-testid="edit-title"]').exists()).toBe(false);
   });
 
   it("hides system notes", async () => {
