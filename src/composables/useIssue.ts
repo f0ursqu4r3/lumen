@@ -3,7 +3,7 @@ import { computed, type Ref } from 'vue'
 import { graphql } from '@/gitlab/generated'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
-import { issueKey } from '@/gitlab/issueParams'
+import { ISSUE_POLL_MS, issueKey } from '@/gitlab/issueParams'
 
 const IssueDocument = graphql(`
   query Issue($fullPath: ID!, $iid: String!) {
@@ -73,5 +73,9 @@ export function useIssue(fullPath: Ref<string>, iid: Ref<string>) {
   return useQuery<Awaited<ReturnType<typeof fetchIssue>>, GitLabError>({
     queryKey: computed(() => issueKey(fullPath.value, iid.value)),
     queryFn: () => fetchIssue(fullPath.value, iid.value),
+    // Polls the open issue (incl. its comments) until per-issue GraphQL
+    // subscriptions replace this. Shares the list's cadence.
+    refetchInterval: ISSUE_POLL_MS,
+    refetchOnWindowFocus: true,
   })
 }

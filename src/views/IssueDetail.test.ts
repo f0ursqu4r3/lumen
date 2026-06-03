@@ -187,4 +187,37 @@ describe('IssueDetail (buffered)', () => {
     await w.get('[data-testid="toggle-state"]').trigger('click')
     expect(w.get('[data-testid="toggle-state"]').text()).toContain('Reopen')
   })
+
+  it('animates only notes that arrive after the first render (not the initial thread)', async () => {
+    const issueRef = ref({ ...fullIssue })
+    useIssue.mockReturnValue({ data: issueRef, isLoading: ref(false), error: ref(null) })
+    const w = mountDetail()
+    await flushPromises()
+
+    const liFor = (body: string) => w.findAll('li').find((li) => li.text().includes(body))
+    // The note present at load lands with the section, not its own entrance.
+    expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
+
+    // A poll delivers a new comment.
+    issueRef.value = {
+      ...issueRef.value,
+      notes: {
+        nodes: [
+          ...issueRef.value.notes.nodes,
+          {
+            id: 'n3',
+            body: 'fresh reply',
+            system: false,
+            createdAt: '2026-01-02T00:00:00Z',
+            author: { username: 'b', avatarUrl: null },
+          },
+        ],
+      },
+    }
+    await flushPromises()
+
+    // Only the newcomer animates; the pre-existing note stays put.
+    expect(liFor('fresh reply')?.classes()).toContain('animate-note-in')
+    expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
+  })
 })

@@ -61,6 +61,38 @@ const notes = computed(
     issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n && !n.system) ?? [],
 )
 
+// Only notes that arrive *after* the thread first renders should animate in;
+// the initial set lands with the section's own entrance. We prime `seen` on the
+// first resolve (nothing flagged fresh), then any later id is a new comment —
+// flag it so its <li> eases in, and drop the flag once the animation has played
+// so an unrelated re-render can't replay it.
+const seen = new Set<string>()
+const fresh = ref(new Set<string>())
+let primed = false
+
+watch(
+  () => notes.value.map((n) => n.id),
+  (ids) => {
+    if (!primed) {
+      // Wait for the first real resolve; priming on the pre-load empty set would
+      // make the whole initial thread count as "arrived" and animate at once.
+      if (!issue.value) return
+      ids.forEach((id) => seen.add(id))
+      primed = true
+      return
+    }
+    const arrived = ids.filter((id) => !seen.has(id))
+    if (!arrived.length) return
+    arrived.forEach((id) => {
+      seen.add(id)
+      fresh.value.add(id)
+    })
+    // Drop the flag after the animation completes (Vue tracks Set mutations).
+    setTimeout(() => arrived.forEach((id) => fresh.value.delete(id)), 1500)
+  },
+  { immediate: true },
+)
+
 if (!props.embedded) {
   useTitle(
     computed(() => (issue.value ? `#${issue.value.iid} ${issue.value.title} · lumen` : 'lumen')),
@@ -299,7 +331,12 @@ if (!props.embedded) {
         </div>
 
         <ul v-if="notes.length" class="mt-3 divide-y divide-border/60">
-          <li v-for="n in notes" :key="n.id" class="flex gap-3 py-4 first:pt-0">
+          <li
+            v-for="n in notes"
+            :key="n.id"
+            class="flex gap-3 py-4 first:pt-0"
+            :class="{ 'animate-note-in': fresh.has(n.id) }"
+          >
             <Avatar class="mt-0.5 size-7 shrink-0 text-[11px]">
               <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
             </Avatar>

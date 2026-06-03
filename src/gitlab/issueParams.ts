@@ -3,6 +3,11 @@ import type { IssuableState, IssuesQueryVariables } from '@/gitlab/generated/gra
 // `assignee` carries either a username or the `__none__` sentinel (Unassigned).
 export const UNASSIGNED = '__none__'
 
+// How often issue data refetches in the background. GitLab has no project-level
+// "issue created" subscription, so polling is the only way to keep the list
+// live; the detail view rides the same cadence until per-issue subscriptions land.
+export const ISSUE_POLL_MS = 30_000
+
 export interface IssueFilters {
   state?: 'opened' | 'closed' | 'all'
   labels?: string[]

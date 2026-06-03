@@ -252,6 +252,30 @@
   }
 }
 
+/* A comment that arrives mid-session (via polling) eases in on its own — the rest
+   of the already-rendered thread stays put. Rise+fade like row-in, with a brief
+   amber wash (kin to flash-in) so the eye catches the new note. */
+@keyframes note-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    background-color: oklch(0.82 0.142 81 / 0.14);
+  }
+  60% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-note-in {
+    animation: note-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 /* Picker → issues handoff: the chosen project's name is the shared element, so
    it morphs into the issues header while the rest of the page cross-fades. The
    View Transition itself is only invoked when motion is allowed (see
