@@ -10,6 +10,31 @@ export interface RenderOptions {
   projectPath?: string
 }
 
+// Slideshow-eligible media only — audio and file attachments are deliberately
+// excluded, so `kind` is narrower than UploadKind.
+export interface MediaItem {
+  kind: 'image' | 'video'
+  src: string // rewritten proxy URL (matches data-media-src on the rendered element)
+  href: string // original href
+  alt: string
+  title: string
+}
+
+export type UploadKind = 'image' | 'video' | 'audio' | 'file'
+
+const EXT_KIND: Record<string, UploadKind> = {
+  png: 'image', jpg: 'image', jpeg: 'image', gif: 'image', webp: 'image', avif: 'image', svg: 'image',
+  mp4: 'video', webm: 'video', mov: 'video', m4v: 'video', ogv: 'video',
+  mp3: 'audio', wav: 'audio', ogg: 'audio', oga: 'audio', m4a: 'audio', aac: 'audio', flac: 'audio',
+}
+
+export function classifyUpload(href: string): UploadKind {
+  const path = href.split(/[?#]/)[0]
+  const dot = path.lastIndexOf('.')
+  const ext = dot >= 0 ? path.slice(dot + 1).toLowerCase() : ''
+  return EXT_KIND[ext] ?? 'file'
+}
+
 // GitLab upload secrets are 32 hex chars; matching the shape keeps the rewrite
 // from touching unrelated URLs (and blocks path-traversal into the API :id).
 const SECRET = '[0-9a-f]{32}'
@@ -100,4 +125,9 @@ export function renderMarkdown(src: string | null | undefined, opts: RenderOptio
   marked.use({ extensions: [gitlabImageExtension(opts.projectPath)] })
   const html = marked.parse(src, { async: false }) as string
   return DOMPurify.sanitize(html)
+}
+
+// Implemented fully in a later task; stub keeps the module's exports stable.
+export function extractMedia(): MediaItem[] {
+  return []
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { renderMarkdown } from './markdown'
+import { renderMarkdown, classifyUpload, extractMedia } from './markdown'
 
 describe('renderMarkdown', () => {
   it('renders markdown to HTML', () => {
@@ -64,5 +64,20 @@ describe('renderMarkdown', () => {
     })
     expect(out).toContain('<code>')
     expect(out).not.toContain('<img')
+  })
+})
+
+describe('classifyUpload', () => {
+  it('classifies uploads by extension, case-insensitively', () => {
+    expect(classifyUpload('/uploads/x/a.PNG')).toBe('image')
+    expect(classifyUpload('/uploads/x/clip.mp4')).toBe('video')
+    expect(classifyUpload('/uploads/x/sound.mp3')).toBe('audio')
+    expect(classifyUpload('/uploads/x/report.pdf')).toBe('file')
+  })
+
+  it('ignores query/hash and treats extensionless paths as files', () => {
+    expect(classifyUpload('/uploads/x/a.png?ref=main')).toBe('image')
+    expect(classifyUpload('/uploads/x/a.png#top')).toBe('image')
+    expect(classifyUpload('/uploads/x/noext')).toBe('file')
   })
 })
