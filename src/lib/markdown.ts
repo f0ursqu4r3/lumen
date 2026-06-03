@@ -78,6 +78,16 @@ function escapeAttr(value: string): string {
     .replace(/>/g, '&gt;')
 }
 
+function uploadFilename(href: string): string {
+  const path = href.split(/[?#]/)[0]
+  const last = path.slice(path.lastIndexOf('/') + 1)
+  try {
+    return decodeURIComponent(last)
+  } catch {
+    return last
+  }
+}
+
 // Inline tokenizer for images that also consumes GitLab's trailing
 // `{width=.. height=..}` attribute list — which standard Markdown leaves as
 // literal text. Running at the inline-token level (not a regex over the raw
@@ -104,9 +114,32 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
       }
     },
     renderer(token) {
+      const kind = classifyUpload(token.href)
       const src = rewriteUploadSrc(token.href, projectPath)
       const { width, height } = parseDimensions(token.attrs)
+      const dim =
+        (width ? ` width="${escapeAttr(width)}"` : '') +
+        (height ? ` height="${escapeAttr(height)}"` : '')
+      const titleAttr = token.title ? ` title="${escapeAttr(token.title)}"` : ''
+
+      if (kind === 'video') {
+        return (
+          `<span class="media-frame">` +
+          `<video controls preload="metadata" src="${escapeAttr(src)}"` +
+          ` data-media-src="${escapeAttr(src)}" data-media-kind="video"${dim}${titleAttr}></video>` +
+          `<button type="button" class="media-expand" data-media-trigger` +
+          ` data-media-src="${escapeAttr(src)}" aria-label="Open in viewer">⤢</button>` +
+          `</span>`
+        )
+      }
+      if (kind === 'audio') {
+        return `<audio controls src="${escapeAttr(src)}"${titleAttr}></audio>`
+      }
+      if (kind === 'file') {
+        return `<a class="file-card" href="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
+      }
       let html = `<img src="${escapeAttr(src)}" alt="${escapeAttr(token.alt)}"`
+      html += ` data-media-src="${escapeAttr(src)}" data-media-kind="image" data-media-trigger`
       if (token.title) html += ` title="${escapeAttr(token.title)}"`
       if (width) html += ` width="${escapeAttr(width)}"`
       if (height) html += ` height="${escapeAttr(height)}"`
@@ -124,7 +157,15 @@ export function renderMarkdown(src: string | null | undefined, opts: RenderOptio
   const marked = new Marked()
   marked.use({ extensions: [gitlabImageExtension(opts.projectPath)] })
   const html = marked.parse(src, { async: false }) as string
-  return DOMPurify.sanitize(html)
+  // video/audio are in DOMPurify's current default allow-list; ADD_TAGS pins them
+  // so a future DOMPurify tightening can't silently break rendering. ADD_ATTR is
+  // load-bearing — controls/preload/download are NOT default-allowed and would be
+  // stripped otherwise. data-* is allowed by default (ALLOW_DATA_ATTR), carrying
+  // data-media-src/-kind/-trigger.
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ['video', 'audio'],
+    ADD_ATTR: ['controls', 'preload', 'download'],
+  })
 }
 
 // Implemented fully in a later task; stub keeps the module's exports stable.

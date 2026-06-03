@@ -65,6 +65,46 @@ describe('renderMarkdown', () => {
     expect(out).toContain('<code>')
     expect(out).not.toContain('<img')
   })
+
+  it('renders video uploads as a <video> with a viewer trigger', () => {
+    const s = secret('f')
+    const out = renderMarkdown(`![clip](/uploads/${s}/scroll.mp4)`, { projectPath: 'g/r' })
+    expect(out).toContain('<video')
+    expect(out).toContain('controls')
+    expect(out).toContain(`data-media-src="/gitlab/v4/projects/g%2Fr/uploads/${s}/scroll.mp4"`)
+    expect(out).not.toContain('<img')
+    // The viewer trigger lives on the expand button, not the <video> body, so
+    // clicking the video plays it instead of opening the viewer.
+    const videoClose = out.indexOf('</video>')
+    const triggerPos = out.indexOf('data-media-trigger')
+    expect(out.slice(0, videoClose)).not.toContain('data-media-trigger')
+    expect(triggerPos).toBeGreaterThan(videoClose)
+  })
+
+  it('renders audio uploads as <audio> with no viewer trigger', () => {
+    const s = secret('g')
+    const out = renderMarkdown(`![sound](/uploads/${s}/clip.mp3)`, { projectPath: 'g/r' })
+    expect(out).toContain('<audio')
+    expect(out).toContain('controls')
+    expect(out).not.toContain('data-media-trigger')
+  })
+
+  it('renders non-media uploads as a download chip', () => {
+    const s = secret('h')
+    const out = renderMarkdown(`![spec](/uploads/${s}/report.pdf)`, { projectPath: 'g/r' })
+    expect(out).toContain('class="file-card"')
+    expect(out).toContain('download')
+    expect(out).toContain('report.pdf')
+    expect(out).not.toContain('<img')
+  })
+
+  it('keeps image uploads as <img> with a viewer trigger', () => {
+    const s = secret('i')
+    const out = renderMarkdown(`![pic](/uploads/${s}/pic.png)`, { projectPath: 'g/r' })
+    expect(out).toContain('<img')
+    expect(out).toContain('data-media-kind="image"')
+    expect(out).toContain('data-media-trigger')
+  })
 })
 
 describe('classifyUpload', () => {
