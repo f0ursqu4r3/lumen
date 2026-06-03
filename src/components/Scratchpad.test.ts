@@ -68,4 +68,53 @@ describe("Scratchpad", () => {
     await nextTick();
     expect(w.text()).not.toContain("Saved");
   });
+
+  it("is collapsed by default (textarea hidden)", () => {
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    expect(
+      w.get('[data-testid="scratchpad-toggle"]').attributes("aria-expanded"),
+    ).toBe("false");
+    expect(w.get("textarea").attributes("style")).toContain("display: none");
+  });
+
+  it("expands when the header toggle is clicked", async () => {
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    await w.get('[data-testid="scratchpad-toggle"]').trigger("click");
+    expect(
+      w.get('[data-testid="scratchpad-toggle"]').attributes("aria-expanded"),
+    ).toBe("true");
+    expect(w.get("textarea").attributes("style") ?? "").not.toContain(
+      "display: none",
+    );
+  });
+
+  it("shows a content marker only when the note has content", () => {
+    const empty = mount(Scratchpad, {
+      props: { fullPath: "grp/proj", iid: "9" },
+    });
+    expect(empty.find('[data-testid="scratchpad-marker"]').exists()).toBe(false);
+
+    localStorage.setItem(
+      "lumen:scratchpad:grp/proj#8",
+      JSON.stringify("has content"),
+    );
+    const withContent = mount(Scratchpad, {
+      props: { fullPath: "grp/proj", iid: "8" },
+    });
+    expect(
+      withContent.find('[data-testid="scratchpad-marker"]').exists(),
+    ).toBe(true);
+  });
+
+  it("persists the open state per issue", async () => {
+    const w = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    await w.get('[data-testid="scratchpad-toggle"]').trigger("click");
+    expect(localStorage.getItem("lumen:scratchpad-open:grp/proj#9")).toBe(
+      JSON.stringify(true),
+    );
+    const w2 = mount(Scratchpad, { props: { fullPath: "grp/proj", iid: "9" } });
+    expect(
+      w2.get('[data-testid="scratchpad-toggle"]').attributes("aria-expanded"),
+    ).toBe("true");
+  });
 });
