@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue'
 import {
   AlertOctagon,
   Zap,
@@ -12,14 +12,14 @@ import {
   Plug,
   FlaskConical,
   Tag,
-} from "@lucide/vue";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { priorityOf, typeOf, parseLabel, tint } from "@/lib/labels";
-import type { Facet } from "@/lib/issueView";
-import type { IssueListItem } from "@/composables/useIssues";
+} from '@lucide/vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { priorityOf, typeOf, parseLabel, tint } from '@/lib/labels'
+import type { Facet } from '@/lib/issueView'
+import type { IssueListItem } from '@/composables/useIssues'
 
-const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: boolean }>();
-const emit = defineEmits<{ filter: [facet: Facet] }>();
+const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: boolean }>()
+const emit = defineEmits<{ filter: [facet: Facet] }>()
 
 const ICONS = {
   AlertOctagon,
@@ -31,38 +31,30 @@ const ICONS = {
   sparkles: Sparkles,
   recycle: Recycle,
   plug: Plug,
-  "flask-conical": FlaskConical,
+  'flask-conical': FlaskConical,
   tag: Tag,
-} as const;
+} as const
 
 const labels = computed(
-  () =>
-    props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ??
-    [],
-);
+  () => props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ?? [],
+)
 const assignees = computed(
-  () =>
-    props.issue.assignees?.nodes?.filter(
-      (a): a is NonNullable<typeof a> => !!a,
-    ) ?? [],
-);
+  () => props.issue.assignees?.nodes?.filter((a): a is NonNullable<typeof a> => !!a) ?? [],
+)
 
-const priority = computed(() => priorityOf(labels.value));
-const type = computed(() => typeOf(labels.value));
+const priority = computed(() => priorityOf(labels.value))
+const type = computed(() => typeOf(labels.value))
 const priorityLabel = computed(() =>
-  labels.value.find(
-    (l) => parseLabel(l.title, l.color).scope?.toLowerCase() === "priority",
-  ),
-);
+  labels.value.find((l) => parseLabel(l.title, l.color).scope?.toLowerCase() === 'priority'),
+)
 
-const shownAssignees = computed(() => assignees.value.slice(0, 3));
-const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3));
-const initials = (u: string) => u.slice(0, 2).toUpperCase();
+const shownAssignees = computed(() => assignees.value.slice(0, 3))
+const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3))
+const initials = (u: string) => u.slice(0, 2).toUpperCase()
 
 const filterLabel = (l: { title: string; color: string }) =>
-  emit("filter", { kind: "label", value: l.title, color: l.color });
-const filterAssignee = (u: string) =>
-  emit("filter", { kind: "assignee", value: u });
+  emit('filter', { kind: 'label', value: l.title, color: l.color })
+const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: u })
 </script>
 
 <template>
@@ -116,10 +108,7 @@ const filterAssignee = (u: string) =>
         <span class="text-muted-foreground/35">#</span>{{ issue.iid }}
       </span>
 
-      <span
-        v-if="shownAssignees.length"
-        class="relative z-10 ml-auto flex -space-x-1.5"
-      >
+      <span v-if="shownAssignees.length" class="relative z-10 ml-auto flex -space-x-1.5">
         <button
           v-for="a in shownAssignees"
           :key="a.id"
@@ -129,9 +118,7 @@ const filterAssignee = (u: string) =>
           @click="filterAssignee(a.username)"
         >
           <Avatar class="size-5 ring-2 ring-card">
-            <AvatarFallback
-              class="bg-muted text-[9px] font-medium text-muted-foreground"
-            >
+            <AvatarFallback class="bg-muted text-[9px] font-medium text-muted-foreground">
               {{ initials(a.username) }}
             </AvatarFallback>
           </Avatar>

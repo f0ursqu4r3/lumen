@@ -46,8 +46,12 @@ const initial = (m: ProjectMember) => (m.name || m.username).charAt(0).toUpperCa
         class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
         @click="select(m.id)"
       >
-        <Avatar class="size-5 text-[10px]"><AvatarFallback>{{ initial(m) }}</AvatarFallback></Avatar>
-        <span class="flex-1 truncate text-foreground">{{ m.name }} <span class="text-muted-foreground">@{{ m.username }}</span></span>
+        <Avatar class="size-5 text-[10px]"
+          ><AvatarFallback>{{ initial(m) }}</AvatarFallback></Avatar
+        >
+        <span class="flex-1 truncate text-foreground"
+          >{{ m.name }} <span class="text-muted-foreground">@{{ m.username }}</span></span
+        >
         <Check v-if="modelValue === m.id" class="size-3.5 text-primary" />
       </button>
       <p v-if="!members.length" class="px-2 py-1.5 text-xs text-muted-foreground">

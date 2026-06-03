@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref } from 'vue'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,19 +9,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { confirmState } from "@/composables/useConfirm";
+} from '@/components/ui/alert-dialog'
+import { confirmState } from '@/composables/useConfirm'
 
 // Track what was chosen before the dialog closes so onOpenChange can pick the
 // right outcome. Set to true on accept, false on cancel/dismiss.
-const chosen = ref<boolean | null>(null);
+const chosen = ref<boolean | null>(null)
 
 function handleAccept() {
-  chosen.value = true;
+  chosen.value = true
 }
 
 function handleCancel() {
-  chosen.value = false;
+  chosen.value = false
 }
 
 // onOpenChange fires after reka-ui begins closing — read `chosen` to decide
@@ -29,9 +29,9 @@ function handleCancel() {
 // dismiss (null → treat as cancel).
 function onOpenChange(open: boolean) {
   if (!open) {
-    const result = chosen.value ?? false;
-    chosen.value = null;
-    confirmState.resolve?.(result);
+    const result = chosen.value ?? false
+    chosen.value = null
+    confirmState.resolve?.(result)
   }
 }
 </script>
@@ -49,10 +49,7 @@ function onOpenChange(open: boolean) {
         <AlertDialogCancel data-testid="confirm-cancel" @click="handleCancel">
           {{ confirmState.cancelLabel }}
         </AlertDialogCancel>
-        <AlertDialogAction
-          data-testid="confirm-accept"
-          @click.capture="handleAccept"
-        >
+        <AlertDialogAction data-testid="confirm-accept" @click.capture="handleAccept">
           {{ confirmState.confirmLabel }}
         </AlertDialogAction>
       </AlertDialogFooter>

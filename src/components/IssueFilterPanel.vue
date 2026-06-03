@@ -1,47 +1,43 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
-import { Check, SlidersHorizontal } from "@lucide/vue";
-import { UNASSIGNED } from "@/gitlab/issueParams";
-import type { ProjectLabel } from "@/composables/useProjectLabels";
-import type { ProjectMember } from "@/composables/useProjectMembers";
-import LabelGroupMenu from "@/components/LabelGroupMenu.vue";
-import { groupLabelsByScope } from "@/lib/labelGroups";
+import { computed, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { Check, SlidersHorizontal } from '@lucide/vue'
+import { UNASSIGNED } from '@/gitlab/issueParams'
+import type { ProjectLabel } from '@/composables/useProjectLabels'
+import type { ProjectMember } from '@/composables/useProjectMembers'
+import LabelGroupMenu from '@/components/LabelGroupMenu.vue'
+import { groupLabelsByScope } from '@/lib/labelGroups'
 
 const props = defineProps<{
-  labels: string[];
-  assignee: string;
-  author: string;
-  catalog: ProjectLabel[];
-  members: ProjectMember[];
-  activeCount: number;
-}>();
+  labels: string[]
+  assignee: string
+  author: string
+  catalog: ProjectLabel[]
+  members: ProjectMember[]
+  activeCount: number
+}>()
 const emit = defineEmits<{
-  "update:labels": [titles: string[]];
-  "update:assignee": [value: string];
-  "update:author": [value: string];
-}>();
+  'update:labels': [titles: string[]]
+  'update:assignee': [value: string]
+  'update:author': [value: string]
+}>()
 
-const open = ref(false);
-const root = ref<HTMLElement | null>(null);
-onClickOutside(root, () => (open.value = false));
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+onClickOutside(root, () => (open.value = false))
 
-const labelGroups = computed(() => groupLabelsByScope(props.catalog));
+const labelGroups = computed(() => groupLabelsByScope(props.catalog))
 
-const labelSelected = (t: string) => props.labels.includes(t);
+const labelSelected = (t: string) => props.labels.includes(t)
 function toggleLabel(t: string) {
   emit(
-    "update:labels",
-    labelSelected(t)
-      ? props.labels.filter((x) => x !== t)
-      : [...props.labels, t],
-  );
+    'update:labels',
+    labelSelected(t) ? props.labels.filter((x) => x !== t) : [...props.labels, t],
+  )
 }
 // Single-select with toggle-off: re-picking the active value clears it.
-const pickAssignee = (v: string) =>
-  emit("update:assignee", props.assignee === v ? "" : v);
-const pickAuthor = (v: string) =>
-  emit("update:author", props.author === v ? "" : v);
+const pickAssignee = (v: string) => emit('update:assignee', props.assignee === v ? '' : v)
+const pickAuthor = (v: string) => emit('update:author', props.author === v ? '' : v)
 </script>
 
 <template>
@@ -69,9 +65,7 @@ const pickAuthor = (v: string) =>
       class="absolute z-50 mt-1 w-72 space-y-3 rounded-lg border border-border bg-popover p-3 shadow-md"
     >
       <section class="space-y-1">
-        <p
-          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-        >
+        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Labels
         </p>
         <LabelGroupMenu
@@ -83,9 +77,7 @@ const pickAuthor = (v: string) =>
       </section>
 
       <section class="space-y-1">
-        <p
-          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-        >
+        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Assignee
         </p>
         <button
@@ -110,18 +102,13 @@ const pickAuthor = (v: string) =>
               {{ m.name || m.username }}
               <span class="text-muted-foreground">@{{ m.username }}</span>
             </span>
-            <Check
-              v-if="assignee === m.username"
-              class="size-3.5 text-primary"
-            />
+            <Check v-if="assignee === m.username" class="size-3.5 text-primary" />
           </button>
         </div>
       </section>
 
       <section class="space-y-1">
-        <p
-          class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-        >
+        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Author
         </p>
         <div class="max-h-32 overflow-y-auto">

@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useIsFetching } from "@tanstack/vue-query";
-import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import { computed } from 'vue'
+import { useIsFetching } from '@tanstack/vue-query'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 // The signal lamp breathes while any query is in flight — a quiet liveness
 // readout for an instrument that's meant to feel alive without being noisy.
-const fetching = useIsFetching();
-const busy = computed(() => fetching.value > 0);
+const fetching = useIsFetching()
+const busy = computed(() => fetching.value > 0)
 </script>
 
 <template>
   <div class="min-h-screen overflow-x-clip bg-background text-foreground">
-    <header
-      class="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-md"
-    >
+    <header class="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div class="mx-auto flex h-14 max-w-5xl items-center px-4">
         <RouterLink
           to="/"

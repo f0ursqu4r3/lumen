@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
-import { Check, UserPlus } from "@lucide/vue";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { assigneeSections, personInitial } from "@/lib/assigneeOrder";
-import type { IssueDetail } from "@/composables/useIssue";
-import type { ProjectMember } from "@/composables/useProjectMembers";
+import { computed, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { Check, UserPlus } from '@lucide/vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { assigneeSections, personInitial } from '@/lib/assigneeOrder'
+import type { IssueDetail } from '@/composables/useIssue'
+import type { ProjectMember } from '@/composables/useProjectMembers'
 
 const props = defineProps<{
-  issue: IssueDetail;
-  members: ProjectMember[];
-  usernames: string[];
-}>();
-const emit = defineEmits<{ "update:usernames": [usernames: string[]] }>();
+  issue: IssueDetail
+  members: ProjectMember[]
+  usernames: string[]
+}>()
+const emit = defineEmits<{ 'update:usernames': [usernames: string[]] }>()
 
-const open = ref(false);
-const root = ref<HTMLElement | null>(null);
-onClickOutside(root, () => (open.value = false));
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+onClickOutside(root, () => (open.value = false))
 
-const view = computed(() => assigneeSections(props.issue, props.members));
+const view = computed(() => assigneeSections(props.issue, props.members))
 
 // Quick assign replaces the whole assignee set with the chosen person.
 function assignOnly(username: string) {
-  emit("update:usernames", [username]);
-  open.value = false;
+  emit('update:usernames', [username])
+  open.value = false
 }
 </script>
 
@@ -70,10 +70,7 @@ function assignOnly(username: string) {
             {{ p.name || p.username }}
             <span class="text-muted-foreground">@{{ p.username }}</span>
           </span>
-          <Check
-            v-if="usernames.includes(p.username)"
-            class="size-3.5 shrink-0 text-primary"
-          />
+          <Check v-if="usernames.includes(p.username)" class="size-3.5 shrink-0 text-primary" />
         </button>
       </template>
     </div>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue'
 
-const props = defineProps<{ state: string; compact?: boolean }>();
-const open = computed(() => props.state === "opened");
-const label = computed(() => (open.value ? "Open" : "Closed"));
+const props = defineProps<{ state: string; compact?: boolean }>()
+const open = computed(() => props.state === 'opened')
+const label = computed(() => (open.value ? 'Open' : 'Closed'))
 </script>
 
 <template>
@@ -15,9 +15,7 @@ const label = computed(() => (open.value ? "Open" : "Closed"));
     :aria-label="label"
     class="inline-block size-2 shrink-0 rounded-full"
     :class="
-      open
-        ? 'bg-emerald-400 shadow-[0_0_0_3px_oklch(0.7_0.15_162/0.18)]'
-        : 'bg-muted-foreground/50'
+      open ? 'bg-emerald-400 shadow-[0_0_0_3px_oklch(0.7_0.15_162/0.18)]' : 'bg-muted-foreground/50'
     "
   />
   <span
@@ -29,10 +27,7 @@ const label = computed(() => (open.value ? "Open" : "Closed"));
         : 'border-border bg-muted text-muted-foreground'
     "
   >
-    <span
-      class="size-1.5 rounded-full"
-      :class="open ? 'bg-emerald-400' : 'bg-muted-foreground'"
-    />
+    <span class="size-1.5 rounded-full" :class="open ? 'bg-emerald-400' : 'bg-muted-foreground'" />
     {{ label }}
   </span>
 </template>

@@ -1,246 +1,221 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-} from "vue";
-import { useRouter } from "vue-router";
-import { useTitle, useIntersectionObserver } from "@vueuse/core";
-import { Search, CornerDownLeft, FolderGit2, LoaderCircle } from "@lucide/vue";
-import { useProjects, type ProjectSummary } from "@/composables/useProjects";
-import ErrorNotice from "@/components/ErrorNotice.vue";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTitle, useIntersectionObserver } from '@vueuse/core'
+import { Search, CornerDownLeft, FolderGit2, LoaderCircle } from '@lucide/vue'
+import { useProjects, type ProjectSummary } from '@/composables/useProjects'
+import ErrorNotice from '@/components/ErrorNotice.vue'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-useTitle("Projects · lumen");
+useTitle('Projects · lumen')
 
-const router = useRouter();
+const router = useRouter()
 
-const search = ref("");
-const {
-  projects,
-  isLoading,
-  error,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage,
-} = useProjects(search);
-const count = computed(() => projects.value.length);
-const hasMore = computed(() => hasNextPage.value ?? false);
+const search = ref('')
+const { projects, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
+  useProjects(search)
+const count = computed(() => projects.value.length)
+const hasMore = computed(() => hasNextPage.value ?? false)
 
 // Split each path so the repo (final segment) reads as the name and the rest
 // trails as muted mono context — same emphasis the issues header uses.
 const namespace = (fullPath: string) => {
-  const parts = fullPath.split("/");
-  return parts.slice(0, -1).join("/");
-};
+  const parts = fullPath.split('/')
+  return parts.slice(0, -1).join('/')
+}
 
 // --- selection cursor -------------------------------------------------------
 // The picker is a launcher first, a list second: a selection glides on the
 // keyboard like a command palette. `active` is the logical cursor; the amber
 // rail (`cursor`) chases it with a critically-damped spring so it has weight
 // without the tackiness of a bounce.
-const active = ref(0);
-const listEl = ref<HTMLElement | null>(null);
+const active = ref(0)
+const listEl = ref<HTMLElement | null>(null)
 const reduce =
-  typeof matchMedia === "function"
-    ? matchMedia("(prefers-reduced-motion: reduce)")
-    : null;
+  typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
 
-const cursor = reactive({ y: 0, h: 0, visible: false });
-let velocity = 0;
-let raf = 0;
-let lastTs = 0;
+const cursor = reactive({ y: 0, h: 0, visible: false })
+let velocity = 0
+let raf = 0
+let lastTs = 0
 
-const rowAt = (i: number) =>
-  listEl.value?.querySelectorAll<HTMLElement>("[data-row]")[i] ?? null;
+const rowAt = (i: number) => listEl.value?.querySelectorAll<HTMLElement>('[data-row]')[i] ?? null
 
 function springTo(snap = false) {
-  const el = rowAt(active.value);
+  const el = rowAt(active.value)
   if (!el) {
-    cursor.visible = false;
-    return;
+    cursor.visible = false
+    return
   }
-  cursor.visible = true;
-  cursor.h = el.offsetHeight;
-  const target = el.offsetTop;
-  cancelAnimationFrame(raf);
+  cursor.visible = true
+  cursor.h = el.offsetHeight
+  const target = el.offsetTop
+  cancelAnimationFrame(raf)
 
   if (snap || reduce?.matches) {
-    cursor.y = target;
-    velocity = 0;
-    return;
+    cursor.y = target
+    velocity = 0
+    return
   }
 
-  lastTs = performance.now();
+  lastTs = performance.now()
   const step = (now: number) => {
-    const dt = Math.min((now - lastTs) / 1000, 1 / 30);
-    lastTs = now;
+    const dt = Math.min((now - lastTs) / 1000, 1 / 30)
+    lastTs = now
     // stiffness/damping tuned just past critical: snappy arrival, no overshoot.
-    const accel = -210 * (cursor.y - target) - 30 * velocity;
-    velocity += accel * dt;
-    cursor.y += velocity * dt;
+    const accel = -210 * (cursor.y - target) - 30 * velocity
+    velocity += accel * dt
+    cursor.y += velocity * dt
     if (Math.abs(cursor.y - target) < 0.3 && Math.abs(velocity) < 0.3) {
-      cursor.y = target;
-      velocity = 0;
-      return;
+      cursor.y = target
+      velocity = 0
+      return
     }
-    raf = requestAnimationFrame(step);
-  };
-  raf = requestAnimationFrame(step);
+    raf = requestAnimationFrame(step)
+  }
+  raf = requestAnimationFrame(step)
 }
 
 function move(delta: number) {
-  if (!count.value) return;
-  active.value = Math.max(0, Math.min(count.value - 1, active.value + delta));
-  rowAt(active.value)?.scrollIntoView({ block: "nearest" });
+  if (!count.value) return
+  active.value = Math.max(0, Math.min(count.value - 1, active.value + delta))
+  rowAt(active.value)?.scrollIntoView({ block: 'nearest' })
 }
 
 // Glide whenever the cursor target changes.
-watch(active, () => springTo());
+watch(active, () => springTo())
 
 // A new search is a new context — reset to the top and snap (no glide across a
 // list that just changed underneath). Appended pages must NOT reset the cursor.
 watch(search, () => {
-  active.value = 0;
-  nextTick(() => springTo(true));
-});
+  active.value = 0
+  nextTick(() => springTo(true))
+})
 
 // First data, or appended pages: keep `active` in range and (re)place the rail.
 watch(
   () => count.value,
   (n, prev) => {
-    if (active.value > n - 1) active.value = Math.max(0, n - 1);
-    nextTick(() => springTo(prev === 0));
+    if (active.value > n - 1) active.value = Math.max(0, n - 1)
+    nextTick(() => springTo(prev === 0))
   },
-);
+)
 
 // --- launch + morph ---------------------------------------------------------
 // Launching morphs the chosen project's name into the issues header via a View
 // Transition, so the picker → issues handoff reads as one instrument retuning
 // rather than a page swap. Degrades to a plain push where VT is unavailable or
 // motion is reduced.
-const morphingId = ref<string | null>(null);
+const morphingId = ref<string | null>(null)
 const nameStyle = (p: ProjectSummary) =>
-  p.id === morphingId.value
-    ? { viewTransitionName: "project-title" }
-    : undefined;
+  p.id === morphingId.value ? { viewTransitionName: 'project-title' } : undefined
 
 function navigate(p: ProjectSummary) {
-  return router.push({ name: "issues", params: { fullPath: p.fullPath } });
+  return router.push({ name: 'issues', params: { fullPath: p.fullPath } })
 }
 
 async function launch(p: ProjectSummary, i: number) {
-  active.value = i;
-  const canMorph =
-    typeof document.startViewTransition === "function" && !reduce?.matches;
+  active.value = i
+  const canMorph = typeof document.startViewTransition === 'function' && !reduce?.matches
   if (!canMorph) {
-    navigate(p);
-    return;
+    navigate(p)
+    return
   }
-  morphingId.value = p.id;
-  await nextTick(); // ensure the name carries the transition-name before snapshot
+  morphingId.value = p.id
+  await nextTick() // ensure the name carries the transition-name before snapshot
   document.startViewTransition(async () => {
-    await navigate(p);
-    await nextTick();
-  });
+    await navigate(p)
+    await nextTick()
+  })
 }
 
 function onRowClick(e: MouseEvent, p: ProjectSummary, i: number) {
   // Let the browser handle modified clicks (open in new tab) via the real href.
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-  e.preventDefault();
-  launch(p, i);
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+  e.preventDefault()
+  launch(p, i)
 }
 
 // --- keyboard ---------------------------------------------------------------
-const searchInput = ref<{ $el?: HTMLElement } | null>(null);
-const focusSearch = () => searchInput.value?.$el?.focus?.();
+const searchInput = ref<{ $el?: HTMLElement } | null>(null)
+const focusSearch = () => searchInput.value?.$el?.focus?.()
 const searchFocused = () =>
-  !!searchInput.value?.$el && document.activeElement === searchInput.value.$el;
+  !!searchInput.value?.$el && document.activeElement === searchInput.value.$el
 
 function onKeydown(e: KeyboardEvent) {
   // ⌘1–9 (or Ctrl): jump straight to a project and launch it, from anywhere.
   if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key)) {
-    const i = Number(e.key) - 1;
-    const p = projects.value[i];
+    const i = Number(e.key) - 1
+    const p = projects.value[i]
     if (p) {
-      e.preventDefault();
-      launch(p, i);
+      e.preventDefault()
+      launch(p, i)
     }
-    return;
+    return
   }
 
   switch (e.key) {
-    case "ArrowDown":
-      e.preventDefault();
-      move(1);
-      return;
-    case "ArrowUp":
-      e.preventDefault();
-      move(-1);
-      return;
-    case "Enter": {
-      const p = projects.value[active.value];
+    case 'ArrowDown':
+      e.preventDefault()
+      move(1)
+      return
+    case 'ArrowUp':
+      e.preventDefault()
+      move(-1)
+      return
+    case 'Enter': {
+      const p = projects.value[active.value]
       if (p) {
-        e.preventDefault();
-        launch(p, active.value);
+        e.preventDefault()
+        launch(p, active.value)
       }
-      return;
+      return
     }
-    case "Escape":
+    case 'Escape':
       if (search.value) {
-        search.value = "";
+        search.value = ''
       } else {
-        searchInput.value?.$el?.blur?.();
+        searchInput.value?.$el?.blur?.()
       }
-      return;
+      return
   }
 
   if (searchFocused()) {
     // j/k are nav only when not typing into the field.
-    return;
+    return
   }
 
-  if (e.key === "j") {
-    e.preventDefault();
-    move(1);
-  } else if (e.key === "k") {
-    e.preventDefault();
-    move(-1);
-  } else if (
-    e.key.length === 1 &&
-    !e.metaKey &&
-    !e.ctrlKey &&
-    !e.altKey
-  ) {
+  if (e.key === 'j') {
+    e.preventDefault()
+    move(1)
+  } else if (e.key === 'k') {
+    e.preventDefault()
+    move(-1)
+  } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
     // Type-to-filter from anywhere: focus the field and let the keypress land.
-    focusSearch();
+    focusSearch()
   }
 }
 
 onMounted(() => {
-  window.addEventListener("keydown", onKeydown);
-  nextTick(() => springTo(true));
-});
+  window.addEventListener('keydown', onKeydown)
+  nextTick(() => springTo(true))
+})
 onBeforeUnmount(() => {
-  window.removeEventListener("keydown", onKeydown);
-  cancelAnimationFrame(raf);
-});
+  window.removeEventListener('keydown', onKeydown)
+  cancelAnimationFrame(raf)
+})
 
 // --- infinite load ----------------------------------------------------------
 function loadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage();
+  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
 }
-const sentinel = ref<HTMLElement | null>(null);
+const sentinel = ref<HTMLElement | null>(null)
 useIntersectionObserver(sentinel, ([entry]) => {
-  if (entry?.isIntersecting) loadMore();
-});
+  if (entry?.isIntersecting) loadMore()
+})
 </script>
 
 <template>
@@ -253,24 +228,17 @@ useIntersectionObserver(sentinel, ([entry]) => {
         >
           Workspace
         </p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
-          Projects
-        </h1>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">Projects</h1>
       </div>
-      <div
-        v-if="!isLoading && !error"
-        class="hidden shrink-0 flex-col items-end sm:flex"
-      >
+      <div v-if="!isLoading && !error" class="hidden shrink-0 flex-col items-end sm:flex">
         <span
           :key="count"
           class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
         >
           {{ count }}
         </span>
-        <span
-          class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
-        >
-          {{ count === 1 ? "project" : "projects" }}{{ hasMore ? "+" : "" }}
+        <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
+          {{ count === 1 ? 'project' : 'projects' }}{{ hasMore ? '+' : '' }}
         </span>
       </div>
     </div>
@@ -338,9 +306,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
         >
           <span
             class="text-sm font-medium transition-colors"
-            :class="
-              i === active ? 'text-foreground' : 'text-foreground/90'
-            "
+            :class="i === active ? 'text-foreground' : 'text-foreground/90'"
             :style="nameStyle(p)"
           >
             {{ p.name }}
@@ -354,9 +320,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
 
           <!-- Right cluster: an Enter affordance on the active row, then the
                quick-jump index for the first nine projects. -->
-          <span
-            class="ml-auto flex shrink-0 items-center gap-2 font-mono text-xs tabular-nums"
-          >
+          <span class="ml-auto flex shrink-0 items-center gap-2 font-mono text-xs tabular-nums">
             <CornerDownLeft
               class="size-3.5 text-primary transition-opacity duration-150"
               :class="i === active ? 'opacity-100' : 'opacity-0'"
@@ -364,11 +328,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
             <span
               v-if="i < 9"
               class="transition-colors"
-              :class="
-                i === active
-                  ? 'text-muted-foreground'
-                  : 'text-muted-foreground/40'
-              "
+              :class="i === active ? 'text-muted-foreground' : 'text-muted-foreground/40'"
             >
               {{ i + 1 }}
             </span>
@@ -382,7 +342,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
           class="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground"
         >
           <LoaderCircle v-if="isFetchingNextPage" class="size-3.5 animate-spin" />
-          <span>{{ isFetchingNextPage ? "Loading…" : "Scroll for more" }}</span>
+          <span>{{ isFetchingNextPage ? 'Loading…' : 'Scroll for more' }}</span>
         </div>
       </Card>
 
@@ -392,19 +352,16 @@ useIntersectionObserver(sentinel, ([entry]) => {
         class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
       >
         <div class="grid size-11 place-items-center rounded-full bg-muted">
-          <component
-            :is="search ? Search : FolderGit2"
-            class="size-5 text-muted-foreground"
-          />
+          <component :is="search ? Search : FolderGit2" class="size-5 text-muted-foreground" />
         </div>
         <p class="text-sm font-medium text-foreground">
-          {{ search ? "No matches." : "No projects." }}
+          {{ search ? 'No matches.' : 'No projects.' }}
         </p>
         <p class="max-w-xs text-xs text-muted-foreground">
           {{
             search
               ? `Nothing matches “${search}”. Try a different term.`
-              : "Projects from your GitLab instance will appear here as you gain access."
+              : 'Projects from your GitLab instance will appear here as you gain access.'
           }}
         </p>
       </div>

@@ -1,31 +1,28 @@
 <script setup lang="ts">
-import { Eye, Pencil } from "@lucide/vue";
+import { Eye, Pencil } from '@lucide/vue'
 
 const props = withDefaults(
   defineProps<{
-    editing: boolean;
-    label: string;
-    toggleTestid?: string;
+    editing: boolean
+    label: string
+    toggleTestid?: string
   }>(),
-  { toggleTestid: "editable-toggle" },
-);
-const emit = defineEmits<{ "update:editing": [value: boolean] }>();
+  { toggleTestid: 'editable-toggle' },
+)
+const emit = defineEmits<{ 'update:editing': [value: boolean] }>()
 
 // Escape leaves edit mode. Stop propagation only while editing so the keystroke
 // doesn't also bubble to an enclosing dialog/drawer and close it; a non-editing
 // Escape is left to bubble (e.g. to close the drawer).
 function onEscape(e: KeyboardEvent) {
-  if (!props.editing) return;
-  e.stopPropagation();
-  emit("update:editing", false);
+  if (!props.editing) return
+  e.stopPropagation()
+  emit('update:editing', false)
 }
 </script>
 
 <template>
-  <div
-    class="space-y-1.5"
-    @keydown.escape="onEscape"
-  >
+  <div class="space-y-1.5" @keydown.escape="onEscape">
     <div class="flex items-center justify-end">
       <button
         type="button"
@@ -35,7 +32,7 @@ function onEscape(e: KeyboardEvent) {
         @click="emit('update:editing', !props.editing)"
       >
         <component :is="props.editing ? Eye : Pencil" class="size-3.5" />
-        {{ props.editing ? "Preview" : "Edit" }}
+        {{ props.editing ? 'Preview' : 'Edit' }}
       </button>
     </div>
     <slot v-if="props.editing" name="edit" />

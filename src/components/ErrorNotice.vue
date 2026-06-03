@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { CircleAlert } from "@lucide/vue";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { GitLabError } from "@/gitlab/errors";
+import { CircleAlert } from '@lucide/vue'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { GitLabError } from '@/gitlab/errors'
 
-defineProps<{ error: GitLabError }>();
+defineProps<{ error: GitLabError }>()
 </script>
 
 <template>

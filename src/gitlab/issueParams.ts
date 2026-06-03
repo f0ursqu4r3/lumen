@@ -1,25 +1,21 @@
-import type {
-  IssuableState,
-  IssuesQueryVariables,
-} from "@/gitlab/generated/graphql";
+import type { IssuableState, IssuesQueryVariables } from '@/gitlab/generated/graphql'
 
 // `assignee` carries either a username or the `__none__` sentinel (Unassigned).
-export const UNASSIGNED = "__none__";
+export const UNASSIGNED = '__none__'
 
 export interface IssueFilters {
-  state?: "opened" | "closed" | "all";
-  labels?: string[];
-  assignee?: string;
-  author?: string;
-  milestone?: string;
-  search?: string;
+  state?: 'opened' | 'closed' | 'all'
+  labels?: string[]
+  assignee?: string
+  author?: string
+  milestone?: string
+  search?: string
 }
 
 export const issuesKey = (fullPath: string, filters: IssueFilters) =>
-  ["issues", fullPath, filters] as const;
+  ['issues', fullPath, filters] as const
 
-export const issueKey = (fullPath: string, iid: string) =>
-  ["issue", fullPath, iid] as const;
+export const issueKey = (fullPath: string, iid: string) => ['issue', fullPath, iid] as const
 
 // Returns the generated IssuesQueryVariables so a GraphQL variable rename is a
 // compile error here, not a runtime surprise. Empty/`all` filters map to
@@ -30,25 +26,20 @@ export function toIssuesVars(
   after?: string,
 ): IssuesQueryVariables {
   const assigned =
-    filters.assignee && filters.assignee !== UNASSIGNED
-      ? [filters.assignee]
-      : undefined;
+    filters.assignee && filters.assignee !== UNASSIGNED ? [filters.assignee] : undefined
   return {
     fullPath,
-    state:
-      filters.state && filters.state !== "all"
-        ? (filters.state as IssuableState)
-        : undefined,
+    state: filters.state && filters.state !== 'all' ? (filters.state as IssuableState) : undefined,
     labelName: filters.labels?.length ? filters.labels : undefined,
     assigneeUsernames: assigned,
     // GitLab models "unassigned" as a wildcard, not an empty username list.
     assigneeWildcardId:
       filters.assignee === UNASSIGNED
-        ? ("NONE" as IssuesQueryVariables["assigneeWildcardId"])
+        ? ('NONE' as IssuesQueryVariables['assigneeWildcardId'])
         : undefined,
     authorUsername: filters.author || undefined,
     milestoneTitle: filters.milestone ? [filters.milestone] : undefined,
     search: filters.search || undefined,
     after: after || undefined,
-  };
+  }
 }

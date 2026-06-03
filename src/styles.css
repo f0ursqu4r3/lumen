@@ -1,10 +1,10 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* Hanken Grotesk — warm humanist grotesque for UI text.
    Geist Mono — sharp mono for issue ids, counts, and label metadata. */
-@import "@fontsource-variable/hanken-grotesk";
-@import "@fontsource-variable/geist-mono";
+@import '@fontsource-variable/hanken-grotesk';
+@import '@fontsource-variable/geist-mono';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -91,8 +91,8 @@
 }
 
 @theme inline {
-  --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -139,8 +139,8 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-feature-settings:
-      "cv05" 1,
-      "ss01" 1;
+      'cv05' 1,
+      'ss01' 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

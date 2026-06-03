@@ -1,39 +1,31 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Check, ChevronRight } from "@lucide/vue";
-import type { ScopeGroup } from "@/lib/labelGroups";
+import { ref } from 'vue'
+import { Check, ChevronRight } from '@lucide/vue'
+import type { ScopeGroup } from '@/lib/labelGroups'
 
 const props = withDefaults(
   defineProps<{
-    groups: ScopeGroup[];
-    selected: string[];
-    flyoutSide?: "left" | "right";
+    groups: ScopeGroup[]
+    selected: string[]
+    flyoutSide?: 'left' | 'right'
   }>(),
-  { flyoutSide: "right" },
-);
-const emit = defineEmits<{ toggle: [title: string] }>();
+  { flyoutSide: 'right' },
+)
+const emit = defineEmits<{ toggle: [title: string] }>()
 
 // One scope flyout open at a time.
-const openKey = ref<string | null>(null);
+const openKey = ref<string | null>(null)
 function toggleScope(key: string) {
-  openKey.value = openKey.value === key ? null : key;
+  openKey.value = openKey.value === key ? null : key
 }
-const isSelected = (title: string) => props.selected.includes(title);
-const countSelected = (g: ScopeGroup) =>
-  g.options.filter((o) => isSelected(o.title)).length;
+const isSelected = (title: string) => props.selected.includes(title)
+const countSelected = (g: ScopeGroup) => g.options.filter((o) => isSelected(o.title)).length
 </script>
 
 <template>
   <div class="min-w-44" @keydown.escape.stop="openKey = null">
-    <p v-if="!groups.length" class="px-2 py-1.5 text-xs text-muted-foreground">
-      No labels.
-    </p>
-    <div
-      v-for="g in groups"
-      :key="g.key"
-      class="relative"
-      @mouseenter="openKey = g.key"
-    >
+    <p v-if="!groups.length" class="px-2 py-1.5 text-xs text-muted-foreground">No labels.</p>
+    <div v-for="g in groups" :key="g.key" class="relative" @mouseenter="openKey = g.key">
       <button
         type="button"
         :data-testid="`lgm-scope-${g.key}`"
@@ -43,10 +35,7 @@ const countSelected = (g: ScopeGroup) =>
         @click="toggleScope(g.key)"
       >
         <span class="flex-1 truncate text-foreground">{{ g.label }}</span>
-        <span
-          v-if="countSelected(g)"
-          class="font-mono text-[10px] text-primary tabular-nums"
-        >
+        <span v-if="countSelected(g)" class="font-mono text-[10px] text-primary tabular-nums">
           {{ countSelected(g) }}
         </span>
         <ChevronRight class="size-3.5 text-muted-foreground" />
@@ -68,10 +57,7 @@ const countSelected = (g: ScopeGroup) =>
           class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
           @click="emit('toggle', o.title)"
         >
-          <span
-            class="size-2.5 shrink-0 rounded-full"
-            :style="{ backgroundColor: o.color }"
-          />
+          <span class="size-2.5 shrink-0 rounded-full" :style="{ backgroundColor: o.color }" />
           <span class="flex-1 truncate text-foreground">{{ o.value }}</span>
           <Check
             v-if="isSelected(o.title)"

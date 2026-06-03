@@ -1,23 +1,15 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, toRef, watch } from "vue";
-import { useIntersectionObserver, useTitle, onKeyStroke } from "@vueuse/core";
-import {
-  Plus,
-  Search,
-  LoaderCircle,
-  List,
-  Columns3,
-  X,
-  GripVertical,
-} from "@lucide/vue";
-import { useIssues, type IssueListItem } from "@/composables/useIssues";
-import { useProjectLabels } from "@/composables/useProjectLabels";
-import { useProjectMembers } from "@/composables/useProjectMembers";
-import { useIssueFilters } from "@/composables/useIssueFilters";
-import { useRetagIssue } from "@/composables/useIssueMutations";
-import IssueComposer from "@/components/IssueComposer.vue";
-import IssueFilterPanel from "@/components/IssueFilterPanel.vue";
-import type { IssueFilters } from "@/gitlab/issueParams";
+import { computed, onUnmounted, ref, toRef, watch } from 'vue'
+import { useIntersectionObserver, useTitle, onKeyStroke } from '@vueuse/core'
+import { Plus, Search, LoaderCircle, List, Columns3, X, GripVertical } from '@lucide/vue'
+import { useIssues, type IssueListItem } from '@/composables/useIssues'
+import { useProjectLabels } from '@/composables/useProjectLabels'
+import { useProjectMembers } from '@/composables/useProjectMembers'
+import { useIssueFilters } from '@/composables/useIssueFilters'
+import { useRetagIssue } from '@/composables/useIssueMutations'
+import IssueComposer from '@/components/IssueComposer.vue'
+import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
+import type { IssueFilters } from '@/gitlab/issueParams'
 import {
   sortIssues,
   groupIssues,
@@ -30,67 +22,67 @@ import {
   type GroupKey,
   type Facet,
   type IssueGroup,
-} from "@/lib/issueView";
-import { useRoute, useRouter } from "vue-router";
-import { useConfirm } from "@/composables/useConfirm";
-import IssueRow from "@/components/IssueRow.vue";
-import IssueCard from "@/components/IssueCard.vue";
-import IssueDrawer from "@/components/IssueDrawer.vue";
-import LabelChip from "@/components/LabelChip.vue";
-import ErrorNotice from "@/components/ErrorNotice.vue";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/lib/issueView'
+import { useRoute, useRouter } from 'vue-router'
+import { useConfirm } from '@/composables/useConfirm'
+import IssueRow from '@/components/IssueRow.vue'
+import IssueCard from '@/components/IssueCard.vue'
+import IssueDrawer from '@/components/IssueDrawer.vue'
+import LabelChip from '@/components/LabelChip.vue'
+import ErrorNotice from '@/components/ErrorNotice.vue'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 
-const props = defineProps<{ fullPath: string }>();
+const props = defineProps<{ fullPath: string }>()
 
-const route = useRoute();
-const router = useRouter();
-const { confirm } = useConfirm();
-const drawerDirty = ref(false);
+const route = useRoute()
+const router = useRouter()
+const { confirm } = useConfirm()
+const drawerDirty = ref(false)
 
 // Drawer is driven by ?issue=<iid> on this route, so back/refresh/links all work.
 const openIid = computed(() => {
-  const q = route.query.issue;
-  return typeof q === "string" && q ? q : null;
-});
+  const q = route.query.issue
+  return typeof q === 'string' && q ? q : null
+})
 
 async function setDrawerOpen(value: boolean) {
-  if (value) return; // opening is driven by issue links, not this handler
-  if (drawerDirty.value) {
-    const ok = await confirm({
-      title: "Discard unsaved changes?",
-      description: "Your edits to this issue haven't been saved.",
-    });
-    if (!ok) return;
-  }
-  drawerDirty.value = false;
-  const { issue: _issue, ...rest } = route.query;
-  router.replace({ query: rest });
-}
-
-async function expandIssue() {
-  if (!openIid.value) return;
+  if (value) return // opening is driven by issue links, not this handler
   if (drawerDirty.value) {
     const ok = await confirm({
       title: 'Discard unsaved changes?',
       description: "Your edits to this issue haven't been saved.",
-    });
-    if (!ok) return;
+    })
+    if (!ok) return
   }
-  drawerDirty.value = false;
+  drawerDirty.value = false
+  const { issue: _issue, ...rest } = route.query
+  router.replace({ query: rest })
+}
+
+async function expandIssue() {
+  if (!openIid.value) return
+  if (drawerDirty.value) {
+    const ok = await confirm({
+      title: 'Discard unsaved changes?',
+      description: "Your edits to this issue haven't been saved.",
+    })
+    if (!ok) return
+  }
+  drawerDirty.value = false
   router.push({
-    name: "issue",
+    name: 'issue',
     params: { fullPath: props.fullPath, iid: openIid.value },
-  });
+  })
 }
 
 const {
@@ -103,140 +95,132 @@ const {
   toggleLabel,
   clearAll,
   filters,
-} = useIssueFilters();
-const { data: members } = useProjectMembers(toRef(props, "fullPath"));
+} = useIssueFilters()
+const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
 
-const view = ref<"list" | "board">("list");
-const sortKey = ref<SortKey>("updated");
-const groupKey = ref<GroupKey>("none");
+const view = ref<'list' | 'board'>('list')
+const sortKey = ref<SortKey>('updated')
+const groupKey = ref<GroupKey>('none')
 // Which scoped-label group defines the board columns (assigned / priority / team…).
-const boardScope = ref("assigned");
+const boardScope = ref('assigned')
 
-type StateValue = NonNullable<IssueFilters["state"]>;
+type StateValue = NonNullable<IssueFilters['state']>
 const STATES: { value: StateValue; label: string }[] = [
-  { value: "opened", label: "Open" },
-  { value: "closed", label: "Closed" },
-  { value: "all", label: "All" },
-];
+  { value: 'opened', label: 'Open' },
+  { value: 'closed', label: 'Closed' },
+  { value: 'all', label: 'All' },
+]
 
 // Split the project path so the final segment (the repo) can be emphasized.
-const pathParts = computed(() => props.fullPath.split("/"));
-const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath);
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join("/"));
+const pathParts = computed(() => props.fullPath.split('/'))
+const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath)
+const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'))
 
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
-useTitle(computed(() => `${repoName.value} · lumen`));
+useTitle(computed(() => `${repoName.value} · lumen`))
 
-const {
-  issues,
-  isLoading,
-  error,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage,
-} = useIssues(toRef(props, "fullPath"), filters);
+const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } = useIssues(
+  toRef(props, 'fullPath'),
+  filters,
+)
 
-const count = computed(() => issues.value.length);
-const hasMore = computed(() => hasNextPage.value ?? false);
+const count = computed(() => issues.value.length)
+const hasMore = computed(() => hasNextPage.value ?? false)
 
 // Sort/group happen client-side on the loaded set — priority & status live in
 // scoped labels, which the server can't order by.
-const sorted = computed(() => sortIssues(issues.value, sortKey.value));
-const listGroups = computed(() => groupIssues(sorted.value, groupKey.value));
+const sorted = computed(() => sortIssues(issues.value, sortKey.value))
+const listGroups = computed(() => groupIssues(sorted.value, groupKey.value))
 
-const { data: projectLabels } = useProjectLabels(toRef(props, "fullPath"));
-const labelCatalog = computed(() => projectLabels.value ?? []);
-const scopeOptions = computed(() => labelScopes(labelCatalog.value));
-const boardGroups = computed(() =>
-  groupByScope(sorted.value, boardScope.value, labelCatalog.value),
-);
+const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
+const labelCatalog = computed(() => projectLabels.value ?? [])
+const scopeOptions = computed(() => labelScopes(labelCatalog.value))
+const boardGroups = computed(() => groupByScope(sorted.value, boardScope.value, labelCatalog.value))
 // When the chosen scope isn't present (e.g. first load), fall back to the first.
 watch(scopeOptions, (opts) => {
-  if (opts.length && !opts.includes(boardScope.value))
-    boardScope.value = opts[0];
-});
+  if (opts.length && !opts.includes(boardScope.value)) boardScope.value = opts[0]
+})
 
 // --- drag to retag ----------------------------------------------------------
-const retag = useRetagIssue(props.fullPath);
-const dragging = ref<IssueListItem | null>(null);
-const draggingIid = ref<string | null>(null);
-const dragOverKey = ref<string | null>(null);
+const retag = useRetagIssue(props.fullPath)
+const dragging = ref<IssueListItem | null>(null)
+const draggingIid = ref<string | null>(null)
+const dragOverKey = ref<string | null>(null)
 
 function onDragStart(issue: IssueListItem, e: DragEvent) {
-  dragging.value = issue;
-  draggingIid.value = issue.iid;
+  dragging.value = issue
+  draggingIid.value = issue.iid
   if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(issue.iid));
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(issue.iid))
   }
 }
 function clearDrag() {
-  dragging.value = null;
-  draggingIid.value = null;
-  dragOverKey.value = null;
+  dragging.value = null
+  draggingIid.value = null
+  dragOverKey.value = null
 }
 function onDrop(group: IssueGroup) {
-  const issue = dragging.value;
-  clearDrag();
-  if (!issue) return;
-  const plan = planRetag(issue, boardScope.value, group.repLabel ?? null);
-  if (plan) retag.mutate({ iid: issue.iid, ...plan });
+  const issue = dragging.value
+  clearDrag()
+  if (!issue) return
+  const plan = planRetag(issue, boardScope.value, group.repLabel ?? null)
+  if (plan) retag.mutate({ iid: issue.iid, ...plan })
 }
 
 // --- active filters ---------------------------------------------------------
 function applyFacet(f: Facet) {
-  if (f.kind === "assignee") {
-    assignee.value = assignee.value === f.value ? "" : f.value;
-    return;
+  if (f.kind === 'assignee') {
+    assignee.value = assignee.value === f.value ? '' : f.value
+    return
   }
-  toggleLabel(f.value);
+  toggleLabel(f.value)
 }
-const removeLabel = (title: string) => toggleLabel(title);
+const removeLabel = (title: string) => toggleLabel(title)
 function clearFilters() {
-  clearAll();
+  clearAll()
 }
 
 // Resolved label chips with color from the catalog (titles no longer carry color)
 const labelChips = computed(() =>
   labelTitles.value.map((title) => ({
     title,
-    color: labelCatalog.value.find((l) => l.title === title)?.color ?? "#888",
+    color: labelCatalog.value.find((l) => l.title === title)?.color ?? '#888',
   })),
-);
+)
 
 function loadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage();
+  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
 }
-const sentinel = ref<HTMLElement | null>(null);
+const sentinel = ref<HTMLElement | null>(null)
 useIntersectionObserver(sentinel, ([entry]) => {
-  if (entry?.isIntersecting) loadMore();
-});
+  if (entry?.isIntersecting) loadMore()
+})
 
 // --- composer + new-issue highlight -----------------------------------------
-const composerOpen = ref(false);
-const highlightIid = ref<string | null>(null);
-let highlightTimer: ReturnType<typeof setTimeout> | undefined;
+const composerOpen = ref(false)
+const highlightIid = ref<string | null>(null)
+let highlightTimer: ReturnType<typeof setTimeout> | undefined
 
 function onCreated(iid: string) {
-  highlightIid.value = iid;
-  clearTimeout(highlightTimer);
+  highlightIid.value = iid
+  clearTimeout(highlightTimer)
   // Matches the 1.6s flash-in animation; clear so re-renders don't replay it.
-  highlightTimer = setTimeout(() => (highlightIid.value = null), 1600);
+  highlightTimer = setTimeout(() => (highlightIid.value = null), 1600)
 }
 
-onUnmounted(() => clearTimeout(highlightTimer));
+onUnmounted(() => clearTimeout(highlightTimer))
 
 // `C` opens the composer — but never while typing or with another surface open.
 // Accept both cases so Caps Lock / Shift don't swallow the shortcut.
-onKeyStroke(["c", "C"], (e) => {
-  const t = e.target as HTMLElement | null;
-  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable))
-    return;
-  if (composerOpen.value || openIid.value) return;
-  e.preventDefault();
-  composerOpen.value = true;
-});
+onKeyStroke(['c', 'C'], (e) => {
+  const t = e.target as HTMLElement | null
+  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return
+  if (composerOpen.value || openIid.value) return
+  e.preventDefault()
+  composerOpen.value = true
+})
 </script>
 
 <template>
@@ -254,10 +238,7 @@ onKeyStroke(["c", "C"], (e) => {
         >
           {{ repoName }}
         </h1>
-        <p
-          v-if="pathPrefix"
-          class="truncate font-mono text-xs text-muted-foreground/75"
-        >
+        <p v-if="pathPrefix" class="truncate font-mono text-xs text-muted-foreground/75">
           {{ pathPrefix }}/
         </p>
       </div>
@@ -274,13 +255,10 @@ onKeyStroke(["c", "C"], (e) => {
             :key="count"
             class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
           >
-            {{ count
-            }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
+            {{ count }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
           </span>
-          <span
-            class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase"
-          >
-            {{ count === 1 ? "issue" : "issues" }}
+          <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
+            {{ count === 1 ? 'issue' : 'issues' }}
           </span>
         </div>
       </div>
@@ -396,10 +374,7 @@ onKeyStroke(["c", "C"], (e) => {
     </div>
 
     <!-- Toolbar row 2 (board): which scoped-label group becomes the columns -->
-    <div
-      v-else-if="scopeOptions.length"
-      class="flex flex-wrap items-center gap-2"
-    >
+    <div v-else-if="scopeOptions.length" class="flex flex-wrap items-center gap-2">
       <Select v-model="boardScope">
         <SelectTrigger class="h-8 w-52 text-xs" aria-label="Column grouping">
           <span class="text-muted-foreground">Columns by</span>
@@ -416,11 +391,7 @@ onKeyStroke(["c", "C"], (e) => {
 
     <!-- Active filter tokens -->
     <div v-if="activeCount" class="flex flex-wrap items-center gap-2">
-      <span
-        class="text-[11px] tracking-wide text-muted-foreground/60 uppercase"
-      >
-        Filtering
-      </span>
+      <span class="text-[11px] tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
       <LabelChip
         v-for="l in labelChips"
         :key="l.title"
@@ -433,9 +404,7 @@ onKeyStroke(["c", "C"], (e) => {
         v-if="assignee"
         class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
-        <span class="font-mono">{{
-          assignee === "__none__" ? "Unassigned" : "@" + assignee
-        }}</span>
+        <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
         <button
           type="button"
           aria-label="Remove assignee filter"
@@ -478,10 +447,7 @@ onKeyStroke(["c", "C"], (e) => {
         <Skeleton class="size-2 rounded-full" />
         <Skeleton class="size-5 rounded-md" />
         <Skeleton class="h-3.5 w-6" />
-        <Skeleton
-          class="h-3.5 flex-1"
-          :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }"
-        />
+        <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
         <Skeleton class="h-5 w-16 rounded-full" />
       </div>
     </div>
@@ -491,25 +457,18 @@ onKeyStroke(["c", "C"], (e) => {
         <!-- List view -->
         <div v-if="view === 'list'" class="space-y-5">
           <section v-for="g in listGroups" :key="g.key" class="space-y-2">
-            <header
-              v-if="groupKey !== 'none'"
-              class="flex items-center gap-2 px-1"
-            >
+            <header v-if="groupKey !== 'none'" class="flex items-center gap-2 px-1">
               <span
                 v-if="g.color"
                 class="size-2 rounded-full"
                 :style="{ backgroundColor: g.color }"
               />
               <h2 class="text-sm font-medium text-foreground">{{ g.label }}</h2>
-              <span
-                class="font-mono text-xs tabular-nums text-muted-foreground/60"
-              >
+              <span class="font-mono text-xs tabular-nums text-muted-foreground/60">
                 {{ g.issues.length }}
               </span>
             </header>
-            <Card
-              class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm"
-            >
+            <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm">
               <IssueRow
                 v-for="(issue, i) in g.issues"
                 :key="issue.iid"
@@ -534,9 +493,7 @@ onKeyStroke(["c", "C"], (e) => {
             :key="g.key"
             class="flex h-full w-72 shrink-0 flex-col rounded-xl ring-1 ring-inset transition-colors duration-150"
             :class="
-              dragOverKey === g.key
-                ? 'bg-primary/6 ring-primary/40'
-                : 'bg-card/40 ring-white/5'
+              dragOverKey === g.key ? 'bg-primary/6 ring-primary/40' : 'bg-card/40 ring-white/5'
             "
             @dragover.prevent="dragOverKey = g.key"
             @dragenter.prevent="dragOverKey = g.key"
@@ -551,15 +508,11 @@ onKeyStroke(["c", "C"], (e) => {
               <h2 class="truncate text-sm font-medium text-foreground">
                 {{ g.label }}
               </h2>
-              <span
-                class="ml-auto font-mono text-xs tabular-nums text-muted-foreground/60"
-              >
+              <span class="ml-auto font-mono text-xs tabular-nums text-muted-foreground/60">
                 {{ g.issues.length }}
               </span>
             </header>
-            <div
-              class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5"
-            >
+            <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5">
               <div
                 v-for="issue in g.issues"
                 :key="issue.iid"
@@ -592,11 +545,8 @@ onKeyStroke(["c", "C"], (e) => {
             :disabled="isFetchingNextPage"
             @click="loadMore"
           >
-            <LoaderCircle
-              v-if="isFetchingNextPage"
-              class="size-4 animate-spin text-primary"
-            />
-            {{ isFetchingNextPage ? "Loading…" : "Load more" }}
+            <LoaderCircle v-if="isFetchingNextPage" class="size-4 animate-spin text-primary" />
+            {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
           </button>
         </div>
       </template>
@@ -611,14 +561,9 @@ onKeyStroke(["c", "C"], (e) => {
         </div>
         <p class="text-sm font-medium text-foreground">No issues.</p>
         <p class="max-w-xs text-xs text-muted-foreground">
-          Nothing matches the current filters — adjust them above, or create
-          one.
+          Nothing matches the current filters — adjust them above, or create one.
         </p>
-        <Button
-          data-testid="empty-new-issue"
-          class="mt-1"
-          @click="composerOpen = true"
-        >
+        <Button data-testid="empty-new-issue" class="mt-1" @click="composerOpen = true">
           <Plus />
           Create issue
         </Button>

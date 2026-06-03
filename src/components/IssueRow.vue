@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from 'vue'
 import {
   AlertOctagon,
   Zap,
@@ -12,29 +12,22 @@ import {
   Plug,
   FlaskConical,
   Tag,
-} from '@lucide/vue';
-import LabelChip from './LabelChip.vue';
-import StateBadge from './StateBadge.vue';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  priorityOf,
-  typeOf,
-  statusOf,
-  remainingLabels,
-  parseLabel,
-  tint,
-} from '@/lib/labels';
-import type { Facet } from '@/lib/issueView';
-import type { IssueListItem } from '@/composables/useIssues';
+} from '@lucide/vue'
+import LabelChip from './LabelChip.vue'
+import StateBadge from './StateBadge.vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/lib/labels'
+import type { Facet } from '@/lib/issueView'
+import type { IssueListItem } from '@/composables/useIssues'
 
 const props = defineProps<{
-  issue: IssueListItem;
-  fullPath: string;
-  index?: number;
-  highlight?: boolean;
-}>();
+  issue: IssueListItem
+  fullPath: string
+  index?: number
+  highlight?: boolean
+}>()
 
-const emit = defineEmits<{ filter: [facet: Facet] }>();
+const emit = defineEmits<{ filter: [facet: Facet] }>()
 
 const ICONS = {
   AlertOctagon,
@@ -48,52 +41,42 @@ const ICONS = {
   plug: Plug,
   'flask-conical': FlaskConical,
   tag: Tag,
-} as const;
+} as const
 
 const labels = computed(
-  () =>
-    props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ??
-    []
-);
+  () => props.issue.labels?.nodes?.filter((l): l is NonNullable<typeof l> => !!l) ?? [],
+)
 const assignees = computed(
-  () =>
-    props.issue.assignees?.nodes?.filter(
-      (a): a is NonNullable<typeof a> => !!a
-    ) ?? []
-);
+  () => props.issue.assignees?.nodes?.filter((a): a is NonNullable<typeof a> => !!a) ?? [],
+)
 
-const priority = computed(() => priorityOf(labels.value));
-const type = computed(() => typeOf(labels.value));
-const status = computed(() => statusOf(labels.value));
-const pills = computed(() => remainingLabels(labels.value));
+const priority = computed(() => priorityOf(labels.value))
+const type = computed(() => typeOf(labels.value))
+const status = computed(() => statusOf(labels.value))
+const pills = computed(() => remainingLabels(labels.value))
 
 // The raw label objects behind the lifted signals, so a facet click filters by
 // the exact GitLab label (e.g. `priority::High`), not the display value.
 const rawLabel = (scope: string) =>
-  labels.value.find(
-    (l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope
-  );
-const priorityLabel = computed(() => rawLabel('priority'));
-const typeLabel = computed(() => rawLabel('type'));
+  labels.value.find((l) => parseLabel(l.title, l.color).scope?.toLowerCase() === scope)
+const priorityLabel = computed(() => rawLabel('priority'))
+const typeLabel = computed(() => rawLabel('type'))
 
-const shownAssignees = computed(() => assignees.value.slice(0, 3));
-const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3));
+const shownAssignees = computed(() => assignees.value.slice(0, 3))
+const extraAssignees = computed(() => Math.max(0, assignees.value.length - 3))
 
 // For assignee avatars, we use the `name` initials as a fallback
 const initials = (name: string) => {
-  const parts = name.split(/[\s.-]+/);
-  return parts.length > 1
-    ? parts[0][0] + parts[parts.length - 1][0]
-    : name.slice(0, 2);
-};
+  const parts = name.split(/[\s.-]+/)
+  return parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.slice(0, 2)
+}
 
 const filterLabel = (l: { title: string; color: string }) =>
-  emit('filter', { kind: 'label', value: l.title, color: l.color });
-const filterAssignee = (username: string) =>
-  emit('filter', { kind: 'assignee', value: username });
+  emit('filter', { kind: 'label', value: l.title, color: l.color })
+const filterAssignee = (username: string) => emit('filter', { kind: 'assignee', value: username })
 
 // Cap the cascade so a long list doesn't drag the last rows in late.
-const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
+const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
 </script>
 
 <template>
@@ -141,9 +124,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
       />
     </button>
 
-    <span
-      class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70 w-6 text-right"
-    >
+    <span class="shrink-0 font-mono text-xs tabular-nums text-muted-foreground/70 w-6 text-right">
       <span class="text-muted-foreground/40">#</span>{{ issue.iid }}
     </span>
 
@@ -165,17 +146,11 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
       }"
       @click="filterLabel({ title: status.raw, color: status.color })"
     >
-      <span
-        class="size-1.5 rounded-full"
-        :style="{ backgroundColor: status.color }"
-      />
+      <span class="size-1.5 rounded-full" :style="{ backgroundColor: status.color }" />
       {{ status.value }}
     </button>
 
-    <span
-      v-if="pills.length"
-      class="relative z-10 hidden shrink-0 gap-1 lg:flex"
-    >
+    <span v-if="pills.length" class="relative z-10 hidden shrink-0 gap-1 lg:flex">
       <button
         v-for="l in pills"
         :key="l.id"
@@ -189,10 +164,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
     </span>
 
     <!-- Assignee avatars — click to filter by that assignee. -->
-    <span
-      v-if="shownAssignees.length"
-      class="relative z-10 flex shrink-0 -space-x-1.5"
-    >
+    <span v-if="shownAssignees.length" class="relative z-10 flex shrink-0 -space-x-1.5">
       <button
         v-for="a in shownAssignees"
         :key="a.id"
@@ -202,9 +174,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`);
         @click="filterAssignee(a.username)"
       >
         <Avatar class="size-6 ring-2 ring-card">
-          <AvatarFallback
-            class="bg-muted text-[10px] font-medium text-muted-foreground"
-          >
+          <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
             {{ initials(a.name) }}
           </AvatarFallback>
         </Avatar>

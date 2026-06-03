@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
-import { Tag } from "@lucide/vue";
-import LabelChip from "./LabelChip.vue";
-import LabelGroupMenu from "./LabelGroupMenu.vue";
-import { groupLabelsByScope, toggleScoped } from "@/lib/labelGroups";
-import type { ProjectLabel } from "@/composables/useProjectLabels";
+import { computed, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { Tag } from '@lucide/vue'
+import LabelChip from './LabelChip.vue'
+import LabelGroupMenu from './LabelGroupMenu.vue'
+import { groupLabelsByScope, toggleScoped } from '@/lib/labelGroups'
+import type { ProjectLabel } from '@/composables/useProjectLabels'
 
-const props = defineProps<{ catalog: ProjectLabel[]; modelValue: string[] }>();
-const emit = defineEmits<{ "update:modelValue": [titles: string[]] }>();
+const props = defineProps<{ catalog: ProjectLabel[]; modelValue: string[] }>()
+const emit = defineEmits<{ 'update:modelValue': [titles: string[]] }>()
 
-const open = ref(false);
-const root = ref<HTMLElement | null>(null);
-onClickOutside(root, () => (open.value = false));
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+onClickOutside(root, () => (open.value = false))
 
-const groups = computed(() => groupLabelsByScope(props.catalog));
+const groups = computed(() => groupLabelsByScope(props.catalog))
 function onToggle(title: string) {
-  emit("update:modelValue", toggleScoped(props.modelValue, title));
+  emit('update:modelValue', toggleScoped(props.modelValue, title))
 }
 
 const chipFor = (title: string) =>
-  props.catalog.find((l) => l.title === title) ?? { title, color: "#888" };
+  props.catalog.find((l) => l.title === title) ?? { title, color: '#888' }
 </script>
 
 <template>
@@ -50,11 +50,7 @@ const chipFor = (title: string) =>
       v-if="open"
       class="absolute z-50 mt-1 w-56 rounded-lg border border-border bg-popover p-1 shadow-md"
     >
-      <LabelGroupMenu
-        :groups="groups"
-        :selected="modelValue"
-        @toggle="onToggle"
-      />
+      <LabelGroupMenu :groups="groups" :selected="modelValue" @toggle="onToggle" />
     </div>
   </div>
 </template>
