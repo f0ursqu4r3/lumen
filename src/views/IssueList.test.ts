@@ -74,6 +74,7 @@ const mockQuery = (over: Record<string, unknown> = {}) =>
   })
 
 beforeEach(() => {
+  localStorage.clear()
   useIssues.mockReset()
   createMutate.mockReset()
   confirmMock.mockReset()

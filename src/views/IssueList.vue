@@ -18,8 +18,6 @@ import {
   planRetag,
   SORTS,
   GROUPS,
-  type SortKey,
-  type GroupKey,
   type Facet,
   type IssueGroup,
 } from '@/lib/issueView'
@@ -91,18 +89,16 @@ const {
   labels: labelTitles,
   assignee,
   author,
+  sort: sortKey,
+  group: groupKey,
+  view,
+  scope: boardScope,
   activeCount,
   toggleLabel,
   clearAll,
   filters,
 } = useIssueFilters()
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
-
-const view = ref<'list' | 'board'>('list')
-const sortKey = ref<SortKey>('updated')
-const groupKey = ref<GroupKey>('none')
-// Which scoped-label group defines the board columns (assigned / priority / team…).
-const boardScope = ref('assigned')
 
 type StateValue = NonNullable<IssueFilters['state']>
 const STATES: { value: StateValue; label: string }[] = [
