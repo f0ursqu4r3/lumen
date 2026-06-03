@@ -40,6 +40,17 @@ function writeSaved(fullPath: string, slice: Record<string, string | string[]>) 
   }
 }
 
+function readSaved(fullPath: string): Record<string, string | string[]> {
+  try {
+    const raw = localStorage.getItem(storageKey(fullPath))
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
 /**
  * Single source of truth for the issue filters, round-tripped through the route
  * query so links are shareable and back/forward works. Search is held locally
@@ -145,6 +156,20 @@ export function useIssueFilters() {
   }))
 
   const fullPath = computed(() => asString(route.params.fullPath))
+
+  // On arrival / project switch, restore saved state — but only when the URL
+  // specifies none of the filter keys, so explicit and shared links win.
+  watch(
+    fullPath,
+    (path) => {
+      if (!path) return
+      if (FILTER_KEYS.some((k) => route.query[k] != null)) return
+      const saved = readSaved(path)
+      if (Object.keys(saved).length)
+        router.replace({ query: { ...route.query, ...saved } })
+    },
+    { immediate: true },
+  )
 
   // Mirror the URL's filter slice into per-project storage on every change.
   // On the initial mount pass we skip an empty slice so we don't clobber any

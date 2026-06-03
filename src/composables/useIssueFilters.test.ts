@@ -174,4 +174,40 @@ describe('useIssueFilters', () => {
     await flushPromises()
     expect(localStorage.getItem(keyFor('grp/proj'))).toBeNull()
   })
+
+  it('seeds saved state into the query when no filter key is present', async () => {
+    localStorage.setItem(
+      'tragit:issue-filters:grp/proj',
+      JSON.stringify({ sort: 'title', assignee: 'ada' }),
+    )
+    const { router, mountIt } = setup({}, 'grp/proj')
+    const api = await mountIt()
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBe('title')
+    expect(router.currentRoute.value.query.assignee).toBe('ada')
+    expect(api.sort.value).toBe('title')
+  })
+
+  it('does NOT seed when the query already carries a filter key', async () => {
+    localStorage.setItem(
+      'tragit:issue-filters:grp/proj',
+      JSON.stringify({ sort: 'title' }),
+    )
+    const { router, mountIt } = setup({ state: 'closed' }, 'grp/proj')
+    await mountIt()
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBeUndefined()
+  })
+
+  it('seeds while preserving unrelated query keys like issue', async () => {
+    localStorage.setItem(
+      'tragit:issue-filters:grp/proj',
+      JSON.stringify({ sort: 'title' }),
+    )
+    const { router, mountIt } = setup({ issue: '9' }, 'grp/proj')
+    await mountIt()
+    await flushPromises()
+    expect(router.currentRoute.value.query.sort).toBe('title')
+    expect(router.currentRoute.value.query.issue).toBe('9')
+  })
 })
