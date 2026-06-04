@@ -1,0 +1,29 @@
+import { describe, it, expect } from "vitest";
+import { buildGraphql, buildRest, buildAsset } from "./gitlab";
+
+const cfg = { gitlabUrl: "https://gl.example.com", token: "glpat-xyz" };
+
+describe("gitlab request builders", () => {
+  it("builds a graphql POST with token + TLS-off", () => {
+    const { url, init } = buildGraphql(cfg, { query: "{ x }", variables: { a: 1 } });
+    expect(url).toBe("https://gl.example.com/api/graphql");
+    expect(init.method).toBe("POST");
+    expect((init.headers as Record<string, string>)["PRIVATE-TOKEN"]).toBe("glpat-xyz");
+    expect((init.headers as Record<string, string>)["Content-Type"]).toBe("application/json");
+    expect(init.body).toBe(JSON.stringify({ query: "{ x }", variables: { a: 1 } }));
+    expect((init as { tls?: { rejectUnauthorized?: boolean } }).tls?.rejectUnauthorized).toBe(false);
+  });
+
+  it("builds a REST request against /api with token", () => {
+    const { url, init } = buildRest(cfg, { method: "POST", path: "/v4/projects/1/star" });
+    expect(url).toBe("https://gl.example.com/api/v4/projects/1/star");
+    expect(init.method).toBe("POST");
+    expect((init.headers as Record<string, string>)["PRIVATE-TOKEN"]).toBe("glpat-xyz");
+  });
+
+  it("builds an asset request against /api with token", () => {
+    const { url, init } = buildAsset(cfg, { path: "/v4/projects/1/uploads/abc/x.png" });
+    expect(url).toBe("https://gl.example.com/api/v4/projects/1/uploads/abc/x.png");
+    expect((init.headers as Record<string, string>)["PRIVATE-TOKEN"]).toBe("glpat-xyz");
+  });
+});
