@@ -1,6 +1,6 @@
 ---
-name: project-tragit
-description: Key patterns, conventions, and architectural decisions in the tragit personal GitLab UI project
+name: project-lumen
+description: Key patterns, conventions, and architectural decisions in the lumen personal GitLab UI project
 metadata:
   type: project
 ---
