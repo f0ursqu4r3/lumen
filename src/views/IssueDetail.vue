@@ -330,7 +330,7 @@ if (!props.embedded) {
               v-if="draft.description.trim()"
               :source="draft.description"
               :project-path="fullPath"
-              class="max-w-[80ch] text-sm leading-relaxed"
+              class="mt-1 text-sm leading-relaxed"
             />
             <p v-else class="text-sm italic text-muted-foreground">No description yet.</p>
           </template>
