@@ -13,7 +13,7 @@ import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { ExternalLink, Images } from '@lucide/vue'
+import { Check, ExternalLink, Images } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -76,6 +76,24 @@ const viewerIndex = ref(0)
 function openViewer(i: number) {
   viewerIndex.value = i
   viewerOpen.value = true
+}
+
+// The GitLab link doubles as a copy affordance: plain click opens (anchor
+// default), Shift copies the bare URL, Shift+Meta copies a markdown link. The
+// label flips to a transient "Copied" confirmation since there's no toast.
+const linkCopied = ref<null | 'url' | 'md'>(null)
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
+
+async function onGitlabLinkClick(e: MouseEvent) {
+  if (!issue.value || !e.shiftKey) return // plain click falls through to the anchor
+  e.preventDefault()
+  const url = issue.value.webUrl
+  const markdown = e.metaKey
+  const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
+  await navigator.clipboard.writeText(text)
+  linkCopied.value = markdown ? 'md' : 'url'
+  clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => (linkCopied.value = null), 1400)
 }
 
 // Inline media is rendered via v-html, so intercept clicks by delegation. The
@@ -251,13 +269,15 @@ if (!props.embedded) {
           :href="issue.webUrl"
           target="_blank"
           rel="noopener noreferrer"
+          title="Click to open · Shift+Click to copy URL · Shift+⌘+Click to copy as markdown"
           data-testid="open-in-gitlab"
           variant="ghost"
           size="sm"
           class="ml-auto text-muted-foreground"
+          @click="onGitlabLinkClick"
         >
-          <ExternalLink class="size-3.5" />
-          Open in GitLab
+          <component :is="linkCopied ? Check : ExternalLink" class="size-3.5" />
+          {{ linkCopied === 'md' ? 'Copied markdown' : linkCopied === 'url' ? 'Copied URL' : 'Open in GitLab' }}
         </Button>
         <Button
           type="button"

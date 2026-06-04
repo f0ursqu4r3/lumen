@@ -224,4 +224,42 @@ describe('IssueDetail (buffered)', () => {
     expect(liFor('fresh reply')?.classes()).toContain('animate-note-in')
     expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
   })
+
+  describe('the GitLab link', () => {
+    const writeText = vi.fn(() => Promise.resolve())
+    beforeEach(() => {
+      writeText.mockClear()
+      vi.stubGlobal('navigator', { clipboard: { writeText } })
+    })
+
+    it('opens in a new tab on a plain click (no copy)', async () => {
+      const w = mountDetail()
+      await flushPromises()
+      const link = w.get('[data-testid="open-in-gitlab"]')
+      expect(link.attributes('target')).toBe('_blank')
+      await link.trigger('click')
+      expect(writeText).not.toHaveBeenCalled()
+      expect(link.text()).toContain('Open in GitLab')
+    })
+
+    it('copies the URL on Shift+Click and confirms', async () => {
+      const w = mountDetail()
+      await flushPromises()
+      const link = w.get('[data-testid="open-in-gitlab"]')
+      await link.trigger('click', { shiftKey: true })
+      await flushPromises()
+      expect(writeText).toHaveBeenCalledWith('#')
+      expect(link.text()).toContain('Copied URL')
+    })
+
+    it('copies a markdown link on Shift+Meta+Click', async () => {
+      const w = mountDetail()
+      await flushPromises()
+      const link = w.get('[data-testid="open-in-gitlab"]')
+      await link.trigger('click', { shiftKey: true, metaKey: true })
+      await flushPromises()
+      expect(writeText).toHaveBeenCalledWith('[#9 Bug](#)')
+      expect(link.text()).toContain('Copied markdown')
+    })
+  })
 })
