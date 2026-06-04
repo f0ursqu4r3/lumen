@@ -15,7 +15,7 @@ import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Check, Link, ExternalLink, Images } from '@lucide/vue'
+import { Check, Link, ExternalLink, Images, ArrowLeft } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -302,7 +302,24 @@ if (!props.embedded) {
   <article v-else-if="issue && draft" class="issue pb-20">
     <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
     <header class="animate-row-in">
+      <!-- The eyebrow doubles as the way back. Full-page (deep link / refresh —
+           the cards and rows open the drawer, so this view is the only one that
+           strands you) it's a link to this repo's issue list, the arrow taking
+           the tick's lead position. Embedded in the drawer it stays inert text:
+           the list is already behind it, and the dirty guard lives on the host. -->
+      <RouterLink
+        v-if="!embedded"
+        :to="{ name: 'issues', params: { fullPath } }"
+        data-testid="back-to-issues"
+        class="group/back -mx-1 inline-flex max-w-full items-center gap-1.5 rounded-sm px-1 font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase outline-none transition-colors hover:text-foreground focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+      >
+        <ArrowLeft
+          class="size-3 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
+        />
+        <span class="min-w-0 truncate">{{ repoName }}</span>
+      </RouterLink>
       <p
+        v-else
         class="eyebrow-tick max-w-full font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
       >
         <span class="min-w-0 truncate">{{ repoName }}</span>

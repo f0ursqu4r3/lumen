@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import { ref } from 'vue'
 import { Check } from '@lucide/vue'
 
@@ -125,7 +125,11 @@ const fullIssue = {
   },
 }
 
-const mountDetail = () => mount(IssueDetail, { props: { fullPath: 'grp/proj', iid: '9' } })
+const mountDetail = (props: Record<string, unknown> = {}) =>
+  mount(IssueDetail, {
+    props: { fullPath: 'grp/proj', iid: '9', ...props },
+    global: { stubs: { RouterLink: RouterLinkStub } },
+  })
 
 beforeEach(() => {
   useIssue.mockReset()
@@ -152,6 +156,23 @@ describe('IssueDetail (buffered)', () => {
     expect(w.text()).toContain('me too')
     expect(w.find('[data-testid="edit-title"]').exists()).toBe(false)
     expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(false)
+  })
+
+  it('links the eyebrow back to this repo issue list when full-page', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    const back = w.find('[data-testid="back-to-issues"]')
+    expect(back.exists()).toBe(true)
+    expect(back.findComponent(RouterLinkStub).props('to')).toEqual({
+      name: 'issues',
+      params: { fullPath: 'grp/proj' },
+    })
+  })
+
+  it('omits the back link when embedded in the drawer', async () => {
+    const w = mountDetail({ embedded: true })
+    await flushPromises()
+    expect(w.find('[data-testid="back-to-issues"]').exists()).toBe(false)
   })
 
   it('reveals the title input when its Edit toggle is clicked', async () => {
