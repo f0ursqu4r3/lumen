@@ -526,6 +526,14 @@ if (!props.embedded) {
   }
   .issue__meta {
     grid-area: meta;
+    /* The stacked/drawer view boxes the attributes into a card to separate them
+       from the document; at full-page width the rail is bare and Linear-like, so
+       drop the surface (the utilities still apply in the narrow layout). */
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
   }
   .issue__talk {
     grid-area: talk;

@@ -43,7 +43,7 @@ function assignOnly(username: string) {
       @click="open = !open"
     >
       <UserStar class="size-3.5" />
-      Quick assign
+      Quick
     </button>
 
     <div
