@@ -32,6 +32,30 @@ describe('useProjectMembers', () => {
     ])
   })
 
+  it('drops bot users', async () => {
+    request.mockResolvedValue({
+      project: {
+        projectMembers: {
+          nodes: [
+            { user: { id: 'gid://user/1', username: 'kdougan', name: 'K D', avatarUrl: null, bot: false } },
+            {
+              user: {
+                id: 'gid://user/9',
+                username: 'group_2453_bot',
+                name: 'Auto merge token',
+                avatarUrl: null,
+                bot: true,
+              },
+            },
+          ],
+        },
+      },
+    })
+    const { result } = withQuery(() => useProjectMembers(ref('grp/proj')))
+    await flushPromises()
+    expect(result().data.value?.map((u) => u.username)).toEqual(['kdougan'])
+  })
+
   it('exposes a normalized error', async () => {
     request.mockRejectedValue(new Error('down'))
     const { result } = withQuery(() => useProjectMembers(ref('grp/proj')))

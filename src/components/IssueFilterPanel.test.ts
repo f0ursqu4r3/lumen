@@ -7,8 +7,8 @@ const catalog = [
   { id: 'l2', title: 'ui', color: '#0f0' },
 ]
 const members = [
-  { id: 'm1', username: 'ada', name: 'Ada Lovelace', avatarUrl: null },
-  { id: 'm2', username: 'bob', name: 'Bob Bk', avatarUrl: null },
+  { id: 'm1', username: 'ada', name: 'Ada Lovelace', avatarUrl: null, bot: false },
+  { id: 'm2', username: 'bob', name: 'Bob Bk', avatarUrl: null, bot: false },
 ]
 
 const mountPanel = (props = {}) =>

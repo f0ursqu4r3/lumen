@@ -19,12 +19,14 @@ const ProjectContributorsDocument = graphql(`
             username
             name
             avatarUrl
+            bot
           }
           assignees {
             nodes {
               username
               name
               avatarUrl
+              bot
             }
           }
         }
@@ -46,7 +48,8 @@ async function fetchContributors(fullPath: string): Promise<ProjectContributor[]
     for (const mr of data.project?.mergeRequests?.nodes ?? []) {
       if (!mr) continue
       for (const p of [mr.author, ...(mr.assignees?.nodes ?? [])]) {
-        if (!p?.username || byUsername.has(p.username)) continue
+        // Bots (auto-merge, project access tokens) aren't real contributors.
+        if (!p?.username || p.bot || byUsername.has(p.username)) continue
         byUsername.set(p.username, {
           username: p.username,
           name: p.name ?? null,

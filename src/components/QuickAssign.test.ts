@@ -10,8 +10,8 @@ const issue = {
   notes: { nodes: [] },
 }
 const members = [
-  { id: 'm1', username: 'ada', name: 'Ada', avatarUrl: null },
-  { id: 'm2', username: 'bob', name: 'Bob', avatarUrl: null },
+  { id: 'm1', username: 'ada', name: 'Ada', avatarUrl: null, bot: false },
+  { id: 'm2', username: 'bob', name: 'Bob', avatarUrl: null, bot: false },
 ]
 
 const mountQA = (usernames = ['ada']) =>

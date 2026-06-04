@@ -17,6 +17,7 @@ const ProjectMembersDocument = graphql(`
             username
             name
             avatarUrl
+            bot
           }
         }
       }
@@ -30,7 +31,8 @@ async function fetchMembers(fullPath: string) {
     return (
       data.project?.projectMembers?.nodes
         ?.map((n) => n?.user)
-        .filter((u): u is NonNullable<typeof u> => !!u) ?? []
+        // Bots (project access tokens, auto-merge, etc.) aren't real assignees.
+        .filter((u): u is NonNullable<typeof u> => !!u && !u.bot) ?? []
     )
   } catch (e) {
     throw normalizeError(e)
