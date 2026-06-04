@@ -14,7 +14,7 @@ import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Check, ExternalLink, Images } from '@lucide/vue'
+import { Check, Copy, ExternalLink, Images } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -79,22 +79,22 @@ function openViewer(i: number) {
   viewerOpen.value = true
 }
 
-// The GitLab link doubles as a copy affordance: plain click opens the URL in the
-// OS browser (the native webview ignores <a target="_blank">, so we route through
-// the host via rpc.openExternal), Shift copies the bare URL, Shift+Meta copies a
-// markdown link. The label flips to a transient "Copied" confirmation (no toast).
+// Two GitLab affordances next to the issue id: open in the browser, and copy a
+// link. Opening routes through the host (the native webview can't open external
+// URLs itself). Copy defaults to a markdown link; Shift+Click copies the bare URL.
+// We deliberately avoid ⌘/Ctrl chords — Electrobun's preload intercepts those on
+// links before our handler runs.
+async function openInGitLab() {
+  if (issue.value) await rpc.openExternal({ url: issue.value.webUrl })
+}
+
 const linkCopied = ref<null | 'url' | 'md'>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | undefined
 
-async function onGitlabLinkClick(e: MouseEvent) {
+async function onCopyClick(e: MouseEvent) {
   if (!issue.value) return
-  e.preventDefault() // never rely on the anchor default — it's inert in the webview
   const url = issue.value.webUrl
-  if (!e.shiftKey) {
-    await rpc.openExternal({ url })
-    return
-  }
-  const markdown = e.metaKey
+  const markdown = !e.shiftKey
   const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
   // navigator.clipboard is undefined under the views:// origin; write via the host.
   await rpc.clipboardWriteText({ text })
@@ -272,19 +272,34 @@ if (!props.embedded) {
           <span class="text-muted-foreground/45">#</span>{{ issue.iid }}
         </span>
         <Button
-          as="a"
-          :href="issue.webUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Click to open · Shift+Click to copy URL · Shift+⌘+Click to copy as markdown"
+          type="button"
           data-testid="open-in-gitlab"
           variant="ghost"
           size="sm"
           class="ml-auto text-muted-foreground"
-          @click="onGitlabLinkClick"
+          title="Open this issue in GitLab"
+          @click="openInGitLab"
         >
-          <component :is="linkCopied ? Check : ExternalLink" class="size-3.5" />
-          {{ linkCopied === 'md' ? 'Copied markdown' : linkCopied === 'url' ? 'Copied URL' : 'Open in GitLab' }}
+          <ExternalLink class="size-3.5" />
+          Open in GitLab
+        </Button>
+        <Button
+          type="button"
+          data-testid="copy-link"
+          variant="ghost"
+          size="sm"
+          class="text-muted-foreground"
+          title="Copy a markdown link · Shift+Click to copy the bare URL"
+          @click="onCopyClick"
+        >
+          <component :is="linkCopied ? Check : Copy" class="size-3.5" />
+          {{
+            linkCopied === 'md'
+              ? 'Copied markdown'
+              : linkCopied === 'url'
+                ? 'Copied URL'
+                : 'Copy Link'
+          }}
         </Button>
         <Button
           type="button"

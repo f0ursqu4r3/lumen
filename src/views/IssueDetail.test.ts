@@ -231,46 +231,39 @@ describe('IssueDetail (buffered)', () => {
     expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
   })
 
-  describe('the GitLab link', () => {
-    const writeText = vi.fn(() => Promise.resolve())
+  describe('the GitLab actions', () => {
     beforeEach(() => {
-      writeText.mockClear()
       openExternal.mockClear()
       clipboardWriteText.mockClear()
-      vi.stubGlobal('navigator', { clipboard: { writeText } })
     })
 
-    it('opens externally via the host on a plain click (no copy)', async () => {
-      // The native webview ignores <a target="_blank">; a plain click must route
-      // through the Bun process (Utils.openExternal) to reach the system browser.
+    it('opens the issue in the browser via the host (no copy)', async () => {
       const w = mountDetail()
       await flushPromises()
-      const link = w.get('[data-testid="open-in-gitlab"]')
-      await link.trigger('click')
+      await w.get('[data-testid="open-in-gitlab"]').trigger('click')
       await flushPromises()
       expect(openExternal).toHaveBeenCalledWith({ url: '#' })
-      expect(writeText).not.toHaveBeenCalled()
-      expect(link.text()).toContain('Open in GitLab')
+      expect(clipboardWriteText).not.toHaveBeenCalled()
     })
 
-    it('copies the URL on Shift+Click and confirms', async () => {
+    it('copies a markdown link on a plain Copy click and confirms', async () => {
       const w = mountDetail()
       await flushPromises()
-      const link = w.get('[data-testid="open-in-gitlab"]')
-      await link.trigger('click', { shiftKey: true })
-      await flushPromises()
-      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
-      expect(link.text()).toContain('Copied URL')
-    })
-
-    it('copies a markdown link on Shift+Meta+Click', async () => {
-      const w = mountDetail()
-      await flushPromises()
-      const link = w.get('[data-testid="open-in-gitlab"]')
-      await link.trigger('click', { shiftKey: true, metaKey: true })
+      const copy = w.get('[data-testid="copy-link"]')
+      await copy.trigger('click')
       await flushPromises()
       expect(clipboardWriteText).toHaveBeenCalledWith({ text: '[#9 Bug](#)' })
-      expect(link.text()).toContain('Copied markdown')
+      expect(openExternal).not.toHaveBeenCalled()
+      expect(copy.text()).toContain('Copied')
+    })
+
+    it('copies the bare URL on Shift+Click of Copy', async () => {
+      const w = mountDetail()
+      await flushPromises()
+      const copy = w.get('[data-testid="copy-link"]')
+      await copy.trigger('click', { shiftKey: true })
+      await flushPromises()
+      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
     })
   })
 })
