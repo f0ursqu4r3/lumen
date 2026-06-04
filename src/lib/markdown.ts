@@ -149,10 +149,10 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
         )
       }
       if (kind === 'audio') {
-        return `<audio controls src="${escapeAttr(src)}"${titleAttr}></audio>`
+        return `<audio controls src="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}"${titleAttr}></audio>`
       }
       if (kind === 'file') {
-        return `<a class="file-card" href="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
+        return `<a class="file-card" href="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
       }
       let html = `<img src="${escapeAttr(src)}" alt="${escapeAttr(token.alt)}"`
       html += ` data-media-src="${escapeAttr(src)}" data-media-kind="image" data-media-trigger`

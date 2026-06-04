@@ -1,14 +1,27 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { renderMarkdown } from '@/lib/markdown'
+import { applyResolvedMedia } from '@/lib/media'
+import { resolveAsset } from '@/composables/useGitlabAsset'
 
 const props = defineProps<{ source?: string | null; projectPath?: string }>()
 const html = computed(() => renderMarkdown(props.source, { projectPath: props.projectPath }))
+const host = ref<HTMLElement | null>(null)
+
+// After each render, swap GitLab upload paths for blob URLs fetched via RPC.
+watch(
+  html,
+  async () => {
+    await nextTick()
+    if (host.value) await applyResolvedMedia(host.value, resolveAsset)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <!-- eslint-disable-next-line vue/no-v-html — sanitized in renderMarkdown -->
-  <div class="markdown" v-html="html" />
+  <div ref="host" class="markdown" v-html="html" />
 </template>
 
 <style scoped>
