@@ -1,6 +1,8 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import IssueDrawer from './IssueDrawer.vue'
+
+vi.mock('@/lib/rpc', () => ({ rpc: { gitlabGraphql: vi.fn() } }))
 
 // IssueDetail does its own data fetching; stub it to a marker.
 const IssueDetailStub = {

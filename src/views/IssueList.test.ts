@@ -18,6 +18,8 @@ const router = createRouter({
   ],
 })
 
+vi.mock('@/lib/rpc', () => ({ rpc: { gitlabGraphql: vi.fn() } }))
+
 const useIssues = vi.fn()
 vi.mock('@/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 
