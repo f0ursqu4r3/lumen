@@ -34,6 +34,14 @@ watch(
   { immediate: true },
 )
 
+// Keep index valid if the collection shrinks while the viewer is open.
+watch(
+  () => props.items.length,
+  () => {
+    index.value = clamp(index.value)
+  },
+)
+
 const current = computed<ViewerItem | undefined>(() => props.items[index.value])
 const hasMany = computed(() => props.items.length > 1)
 

@@ -74,4 +74,14 @@ describe('MediaViewer', () => {
     expect(document.querySelector('[data-media-source="comment"]')).toBeTruthy()
     w.unmount()
   })
+
+  it('re-clamps the index when the collection shrinks while open', async () => {
+    const w = mountViewer({ startIndex: 2 })
+    await nextTick()
+    expect(counterText()).toContain('3 / 3')
+    await w.setProps({ items: [items[0]] })
+    await nextTick()
+    expect(counterText()).toContain('1 / 1')
+    w.unmount()
+  })
 })

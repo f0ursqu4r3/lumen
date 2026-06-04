@@ -74,15 +74,18 @@ function openViewer(i: number) {
   viewerOpen.value = true
 }
 
-// Inline media is rendered via v-html, so intercept clicks by delegation: an
-// image's <img> carries the trigger; a video's expand button carries it (the
-// <video> body keeps native controls). Match data-media-src to the collection.
+// Inline media is rendered via v-html, so intercept clicks by delegation. The
+// clicked trigger's ordinal among all [data-media-trigger] elements in the body
+// is its index in `media`: both follow document order (description then
+// comments) and only images/videos carry the trigger — exactly the collection.
 function onBodyMediaClick(e: MouseEvent) {
   const el = (e.target as HTMLElement | null)?.closest('[data-media-trigger]')
-  const src = el?.getAttribute('data-media-src')
-  if (!src) return
+  if (!el) return
   e.preventDefault()
-  const i = media.value.findIndex((m) => m.src === src)
+  const triggers = Array.from(
+    (e.currentTarget as HTMLElement).querySelectorAll('[data-media-trigger]'),
+  )
+  const i = triggers.indexOf(el)
   if (i >= 0) openViewer(i)
 }
 
