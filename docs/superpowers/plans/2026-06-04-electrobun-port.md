@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Convert tragit from a Vite-dev-server-as-runtime web app into an installable, cross-platform Electrobun desktop app whose Bun main process holds the GitLab token and proxies all GitLab traffic over typed RPC.
+**Goal:** Convert lumen from a Vite-dev-server-as-runtime web app into an installable, cross-platform Electrobun desktop app whose Bun main process holds the GitLab token and proxies all GitLab traffic over typed RPC.
 
 **Architecture:** Vite still builds the Vue/Tailwind SPA into `dist/`; Electrobun's `build.copy` maps `dist/` into the app bundle and serves it under the `views://` origin. The Bun main process (`src/bun/`) reads a token from an app-support config file and exposes RPC handlers (`gitlabGraphql`, `gitlabRest`, `gitlabAsset`, config CRUD) that the webview calls in place of the old `/gitlab` proxy. Images load as blob URLs fetched through RPC. A persisted vue-query cache gives instant-offline render.
 
@@ -16,7 +16,7 @@ Bun side (`electrobun/bun`):
 ```typescript
 import Electrobun, { BrowserWindow, BrowserView, ApplicationMenu } from "electrobun/bun";
 
-const rpc = BrowserView.defineRPC<TragitRPC>({
+const rpc = BrowserView.defineRPC<LumenRPC>({
   maxRequestTime: 30000,
   handlers: {
     requests: { /* name: async (args) => result */ },
@@ -25,7 +25,7 @@ const rpc = BrowserView.defineRPC<TragitRPC>({
 });
 
 const win = new BrowserWindow({
-  title: "Tragit",
+  title: "Lumen",
   url: "views://mainview/index.html",
   frame: { width: 1280, height: 860, x: 80, y: 80 },
   rpc,
@@ -61,7 +61,7 @@ export interface AssetArgs { path: string }
 export interface AssetResult { base64: string; contentType: string }
 export interface SaveConfigArgs { url: string; token: string }
 
-export interface TragitRequests {
+export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
   gitlabRest: (a: RestArgs) => Promise<RestResult>
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
@@ -70,9 +70,9 @@ export interface TragitRequests {
   clearConfig: () => Promise<{ ok: true }>
 }
 
-export type TragitRPC = {
+export type LumenRPC = {
   maxRequestTime: number
-  handlers: { requests: TragitRequests; messages: Record<string, never> }
+  handlers: { requests: LumenRequests; messages: Record<string, never> }
 }
 ```
 
@@ -157,8 +157,8 @@ import type { ElectrobunConfig } from "electrobun";
 
 export default {
   app: {
-    name: "Tragit",
-    identifier: "com.kdougan.tragit",
+    name: "Lumen",
+    identifier: "com.kdougan.lumen",
     version: "0.1.0",
   },
   build: {
@@ -185,7 +185,7 @@ export default {
 import Electrobun, { BrowserWindow } from "electrobun/bun";
 
 const win = new BrowserWindow({
-  title: "Tragit",
+  title: "Lumen",
   url: "views://mainview/index.html",
   frame: { width: 1280, height: 860, x: 80, y: 80 },
 });
@@ -216,7 +216,7 @@ Run:
 ```bash
 bun run app:dev
 ```
-Expected: a native window titled "Tragit" opens showing the tragit UI (it will show a connection/error state since GitLab isn't wired yet — that's fine). Close it to end.
+Expected: a native window titled "Lumen" opens showing the lumen UI (it will show a connection/error state since GitLab isn't wired yet — that's fine). Close it to end.
 
 If the window is blank, open the webview devtools (right-click → Inspect, if available) and confirm assets load from `views://mainview/assets/...`. A 404 on assets means `base: './'` did not take — recheck Step 2.
 
@@ -257,7 +257,7 @@ async function devServerUp(): Promise<boolean> {
 const url = (await devServerUp()) ? `${DEV_URL}/index.html` : "views://mainview/index.html";
 
 const win = new BrowserWindow({
-  title: "Tragit",
+  title: "Lumen",
   url,
   frame: { width: 1280, height: 860, x: 80, y: 80 },
 });
@@ -316,14 +316,14 @@ import { loadConfig, saveConfig, clearConfig } from "./config";
 
 let dir: string;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "tragit-cfg-"));
-  process.env.TRAGIT_CONFIG_DIR = dir;
+  dir = mkdtempSync(join(tmpdir(), "lumen-cfg-"));
+  process.env.LUMEN_CONFIG_DIR = dir;
   delete process.env.GITLAB_URL;
   delete process.env.GITLAB_TOKEN;
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
-  delete process.env.TRAGIT_CONFIG_DIR;
+  delete process.env.LUMEN_CONFIG_DIR;
 });
 
 describe("config", () => {
@@ -370,17 +370,17 @@ export interface AppConfig { gitlabUrl: string | null; token: string | null }
 
 const trimSlash = (s: string) => s.replace(/\/+$/, "");
 
-/** Cross-platform per-user app data dir. Overridable via TRAGIT_CONFIG_DIR (tests). */
+/** Cross-platform per-user app data dir. Overridable via LUMEN_CONFIG_DIR (tests). */
 export function configDir(): string {
-  if (process.env.TRAGIT_CONFIG_DIR) return process.env.TRAGIT_CONFIG_DIR;
+  if (process.env.LUMEN_CONFIG_DIR) return process.env.LUMEN_CONFIG_DIR;
   const home = homedir();
   switch (platform()) {
     case "darwin":
-      return join(home, "Library", "Application Support", "Tragit");
+      return join(home, "Library", "Application Support", "Lumen");
     case "win32":
-      return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Tragit");
+      return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Lumen");
     default:
-      return join(process.env.XDG_CONFIG_HOME ?? join(home, ".config"), "Tragit");
+      return join(process.env.XDG_CONFIG_HOME ?? join(home, ".config"), "Lumen");
   }
 }
 
@@ -607,14 +607,14 @@ Replace `src/bun/index.ts` with:
 import Electrobun, { BrowserWindow, BrowserView } from "electrobun/bun";
 import { loadConfig, saveConfig, clearConfig } from "./config";
 import { gitlabGraphql, gitlabRest, gitlabAsset } from "./gitlab";
-import type { TragitRPC } from "@/lib/rpcContract";
+import type { LumenRPC } from "@/lib/rpcContract";
 
 const DEV_URL = "http://localhost:5173";
 async function devServerUp(): Promise<boolean> {
   try { return (await fetch(DEV_URL, { method: "HEAD" })).ok; } catch { return false; }
 }
 
-const rpc = BrowserView.defineRPC<TragitRPC>({
+const rpc = BrowserView.defineRPC<LumenRPC>({
   maxRequestTime: 30000,
   handlers: {
     requests: {
@@ -634,7 +634,7 @@ const rpc = BrowserView.defineRPC<TragitRPC>({
 
 const url = (await devServerUp()) ? `${DEV_URL}/index.html` : "views://mainview/index.html";
 const win = new BrowserWindow({
-  title: "Tragit",
+  title: "Lumen",
   url,
   frame: { width: 1280, height: 860, x: 80, y: 80 },
   rpc,
@@ -651,7 +651,7 @@ void Electrobun;
 ```typescript
 // src/lib/rpc.ts
 import Electrobun, { Electroview } from "electrobun/view";
-import type { TragitRequests } from "./rpcContract";
+import type { LumenRequests } from "./rpcContract";
 
 const rpcDef = Electroview.defineRPC<any>({
   maxRequestTime: 30000,
@@ -660,9 +660,9 @@ const rpcDef = Electroview.defineRPC<any>({
 const electrobun = new Electrobun.Electroview({ rpc: rpcDef });
 
 // One typed funnel over the loosely-typed framework client.
-const request = (electrobun.rpc as any).request as TragitRequests;
+const request = (electrobun.rpc as any).request as LumenRequests;
 
-export const rpc: TragitRequests = {
+export const rpc: LumenRequests = {
   gitlabGraphql: (a) => request.gitlabGraphql(a),
   gitlabRest: (a) => request.gitlabRest(a),
   gitlabAsset: (a) => request.gitlabAsset(a),
@@ -1278,7 +1278,7 @@ async function save() {
 
 - [ ] **Step 5: Verify unconfigured launch lands on Settings**
 
-Run with a clean config: `TRAGIT_CONFIG_DIR=$(mktemp -d) bun run app:dev` (and ensure no `GITLAB_*` in `.env`, or temporarily rename `.env.development`). Expected: window opens on the Settings screen. Enter URL + token, Save → lands on the projects list.
+Run with a clean config: `LUMEN_CONFIG_DIR=$(mktemp -d) bun run app:dev` (and ensure no `GITLAB_*` in `.env`, or temporarily rename `.env.development`). Expected: window opens on the Settings screen. Enter URL + token, Save → lands on the projects list.
 
 - [ ] **Step 6: Commit**
 
@@ -1340,7 +1340,7 @@ const APP_VERSION = '1'
 
 /** Cache key generation: changing instance (or app schema) invalidates the cache. */
 export function makeBuster(url: string | null): string {
-  return `tragit:${APP_VERSION}:${url ?? 'unconfigured'}`
+  return `lumen:${APP_VERSION}:${url ?? 'unconfigured'}`
 }
 
 /** Create a QueryClient with a localStorage-backed persister (disk-backed in the native webview). */
@@ -1467,7 +1467,7 @@ Verify `electrobun.config.ts` has `mac`, `linux`, and `win` entries (from Task 1
 
 - [ ] **Step 6: Update project memory**
 
-Append a note to the tragit memory files that the runtime moved from the Vite proxy to the Electrobun Bun process, and that `bun run app:dev` / `app:hmr` launch the desktop app.
+Append a note to the lumen memory files that the runtime moved from the Vite proxy to the Electrobun Bun process, and that `bun run app:dev` / `app:hmr` launch the desktop app.
 
 - [ ] **Step 7: Commit**
 

@@ -55,7 +55,7 @@ The full **filter slice** is these nine keys.
   `patch`, passing `undefined` when the value equals the default (keeps the URL
   clean). Import `SortKey` / `GroupKey` types from the issue sort/group module.
 - Derive the storage key from `route.params.fullPath`:
-  `tragit:issue-filters:<fullPath>`.
+  `lumen:issue-filters:<fullPath>`.
 - **Seed (restore):** watch `route.params.fullPath` with `immediate: true`. When
   it resolves and the URL has none of the nine keys, read the saved JSON for that
   project and `router.replace({ query: { ...route.query, ...saved } })`. Existing

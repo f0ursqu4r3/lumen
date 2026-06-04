@@ -1,11 +1,11 @@
-# tragit → Electrobun port — design
+# lumen → Electrobun port — design
 
 **Date:** 2026-06-04
 **Status:** Approved (design)
 
 ## Goal
 
-Turn tragit (a Vue 3 + TypeScript + Tailwind v4 UI over a self-hosted GitLab,
+Turn lumen (a Vue 3 + TypeScript + Tailwind v4 UI over a self-hosted GitLab,
 currently run via `bun dev`) into a real, installable, cross-platform desktop
 app using [Electrobun](https://blackboard.sh/electrobun/). Four user-stated
 drivers:
@@ -76,7 +76,7 @@ must be re-pointed at the Bun main process.
 
 - Add `electrobun` dependency.
 - New `electrobun.config.ts`:
-  - `app`: name, identifier (e.g. `com.kdougan.tragit`), version, URL schemes.
+  - `app`: name, identifier (e.g. `com.kdougan.lumen`), version, URL schemes.
   - `build.bun.entrypoint`: `src/bun/index.ts`.
   - `build.views.mainview.entrypoint`: a thin loader the framework needs; the
     actual UI is the Vite output copied in via `build.copy`.

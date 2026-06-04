@@ -247,17 +247,17 @@ Add to `src/composables/useIssueFilters.test.ts`:
     api.sort.value = 'title'
     api.assignee.value = 'ada'
     await flushPromises()
-    const saved = JSON.parse(localStorage.getItem('tragit:issue-filters:grp/proj')!)
+    const saved = JSON.parse(localStorage.getItem('lumen:issue-filters:grp/proj')!)
     expect(saved).toMatchObject({ sort: 'title', assignee: 'ada' })
   })
 
   it('clears the storage entry when all keys return to default', async () => {
     const { mountIt } = setup({ sort: 'title' }, 'grp/proj')
     const api = await mountIt()
-    expect(localStorage.getItem('tragit:issue-filters:grp/proj')).not.toBeNull()
+    expect(localStorage.getItem('lumen:issue-filters:grp/proj')).not.toBeNull()
     api.sort.value = 'updated'
     await flushPromises()
-    expect(localStorage.getItem('tragit:issue-filters:grp/proj')).toBeNull()
+    expect(localStorage.getItem('lumen:issue-filters:grp/proj')).toBeNull()
   })
 ```
 
@@ -284,7 +284,7 @@ const FILTER_KEYS = [
   'scope',
 ] as const
 
-const storageKey = (fullPath: string) => `tragit:issue-filters:${fullPath}`
+const storageKey = (fullPath: string) => `lumen:issue-filters:${fullPath}`
 
 function writeSaved(fullPath: string, slice: Record<string, string | string[]>) {
   try {
@@ -348,7 +348,7 @@ Add to `src/composables/useIssueFilters.test.ts`:
 ```ts
   it('seeds saved state into the query when no filter key is present', async () => {
     localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
+      'lumen:issue-filters:grp/proj',
       JSON.stringify({ sort: 'title', assignee: 'ada' }),
     )
     const { router, mountIt } = setup({}, 'grp/proj')
@@ -361,7 +361,7 @@ Add to `src/composables/useIssueFilters.test.ts`:
 
   it('does NOT seed when the query already carries a filter key', async () => {
     localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
+      'lumen:issue-filters:grp/proj',
       JSON.stringify({ sort: 'title' }),
     )
     const { router, mountIt } = setup({ state: 'closed' }, 'grp/proj')
@@ -372,7 +372,7 @@ Add to `src/composables/useIssueFilters.test.ts`:
 
   it('seeds while preserving unrelated query keys like issue', async () => {
     localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
+      'lumen:issue-filters:grp/proj',
       JSON.stringify({ sort: 'title' }),
     )
     const { router, mountIt } = setup({ issue: '9' }, 'grp/proj')
