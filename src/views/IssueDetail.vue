@@ -13,7 +13,7 @@ import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { ExternalLink } from '@lucide/vue'
+import { ExternalLink, Images } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,6 +22,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import MarkdownText from '@/components/MarkdownText.vue'
 import EditableField from '@/components/EditableField.vue'
 import Scratchpad from '@/components/Scratchpad.vue'
+import MediaViewer from '@/components/MediaViewer.vue'
+import { buildIssueMedia } from '@/composables/useIssueMedia'
 
 const props = defineProps<{
   fullPath: string
@@ -62,6 +64,27 @@ const notes = computed(
   () =>
     issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n && !n.system) ?? [],
 )
+
+const media = computed(() => buildIssueMedia(draft.value?.description, notes.value, props.fullPath))
+const viewerOpen = ref(false)
+const viewerIndex = ref(0)
+
+function openViewer(i: number) {
+  viewerIndex.value = i
+  viewerOpen.value = true
+}
+
+// Inline media is rendered via v-html, so intercept clicks by delegation: an
+// image's <img> carries the trigger; a video's expand button carries it (the
+// <video> body keeps native controls). Match data-media-src to the collection.
+function onBodyMediaClick(e: MouseEvent) {
+  const el = (e.target as HTMLElement | null)?.closest('[data-media-trigger]')
+  const src = el?.getAttribute('data-media-src')
+  if (!src) return
+  e.preventDefault()
+  const i = media.value.findIndex((m) => m.src === src)
+  if (i >= 0) openViewer(i)
+}
 
 // Only notes that arrive *after* the thread first renders should animate in;
 // the initial set lands with the section's own entrance. We prime `seen` on the
@@ -265,9 +288,19 @@ if (!props.embedded) {
 
     <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
 
-    <div class="issue__body mt-8">
+    <div class="issue__body mt-8" @click="onBodyMediaClick">
       <!-- Main column: the document. -->
       <section class="issue__desc min-w-0 animate-row-in" style="animation-delay: 60ms">
+        <button
+          v-if="media.length"
+          type="button"
+          data-testid="view-all-media"
+          class="mb-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          @click.stop="openViewer(0)"
+        >
+          <Images class="size-3.5" />
+          View all media ({{ media.length }})
+        </button>
         <EditableField
           v-model:editing="editingDescription"
           label="Description"
@@ -405,6 +438,8 @@ if (!props.embedded) {
         </Button>
       </div>
     </Transition>
+
+    <MediaViewer v-model:open="viewerOpen" :items="media" :start-index="viewerIndex" />
   </article>
   <p v-else class="text-sm text-muted-foreground">Issue not found.</p>
 </template>
