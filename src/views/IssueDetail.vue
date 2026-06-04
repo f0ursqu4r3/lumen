@@ -267,7 +267,7 @@ if (!props.embedded) {
           <span class="field-label">Title</span>
         </template>
         <template #view>
-          <h1 class="text-balance text-2xl font-semibold leading-tight tracking-tight">
+          <h1 class="text-balance text-[1.875rem] leading-[1.1] font-semibold tracking-[-0.02em]">
             {{ draft.title }}
           </h1>
         </template>
@@ -276,7 +276,7 @@ if (!props.embedded) {
             v-model="draft.title"
             data-testid="edit-title"
             aria-label="Issue title"
-            class="h-auto py-1.5 text-2xl font-semibold tracking-tight"
+            class="h-auto py-1.5 text-[1.875rem] font-semibold tracking-[-0.02em]"
           />
         </template>
       </EditableField>

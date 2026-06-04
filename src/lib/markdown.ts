@@ -23,9 +23,25 @@ export interface MediaItem {
 export type UploadKind = 'image' | 'video' | 'audio' | 'file'
 
 const EXT_KIND: Record<string, UploadKind> = {
-  png: 'image', jpg: 'image', jpeg: 'image', gif: 'image', webp: 'image', avif: 'image', svg: 'image',
-  mp4: 'video', webm: 'video', mov: 'video', m4v: 'video', ogv: 'video',
-  mp3: 'audio', wav: 'audio', ogg: 'audio', oga: 'audio', m4a: 'audio', aac: 'audio', flac: 'audio',
+  png: 'image',
+  jpg: 'image',
+  jpeg: 'image',
+  gif: 'image',
+  webp: 'image',
+  avif: 'image',
+  svg: 'image',
+  mp4: 'video',
+  webm: 'video',
+  mov: 'video',
+  m4v: 'video',
+  ogv: 'video',
+  mp3: 'audio',
+  wav: 'audio',
+  ogg: 'audio',
+  oga: 'audio',
+  m4a: 'audio',
+  aac: 'audio',
+  flac: 'audio',
 }
 
 export function classifyUpload(href: string): UploadKind {

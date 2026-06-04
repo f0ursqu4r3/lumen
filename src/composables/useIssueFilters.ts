@@ -32,8 +32,7 @@ const storageKey = (fullPath: string) => `tragit:issue-filters:${fullPath}`
 
 function writeSaved(fullPath: string, slice: Record<string, string | string[]>) {
   try {
-    if (Object.keys(slice).length)
-      localStorage.setItem(storageKey(fullPath), JSON.stringify(slice))
+    if (Object.keys(slice).length) localStorage.setItem(storageKey(fullPath), JSON.stringify(slice))
     else localStorage.removeItem(storageKey(fullPath))
   } catch {
     // storage unavailable (quota / disabled) — degrade silently
@@ -171,8 +170,7 @@ export function useIssueFilters() {
       if (!path) return
       if (FILTER_KEYS.some((k) => route.query[k] != null)) return
       const saved = readSaved(path)
-      if (Object.keys(saved).length)
-        void router.replace({ query: { ...route.query, ...saved } })
+      if (Object.keys(saved).length) void router.replace({ query: { ...route.query, ...saved } })
     },
     { immediate: true },
   )

@@ -84,7 +84,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
        facet buttons sit above it so clicking a label/priority/assignee filters
        instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
   <div
-    class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/60 focus-within:bg-accent/60"
+    class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
     :class="highlight ? 'animate-flash' : 'animate-row-in'"
     :style="{ animationDelay: delay }"
   >
@@ -129,7 +129,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
     </span>
 
     <span
-      class="min-w-0 flex-1 truncate text-sm text-foreground/85 transition-colors group-hover:text-foreground"
+      class="min-w-0 flex-1 truncate text-sm font-medium text-foreground/90 transition-colors group-hover:text-foreground"
     >
       {{ issue.title }}
     </span>

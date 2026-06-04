@@ -224,21 +224,27 @@ useIntersectionObserver(sentinel, ([entry]) => {
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="font-mono text-[10px] font-medium tracking-[0.28em] text-muted-foreground/70 uppercase"
+          class="eyebrow-tick font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           Workspace
         </p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">Projects</h1>
+        <h1
+          class="mt-2 text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+        >
+          Projects
+        </h1>
       </div>
       <div v-if="!isLoading && !error" class="hidden shrink-0 flex-col items-end sm:flex">
         <span
           :key="count"
-          class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+          class="animate-count inline-block font-mono text-[2.75rem] leading-[0.85] font-semibold tabular-nums tracking-[-0.03em] text-foreground"
         >
-          {{ count }}
+          {{ count }}<span class="text-primary" v-if="hasMore">+</span>
         </span>
-        <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
-          {{ count === 1 ? 'project' : 'projects' }}{{ hasMore ? '+' : '' }}
+        <span
+          class="mt-2 font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+        >
+          {{ count === 1 ? 'project' : 'projects' }}
         </span>
       </div>
     </div>
@@ -273,7 +279,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
     <template v-else>
       <Card
         v-if="count"
-        class="relative gap-0 overflow-hidden p-0 shadow-sm"
+        class="relative gap-0 overflow-hidden p-0 shadow-pop"
         role="listbox"
         aria-label="Projects"
       >

@@ -73,7 +73,9 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
       >
         <VisuallyHidden>
           <DialogTitle>Media viewer</DialogTitle>
-          <DialogDescription>Fullscreen viewer for images and videos in this issue.</DialogDescription>
+          <DialogDescription
+            >Fullscreen viewer for images and videos in this issue.</DialogDescription
+          >
         </VisuallyHidden>
 
         <DialogClose
@@ -153,7 +155,9 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
             :key="i"
             type="button"
             class="relative size-14 shrink-0 overflow-hidden rounded border-2 transition"
-            :class="i === index ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'"
+            :class="
+              i === index ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
+            "
             :aria-label="`Media ${i + 1}`"
             :aria-current="i === index ? 'true' : undefined"
             @click="index = i"

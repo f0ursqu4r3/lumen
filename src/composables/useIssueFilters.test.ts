@@ -4,10 +4,7 @@ import { defineComponent, h, nextTick } from 'vue'
 import { createRouter, createMemoryHistory, type Router } from 'vue-router'
 import { useIssueFilters } from './useIssueFilters'
 
-function setup(
-  initialQuery: Record<string, string | string[]> = {},
-  fullPath = 'grp/proj',
-) {
+function setup(initialQuery: Record<string, string | string[]> = {}, fullPath = 'grp/proj') {
   let api!: ReturnType<typeof useIssueFilters>
   const router: Router = createRouter({
     history: createMemoryHistory(),
@@ -189,10 +186,7 @@ describe('useIssueFilters', () => {
   })
 
   it('does NOT seed when the query already carries a filter key', async () => {
-    localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
-      JSON.stringify({ sort: 'title' }),
-    )
+    localStorage.setItem('tragit:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
     const { router, mountIt } = setup({ state: 'closed' }, 'grp/proj')
     await mountIt()
     await flushPromises()
@@ -200,10 +194,7 @@ describe('useIssueFilters', () => {
   })
 
   it('seeds while preserving unrelated query keys like issue', async () => {
-    localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
-      JSON.stringify({ sort: 'title' }),
-    )
+    localStorage.setItem('tragit:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
     const { router, mountIt } = setup({ issue: '9' }, 'grp/proj')
     await mountIt()
     await flushPromises()
@@ -221,11 +212,8 @@ describe('useIssueFilters', () => {
     expect(router.currentRoute.value.query.issue).toBe('9')
   })
 
-  it('restores the new project\'s saved state on project switch', async () => {
-    localStorage.setItem(
-      'tragit:issue-filters:grp/proj-b',
-      JSON.stringify({ sort: 'priority' }),
-    )
+  it("restores the new project's saved state on project switch", async () => {
+    localStorage.setItem('tragit:issue-filters:grp/proj-b', JSON.stringify({ sort: 'priority' }))
     const { router, mountIt } = setup({}, 'grp/proj-a')
     const api = await mountIt()
     await flushPromises()

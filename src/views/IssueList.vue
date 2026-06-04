@@ -228,16 +228,16 @@ onKeyStroke(['c', 'C'], (e) => {
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="font-mono text-[10px] font-medium tracking-[0.28em] text-muted-foreground/70 uppercase"
+          class="eyebrow-tick font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           Issues
         </p>
         <h1
-          class="vt-project-title mt-1 truncate text-2xl font-semibold tracking-tight text-foreground"
+          class="vt-project-title mt-2 truncate text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
         >
           {{ repoName }}
         </h1>
-        <p v-if="pathPrefix" class="truncate font-mono text-xs text-muted-foreground/75">
+        <p v-if="pathPrefix" class="mt-1.5 truncate font-mono text-xs text-muted-foreground/75">
           {{ pathPrefix }}/
         </p>
       </div>
@@ -252,11 +252,13 @@ onKeyStroke(['c', 'C'], (e) => {
         >
           <span
             :key="count"
-            class="animate-count inline-block font-mono text-[2rem] leading-none font-medium tabular-nums text-foreground"
+            class="animate-count inline-block font-mono text-[2.75rem] leading-[0.85] font-semibold tabular-nums tracking-[-0.03em] text-foreground"
           >
-            {{ count }}<span v-if="hasMore" class="text-muted-foreground/40">+</span>
+            {{ count }}<span class="text-primary" v-if="hasMore">+</span>
           </span>
-          <span class="mt-1.5 text-[11px] tracking-wide text-muted-foreground/70 uppercase">
+          <span
+            class="mt-2 font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+          >
             {{ count === 1 ? 'issue' : 'issues' }}
           </span>
         </div>
@@ -278,7 +280,7 @@ onKeyStroke(['c', 'C'], (e) => {
           class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             state === s.value
-              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground'
           "
           @click="state = s.value"
@@ -322,7 +324,7 @@ onKeyStroke(['c', 'C'], (e) => {
           class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             view === 'list'
-              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground'
           "
           @click="view = 'list'"
@@ -336,7 +338,7 @@ onKeyStroke(['c', 'C'], (e) => {
           class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             view === 'board'
-              ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground'
           "
           @click="view = 'board'"
@@ -467,7 +469,7 @@ onKeyStroke(['c', 'C'], (e) => {
                 {{ g.issues.length }}
               </span>
             </header>
-            <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-sm">
+            <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-pop">
               <IssueRow
                 v-for="(issue, i) in g.issues"
                 :key="issue.iid"

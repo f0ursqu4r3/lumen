@@ -70,7 +70,7 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
     />
 
     <p
-      class="line-clamp-2 text-sm leading-snug text-foreground/90 transition-colors group-hover:text-foreground"
+      class="line-clamp-2 text-sm leading-snug font-medium text-foreground/90 transition-colors group-hover:text-foreground"
     >
       {{ issue.title }}
     </p>

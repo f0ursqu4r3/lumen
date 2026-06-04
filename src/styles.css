@@ -121,6 +121,22 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Sculpted dark elevation. Each surface gets a real layered ambient shadow
+     plus a 1px top inner-highlight (the lit edge premium dark UIs use to catch
+     the light) — depth without glassmorphism, and never a colored side-stripe.
+     `shadow-card` is the resting state; `shadow-pop` is for the focal panels. */
+  --shadow-card:
+    0 1px 2px oklch(0 0 0 / 0.3), 0 6px 16px -6px oklch(0 0 0 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.04);
+  --shadow-pop:
+    0 2px 4px oklch(0 0 0 / 0.34), 0 18px 44px -12px oklch(0 0 0 / 0.5),
+    inset 0 1px 0 oklch(1 0 0 / 0.055);
+  /* The amber primary reads as a physical key: a lit top edge at rest, a soft
+     amber bloom on hover (kin to the signal lamp). */
+  --shadow-key: 0 1px 2px oklch(0.2 0.04 75 / 0.45), inset 0 1px 0 oklch(1 0.05 90 / 0.28);
+  --shadow-key-hover:
+    0 6px 18px -4px oklch(0.82 0.142 81 / 0.42), inset 0 1px 0 oklch(1 0.05 90 / 0.32);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -145,11 +161,61 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Ambient canvas — a faint top-down slate lift so the page reads as a sculpted
+     surface catching light from above, not dead-flat fill. Fixed so it stays put
+     while content scrolls. No hue shift (amber stays reserved for signal), low
+     enough chroma to never look like a glowing-accent backdrop. */
+  .dark body {
+    background-image: radial-gradient(
+      128% 72% at 50% -12%,
+      oklch(0.236 0.014 256) 0%,
+      oklch(0.196 0.01 256) 38%,
+      oklch(0.178 0.008 256) 72%
+    );
+    background-attachment: fixed;
+  }
+
   /* Tinted, slim scrollbar so it sits inside the slate palette. */
   * {
     scrollbar-color: var(--border) transparent;
     scrollbar-width: thin;
   }
+}
+
+/* Masthead signal bleed — the amber identity doesn't sit in a dot alone; it
+   washes a hairline along the bottom of the header, brightest under the lamp at
+   the left and fading to nothing across the bar. A telemetry signature, not a
+   border accent: it lives on the masthead edge, never on a card or list item. */
+.masthead-signal::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    oklch(0.82 0.142 81 / 0.55) 0%,
+    oklch(0.82 0.142 81 / 0.12) 16%,
+    oklch(0.82 0.142 81 / 0) 46%
+  );
+  pointer-events: none;
+}
+
+/* Page eyebrow — the small mono kicker that tops every view. A short amber tick
+   leads it, echoing the header lamp. Inline-flex so the tick is the block's left
+   edge and the big title below aligns to it cleanly. */
+.eyebrow-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+}
+.eyebrow-tick::before {
+  content: '';
+  width: 0.4375rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--primary);
+  box-shadow: 0 0 6px oklch(0.82 0.142 81 / 0.6);
 }
 
 /* Quiet field tag — a consistent second tier under the big title, so every

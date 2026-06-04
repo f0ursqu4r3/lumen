@@ -5,8 +5,24 @@ import MediaViewer from './MediaViewer.vue'
 import type { ViewerItem } from '@/composables/useIssueMedia'
 
 const items: ViewerItem[] = [
-  { kind: 'image', src: '/a.png', href: '/a.png', alt: 'A', title: '', source: 'description', caption: 'A' },
-  { kind: 'video', src: '/b.mp4', href: '/b.mp4', alt: 'B', title: '', source: 'comment', caption: 'B' },
+  {
+    kind: 'image',
+    src: '/a.png',
+    href: '/a.png',
+    alt: 'A',
+    title: '',
+    source: 'description',
+    caption: 'A',
+  },
+  {
+    kind: 'video',
+    src: '/b.mp4',
+    href: '/b.mp4',
+    alt: 'B',
+    title: '',
+    source: 'comment',
+    caption: 'B',
+  },
   { kind: 'image', src: '/c.png', href: '/c.png', alt: 'C', title: '', source: 'comment' },
 ]
 
@@ -33,7 +49,9 @@ describe('MediaViewer', () => {
   it('navigates with the next/prev buttons and clamps at the bounds', async () => {
     const w = mountViewer({ startIndex: 0 })
     await nextTick()
-    expect(document.querySelector<HTMLButtonElement>('[aria-label="Previous"]')!.disabled).toBe(true)
+    expect(document.querySelector<HTMLButtonElement>('[aria-label="Previous"]')!.disabled).toBe(
+      true,
+    )
     document.querySelector<HTMLButtonElement>('[aria-label="Next"]')!.click()
     await nextTick()
     expect(counterText()).toContain('2 / 3')
