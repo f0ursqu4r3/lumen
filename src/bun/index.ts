@@ -1,8 +1,9 @@
-import Electrobun, { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
+import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from "electrobun/bun";
 import { loadConfig, saveConfig, clearConfig } from "./config";
 import { gitlabGraphql, gitlabRest, gitlabAsset } from "./gitlab";
 import type { LumenRPC } from "@/lib/rpcContract";
 import { resolveStartUrl } from "./startUrl";
+import { buildAppMenu, DEVTOOLS_ACTION } from "./menu";
 
 // LumenRPC describes the RPC *config* shape; it is not the bun/webview *schema*
 // shape that BrowserView.defineRPC<Schema extends ElectrobunRPCSchema> expects,
@@ -35,6 +36,16 @@ const win = new BrowserWindow({
   url,
   frame: { width: 1280, height: 860, x: 80, y: 80 },
   rpc,
+});
+
+// Without an application menu, macOS has no Edit menu, so ⌘C/⌘V/⌘X/⌘A have
+// nothing to dispatch to and clipboard does not work in the webview. The Develop
+// menu's "Toggle Developer Tools" opens the inspector (developer mode).
+ApplicationMenu.setApplicationMenu(buildAppMenu("Lumen"));
+ApplicationMenu.on("application-menu-clicked", (event) => {
+  if ((event as { data?: { action?: string } })?.data?.action === DEVTOOLS_ACTION) {
+    win.webview.toggleDevTools();
+  }
 });
 
 void win;
