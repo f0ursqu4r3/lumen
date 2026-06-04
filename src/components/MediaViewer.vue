@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, reactive, watchEffect } from 'vue'
+import { resolveAsset } from '@/composables/useGitlabAsset'
 import {
   DialogRoot,
   DialogPortal,
@@ -44,6 +45,16 @@ watch(
 
 const current = computed<ViewerItem | undefined>(() => props.items[index.value])
 const hasMany = computed(() => props.items.length > 1)
+
+// GitLab upload paths can't load under the views:// origin; resolve each to a
+// blob URL via RPC, lazily and memoized. Empty string until the blob is ready.
+const resolved = reactive<Record<string, string>>({})
+function srcFor(path: string): string {
+  if (!resolved[path]) resolveAsset(path).then((u) => { resolved[path] = u }).catch(() => {})
+  return resolved[path] ?? ''
+}
+// Eagerly resolve the current item so it shows without waiting for a thumbnail pass.
+watchEffect(() => { if (current.value?.src) srcFor(current.value.src) })
 
 function go(delta: number) {
   index.value = clamp(index.value + delta)
@@ -107,14 +118,14 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
           >
             <img
               v-if="current?.kind === 'image'"
-              :src="current.src"
+              :src="srcFor(current.src)"
               :alt="current.alt"
               class="max-h-full max-w-full object-contain"
             />
             <video
               v-else-if="current?.kind === 'video'"
               :key="current.src"
-              :src="current.src"
+              :src="srcFor(current.src)"
               controls
               class="max-h-full max-w-full object-contain"
             />
@@ -164,7 +175,7 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
           >
             <img
               v-if="item.kind === 'image'"
-              :src="item.src"
+              :src="srcFor(item.src)"
               :alt="item.alt"
               class="size-full object-cover"
             />
