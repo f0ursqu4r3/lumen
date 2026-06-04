@@ -1,9 +1,11 @@
 import { rpc } from '@/lib/rpc'
 import type { GitLabError } from './errors'
 
-// The Bun main process proxies REST to GITLAB_URL/api/* and attaches the token
-// (see src/bun/gitlab.ts), so call sites stay token-free. We keep the same
-// restGet/restPost surface and error mapping the proxy version had.
+// Callers pass a `/v4`-relative path (e.g. `/projects/7/star`); this helper
+// prepends `/v4` before handing it to the Bun RPC, which builds the final
+// `${gitlabUrl}/api/v4/...` URL and attaches the token (see src/bun/gitlab.ts).
+// Call sites stay token-free. We keep the same restGet/restPost surface and
+// error mapping the previous version had.
 function httpError(status: number, statusText: string): GitLabError {
   if (status === 401 || status === 403) {
     return {
@@ -15,7 +17,7 @@ function httpError(status: number, statusText: string): GitLabError {
 }
 
 async function request<T>(method: 'GET' | 'POST', path: string): Promise<T> {
-  const res = await rpc.gitlabRest({ method, path })
+  const res = await rpc.gitlabRest({ method, path: `/v4${path}` })
   if (!res.ok) throw httpError(res.status, res.statusText)
   return (res.body ? JSON.parse(res.body) : null) as T
 }

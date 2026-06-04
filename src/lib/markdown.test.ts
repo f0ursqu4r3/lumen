@@ -27,13 +27,13 @@ describe('renderMarkdown', () => {
     const out = renderMarkdown(`![img](/uploads/${s}/pic.png)`, {
       projectPath: 'group/sub/repo',
     })
-    expect(out).toContain(`src="/gitlab/v4/projects/group%2Fsub%2Frepo/uploads/${s}/pic.png"`)
+    expect(out).toContain(`src="/v4/projects/group%2Fsub%2Frepo/uploads/${s}/pic.png"`)
   })
 
   it('routes /-/project/<id>/uploads images through the proxy by numeric id', () => {
     const s = secret('b')
     const out = renderMarkdown(`![img](/-/project/42/uploads/${s}/pic.png)`)
-    expect(out).toContain(`src="/gitlab/v4/projects/42/uploads/${s}/pic.png"`)
+    expect(out).toContain(`src="/v4/projects/42/uploads/${s}/pic.png"`)
   })
 
   it('applies GitLab {width= height=} attributes instead of leaking them as text', () => {
@@ -71,7 +71,7 @@ describe('renderMarkdown', () => {
     const out = renderMarkdown(`![clip](/uploads/${s}/scroll.mp4)`, { projectPath: 'g/r' })
     expect(out).toContain('<video')
     expect(out).toContain('controls')
-    expect(out).toContain(`data-media-src="/gitlab/v4/projects/g%2Fr/uploads/${s}/scroll.mp4"`)
+    expect(out).toContain(`data-media-src="/v4/projects/g%2Fr/uploads/${s}/scroll.mp4"`)
     expect(out).not.toContain('<img')
     // The viewer trigger lives on the expand button, not the <video> body, so
     // clicking the video plays it instead of opening the viewer.
@@ -135,7 +135,7 @@ describe('extractMedia', () => {
     ].join('\n\n')
     const items = extractMedia(md, { projectPath: 'g/r' })
     expect(items.map((i) => i.kind)).toEqual(['image', 'video'])
-    expect(items[0].src).toBe(`/gitlab/v4/projects/g%2Fr/uploads/${s}/a.png`)
+    expect(items[0].src).toBe(`/v4/projects/g%2Fr/uploads/${s}/a.png`)
     expect(items[1].alt).toBe('two')
     expect(items[0].href).toBe(`/uploads/${s}/a.png`)
   })

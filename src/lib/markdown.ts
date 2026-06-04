@@ -14,7 +14,7 @@ export interface RenderOptions {
 // excluded, so `kind` is narrower than UploadKind.
 export interface MediaItem {
   kind: 'image' | 'video'
-  src: string // rewritten proxy URL (matches data-media-src on the rendered element)
+  src: string // resolved upload path; swapped to a blob URL after render (matches data-media-src on the rendered element)
   href: string // original href
   alt: string
   title: string
@@ -58,18 +58,20 @@ const RELATIVE_UPLOAD = new RegExp(`^/uploads/${SECRET}/.+`, 'i')
 const PROJECT_UPLOAD = new RegExp(`^/-/project/(\\d+)(/uploads/${SECRET}/.+)$`, 'i')
 
 // GitLab serves attachment uploads behind auth, so a bare `/uploads/...` <img>
-// 404s against the dev-server origin and a direct GitLab URL is cross-origin +
-// unauthenticated. Route uploads through the same /gitlab proxy as the API
-// (which attaches the token server-side); the REST uploads endpoint accepts a
-// URL-encoded project path — or numeric id — as `:id`.
+// 404s and a direct GitLab URL is cross-origin + unauthenticated. Uploads are
+// fetched through the Bun RPC asset handler (`rpc.gitlabAsset`), which attaches
+// the token and builds `${url}/api/v4/projects/.../uploads/...`. We rewrite to a
+// `/v4/projects/...` path here; it is later swapped to a blob URL in the webview.
+// The REST uploads endpoint accepts a URL-encoded project path — or numeric id —
+// as `:id`.
 function rewriteUploadSrc(href: string, projectPath?: string): string {
   const byId = PROJECT_UPLOAD.exec(href)
   if (byId) {
     const [, id, uploadPath] = byId
-    return `/gitlab/v4/projects/${id}${uploadPath}`
+    return `/v4/projects/${id}${uploadPath}`
   }
   if (projectPath && RELATIVE_UPLOAD.test(href)) {
-    return `/gitlab/v4/projects/${encodeURIComponent(projectPath)}${href}`
+    return `/v4/projects/${encodeURIComponent(projectPath)}${href}`
   }
   return href
 }
