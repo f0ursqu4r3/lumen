@@ -54,10 +54,11 @@ vi.mock('@/composables/useIssueDraft', async () => {
 })
 vi.mock('vue-router', () => ({ onBeforeRouteLeave: vi.fn() }))
 
-const { openExternal } = vi.hoisted(() => ({
+const { openExternal, clipboardWriteText } = vi.hoisted(() => ({
   openExternal: vi.fn(() => Promise.resolve({ ok: true })),
+  clipboardWriteText: vi.fn(() => Promise.resolve({ ok: true })),
 }))
-vi.mock('@/lib/rpc', () => ({ rpc: { openExternal } }))
+vi.mock('@/lib/rpc', () => ({ rpc: { openExternal, clipboardWriteText } }))
 
 import IssueDetail from './IssueDetail.vue'
 
@@ -235,6 +236,7 @@ describe('IssueDetail (buffered)', () => {
     beforeEach(() => {
       writeText.mockClear()
       openExternal.mockClear()
+      clipboardWriteText.mockClear()
       vi.stubGlobal('navigator', { clipboard: { writeText } })
     })
 
@@ -257,7 +259,7 @@ describe('IssueDetail (buffered)', () => {
       const link = w.get('[data-testid="open-in-gitlab"]')
       await link.trigger('click', { shiftKey: true })
       await flushPromises()
-      expect(writeText).toHaveBeenCalledWith('#')
+      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
       expect(link.text()).toContain('Copied URL')
     })
 
@@ -267,7 +269,7 @@ describe('IssueDetail (buffered)', () => {
       const link = w.get('[data-testid="open-in-gitlab"]')
       await link.trigger('click', { shiftKey: true, metaKey: true })
       await flushPromises()
-      expect(writeText).toHaveBeenCalledWith('[#9 Bug](#)')
+      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '[#9 Bug](#)' })
       expect(link.text()).toContain('Copied markdown')
     })
   })

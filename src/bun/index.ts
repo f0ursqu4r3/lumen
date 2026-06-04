@@ -24,6 +24,7 @@ const rpc = BrowserView.defineRPC<any>({
       saveConfig: async ({ url, token }) => { saveConfig({ url, token }); return { ok: true }; },
       clearConfig: async () => { clearConfig(); return { ok: true }; },
       openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
+      clipboardWriteText: async ({ text }) => { Utils.clipboardWriteText(text); return { ok: true }; },
     },
     messages: {},
   },

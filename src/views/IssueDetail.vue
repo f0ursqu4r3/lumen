@@ -96,7 +96,8 @@ async function onGitlabLinkClick(e: MouseEvent) {
   }
   const markdown = e.metaKey
   const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
-  await navigator.clipboard.writeText(text)
+  // navigator.clipboard is undefined under the views:// origin; write via the host.
+  await rpc.clipboardWriteText({ text })
   linkCopied.value = markdown ? 'md' : 'url'
   clearTimeout(copiedTimer)
   copiedTimer = setTimeout(() => (linkCopied.value = null), 1400)
