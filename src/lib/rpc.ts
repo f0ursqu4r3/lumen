@@ -1,20 +1,33 @@
 import Electrobun, { Electroview } from "electrobun/view";
 import type { TragitRequests } from "./rpcContract";
 
-const rpcDef = Electroview.defineRPC<any>({
-  maxRequestTime: 30000,
-  handlers: { requests: {}, messages: {} },
-});
-const electrobun = new Electrobun.Electroview({ rpc: rpcDef });
-
 // One typed funnel over the loosely-typed framework client.
-const request = (electrobun.rpc as any).request as TragitRequests;
+//
+// The Electroview client is constructed lazily on first use rather than at
+// module load: its constructor touches `window.receiveMessageFromBun`, which
+// doesn't exist in non-Electrobun environments (e.g. jsdom under vitest), so
+// eager construction would crash any module that merely imports this file.
+// This is request-response only (no unsolicited bun->webview messages), so
+// building the bridge right before the first request is safe -- it registers
+// synchronously before anything is sent.
+let request: TragitRequests | null = null;
+function client(): TragitRequests {
+  if (!request) {
+    const rpcDef = Electroview.defineRPC<any>({
+      maxRequestTime: 30000,
+      handlers: { requests: {}, messages: {} },
+    });
+    const electrobun = new Electrobun.Electroview({ rpc: rpcDef });
+    request = (electrobun.rpc as any).request as TragitRequests;
+  }
+  return request;
+}
 
 export const rpc: TragitRequests = {
-  gitlabGraphql: (a) => request.gitlabGraphql(a),
-  gitlabRest: (a) => request.gitlabRest(a),
-  gitlabAsset: (a) => request.gitlabAsset(a),
-  getConfig: () => request.getConfig(),
-  saveConfig: (a) => request.saveConfig(a),
-  clearConfig: () => request.clearConfig(),
+  gitlabGraphql: (a) => client().gitlabGraphql(a),
+  gitlabRest: (a) => client().gitlabRest(a),
+  gitlabAsset: (a) => client().gitlabAsset(a),
+  getConfig: () => client().getConfig(),
+  saveConfig: (a) => client().saveConfig(a),
+  clearConfig: () => client().clearConfig(),
 };
