@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vue-tsc --noEmit && vite build && electrobun build",
+    "app:dev": "vite build && electrobun dev",
     "preview": "vite preview",
     "codegen": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts",
     "typecheck": "vue-tsc --noEmit",
@@ -20,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.4.7",
+    "electrobun": "^1.18.1",
     "graphql": "^16.10.0",
     "graphql-request": "^7.1.2",
     "marked": "^18.0.4",

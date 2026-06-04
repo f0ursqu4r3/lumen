@@ -38,3 +38,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Electrobun build outputs
+/build
+/dist

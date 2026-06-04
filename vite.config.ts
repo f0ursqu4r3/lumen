@@ -15,22 +15,10 @@ export default defineConfig(({ mode }) => {
     : {};
 
   return {
+    base: './',
     plugins: [vue(), tailwindcss(), vueDevTools()],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-    },
-    server: {
-      proxy: {
-        '/gitlab': {
-          target: GITLAB_URL,
-          changeOrigin: true,
-          // Self-hosted instance uses an internal-CA cert; skip upstream TLS
-          // verification for this local-only dev tool (see also `codegen` script).
-          secure: false,
-          rewrite: (path) => path.replace(/^\/gitlab/, '/api'),
-          headers,
-        },
-      },
     },
   };
 });
