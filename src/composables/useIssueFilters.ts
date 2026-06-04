@@ -28,7 +28,7 @@ const FILTER_KEYS = [
   'scope',
 ] as const
 
-const storageKey = (fullPath: string) => `tragit:issue-filters:${fullPath}`
+const storageKey = (fullPath: string) => `lumen:issue-filters:${fullPath}`
 
 function writeSaved(fullPath: string, slice: Record<string, string | string[]>) {
   try {

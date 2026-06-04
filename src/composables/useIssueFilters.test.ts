@@ -151,7 +151,7 @@ describe('useIssueFilters', () => {
     expect(router.currentRoute.value.query.view).toBe('board')
   })
 
-  const keyFor = (p: string) => `tragit:issue-filters:${p}`
+  const keyFor = (p: string) => `lumen:issue-filters:${p}`
 
   it('persists the filter slice to localStorage per project', async () => {
     const { mountIt } = setup({}, 'grp/proj')
@@ -174,7 +174,7 @@ describe('useIssueFilters', () => {
 
   it('seeds saved state into the query when no filter key is present', async () => {
     localStorage.setItem(
-      'tragit:issue-filters:grp/proj',
+      'lumen:issue-filters:grp/proj',
       JSON.stringify({ sort: 'title', assignee: 'ada' }),
     )
     const { router, mountIt } = setup({}, 'grp/proj')
@@ -186,7 +186,7 @@ describe('useIssueFilters', () => {
   })
 
   it('does NOT seed when the query already carries a filter key', async () => {
-    localStorage.setItem('tragit:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
+    localStorage.setItem('lumen:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
     const { router, mountIt } = setup({ state: 'closed' }, 'grp/proj')
     await mountIt()
     await flushPromises()
@@ -194,7 +194,7 @@ describe('useIssueFilters', () => {
   })
 
   it('seeds while preserving unrelated query keys like issue', async () => {
-    localStorage.setItem('tragit:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
+    localStorage.setItem('lumen:issue-filters:grp/proj', JSON.stringify({ sort: 'title' }))
     const { router, mountIt } = setup({ issue: '9' }, 'grp/proj')
     await mountIt()
     await flushPromises()
@@ -213,7 +213,7 @@ describe('useIssueFilters', () => {
   })
 
   it("restores the new project's saved state on project switch", async () => {
-    localStorage.setItem('tragit:issue-filters:grp/proj-b', JSON.stringify({ sort: 'priority' }))
+    localStorage.setItem('lumen:issue-filters:grp/proj-b', JSON.stringify({ sort: 'priority' }))
     const { router, mountIt } = setup({}, 'grp/proj-a')
     const api = await mountIt()
     await flushPromises()
@@ -223,6 +223,6 @@ describe('useIssueFilters', () => {
     expect(router.currentRoute.value.query.sort).toBe('priority')
     expect(api.sort.value).toBe('priority')
     // proj-a storage not contaminated by proj-b's values
-    expect(localStorage.getItem('tragit:issue-filters:grp/proj-a')).toBeNull()
+    expect(localStorage.getItem('lumen:issue-filters:grp/proj-a')).toBeNull()
   })
 })

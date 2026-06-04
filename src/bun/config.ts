@@ -6,17 +6,17 @@ export interface AppConfig { gitlabUrl: string | null; token: string | null }
 
 const trimSlash = (s: string) => s.replace(/\/+$/, "");
 
-/** Cross-platform per-user app data dir. Overridable via TRAGIT_CONFIG_DIR (tests). */
+/** Cross-platform per-user app data dir. Overridable via LUMEN_CONFIG_DIR (tests). */
 export function configDir(): string {
-  if (process.env.TRAGIT_CONFIG_DIR) return process.env.TRAGIT_CONFIG_DIR;
+  if (process.env.LUMEN_CONFIG_DIR) return process.env.LUMEN_CONFIG_DIR;
   const home = homedir();
   switch (platform()) {
     case "darwin":
-      return join(home, "Library", "Application Support", "Tragit");
+      return join(home, "Library", "Application Support", "Lumen");
     case "win32":
-      return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Tragit");
+      return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Lumen");
     default:
-      return join(process.env.XDG_CONFIG_HOME ?? join(home, ".config"), "Tragit");
+      return join(process.env.XDG_CONFIG_HOME ?? join(home, ".config"), "Lumen");
   }
 }
 

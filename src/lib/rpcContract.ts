@@ -7,7 +7,7 @@ export interface AssetArgs { path: string }
 export interface AssetResult { base64: string; contentType: string }
 export interface SaveConfigArgs { url: string; token: string }
 
-export interface TragitRequests {
+export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
   gitlabRest: (a: RestArgs) => Promise<RestResult>
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
@@ -16,7 +16,7 @@ export interface TragitRequests {
   clearConfig: () => Promise<{ ok: true }>
 }
 
-export type TragitRPC = {
+export type LumenRPC = {
   maxRequestTime: number
-  handlers: { requests: TragitRequests; messages: Record<string, never> }
+  handlers: { requests: LumenRequests; messages: Record<string, never> }
 }

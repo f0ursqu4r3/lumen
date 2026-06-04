@@ -24,5 +24,5 @@ async function boot() {
     .mount('#app')
 }
 void boot().catch((err) => {
-  console.error('[tragit] failed to start', err)
+  console.error('[lumen] failed to start', err)
 })

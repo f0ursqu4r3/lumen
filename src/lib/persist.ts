@@ -6,7 +6,7 @@ const APP_VERSION = '1'
 
 /** Cache key generation: changing instance (or app schema) invalidates the cache. */
 export function makeBuster(url: string | null): string {
-  return `tragit:${APP_VERSION}:${url ?? 'unconfigured'}`
+  return `lumen:${APP_VERSION}:${url ?? 'unconfigured'}`
 }
 
 /** Create a QueryClient with a localStorage-backed persister (disk-backed in the native webview). */

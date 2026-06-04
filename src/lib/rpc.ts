@@ -1,5 +1,5 @@
 import Electrobun, { Electroview } from "electrobun/view";
-import type { TragitRequests } from "./rpcContract";
+import type { LumenRequests } from "./rpcContract";
 
 // One typed funnel over the loosely-typed framework client.
 //
@@ -10,20 +10,20 @@ import type { TragitRequests } from "./rpcContract";
 // This is request-response only (no unsolicited bun->webview messages), so
 // building the bridge right before the first request is safe -- it registers
 // synchronously before anything is sent.
-let request: TragitRequests | null = null;
-function client(): TragitRequests {
+let request: LumenRequests | null = null;
+function client(): LumenRequests {
   if (!request) {
     const rpcDef = Electroview.defineRPC<any>({
       maxRequestTime: 30000,
       handlers: { requests: {}, messages: {} },
     });
     const electrobun = new Electrobun.Electroview({ rpc: rpcDef });
-    request = (electrobun.rpc as any).request as TragitRequests;
+    request = (electrobun.rpc as any).request as LumenRequests;
   }
   return request;
 }
 
-export const rpc: TragitRequests = {
+export const rpc: LumenRequests = {
   gitlabGraphql: (a) => client().gitlabGraphql(a),
   gitlabRest: (a) => client().gitlabRest(a),
   gitlabAsset: (a) => client().gitlabAsset(a),

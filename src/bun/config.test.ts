@@ -6,14 +6,14 @@ import { loadConfig, saveConfig, clearConfig } from "./config";
 
 let dir: string;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "tragit-cfg-"));
-  process.env.TRAGIT_CONFIG_DIR = dir;
+  dir = mkdtempSync(join(tmpdir(), "lumen-cfg-"));
+  process.env.LUMEN_CONFIG_DIR = dir;
   delete process.env.GITLAB_URL;
   delete process.env.GITLAB_TOKEN;
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
-  delete process.env.TRAGIT_CONFIG_DIR;
+  delete process.env.LUMEN_CONFIG_DIR;
 });
 
 describe("config", () => {
