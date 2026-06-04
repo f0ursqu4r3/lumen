@@ -280,7 +280,7 @@ if (!props.embedded) {
           <span class="field-label">Title</span>
         </template>
         <template #view>
-          <h1 class="text-balance text-[2rem] leading-[1.08] font-semibold tracking-[-0.025em]">
+          <h1 class="text-balance text-[2rem] leading-[1.08] font-semibold tracking-tight">
             {{ draft.title }}
           </h1>
         </template>
@@ -289,7 +289,7 @@ if (!props.embedded) {
             v-model="draft.title"
             data-testid="edit-title"
             aria-label="Issue title"
-            class="h-auto py-1.5 text-[2rem] font-semibold tracking-[-0.025em]"
+            class="h-auto py-1.5 text-[2rem] font-semibold tracking-tight"
           />
         </template>
       </EditableField>
@@ -330,7 +330,7 @@ if (!props.embedded) {
               v-if="draft.description.trim()"
               :source="draft.description"
               :project-path="fullPath"
-              class="max-w-[68ch] text-sm leading-relaxed"
+              class="max-w-[80ch] text-sm leading-relaxed"
             />
             <p v-else class="text-sm italic text-muted-foreground">No description yet.</p>
           </template>
