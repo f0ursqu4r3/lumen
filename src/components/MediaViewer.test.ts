@@ -84,4 +84,18 @@ describe('MediaViewer', () => {
     expect(counterText()).toContain('1 / 1')
     w.unmount()
   })
+
+  it('closes when the backdrop is clicked, but not when the media itself is clicked', async () => {
+    const w = mountViewer({ startIndex: 0 })
+    await nextTick()
+    // Clicking the media does not close the viewer.
+    document.querySelector<HTMLElement>('img[src="/a.png"]')!.click()
+    await nextTick()
+    expect(w.emitted('update:open')).toBeFalsy()
+    // Clicking the backdrop (the content root) closes it.
+    document.querySelector<HTMLElement>('[data-testid="media-viewer"]')!.click()
+    await nextTick()
+    expect(w.emitted('update:open')?.at(-1)).toEqual([false])
+    w.unmount()
+  })
 })

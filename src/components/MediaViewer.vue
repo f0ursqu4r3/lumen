@@ -69,6 +69,7 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
       <DialogContent
         data-testid="media-viewer"
         class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 p-6 focus:outline-none"
+        @click.self="open = false"
       >
         <VisuallyHidden>
           <DialogTitle>Media viewer</DialogTitle>
@@ -82,8 +83,11 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
           <X class="size-5" />
         </DialogClose>
 
-        <!-- Stage -->
-        <div class="flex min-h-0 w-full flex-1 items-center justify-center gap-4">
+        <!-- Stage. Clicking the empty backdrop around the media closes the viewer. -->
+        <div
+          class="flex min-h-0 w-full flex-1 items-center justify-center gap-4"
+          @click.self="open = false"
+        >
           <button
             v-if="hasMany"
             type="button"
@@ -95,7 +99,10 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
             <ChevronLeft class="size-7" />
           </button>
 
-          <div class="flex min-h-0 min-w-0 flex-1 items-center justify-center">
+          <div
+            class="flex min-h-0 min-w-0 flex-1 items-center justify-center"
+            @click.self="open = false"
+          >
             <img
               v-if="current?.kind === 'image'"
               :src="current.src"
