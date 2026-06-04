@@ -1,7 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { rpc } from '@/lib/rpc'
+import { nextRoute } from './guard'
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
@@ -20,5 +22,16 @@ export const router = createRouter({
       component: () => import('@/views/IssueDetail.vue'),
       props: true,
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/views/SettingsView.vue'),
+    },
   ],
+})
+
+// Send first-run / unconfigured users to Settings before anything tries to query.
+router.beforeEach(async (to) => {
+  const { configured } = await rpc.getConfig()
+  return nextRoute(to.name as string | undefined, configured)
 })
