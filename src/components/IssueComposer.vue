@@ -92,46 +92,53 @@ function onKeydown(e: KeyboardEvent) {
 
       <form
         data-testid="composer-form"
-        class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4"
+        class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4"
         @submit.prevent="submit"
         @keydown="onKeydown"
       >
-        <!-- Title is the headline: same boxed field as the description, lifted by
-             type (larger, semibold) rather than a different structure — matches the
-             inline title-edit idiom in IssueDetail and keeps left edges aligned. -->
-        <Input
-          ref="titleInput"
-          v-model="title"
-          data-testid="composer-title"
-          placeholder="Issue title…"
-          aria-label="Issue title"
-          class="h-auto py-1.5 text-base font-semibold tracking-tight md:text-base"
-        />
-        <Textarea
-          v-model="description"
-          data-testid="composer-description"
-          placeholder="Add a description…"
-          aria-label="Issue description"
-          class="mt-2 min-h-28"
-        />
+        <!-- Every field is explicitly labeled (the system's field-label idiom) — a
+             persistent visible <label>, not placeholder-as-label. Title is the
+             primary field, lifted by type (semibold) rather than a different shape. -->
+        <div class="flex flex-col gap-1.5">
+          <label for="composer-title" class="field-label">Title</label>
+          <Input
+            id="composer-title"
+            ref="titleInput"
+            v-model="title"
+            data-testid="composer-title"
+            placeholder="Summarize the issue…"
+            class="h-auto py-1.5 text-base font-semibold tracking-tight md:text-base"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="composer-description" class="field-label">Description</label>
+          <Textarea
+            id="composer-description"
+            v-model="description"
+            data-testid="composer-description"
+            placeholder="Add detail, repro steps, links… (optional)"
+            class="min-h-28"
+          />
+        </div>
 
         <button
           v-if="!showDetails"
           type="button"
           data-testid="composer-add-details"
-          class="mt-4 inline-flex w-fit items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
+          class="inline-flex w-fit items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
           @click="showDetails = true"
         >
           <ChevronDown class="size-3.5" />
           Add details
         </button>
 
-        <div v-else class="mt-4 flex animate-row-in flex-col gap-3">
+        <div v-else class="flex animate-row-in flex-col gap-3">
           <LabelPicker v-model="selectedLabels" :catalog="labels ?? []" />
           <AssigneePicker v-model="assigneeId" :members="members ?? []" />
         </div>
 
-        <ErrorNotice v-if="create.error.value" :error="create.error.value" class="mt-4" />
+        <ErrorNotice v-if="create.error.value" :error="create.error.value" />
 
         <div class="mt-auto flex items-center justify-between gap-2 border-t pt-4">
           <span class="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
