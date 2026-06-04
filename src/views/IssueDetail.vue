@@ -60,6 +60,10 @@ const draftLabelTitles = computed<string[]>({
 
 const actionError = computed(() => saveError.value)
 
+// The repo (final path segment) anchors the masthead eyebrow, echoing the list
+// and picker headers so the detail view reads as part of the same instrument.
+const repoName = computed(() => props.fullPath.split('/').at(-1) ?? props.fullPath)
+
 const notes = computed(
   () =>
     issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n && !n.system) ?? [],
@@ -229,10 +233,19 @@ if (!props.embedded) {
   <article v-else-if="issue && draft" class="issue pb-20">
     <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
     <header class="animate-row-in">
-      <div class="flex items-center gap-2.5">
+      <p
+        class="eyebrow-tick max-w-full font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+      >
+        <span class="min-w-0 truncate">{{ repoName }}</span>
+      </p>
+      <div class="mt-2.5 flex items-center gap-2.5">
         <!-- Keyed by state so toggling open/closed re-triggers the quiet status flash. -->
         <StateBadge :key="draft.state" :state="draft.state" class="animate-status" />
-        <span class="font-mono text-xs text-muted-foreground">#{{ issue.iid }}</span>
+        <span
+          class="inline-flex items-center rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm font-medium tabular-nums text-foreground/90 ring-1 ring-inset ring-border/60"
+        >
+          <span class="text-muted-foreground/45">#</span>{{ issue.iid }}
+        </span>
         <Button
           as="a"
           :href="issue.webUrl"
@@ -267,7 +280,7 @@ if (!props.embedded) {
           <span class="field-label">Title</span>
         </template>
         <template #view>
-          <h1 class="text-balance text-[1.875rem] leading-[1.1] font-semibold tracking-[-0.02em]">
+          <h1 class="text-balance text-[2rem] leading-[1.08] font-semibold tracking-[-0.025em]">
             {{ draft.title }}
           </h1>
         </template>
@@ -276,7 +289,7 @@ if (!props.embedded) {
             v-model="draft.title"
             data-testid="edit-title"
             aria-label="Issue title"
-            class="h-auto py-1.5 text-[1.875rem] font-semibold tracking-[-0.02em]"
+            class="h-auto py-1.5 text-[2rem] font-semibold tracking-[-0.025em]"
           />
         </template>
       </EditableField>
@@ -332,8 +345,12 @@ if (!props.embedded) {
         </EditableField>
       </section>
 
-      <!-- Details rail: the issue's attributes, grouped. -->
-      <aside class="issue__meta space-y-6 animate-row-in" style="animation-delay: 90ms">
+      <!-- Details rail: the issue's attributes, grouped into a sculpted panel so
+           they read as one scannable instrument cluster rather than loose fields. -->
+      <aside
+        class="issue__meta animate-row-in space-y-5 rounded-xl border border-border bg-card/55 p-4 shadow-card"
+        style="animation-delay: 90ms"
+      >
         <LabelPicker v-model="draftLabelTitles" :catalog="catalog" label="Labels" />
 
         <AssigneeEditor
@@ -377,7 +394,7 @@ if (!props.embedded) {
             class="flex gap-3 py-4 first:pt-0"
             :class="{ 'animate-note-in': fresh.has(n.id) }"
           >
-            <Avatar class="mt-0.5 size-7 shrink-0 text-[11px]">
+            <Avatar class="mt-0.5 size-7 shrink-0 text-[11px] ring-1 ring-border/70">
               <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
             </Avatar>
             <div class="min-w-0 flex-1">
@@ -425,7 +442,7 @@ if (!props.embedded) {
     <Transition name="savebar">
       <div
         v-if="dirty"
-        class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-4 py-3 backdrop-blur"
+        class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
       >
         <Button
           type="button"

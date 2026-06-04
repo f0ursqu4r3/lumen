@@ -26,6 +26,11 @@ const namespace = (fullPath: string) => {
   return parts.slice(0, -1).join('/')
 }
 
+// One-letter monogram for the launcher rows — a derived initial, consistent with
+// the initials-only avatars elsewhere (no fetched icons). It lights amber on the
+// active row, so the glyph doubles as the "this one launches" selection signal.
+const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
+
 // --- selection cursor -------------------------------------------------------
 // The picker is a launcher first, a list second: a selection glides on the
 // keyboard like a command palette. `active` is the logical cursor; the amber
@@ -251,7 +256,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
 
     <div class="relative">
       <Search
-        class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        class="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted-foreground"
       />
       <Input
         ref="searchInput"
@@ -259,7 +264,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
         type="search"
         placeholder="Search projects…"
         aria-label="Search projects"
-        class="pl-9"
+        class="h-11 rounded-lg pl-11 text-base shadow-card"
       />
     </div>
 
@@ -283,7 +288,9 @@ useIntersectionObserver(sentinel, ([entry]) => {
         role="listbox"
         aria-label="Projects"
       >
-        <!-- The amber rail: one element that glides between rows on a spring. -->
+        <!-- The selection rail: one element that glides between rows on a spring.
+             The amber "you are here" signal now lives in the active row's
+             monogram, so the rail itself is a clean accent band. -->
         <div
           class="pointer-events-none absolute inset-x-1 top-0 z-0 rounded-lg bg-accent ring-1 ring-inset ring-border transition-[height,opacity] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"
           :style="{
@@ -291,11 +298,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
             height: `${cursor.h}px`,
             opacity: cursor.visible ? 1 : 0,
           }"
-        >
-          <span
-            class="absolute top-1/2 left-2.5 size-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_1px] shadow-primary/50"
-          />
-        </div>
+        />
 
         <RouterLink
           v-for="(p, i) in projects"
@@ -304,40 +307,59 @@ useIntersectionObserver(sentinel, ([entry]) => {
           role="option"
           :aria-selected="i === active"
           :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
-          class="group relative z-10 flex animate-row-in items-baseline gap-2.5 rounded-lg py-3 pr-4 pl-7 outline-none"
+          class="group relative z-10 flex animate-row-in items-center gap-3 rounded-lg py-2.5 pr-3 pl-3 outline-none"
           :style="{ animationDelay: `${Math.min(i, 14) * 26}ms` }"
           @mouseenter="active = i"
           @click="onRowClick($event, p, i)"
           @focus="active = i"
         >
+          <!-- Monogram: a derived initial that lights amber on the active row, so
+               the glyph is also the "this one launches" signal. -->
           <span
-            class="text-sm font-medium transition-colors"
-            :class="i === active ? 'text-foreground' : 'text-foreground/90'"
-            :style="nameStyle(p)"
+            class="grid size-7 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold ring-1 ring-inset transition-colors"
+            :class="
+              i === active
+                ? 'bg-primary/15 text-primary ring-primary/30'
+                : 'bg-muted/60 text-muted-foreground ring-border/60'
+            "
           >
-            {{ p.name }}
+            {{ monogram(p.name) }}
           </span>
-          <span
-            v-if="namespace(p.fullPath)"
-            class="truncate font-mono text-xs text-muted-foreground/60"
-          >
-            {{ namespace(p.fullPath) }}/
+
+          <span class="flex min-w-0 flex-1 items-baseline gap-2">
+            <span
+              class="shrink-0 text-[0.9375rem] font-medium tracking-tight transition-colors"
+              :class="i === active ? 'text-foreground' : 'text-foreground/90'"
+              :style="nameStyle(p)"
+            >
+              {{ p.name }}
+            </span>
+            <span
+              v-if="namespace(p.fullPath)"
+              class="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground/55"
+            >
+              {{ namespace(p.fullPath) }}/
+            </span>
           </span>
 
           <!-- Right cluster: an Enter affordance on the active row, then the
-               quick-jump index for the first nine projects. -->
-          <span class="ml-auto flex shrink-0 items-center gap-2 font-mono text-xs tabular-nums">
+               quick-jump keycap for the first nine projects. -->
+          <span class="flex shrink-0 items-center gap-2">
             <CornerDownLeft
               class="size-3.5 text-primary transition-opacity duration-150"
               :class="i === active ? 'opacity-100' : 'opacity-0'"
             />
-            <span
+            <kbd
               v-if="i < 9"
-              class="transition-colors"
-              :class="i === active ? 'text-muted-foreground' : 'text-muted-foreground/40'"
+              class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-[10px] tabular-nums transition-colors"
+              :class="
+                i === active
+                  ? 'border-border bg-muted/60 text-muted-foreground'
+                  : 'border-border/50 text-muted-foreground/40'
+              "
             >
               {{ i + 1 }}
-            </span>
+            </kbd>
           </span>
         </RouterLink>
 
@@ -375,12 +397,12 @@ useIntersectionObserver(sentinel, ([entry]) => {
       <!-- Keyboard legend — the launcher tells you how to fly it. -->
       <div
         v-if="count"
-        class="hidden items-center gap-x-4 gap-y-1 px-1 font-mono text-[11px] text-muted-foreground/60 select-none sm:flex sm:flex-wrap"
+        class="hidden items-center gap-x-4 gap-y-1.5 px-1 font-mono text-[11px] text-muted-foreground/55 select-none sm:flex sm:flex-wrap"
       >
-        <span><kbd class="text-muted-foreground/80">type</kbd> filter</span>
-        <span><kbd class="text-muted-foreground/80">↑↓</kbd> move</span>
-        <span><kbd class="text-muted-foreground/80">⏎</kbd> open</span>
-        <span><kbd class="text-muted-foreground/80">⌘1–9</kbd> jump</span>
+        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">type</kbd> filter</span>
+        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">↑↓</kbd> move</span>
+        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⏎</kbd> open</span>
+        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⌘1–9</kbd> jump</span>
       </div>
     </template>
   </section>
