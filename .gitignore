@@ -39,6 +39,5 @@ yarn-error.log*
 *.sln
 *.sw?
 
-# Electrobun build outputs
+# Electrobun build outputs (dist/ already ignored above)
 /build
-/dist
