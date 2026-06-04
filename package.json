@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electrobun build",
     "app:dev": "vite build && electrobun dev",
+    "app:hmr": "vite & electrobun dev",
     "preview": "vite preview",
     "codegen": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts",
     "typecheck": "vue-tsc --noEmit",
