@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 import { router } from './router'
+import { rpc } from '@/lib/rpc'
+import { createPersistedQueryClient } from '@/lib/persist'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
@@ -13,4 +15,12 @@ console.log(
   'color:oklch(0.66 0.018 256);font-family:ui-monospace,monospace',
 )
 
-createApp(App).use(router).use(VueQueryPlugin).mount('#app')
+async function boot() {
+  const { url } = await rpc.getConfig()
+  const queryClient = createPersistedQueryClient(url)
+  createApp(App)
+    .use(router)
+    .use(VueQueryPlugin, { queryClient })
+    .mount('#app')
+}
+void boot()
