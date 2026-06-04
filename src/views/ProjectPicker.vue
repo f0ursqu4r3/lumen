@@ -2,8 +2,13 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitle, useIntersectionObserver } from '@vueuse/core'
-import { Search, CornerDownLeft, FolderGit2, LoaderCircle } from '@lucide/vue'
-import { useProjects, type ProjectSummary } from '@/composables/useProjects'
+import { Search, CornerDownLeft, FolderGit2, LoaderCircle, Star } from '@lucide/vue'
+import {
+  useProjectBrowser,
+  type BrowserRow,
+  type BrowserSectionKey,
+} from '@/composables/useProjectBrowser'
+import { useToggleStar } from '@/composables/useToggleStar'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -14,10 +19,24 @@ useTitle('Projects · lumen')
 const router = useRouter()
 
 const search = ref('')
-const { projects, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-  useProjects(search)
-const count = computed(() => projects.value.length)
-const hasMore = computed(() => hasNextPage.value ?? false)
+const { flatRows, count, searching, isLoading, error, hasMore, fetchNextPage, isFetchingNextPage } =
+  useProjectBrowser(search)
+const toggleStar = useToggleStar()
+
+const SECTION_LABELS: Record<BrowserSectionKey, string> = {
+  starred: 'Starred',
+  assigned: 'Assigned to me',
+  all: 'All projects',
+}
+// Headers only earn their keep when there's more than the membership list to
+// separate — a lone "All projects" group reads cleaner with no header.
+const showHeaders = computed(
+  () => !searching.value && flatRows.value.some((r) => r.section !== 'all'),
+)
+const sectionCount = (key: BrowserSectionKey) =>
+  flatRows.value.filter((r) => r.section === key).length
+const startsSection = (i: number) =>
+  i === 0 || flatRows.value[i - 1]?.section !== flatRows.value[i].section
 
 // Split each path so the repo (final segment) reads as the name and the rest
 // trails as muted mono context — same emphasis the issues header uses.
@@ -33,9 +52,9 @@ const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 
 // --- selection cursor -------------------------------------------------------
 // The picker is a launcher first, a list second: a selection glides on the
-// keyboard like a command palette. `active` is the logical cursor; the amber
-// rail (`cursor`) chases it with a critically-damped spring so it has weight
-// without the tackiness of a bounce.
+// keyboard like a command palette. `active` is the logical cursor (an index into
+// the flattened row list); the amber rail (`cursor`) chases it with a
+// critically-damped spring so it has weight without the tackiness of a bounce.
 const active = ref(0)
 const listEl = ref<HTMLElement | null>(null)
 const reduce =
@@ -99,48 +118,60 @@ watch(search, () => {
   nextTick(() => springTo(true))
 })
 
-// First data, or appended pages: keep `active` in range and (re)place the rail.
-watch(
-  () => count.value,
-  (n, prev) => {
-    if (active.value > n - 1) active.value = Math.max(0, n - 1)
-    nextTick(() => springTo(prev === 0))
-  },
-)
+// The row set changed: first data, an appended page, or a star toggle that hops a
+// project between sections. Keep the selection on the same project where we can
+// (`pinTo`), clamp it in range, then (re)place the rail.
+const pinTo = ref<string | null>(null)
+watch(flatRows, (rows, prev) => {
+  if (pinTo.value) {
+    const i = rows.findIndex((r) => r.fullPath === pinTo.value)
+    if (i >= 0) active.value = i
+    pinTo.value = null
+  }
+  if (active.value > rows.length - 1) active.value = Math.max(0, rows.length - 1)
+  nextTick(() => springTo((prev?.length ?? 0) === 0))
+})
 
 // --- launch + morph ---------------------------------------------------------
 // Launching morphs the chosen project's name into the issues header via a View
 // Transition, so the picker → issues handoff reads as one instrument retuning
 // rather than a page swap. Degrades to a plain push where VT is unavailable or
 // motion is reduced.
-const morphingId = ref<string | null>(null)
-const nameStyle = (p: ProjectSummary) =>
-  p.id === morphingId.value ? { viewTransitionName: 'project-title' } : undefined
+const morphingPath = ref<string | null>(null)
+const nameStyle = (row: BrowserRow) =>
+  row.fullPath === morphingPath.value ? { viewTransitionName: 'project-title' } : undefined
 
-function navigate(p: ProjectSummary) {
-  return router.push({ name: 'issues', params: { fullPath: p.fullPath } })
+function navigate(row: BrowserRow) {
+  return router.push({ name: 'issues', params: { fullPath: row.fullPath } })
 }
 
-async function launch(p: ProjectSummary, i: number) {
+async function launch(row: BrowserRow, i: number) {
   active.value = i
   const canMorph = typeof document.startViewTransition === 'function' && !reduce?.matches
   if (!canMorph) {
-    navigate(p)
+    navigate(row)
     return
   }
-  morphingId.value = p.id
+  morphingPath.value = row.fullPath
   await nextTick() // ensure the name carries the transition-name before snapshot
   document.startViewTransition(async () => {
-    await navigate(p)
+    await navigate(row)
     await nextTick()
   })
 }
 
-function onRowClick(e: MouseEvent, p: ProjectSummary, i: number) {
+function onRowClick(e: MouseEvent, row: BrowserRow, i: number) {
   // Let the browser handle modified clicks (open in new tab) via the real href.
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
   e.preventDefault()
-  launch(p, i)
+  launch(row, i)
+}
+
+// Toggle the star; pin the selection to this project so the rail follows it as it
+// hops into (or out of) the Starred section.
+function onToggleStar(row: BrowserRow) {
+  pinTo.value = row.fullPath
+  toggleStar.mutate({ fullPath: row.fullPath, name: row.name, starred: row.starred })
 }
 
 // --- keyboard ---------------------------------------------------------------
@@ -153,10 +184,10 @@ function onKeydown(e: KeyboardEvent) {
   // ⌘1–9 (or Ctrl): jump straight to a project and launch it, from anywhere.
   if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key)) {
     const i = Number(e.key) - 1
-    const p = projects.value[i]
-    if (p) {
+    const row = flatRows.value[i]
+    if (row) {
       e.preventDefault()
-      launch(p, i)
+      launch(row, i)
     }
     return
   }
@@ -171,10 +202,10 @@ function onKeydown(e: KeyboardEvent) {
       move(-1)
       return
     case 'Enter': {
-      const p = projects.value[active.value]
-      if (p) {
+      const row = flatRows.value[active.value]
+      if (row) {
         e.preventDefault()
-        launch(p, active.value)
+        launch(row, active.value)
       }
       return
     }
@@ -200,6 +231,7 @@ function onKeydown(e: KeyboardEvent) {
     move(-1)
   } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
     // Type-to-filter from anywhere: focus the field and let the keypress land.
+    // (No single-letter star shortcut — it would shadow type-to-filter.)
     focusSearch()
   }
 }
@@ -215,7 +247,7 @@ onBeforeUnmount(() => {
 
 // --- infinite load ----------------------------------------------------------
 function loadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
+  if (hasMore.value && !isFetchingNextPage.value) fetchNextPage()
 }
 const sentinel = ref<HTMLElement | null>(null)
 useIntersectionObserver(sentinel, ([entry]) => {
@@ -244,7 +276,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
           :key="count"
           class="animate-count inline-block font-mono text-[2.75rem] leading-[0.85] font-semibold tabular-nums tracking-[-0.03em] text-foreground"
         >
-          {{ count }}<span class="text-primary" v-if="hasMore">+</span>
+          {{ count }}<span v-if="hasMore" class="text-primary">+</span>
         </span>
         <span
           class="mt-2 font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
@@ -275,7 +307,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
       class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
     >
       <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-3">
-        <Skeleton class="size-4 rounded-md" />
+        <Skeleton class="size-7 rounded-md" />
         <Skeleton class="h-3.5" :style="{ width: `${30 + ((i * 17) % 40)}%` }" />
         <Skeleton class="h-3 w-24" />
       </div>
@@ -289,8 +321,8 @@ useIntersectionObserver(sentinel, ([entry]) => {
         aria-label="Projects"
       >
         <!-- The selection rail: one element that glides between rows on a spring.
-             The amber "you are here" signal now lives in the active row's
-             monogram, so the rail itself is a clean accent band. -->
+             The amber "you are here" signal lives in the active row's monogram,
+             so the rail itself is a clean accent band. -->
         <div
           class="pointer-events-none absolute inset-x-1 top-0 z-0 rounded-lg bg-accent ring-1 ring-inset ring-border transition-[height,opacity] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"
           :style="{
@@ -300,68 +332,121 @@ useIntersectionObserver(sentinel, ([entry]) => {
           }"
         />
 
-        <RouterLink
-          v-for="(p, i) in projects"
-          :key="p.id"
-          data-row
-          role="option"
-          :aria-selected="i === active"
-          :to="{ name: 'issues', params: { fullPath: p.fullPath } }"
-          class="group relative z-10 flex animate-row-in items-center gap-3 rounded-lg py-2.5 pr-3 pl-3 outline-none"
-          :style="{ animationDelay: `${Math.min(i, 14) * 26}ms` }"
-          @mouseenter="active = i"
-          @click="onRowClick($event, p, i)"
-          @focus="active = i"
-        >
-          <!-- Monogram: a derived initial that lights amber on the active row, so
-               the glyph is also the "this one launches" signal. -->
-          <span
-            class="grid size-7 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold ring-1 ring-inset transition-colors"
-            :class="
-              i === active
-                ? 'bg-primary/15 text-primary ring-primary/30'
-                : 'bg-muted/60 text-muted-foreground ring-border/60'
-            "
-          >
-            {{ monogram(p.name) }}
-          </span>
+        <!-- Rows wrapper carries the [data-row] elements the spring rail measures;
+             it stays unpositioned so rows still offset against the relative Card. -->
+        <div ref="listEl">
+          <template v-for="(row, i) in flatRows" :key="row.fullPath">
+            <!-- Section header — sits between rows, never carries [data-row], so the
+               rail's row indexing stays aligned to the flat list. -->
+            <div
+              v-if="showHeaders && startsSection(i)"
+              class="relative z-10 flex items-center gap-2 px-3 pt-4 pb-1.5 first:pt-2.5"
+            >
+              <Star
+                v-if="row.section === 'starred'"
+                class="size-3 text-primary"
+                fill="currentColor"
+              />
+              <span
+                class="font-mono text-[10px] font-semibold tracking-[0.22em] text-muted-foreground/70 uppercase"
+              >
+                {{ SECTION_LABELS[row.section] }}
+              </span>
+              <span class="font-mono text-[10px] tabular-nums text-muted-foreground/40">
+                {{ sectionCount(row.section) }}
+              </span>
+            </div>
 
-          <span class="flex min-w-0 flex-1 items-baseline gap-2">
-            <span
-              class="shrink-0 text-[0.9375rem] font-medium tracking-tight transition-colors"
-              :class="i === active ? 'text-foreground' : 'text-foreground/90'"
-              :style="nameStyle(p)"
+            <RouterLink
+              data-row
+              role="option"
+              :aria-selected="i === active"
+              :to="{ name: 'issues', params: { fullPath: row.fullPath } }"
+              class="group relative z-10 flex animate-row-in items-center gap-3 rounded-lg py-2.5 pr-2.5 pl-3 outline-none"
+              :style="{ animationDelay: `${Math.min(i, 14) * 26}ms` }"
+              @mouseenter="active = i"
+              @click="onRowClick($event, row, i)"
+              @focus="active = i"
             >
-              {{ p.name }}
-            </span>
-            <span
-              v-if="namespace(p.fullPath)"
-              class="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground/55"
-            >
-              {{ namespace(p.fullPath) }}/
-            </span>
-          </span>
+              <!-- Monogram: a derived initial that lights amber on the active row, so
+                 the glyph is also the "this one launches" signal. -->
+              <span
+                class="grid size-7 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold ring-1 ring-inset transition-colors"
+                :class="
+                  i === active
+                    ? 'bg-primary/15 text-primary ring-primary/30'
+                    : 'bg-muted/60 text-muted-foreground ring-border/60'
+                "
+              >
+                {{ monogram(row.name) }}
+              </span>
 
-          <!-- Right cluster: an Enter affordance on the active row, then the
-               quick-jump keycap for the first nine projects. -->
-          <span class="flex shrink-0 items-center gap-2">
-            <CornerDownLeft
-              class="size-3.5 text-primary transition-opacity duration-150"
-              :class="i === active ? 'opacity-100' : 'opacity-0'"
-            />
-            <kbd
-              v-if="i < 9"
-              class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-[10px] tabular-nums transition-colors"
-              :class="
-                i === active
-                  ? 'border-border bg-muted/60 text-muted-foreground'
-                  : 'border-border/50 text-muted-foreground/40'
-              "
-            >
-              {{ i + 1 }}
-            </kbd>
-          </span>
-        </RouterLink>
+              <span class="flex min-w-0 flex-1 items-baseline gap-2">
+                <span
+                  class="shrink-0 text-[0.9375rem] font-medium tracking-tight transition-colors"
+                  :class="i === active ? 'text-foreground' : 'text-foreground/90'"
+                  :style="nameStyle(row)"
+                >
+                  {{ row.name }}
+                </span>
+                <span
+                  v-if="namespace(row.fullPath)"
+                  class="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground/55"
+                >
+                  {{ namespace(row.fullPath) }}/
+                </span>
+              </span>
+
+              <!-- Right cluster: assigned count, the star toggle, then the Enter
+                 affordance + quick-jump keycap for the first nine rows. -->
+              <span class="flex shrink-0 items-center gap-1.5">
+                <span
+                  v-if="row.assignedOpen"
+                  class="mr-0.5 font-mono text-[11px] tabular-nums text-muted-foreground/65"
+                >
+                  {{ row.assignedOpen }} open
+                </span>
+
+                <button
+                  type="button"
+                  :aria-label="row.starred ? `Unstar ${row.name}` : `Star ${row.name}`"
+                  :aria-pressed="row.starred"
+                  class="relative z-10 grid size-7 place-items-center rounded-md outline-none transition-colors focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/60"
+                  :class="
+                    row.starred
+                      ? 'text-primary'
+                      : i === active
+                        ? 'text-muted-foreground/50 hover:text-foreground'
+                        : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-foreground'
+                  "
+                  @click.stop.prevent="onToggleStar(row)"
+                >
+                  <Star
+                    class="size-4"
+                    :fill="row.starred ? 'currentColor' : 'none'"
+                    :stroke-width="2"
+                  />
+                </button>
+
+                <CornerDownLeft
+                  class="size-3.5 text-primary transition-opacity duration-150"
+                  :class="i === active ? 'opacity-100' : 'opacity-0'"
+                />
+                <kbd
+                  v-if="i < 9"
+                  class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-[10px] tabular-nums transition-colors"
+                  :class="
+                    i === active
+                      ? 'border-border bg-muted/60 text-muted-foreground'
+                      : 'border-border/50 text-muted-foreground/40'
+                  "
+                >
+                  {{ i + 1 }}
+                </kbd>
+              </span>
+            </RouterLink>
+          </template>
+        </div>
 
         <!-- Load more: the sentinel auto-fetches; the row also reports state. -->
         <div
