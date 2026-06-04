@@ -4,6 +4,7 @@ import { useTitle } from '@vueuse/core'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/composables/useIssue'
 import { useIssueDraft } from '@/composables/useIssueDraft'
+import { useAddNote } from '@/composables/useIssueMutations'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useProjectContributors } from '@/composables/useProjectContributors'
 import { useProjectLabels } from '@/composables/useProjectLabels'
@@ -14,7 +15,7 @@ import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Check, Copy, ExternalLink, Images } from '@lucide/vue'
+import { Check, Link, ExternalLink, Images } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -65,10 +66,23 @@ const actionError = computed(() => saveError.value)
 // and picker headers so the detail view reads as part of the same instrument.
 const repoName = computed(() => props.fullPath.split('/').at(-1) ?? props.fullPath)
 
-const notes = computed(
-  () =>
-    issue.value?.notes?.nodes?.filter((n): n is NonNullable<typeof n> => !!n && !n.system) ?? [],
+// Each discussion is a thread: its first note is the comment, the rest are
+// replies. Drop system notes (GitLab models each as its own single-note
+// discussion) and any thread left empty by that filter.
+const threads = computed(() =>
+  (issue.value?.discussions?.nodes ?? [])
+    .map((d) => {
+      const notes = (d?.notes?.nodes ?? []).filter(
+        (n): n is NonNullable<typeof n> => !!n && !n.system,
+      )
+      return d && notes.length ? { id: d.id, notes } : null
+    })
+    .filter((t): t is NonNullable<typeof t> => !!t),
 )
+
+// Flattened in DOM order (threads, then notes within each) — the media-trigger
+// index mapping and the fresh-animation tracker both key off this.
+const notes = computed(() => threads.value.flatMap((t) => t.notes))
 
 const media = computed(() => buildIssueMedia(draft.value?.description, notes.value, props.fullPath))
 const viewerOpen = ref(false)
@@ -81,7 +95,7 @@ function openViewer(i: number) {
 
 // Two GitLab affordances next to the issue id: open in the browser, and copy a
 // link. Opening routes through the host (the native webview can't open external
-// URLs itself). Copy defaults to a markdown link; Shift+Click copies the bare URL.
+// URLs itself). Copy defaults to the bare URL; Shift+Click copies a markdown link.
 // We deliberately avoid ⌘/Ctrl chords — Electrobun's preload intercepts those on
 // links before our handler runs.
 async function openInGitLab() {
@@ -94,7 +108,7 @@ let copiedTimer: ReturnType<typeof setTimeout> | undefined
 async function onCopyClick(e: MouseEvent) {
   if (!issue.value) return
   const url = issue.value.webUrl
-  const markdown = !e.shiftKey
+  const markdown = e.shiftKey
   const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
   // navigator.clipboard is undefined under the views:// origin; write via the host.
   await rpc.clipboardWriteText({ text })
@@ -149,6 +163,36 @@ watch(
   },
   { immediate: true },
 )
+
+// Replies post immediately (their own per-thread box), independent of the draft
+// buffer that batches field edits + the top-level comment behind Save. One box
+// open at a time keeps the state flat; the mutation invalidates the issue query
+// so the new reply lands on the next refetch.
+const reply = useAddNote(props.fullPath, props.iid)
+const replyingTo = ref<string | null>(null)
+const replyBody = ref('')
+const replyPending = computed(() => reply.isPending.value)
+const replyError = computed(() => reply.error.value)
+
+function openReply(threadId: string) {
+  replyingTo.value = threadId
+  replyBody.value = ''
+  reply.reset()
+}
+function cancelReply() {
+  replyingTo.value = null
+  replyBody.value = ''
+}
+async function submitReply(threadId: string) {
+  const body = replyBody.value.trim()
+  if (!body || !issue.value?.id || reply.isPending.value) return
+  try {
+    await reply.mutateAsync({ noteableId: issue.value.id, discussionId: threadId, body })
+    cancelReply()
+  } catch {
+    // Left open with the text intact; the error surfaces via reply.error below.
+  }
+}
 
 if (!props.embedded) {
   useTitle(
@@ -273,6 +317,18 @@ if (!props.embedded) {
         </span>
         <Button
           type="button"
+          data-testid="copy-link"
+          variant="ghost"
+          size="icon-xs"
+          class="text-muted-foreground"
+          title="Copy link · Shift+Click to copy a markdown link"
+          @click="onCopyClick"
+        >
+          <component :is="linkCopied ? Check : Link" class="size-3.5" />
+        </Button>
+
+        <Button
+          type="button"
           data-testid="open-in-gitlab"
           variant="ghost"
           size="sm"
@@ -282,24 +338,6 @@ if (!props.embedded) {
         >
           <ExternalLink class="size-3.5" />
           Open in GitLab
-        </Button>
-        <Button
-          type="button"
-          data-testid="copy-link"
-          variant="ghost"
-          size="sm"
-          class="text-muted-foreground"
-          title="Copy a markdown link · Shift+Click to copy the bare URL"
-          @click="onCopyClick"
-        >
-          <component :is="linkCopied ? Check : Copy" class="size-3.5" />
-          {{
-            linkCopied === 'md'
-              ? 'Copied markdown'
-              : linkCopied === 'url'
-                ? 'Copied URL'
-                : 'Copy Link'
-          }}
         </Button>
         <Button
           type="button"
@@ -346,7 +384,7 @@ if (!props.embedded) {
 
     <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
 
-    <div class="issue__body mt-8" @click="onBodyMediaClick">
+    <div class="issue__body my-8" @click="onBodyMediaClick">
       <!-- Main column: the document. -->
       <section class="issue__desc min-w-0 animate-row-in" style="animation-delay: 60ms">
         <button
@@ -429,30 +467,78 @@ if (!props.embedded) {
           </span>
         </div>
 
-        <ul v-if="notes.length" class="mt-3 divide-y divide-border/60">
-          <li
-            v-for="n in notes"
-            :key="n.id"
-            class="flex gap-3 py-4 first:pt-0"
-            :class="{ 'animate-note-in': fresh.has(n.id) }"
-          >
-            <Avatar class="mt-0.5 size-7 shrink-0 text-[11px] ring-1 ring-border/70">
-              <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
-            </Avatar>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-baseline gap-2">
-                <span class="text-sm font-medium text-foreground">
-                  {{ nameOrUsername(n.author) }}
-                </span>
-                <span class="font-mono text-xs text-muted-foreground">
-                  {{ new Date(n.createdAt).toLocaleDateString() }}
-                </span>
+        <ul v-if="threads.length" class="mt-3 divide-y divide-border/60">
+          <li v-for="t in threads" :key="t.id" class="py-4 first:pt-0">
+            <!-- First note is the comment; the rest are replies, indented to align
+                 under the comment's content (size-7 avatar + gap-3 = pl-10). -->
+            <div
+              v-for="(n, i) in t.notes"
+              :key="n.id"
+              data-testid="note"
+              class="flex gap-3"
+              :class="[i > 0 && 'mt-4 pl-10', fresh.has(n.id) && 'animate-note-in']"
+            >
+              <Avatar class="mt-0.5 size-7 shrink-0 text-[11px] ring-1 ring-border/70">
+                <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
+              </Avatar>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-sm font-medium text-foreground">
+                    {{ nameOrUsername(n.author) }}
+                  </span>
+                  <span class="font-mono text-xs text-muted-foreground">
+                    {{ new Date(n.createdAt).toLocaleDateString() }}
+                  </span>
+                </div>
+                <MarkdownText
+                  :source="n.body"
+                  :project-path="fullPath"
+                  class="mt-1 max-w-[68ch] text-sm leading-relaxed"
+                />
               </div>
-              <MarkdownText
-                :source="n.body"
-                :project-path="fullPath"
-                class="mt-1 max-w-[68ch] text-sm leading-relaxed"
-              />
+            </div>
+
+            <!-- Per-thread reply, aligned with the thread content past the avatar. -->
+            <div class="mt-2 pl-10">
+              <Button
+                v-if="replyingTo !== t.id"
+                type="button"
+                variant="ghost"
+                size="sm"
+                class="-ml-3 h-7 px-3 text-xs text-muted-foreground"
+                @click="openReply(t.id)"
+              >
+                Reply
+              </Button>
+              <div v-else class="space-y-2">
+                <Textarea
+                  v-model="replyBody"
+                  :rows="2"
+                  placeholder="Write a reply…"
+                  aria-label="Write a reply"
+                  @keydown.esc="cancelReply"
+                />
+                <ErrorNotice v-if="replyError" :error="replyError" />
+                <div class="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    :disabled="replyPending || !replyBody.trim()"
+                    @click="submitReply(t.id)"
+                  >
+                    {{ replyPending ? 'Replying…' : 'Reply' }}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    :disabled="replyPending"
+                    @click="cancelReply"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             </div>
           </li>
         </ul>
@@ -493,7 +579,7 @@ if (!props.embedded) {
           :disabled="saving"
           @click="onCancel"
         >
-          Cancel
+          Revert Changes
         </Button>
         <Button type="button" data-testid="save-issue" :disabled="saving" @click="onSave">
           {{ saving ? 'Saving…' : 'Save changes' }}

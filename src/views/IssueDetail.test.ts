@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
+import { Check } from '@lucide/vue'
 
 const useIssue = vi.fn()
 vi.mock('@/composables/useIssue', () => ({ useIssue: () => useIssue() }))
@@ -52,6 +53,20 @@ vi.mock('@/composables/useIssueDraft', async () => {
     },
   }
 })
+const { addNoteMutate } = vi.hoisted(() => ({
+  addNoteMutate: vi.fn(() => Promise.resolve({ note: { id: 'new' } })),
+}))
+vi.mock('@/composables/useIssueMutations', async () => {
+  const { ref } = await import('vue')
+  return {
+    useAddNote: () => ({
+      mutateAsync: addNoteMutate,
+      isPending: ref(false),
+      error: ref(null),
+      reset: vi.fn(),
+    }),
+  }
+})
 vi.mock('vue-router', () => ({ onBeforeRouteLeave: vi.fn() }))
 
 const { openExternal, clipboardWriteText } = vi.hoisted(() => ({
@@ -76,21 +91,35 @@ const fullIssue = {
   assignees: {
     nodes: [{ id: 'u1', name: 'Ada Lovelace', username: 'a', avatarUrl: null }],
   },
-  notes: {
+  discussions: {
     nodes: [
       {
-        id: 'n1',
-        body: 'me too',
-        system: false,
-        createdAt: '2026-01-01T00:00:00Z',
-        author: { username: 'a', avatarUrl: null },
+        id: 'd1',
+        notes: {
+          nodes: [
+            {
+              id: 'n1',
+              body: 'me too',
+              system: false,
+              createdAt: '2026-01-01T00:00:00Z',
+              author: { username: 'a', avatarUrl: null },
+            },
+          ],
+        },
       },
       {
-        id: 'n2',
-        body: 'changed milestone',
-        system: true,
-        createdAt: '2026-01-01T00:00:00Z',
-        author: { username: 'bot', avatarUrl: null },
+        id: 'd2',
+        notes: {
+          nodes: [
+            {
+              id: 'n2',
+              body: 'changed milestone',
+              system: true,
+              createdAt: '2026-01-01T00:00:00Z',
+              author: { username: 'bot', avatarUrl: null },
+            },
+          ],
+        },
       },
     ],
   },
@@ -102,6 +131,7 @@ beforeEach(() => {
   useIssue.mockReset()
   draftSave.mockReset()
   draftReset.mockReset()
+  addNoteMutate.mockClear()
   // Reset shared draft state between tests so mutations from one test don't
   // bleed into the next.
   if (draftState.dirty) draftState.dirty.value = false
@@ -158,6 +188,30 @@ describe('IssueDetail (buffered)', () => {
     expect(w.text()).not.toContain('changed milestone')
   })
 
+  it('posts a reply to a thread with the discussion id', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    // Open the per-thread reply box (the only Reply button until it is open).
+    await w
+      .findAll('button')
+      .find((b) => b.text() === 'Reply')!
+      .trigger('click')
+    const box = w.find('textarea[aria-label="Write a reply"]')
+    expect(box.exists()).toBe(true)
+    await box.setValue('on it')
+    // Submit — the reply targets the thread (d1), not a new top-level discussion.
+    await w
+      .findAll('button')
+      .find((b) => b.text() === 'Reply')!
+      .trigger('click')
+    await flushPromises()
+    expect(addNoteMutate).toHaveBeenCalledWith({
+      noteableId: 'gid://issue/9',
+      discussionId: 'd1',
+      body: 'on it',
+    })
+  })
+
   it('shows the Save/Cancel footer only when dirty', async () => {
     const w = mountDetail()
     await flushPromises()
@@ -204,22 +258,30 @@ describe('IssueDetail (buffered)', () => {
     const w = mountDetail()
     await flushPromises()
 
-    const liFor = (body: string) => w.findAll('li').find((li) => li.text().includes(body))
+    const noteFor = (body: string) =>
+      w.findAll('[data-testid="note"]').find((n) => n.text().includes(body))
     // The note present at load lands with the section, not its own entrance.
-    expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
+    expect(noteFor('me too')?.classes()).not.toContain('animate-note-in')
 
-    // A poll delivers a new comment.
+    // A poll delivers a new comment (a fresh discussion thread).
     issueRef.value = {
       ...issueRef.value,
-      notes: {
+      discussions: {
         nodes: [
-          ...issueRef.value.notes.nodes,
+          ...issueRef.value.discussions.nodes,
           {
-            id: 'n3',
-            body: 'fresh reply',
-            system: false,
-            createdAt: '2026-01-02T00:00:00Z',
-            author: { username: 'b', avatarUrl: null },
+            id: 'd3',
+            notes: {
+              nodes: [
+                {
+                  id: 'n3',
+                  body: 'fresh reply',
+                  system: false,
+                  createdAt: '2026-01-02T00:00:00Z',
+                  author: { username: 'b', avatarUrl: null },
+                },
+              ],
+            },
           },
         ],
       },
@@ -227,8 +289,8 @@ describe('IssueDetail (buffered)', () => {
     await flushPromises()
 
     // Only the newcomer animates; the pre-existing note stays put.
-    expect(liFor('fresh reply')?.classes()).toContain('animate-note-in')
-    expect(liFor('me too')?.classes()).not.toContain('animate-note-in')
+    expect(noteFor('fresh reply')?.classes()).toContain('animate-note-in')
+    expect(noteFor('me too')?.classes()).not.toContain('animate-note-in')
   })
 
   describe('the GitLab actions', () => {
@@ -246,24 +308,25 @@ describe('IssueDetail (buffered)', () => {
       expect(clipboardWriteText).not.toHaveBeenCalled()
     })
 
-    it('copies a markdown link on a plain Copy click and confirms', async () => {
+    it('copies the bare URL on a plain Copy click and confirms', async () => {
       const w = mountDetail()
       await flushPromises()
       const copy = w.get('[data-testid="copy-link"]')
       await copy.trigger('click')
       await flushPromises()
-      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '[#9 Bug](#)' })
+      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
       expect(openExternal).not.toHaveBeenCalled()
-      expect(copy.text()).toContain('Copied')
+      // Confirmation is the icon swapping to a check, not a text label.
+      expect(copy.findComponent(Check).exists()).toBe(true)
     })
 
-    it('copies the bare URL on Shift+Click of Copy', async () => {
+    it('copies a markdown link on Shift+Click of Copy', async () => {
       const w = mountDetail()
       await flushPromises()
       const copy = w.get('[data-testid="copy-link"]')
       await copy.trigger('click', { shiftKey: true })
       await flushPromises()
-      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
+      expect(clipboardWriteText).toHaveBeenCalledWith({ text: '[#9 Bug](#)' })
     })
   })
 })

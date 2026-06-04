@@ -105,9 +105,15 @@ export function useCreateIssue(fullPath: string) {
   })
 }
 
+// `discussionId` makes the note a reply within that thread; omit it to start a
+// new top-level discussion. `noteableId` (the issue gid) is required either way.
 export function useAddNote(fullPath: string, iid: string) {
   const qc = useQueryClient()
-  return useMutation<CreateNotePayload, GitLabError, { noteableId: string; body: string }>({
+  return useMutation<
+    CreateNotePayload,
+    GitLabError,
+    { noteableId: string; body: string; discussionId?: string }
+  >({
     mutationFn: (input) =>
       run(
         () => gqlClient.request(CreateNoteDocument, { input }),

@@ -15,7 +15,7 @@ beforeEach(() => {
 })
 
 describe('useIssue', () => {
-  it('returns the issue with its notes', async () => {
+  it('returns the issue with its discussions', async () => {
     request.mockResolvedValue({
       project: {
         issue: {
@@ -28,14 +28,21 @@ describe('useIssue', () => {
           milestone: { title: 'v1' },
           labels: { nodes: [] },
           assignees: { nodes: [] },
-          notes: {
+          discussions: {
             nodes: [
               {
-                id: 'n1',
-                body: 'me too',
-                system: false,
-                createdAt: '2026-01-01T00:00:00Z',
-                author: { username: 'a', avatarUrl: '#' },
+                id: 'd1',
+                notes: {
+                  nodes: [
+                    {
+                      id: 'n1',
+                      body: 'me too',
+                      system: false,
+                      createdAt: '2026-01-01T00:00:00Z',
+                      author: { username: 'a', avatarUrl: '#' },
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -45,6 +52,6 @@ describe('useIssue', () => {
     const { result } = withQuery(() => useIssue(ref('grp/proj'), ref('9')))
     await flushPromises()
     expect(result().data.value?.title).toBe('Bug')
-    expect(result().data.value?.notes.nodes).toHaveLength(1)
+    expect(result().data.value?.discussions.nodes).toHaveLength(1)
   })
 })

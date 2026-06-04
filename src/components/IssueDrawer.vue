@@ -35,7 +35,10 @@ const emit = defineEmits<{
           <Maximize2 />
         </Button>
       </SheetHeader>
-      <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <!-- No bottom padding: the save bar (sticky bottom-0 inside IssueDetail) must
+           pin flush to the panel edge. Any pb here leaves a strip below the bar where
+           scrolling content peeks through. The article's own pb-20 handles spacing. -->
+      <div class="min-h-0 flex-1 overflow-y-auto px-4 pt-4">
         <IssueDetail
           v-if="iid"
           :key="iid"

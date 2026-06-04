@@ -39,17 +39,25 @@ const IssueDocument = graphql(`
             avatarUrl
           }
         }
-        # capped at 100, no pagination — fine for a personal tool
-        notes(first: 100) {
+        # Comments grouped by thread: each discussion is one thread whose first
+        # note is the comment and any following notes are replies. (GitLab's flat
+        # notes field discards this grouping.) Capped, no pagination — fine for a
+        # personal tool.
+        discussions(first: 100) {
           nodes {
             id
-            body
-            system
-            createdAt
-            author {
-              name
-              username
-              avatarUrl
+            notes(first: 100) {
+              nodes {
+                id
+                body
+                system
+                createdAt
+                author {
+                  name
+                  username
+                  avatarUrl
+                }
+              }
             }
           }
         }
