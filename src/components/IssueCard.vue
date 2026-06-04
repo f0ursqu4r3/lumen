@@ -59,7 +59,7 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
 
 <template>
   <div
-    class="group relative flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 transition-colors duration-150 hover:border-border/0 hover:bg-accent/50 focus-within:bg-accent/50"
+    class="group relative flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-card transition-[background-color,box-shadow,border-color] duration-150 hover:border-border/0 hover:bg-accent/50 hover:shadow-pop focus-within:bg-accent/50"
     :class="{ 'animate-flash': highlight }"
   >
     <RouterLink

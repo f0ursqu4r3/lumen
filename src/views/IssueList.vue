@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, toRef, watch } from 'vue'
-import { useIntersectionObserver, useTitle, onKeyStroke } from '@vueuse/core'
+import { useIntersectionObserver, useTitle, onKeyStroke, useElementBounding } from '@vueuse/core'
 import { Plus, Search, LoaderCircle, List, Columns3, X, GripVertical } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { useProjectLabels } from '@/composables/useProjectLabels'
@@ -123,6 +123,16 @@ const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage
 
 const count = computed(() => issues.value.length)
 const hasMore = computed(() => hasNextPage.value ?? false)
+
+// Board fills the page: its height is the viewport minus its own distance from
+// the top (measured, so it stays correct as the toolbar rows wrap/grow) minus
+// the main column's bottom padding — so the horizontal scrollbar lands at the
+// true bottom of the page instead of floating mid-screen.
+const boardEl = ref<HTMLElement | null>(null)
+const { top: boardTop } = useElementBounding(boardEl)
+const boardStyle = computed(() => ({
+  height: `calc(100dvh - ${Math.max(0, Math.round(boardTop.value))}px - 1.5rem)`,
+}))
 
 // Sort/group happen client-side on the loaded set — priority & status live in
 // scoped labels, which the server can't order by.
@@ -487,29 +497,44 @@ onKeyStroke(['c', 'C'], (e) => {
              height, each column scrolls on its own, drag to retag. -->
         <div
           v-else
-          class="relative left-1/2 flex h-[72vh] min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
+          ref="boardEl"
+          :style="boardStyle"
+          class="relative left-1/2 flex min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
         >
           <section
             v-for="g in boardGroups"
             :key="g.key"
-            class="flex h-full w-72 shrink-0 flex-col rounded-xl ring-1 ring-inset transition-colors duration-150"
+            class="relative flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-xl ring-1 ring-inset transition-[background-color,box-shadow,outline-color] duration-150 outline outline-1 outline-offset-2 outline-transparent"
             :class="
-              dragOverKey === g.key ? 'bg-primary/6 ring-primary/40' : 'bg-card/40 ring-white/5'
+              dragOverKey === g.key
+                ? 'bg-primary/12 shadow-pop ring-primary/55 outline-primary/45'
+                : 'bg-card/55 shadow-card ring-border/70'
             "
             @dragover.prevent="dragOverKey = g.key"
             @dragenter.prevent="dragOverKey = g.key"
             @drop.prevent="onDrop(g)"
           >
-            <header class="flex shrink-0 items-center gap-2 px-3 pt-2.5 pb-2">
+            <!-- Per-column status signal: a 1px border lit in the lane's own
+                 workflow-status color from the top-left corner, fading into the
+                 plain border — each column color-keyed to its state at a glance. -->
+            <span
+              v-if="g.color"
+              aria-hidden="true"
+              class="col-signal"
+              :style="{ '--signal-color': g.color }"
+            />
+            <header class="relative flex shrink-0 items-center gap-2 px-3 pt-3 pb-2.5">
               <span
                 v-if="g.color"
-                class="size-2 rounded-full"
-                :style="{ backgroundColor: g.color }"
+                class="size-2 shrink-0 rounded-full"
+                :style="{ backgroundColor: g.color, boxShadow: `0 0 0 3px ${g.color}2e` }"
               />
-              <h2 class="truncate text-sm font-medium text-foreground">
+              <h2 class="truncate text-sm font-semibold tracking-tight text-foreground">
                 {{ g.label }}
               </h2>
-              <span class="ml-auto font-mono text-xs tabular-nums text-muted-foreground/60">
+              <span
+                class="ml-auto rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums text-muted-foreground/80"
+              >
                 {{ g.issues.length }}
               </span>
             </header>
@@ -533,6 +558,16 @@ onKeyStroke(['c', 'C'], (e) => {
                     class="size-3.5 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover/card:opacity-100"
                   />
                 </IssueCard>
+              </div>
+              <!-- Empty lane: a quiet placeholder gives the column presence and a
+                   visible target to drop a card into. -->
+              <div
+                v-if="!g.issues.length"
+                class="grid flex-1 place-items-center px-2 py-6 text-center"
+              >
+                <span class="font-mono text-[11px] tracking-wide text-muted-foreground/35">
+                  drop here
+                </span>
               </div>
             </div>
           </section>
