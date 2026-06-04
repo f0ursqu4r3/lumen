@@ -399,9 +399,9 @@ if (!props.embedded) {
             </Avatar>
             <div class="min-w-0 flex-1">
               <div class="flex items-baseline gap-2">
-                <span class="text-sm font-medium text-foreground">{{
-                  nameOrUsername(n.author)
-                }}</span>
+                <span class="text-sm font-medium text-foreground">
+                  {{ nameOrUsername(n.author) }}
+                </span>
                 <span class="font-mono text-xs text-muted-foreground">
                   {{ new Date(n.createdAt).toLocaleDateString() }}
                 </span>
