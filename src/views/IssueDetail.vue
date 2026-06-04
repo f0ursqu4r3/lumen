@@ -8,6 +8,7 @@ import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useProjectContributors } from '@/composables/useProjectContributors'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useConfirm } from '@/composables/useConfirm'
+import { rpc } from '@/lib/rpc'
 import QuickAssign from '@/components/QuickAssign.vue'
 import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
@@ -78,16 +79,21 @@ function openViewer(i: number) {
   viewerOpen.value = true
 }
 
-// The GitLab link doubles as a copy affordance: plain click opens (anchor
-// default), Shift copies the bare URL, Shift+Meta copies a markdown link. The
-// label flips to a transient "Copied" confirmation since there's no toast.
+// The GitLab link doubles as a copy affordance: plain click opens the URL in the
+// OS browser (the native webview ignores <a target="_blank">, so we route through
+// the host via rpc.openExternal), Shift copies the bare URL, Shift+Meta copies a
+// markdown link. The label flips to a transient "Copied" confirmation (no toast).
 const linkCopied = ref<null | 'url' | 'md'>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | undefined
 
 async function onGitlabLinkClick(e: MouseEvent) {
-  if (!issue.value || !e.shiftKey) return // plain click falls through to the anchor
-  e.preventDefault()
+  if (!issue.value) return
+  e.preventDefault() // never rely on the anchor default — it's inert in the webview
   const url = issue.value.webUrl
+  if (!e.shiftKey) {
+    await rpc.openExternal({ url })
+    return
+  }
   const markdown = e.metaKey
   const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
   await navigator.clipboard.writeText(text)

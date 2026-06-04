@@ -30,4 +30,5 @@ export const rpc: LumenRequests = {
   getConfig: () => client().getConfig(),
   saveConfig: (a) => client().saveConfig(a),
   clearConfig: () => client().clearConfig(),
+  openExternal: (a) => client().openExternal(a),
 };

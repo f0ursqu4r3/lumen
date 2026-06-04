@@ -14,6 +14,9 @@ export interface LumenRequests {
   getConfig: () => Promise<ConfigStatus>
   saveConfig: (a: SaveConfigArgs) => Promise<{ ok: true }>
   clearConfig: () => Promise<{ ok: true }>
+  // Open a URL in the OS default browser. The native webview ignores
+  // <a target="_blank">, so external links must round-trip through the host.
+  openExternal: (a: { url: string }) => Promise<{ ok: boolean }>
 }
 
 export type LumenRPC = {

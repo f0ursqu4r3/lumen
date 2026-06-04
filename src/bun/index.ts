@@ -1,4 +1,4 @@
-import Electrobun, { BrowserWindow, BrowserView } from "electrobun/bun";
+import Electrobun, { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
 import { loadConfig, saveConfig, clearConfig } from "./config";
 import { gitlabGraphql, gitlabRest, gitlabAsset } from "./gitlab";
 import type { LumenRPC } from "@/lib/rpcContract";
@@ -22,6 +22,7 @@ const rpc = BrowserView.defineRPC<any>({
       },
       saveConfig: async ({ url, token }) => { saveConfig({ url, token }); return { ok: true }; },
       clearConfig: async () => { clearConfig(); return { ok: true }; },
+      openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
     },
     messages: {},
   },

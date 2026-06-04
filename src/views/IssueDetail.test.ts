@@ -54,6 +54,11 @@ vi.mock('@/composables/useIssueDraft', async () => {
 })
 vi.mock('vue-router', () => ({ onBeforeRouteLeave: vi.fn() }))
 
+const { openExternal } = vi.hoisted(() => ({
+  openExternal: vi.fn(() => Promise.resolve({ ok: true })),
+}))
+vi.mock('@/lib/rpc', () => ({ rpc: { openExternal } }))
+
 import IssueDetail from './IssueDetail.vue'
 
 const fullIssue = {
@@ -229,15 +234,19 @@ describe('IssueDetail (buffered)', () => {
     const writeText = vi.fn(() => Promise.resolve())
     beforeEach(() => {
       writeText.mockClear()
+      openExternal.mockClear()
       vi.stubGlobal('navigator', { clipboard: { writeText } })
     })
 
-    it('opens in a new tab on a plain click (no copy)', async () => {
+    it('opens externally via the host on a plain click (no copy)', async () => {
+      // The native webview ignores <a target="_blank">; a plain click must route
+      // through the Bun process (Utils.openExternal) to reach the system browser.
       const w = mountDetail()
       await flushPromises()
       const link = w.get('[data-testid="open-in-gitlab"]')
-      expect(link.attributes('target')).toBe('_blank')
       await link.trigger('click')
+      await flushPromises()
+      expect(openExternal).toHaveBeenCalledWith({ url: '#' })
       expect(writeText).not.toHaveBeenCalled()
       expect(link.text()).toContain('Open in GitLab')
     })
