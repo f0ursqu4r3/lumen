@@ -2,11 +2,7 @@ import Electrobun, { BrowserWindow, BrowserView } from "electrobun/bun";
 import { loadConfig, saveConfig, clearConfig } from "./config";
 import { gitlabGraphql, gitlabRest, gitlabAsset } from "./gitlab";
 import type { LumenRPC } from "@/lib/rpcContract";
-
-const DEV_URL = "http://localhost:5173";
-async function devServerUp(): Promise<boolean> {
-  try { return (await fetch(DEV_URL, { method: "HEAD" })).ok; } catch { return false; }
-}
+import { resolveStartUrl } from "./startUrl";
 
 // LumenRPC describes the RPC *config* shape; it is not the bun/webview *schema*
 // shape that BrowserView.defineRPC<Schema extends ElectrobunRPCSchema> expects,
@@ -31,7 +27,8 @@ const rpc = BrowserView.defineRPC<any>({
   },
 } satisfies LumenRPC);
 
-const url = (await devServerUp()) ? `${DEV_URL}/index.html` : "views://mainview/index.html";
+// app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
+const url = await resolveStartUrl({ hmr: process.env.LUMEN_HMR === "1" });
 const win = new BrowserWindow({
   title: "Lumen",
   url,
