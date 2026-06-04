@@ -23,4 +23,6 @@ async function boot() {
     .use(VueQueryPlugin, { queryClient })
     .mount('#app')
 }
-void boot()
+void boot().catch((err) => {
+  console.error('[tragit] failed to start', err)
+})
