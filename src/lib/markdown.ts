@@ -14,7 +14,7 @@ export interface RenderOptions {
 // excluded, so `kind` is narrower than UploadKind.
 export interface MediaItem {
   kind: 'image' | 'video'
-  src: string // rewritten proxy URL (matches data-media-src on the rendered element)
+  src: string // resolved upload path; swapped to a blob URL after render (matches data-media-src on the rendered element)
   href: string // original href
   alt: string
   title: string
@@ -58,18 +58,20 @@ const RELATIVE_UPLOAD = new RegExp(`^/uploads/${SECRET}/.+`, 'i')
 const PROJECT_UPLOAD = new RegExp(`^/-/project/(\\d+)(/uploads/${SECRET}/.+)$`, 'i')
 
 // GitLab serves attachment uploads behind auth, so a bare `/uploads/...` <img>
-// 404s against the dev-server origin and a direct GitLab URL is cross-origin +
-// unauthenticated. Route uploads through the same /gitlab proxy as the API
-// (which attaches the token server-side); the REST uploads endpoint accepts a
-// URL-encoded project path — or numeric id — as `:id`.
+// 404s and a direct GitLab URL is cross-origin + unauthenticated. Uploads are
+// fetched through the Bun RPC asset handler (`rpc.gitlabAsset`), which attaches
+// the token and builds `${url}/api/v4/projects/.../uploads/...`. We rewrite to a
+// `/v4/projects/...` path here; it is later swapped to a blob URL in the webview.
+// The REST uploads endpoint accepts a URL-encoded project path — or numeric id —
+// as `:id`.
 function rewriteUploadSrc(href: string, projectPath?: string): string {
   const byId = PROJECT_UPLOAD.exec(href)
   if (byId) {
     const [, id, uploadPath] = byId
-    return `/gitlab/v4/projects/${id}${uploadPath}`
+    return `/v4/projects/${id}${uploadPath}`
   }
   if (projectPath && RELATIVE_UPLOAD.test(href)) {
-    return `/gitlab/v4/projects/${encodeURIComponent(projectPath)}${href}`
+    return `/v4/projects/${encodeURIComponent(projectPath)}${href}`
   }
   return href
 }
@@ -149,10 +151,10 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
         )
       }
       if (kind === 'audio') {
-        return `<audio controls src="${escapeAttr(src)}"${titleAttr}></audio>`
+        return `<audio controls src="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}"${titleAttr}></audio>`
       }
       if (kind === 'file') {
-        return `<a class="file-card" href="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
+        return `<a class="file-card" href="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
       }
       let html = `<img src="${escapeAttr(src)}" alt="${escapeAttr(token.alt)}"`
       html += ` data-media-src="${escapeAttr(src)}" data-media-kind="image" data-media-trigger`
@@ -165,9 +167,10 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
 }
 
 // GitLab descriptions/notes are Markdown that may contain attacker-authored raw
-// HTML. marked does not sanitize, and the dev-server proxy attaches the token to
-// same-origin requests — so an unsanitized `<img onerror=fetch('/gitlab/...')>`
-// could act as the user. Every rendered fragment goes through DOMPurify.
+// HTML. marked does not sanitize, so an unsanitized `<img onerror=...>` could run
+// arbitrary script in the webview. The token now lives in the Bun process (not the
+// webview), and upload URLs are resolved to blob URLs via RPC — but raw HTML is
+// still dangerous, so every rendered fragment goes through DOMPurify.
 export function renderMarkdown(src: string | null | undefined, opts: RenderOptions = {}): string {
   if (!src) return ''
   const marked = new Marked()

@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, it, expect, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import MediaViewer from './MediaViewer.vue'
 import type { ViewerItem } from '@/composables/useIssueMedia'
+
+// resolveAsset() would hit the real RPC/Electroview (crashes in jsdom); identity-mock it
+// so the resolved blob URL equals the original path and the [src=...] selectors still match.
+vi.mock('@/composables/useGitlabAsset', () => ({ resolveAsset: (p: string) => Promise.resolve(p) }))
 
 const items: ViewerItem[] = [
   {
@@ -41,6 +45,7 @@ describe('MediaViewer', () => {
   it('shows the start item and a 1-based counter', async () => {
     const w = mountViewer({ startIndex: 1 })
     await nextTick()
+    await flushPromises()
     expect(counterText()).toContain('2 / 3')
     expect(document.querySelector('video[src="/b.mp4"]')).toBeTruthy()
     w.unmount()
@@ -106,6 +111,7 @@ describe('MediaViewer', () => {
   it('closes when the backdrop is clicked, but not when the media itself is clicked', async () => {
     const w = mountViewer({ startIndex: 0 })
     await nextTick()
+    await flushPromises()
     // Clicking the media does not close the viewer.
     document.querySelector<HTMLElement>('img[src="/a.png"]')!.click()
     await nextTick()
