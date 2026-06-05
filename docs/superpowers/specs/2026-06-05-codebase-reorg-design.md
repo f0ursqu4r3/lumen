@@ -38,9 +38,10 @@ src/
     labels/      { components/, composables/, lib/ }
     assignees/   { components/, lib/ }
   shared/
-    ui/          (generic, domain-agnostic components)
+    ui/          (shadcn-vue vendored primitives — was components/ui/)
+    components/  (our generic, domain-agnostic components)
     composables/ (cross-cutting composables)
-    lib/         (generic utilities)
+    lib/         (generic utilities, incl. utils.ts / cn helper)
   gitlab/        (API client layer — unchanged)
   bun/           (Electrobun main-process — unchanged)
   router/        (unchanged)
@@ -86,7 +87,11 @@ Colocated `*.test.ts` files move together with their source file.
 - **components/** AssigneeAvatar, AssigneeEditor, AssigneeMenu, AssigneePicker, QuickAssign
 - **lib/** assigneeOrder
 
-### shared/ui
+### shared/ui  (shadcn-vue primitives — relocated from `components/ui/`)
+alert, alert-dialog, avatar, badge, button, card, checkbox, dialog, input, label, select,
+sheet, skeleton, stepper, textarea (each is its own subdirectory with an `index.ts` barrel).
+
+### shared/components  (our generic app components)
 ConfirmDialog, ErrorNotice, Odometer, ToastHost, MediaViewer, MarkdownText, EditableField,
 Scratchpad, SettingsDialog, SavedViews
 
@@ -96,9 +101,26 @@ useGitlabConnect, useGitlabUrl
 
 ### shared/lib
 utils, persist, markdown, media, appActive, viewTransition, rpc, rpcContract
+(`utils.ts` is the shadcn `cn` helper — it moves with the rest of lib.)
 
-### Deleted
-- `src/components/ui/` — empty shadcn placeholder.
+## shadcn-vue tooling
+
+`components.json` wires the shadcn CLI to alias paths. Those aliases MUST be updated to the
+new locations or future `shadcn-vue add` commands write to the wrong place and added
+components fail to resolve `cn`. The CLI reads `aliases` from `components.json` (confirmed
+via the shadcn-vue skill); updating them is the supported relocation mechanism.
+
+| alias | before | after |
+|---|---|---|
+| `ui` | `@/components/ui` | `@/shared/ui` |
+| `components` | `@/components` | `@/shared/components` |
+| `composables` | `@/composables` | `@/shared/composables` |
+| `utils` | `@/lib/utils` | `@/shared/lib/utils` |
+| `lib` | `@/lib` | `@/shared/lib` |
+
+Internal references inside the vendored primitives also get rewritten by the same global
+import pass: `@/lib/utils` → `@/shared/lib/utils`, and the few `@/components/ui/*` sibling
+imports (e.g. in `alert-dialog/`) → `@/shared/ui/*`.
 
 ## Resolved judgment calls
 
@@ -118,7 +140,7 @@ utils, persist, markdown, media, appActive, viewTransition, rpc, rpcContract
      a deterministic old-path → new-path mapping built from the file map.
    - Relative imports between moved files must be re-pointed; simplest is to convert any
      now-broken relative import to its `@/`-aliased equivalent.
-4. Delete `src/components/ui/`.
+4. Update `components.json` aliases (see shadcn-vue table).
 5. Verify (see below).
 
 ## Verification
