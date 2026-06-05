@@ -150,7 +150,6 @@ function openPipeline(p: Pipeline) {
           @click="() => refetch()"
         >
           <RefreshCw :class="isFetching ? 'animate-spin' : ''" />
-          Refresh
         </Button>
       </div>
     </div>
