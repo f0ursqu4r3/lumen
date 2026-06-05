@@ -103,10 +103,14 @@ async function expandIssue() {
   }
   drawerDirty.value = false
   const iid = openIid.value
-  // Open (or focus) the issue's own native window, then leave the list clean:
-  // the drawer's unsaved edits don't carry into the fresh window, so clear
-  // ?issue= the same way closing the drawer does.
-  await rpc.openIssueWindow({ fullPath: props.fullPath, iid })
+  // Open (or focus) the issue's own native window. Only once it's open do we
+  // leave the list clean — clear ?issue= the same way closing the drawer does.
+  // If the host call fails, keep the drawer open so the user can retry.
+  try {
+    await rpc.openIssueWindow({ fullPath: props.fullPath, iid })
+  } catch {
+    return
+  }
   const { issue: _issue, ...rest } = route.query
   router.replace({ query: rest })
 }

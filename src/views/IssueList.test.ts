@@ -257,6 +257,18 @@ describe('IssueList', () => {
     expect(router.currentRoute.value.name).toBe('issues')
   })
 
+  it('keeps the drawer open if openIssueWindow rejects', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    openIssueWindow.mockRejectedValueOnce(new Error('ipc failure'))
+    w.findComponent(IssueDrawer).vm.$emit('expand')
+    await flushPromises()
+    expect(router.currentRoute.value.query.issue).toBe('7')
+  })
+
   it('removes ?issue from the URL when the drawer emits update:open false', async () => {
     mockQuery({ issues: ref([issue]) })
     await router.replace('/?issue=7')
