@@ -13,8 +13,8 @@
 ## Why tests are the gate (read first)
 
 - TypeScript typecheck is **expected to be red** independent of this work: `src/gitlab/generated` is gitignored and only produced by `bun codegen` against the live GitLab instance. Do **not** use `tsc`/typecheck as a pass/fail signal here.
-- The gate is **`bun test`** (Vitest). Vitest resolves the `@/` alias via `vitest.config.ts`, and nearly every module has a colocated `*.test.ts`. A green run proves the moved imports resolve.
-- Secondary gate (final task only): **`bun run build`** must complete without unresolved-import errors — this is what catches shadcn/runtime import breakage that tests might miss.
+- The gate is **`bunx vitest run`** (one-shot Vitest). NOTE: the package script `"test": "vitest"` runs in **watch mode** and never exits, and `bun test` runs Bun's *built-in* runner (no `vi`, no jsdom) which spuriously fails ~227 tests — do NOT use either. Always use `bunx vitest run`. Vitest resolves the `@/` alias via `vitest.config.ts`, and nearly every module has a colocated `*.test.ts`. Baseline before the reorg: **76 files, 467 tests, all passing.**
+- Secondary gate (final task only): **`bunx vite build`** must complete without unresolved-import errors — this catches shadcn/runtime import breakage tests might miss. Do NOT use `bun run build`: it runs `vue-tsc` first, which is expected-red because `src/gitlab/generated` requires `bun codegen` against the live instance.
 
 ## Conventions used in every move task
 
@@ -139,8 +139,8 @@ import { priorityOf, parseLabel } from './labels'  ->  import { priorityOf, pars
 
 - [ ] **Step 4: Run tests to confirm normalization is behavior-neutral**
 
-Run: `bun test`
-Expected: PASS (same count as before; relative→alias is a no-op at runtime).
+Run: `bunx vitest run`
+Expected: PASS (467 tests) (same count as before; relative→alias is a no-op at runtime).
 
 - [ ] **Step 5: Commit**
 
@@ -172,8 +172,8 @@ This rewrites every consumer (`@/components/ui/button` → `@/shared/ui/button`)
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -218,8 +218,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -262,8 +262,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -307,8 +307,8 @@ This also fixes the `cn` (`@/lib/utils`) imports inside the relocated shadcn pri
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -373,8 +373,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -424,8 +424,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -472,8 +472,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -523,8 +523,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Commit**
 
@@ -568,8 +568,8 @@ bun scripts/reorg-remap.mjs \
 
 - [ ] **Step 3: Run tests**
 
-Run: `bun test`
-Expected: PASS.
+Run: `bunx vitest run`
+Expected: PASS (467 tests).
 
 - [ ] **Step 4: Verify the old layer dirs are empty and remove them**
 
@@ -622,13 +622,13 @@ Expected: **no output**. Any hit is an import that still points at an old locati
 
 - [ ] **Step 3: Run the full test suite**
 
-Run: `bun test`
-Expected: PASS, with the same number of test files/cases as before the reorg.
+Run: `bunx vitest run`
+Expected: PASS (467 tests), with the same number of test files/cases as before the reorg.
 
 - [ ] **Step 4: Run the production build**
 
-Run: `bun run build`
-Expected: completes with no unresolved-import / module-not-found errors. (This is the gate that catches runtime/shadcn import breakage beyond what tests cover.)
+Run: `bunx vite build`
+Expected: completes with no unresolved-import / module-not-found errors. (This is the gate that catches runtime/shadcn import breakage beyond what tests cover. Use `vite build` directly, NOT `bun run build`, which additionally runs `vue-tsc` — expected-red until `bun codegen`.)
 
 - [ ] **Step 5: Manual smoke test**
 
