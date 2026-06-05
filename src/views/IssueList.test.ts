@@ -51,6 +51,11 @@ vi.mock('@/composables/useProjectMembers', () => ({
   useProjectMembers: () => ({ data: ref([]) }),
 }))
 
+const openIssueWindow = vi.fn().mockResolvedValue({ ok: true })
+vi.mock('@/lib/rpc', () => ({
+  rpc: { openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a) },
+}))
+
 import IssueList from './IssueList.vue'
 
 const mountList = () =>
@@ -90,6 +95,7 @@ beforeEach(() => {
   createMutate.mockReset()
   confirmMock.mockReset()
   pipelinesRef.value = []
+  openIssueWindow.mockClear()
 })
 
 afterEach(async () => {
@@ -238,7 +244,7 @@ describe('IssueList', () => {
     expect(drawer.props('iid')).toBe('7')
   })
 
-  it('expands to the full issue route when the drawer emits expand', async () => {
+  it('opens a native issue window and closes the drawer when expand is emitted', async () => {
     mockQuery({ issues: ref([issue]) })
     await router.replace('/?issue=7')
     await router.isReady()
@@ -246,9 +252,21 @@ describe('IssueList', () => {
     await flushPromises()
     w.findComponent(IssueDrawer).vm.$emit('expand')
     await flushPromises()
-    expect(router.currentRoute.value.name).toBe('issue')
-    expect(router.currentRoute.value.params.fullPath).toBe('grp/proj')
-    expect(router.currentRoute.value.params.iid).toBe('7')
+    expect(openIssueWindow).toHaveBeenCalledWith({ fullPath: 'grp/proj', iid: '7' })
+    expect(router.currentRoute.value.query.issue).toBeUndefined()
+    expect(router.currentRoute.value.name).toBe('issues')
+  })
+
+  it('keeps the drawer open if openIssueWindow rejects', async () => {
+    mockQuery({ issues: ref([issue]) })
+    await router.replace('/?issue=7')
+    await router.isReady()
+    const w = mountList()
+    await flushPromises()
+    openIssueWindow.mockRejectedValueOnce(new Error('ipc failure'))
+    w.findComponent(IssueDrawer).vm.$emit('expand')
+    await flushPromises()
+    expect(router.currentRoute.value.query.issue).toBe('7')
   })
 
   it('removes ?issue from the URL when the drawer emits update:open false', async () => {
@@ -317,23 +335,24 @@ describe('IssueList — drawer dirty-guard', () => {
     expect(router.currentRoute.value.query.issue).toBeUndefined()
   })
 
-  it('guards expand when dirty — blocks navigation when discard is cancelled', async () => {
+  it('guards expand when dirty — does not open a window when discard is cancelled', async () => {
     const w = await mountDirtyGuard('/?issue=9')
     await w.get('[data-testid="stub-dirty"]').trigger('click')
     confirmMock.mockResolvedValue(false)
     await w.get('[data-testid="stub-expand"]').trigger('click')
     await flushPromises()
-    expect(router.currentRoute.value.name).not.toBe('issue')
+    expect(openIssueWindow).not.toHaveBeenCalled()
+    expect(router.currentRoute.value.query.issue).toBe('9')
     expect(confirmMock).toHaveBeenCalledOnce()
   })
 
-  it('guards expand when dirty — navigates when discard is confirmed', async () => {
+  it('guards expand when dirty — opens the window and closes the drawer when confirmed', async () => {
     const w = await mountDirtyGuard('/?issue=9')
     await w.get('[data-testid="stub-dirty"]').trigger('click')
     confirmMock.mockResolvedValue(true)
     await w.get('[data-testid="stub-expand"]').trigger('click')
     await flushPromises()
-    expect(router.currentRoute.value.name).toBe('issue')
-    expect(router.currentRoute.value.params.iid).toBe('9')
+    expect(openIssueWindow).toHaveBeenCalledWith({ fullPath: 'grp/proj', iid: '9' })
+    expect(router.currentRoute.value.query.issue).toBeUndefined()
   })
 })

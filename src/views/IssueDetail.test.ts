@@ -181,6 +181,12 @@ describe('IssueDetail (buffered)', () => {
     expect(w.find('[data-testid="back-to-issues"]').exists()).toBe(false)
   })
 
+  it('omits the back link in windowed mode', async () => {
+    const w = mountDetail({ windowed: true })
+    await flushPromises()
+    expect(w.find('[data-testid="back-to-issues"]').exists()).toBe(false)
+  })
+
   it('reveals the title input when its Edit toggle is clicked', async () => {
     const w = mountDetail()
     await flushPromises()

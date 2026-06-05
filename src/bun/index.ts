@@ -3,53 +3,86 @@ import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
 import type { LumenRPC } from '@/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
+import { issueWindowUrl } from './issueWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
 
-// LumenRPC describes the RPC *config* shape; it is not the bun/webview *schema*
-// shape that BrowserView.defineRPC<Schema extends ElectrobunRPCSchema> expects,
-// so the generic is loosened to <any> per the port plan. We still assert the
-// authored config against LumenRPC via `satisfies` for editor/type safety,
-// keeping the handler names and bodies exactly as the plan specifies.
-const rpc = BrowserView.defineRPC<any>({
-  maxRequestTime: 30000,
-  handlers: {
-    requests: {
-      gitlabGraphql,
-      gitlabRest,
-      gitlabAsset,
-      getConfig: async () => {
-        const { gitlabUrl } = loadConfig()
-        return { url: gitlabUrl, configured: Boolean(gitlabUrl) }
-      },
-      saveConfig: async ({ url, token }) => {
-        saveConfig({ url, token })
-        return { ok: true }
-      },
-      clearConfig: async () => {
-        clearConfig()
-        return { ok: true }
-      },
-      openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
-      clipboardWriteText: async ({ text }) => {
-        Utils.clipboardWriteText(text)
-        return { ok: true }
-      },
-      showNotification: async ({ title, body, subtitle, silent }) => {
-        Utils.showNotification({ title, body, subtitle, silent })
-        return { ok: true }
-      },
-    },
-    messages: {},
-  },
-} satisfies LumenRPC)
-
-// app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
+// Resolve the base app URL once; every native window (main + per-issue) loads
+// off it. app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
 const url = await resolveStartUrl({ hmr: process.env.LUMEN_HMR === '1' })
+
+// One native window per issue, keyed by `${fullPath}#${iid}`, so re-expanding an
+// already-open issue focuses it instead of spawning a duplicate.
+const issueWindows = new Map<string, BrowserWindow>()
+
+function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): {
+  ok: boolean
+} {
+  const key = `${fullPath}#${iid}`
+  const existing = issueWindows.get(key)
+  if (existing) {
+    existing.activate()
+    return { ok: true }
+  }
+  const repo = fullPath.split('/').at(-1) ?? fullPath
+  // Cascade each new window so stacked issue windows don't perfectly overlap.
+  const offset = issueWindows.size * 24
+  const issueWin = new BrowserWindow({
+    title: `#${iid} · ${repo}`,
+    url: issueWindowUrl(url, fullPath, iid),
+    frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
+    rpc: buildRpc(),
+  })
+  // Per-window close event (scoped by window id) keeps the registry accurate.
+  // Register before inserting so a synchronous close can't strand a stale entry.
+  issueWin.on('close', () => issueWindows.delete(key))
+  issueWindows.set(key, issueWin)
+  return { ok: true }
+}
+
+// Each native window needs its own RPC bridge; build a fresh config per window.
+// The handler bodies are identical to the original single-window definition,
+// plus openIssueWindow.
+function buildRpc() {
+  return BrowserView.defineRPC<any>({
+    maxRequestTime: 30000,
+    handlers: {
+      requests: {
+        gitlabGraphql,
+        gitlabRest,
+        gitlabAsset,
+        getConfig: async () => {
+          const { gitlabUrl } = loadConfig()
+          return { url: gitlabUrl, configured: Boolean(gitlabUrl) }
+        },
+        saveConfig: async ({ url, token }) => {
+          saveConfig({ url, token })
+          return { ok: true }
+        },
+        clearConfig: async () => {
+          clearConfig()
+          return { ok: true }
+        },
+        openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
+        clipboardWriteText: async ({ text }) => {
+          Utils.clipboardWriteText(text)
+          return { ok: true }
+        },
+        showNotification: async ({ title, body, subtitle, silent }) => {
+          Utils.showNotification({ title, body, subtitle, silent })
+          return { ok: true }
+        },
+        openIssueWindow: async ({ fullPath, iid }) => openIssueWindow({ fullPath, iid }),
+      },
+      messages: {},
+    },
+  } satisfies LumenRPC)
+}
+
 const win = new BrowserWindow({
   title: 'Lumen',
   url,
   frame: { width: 1280, height: 860, x: 80, y: 80 },
-  rpc,
+  rpc: buildRpc(),
 })
 
 // Without an application menu, macOS has no Edit menu, so ⌘C/⌘V/⌘X/⌘A have

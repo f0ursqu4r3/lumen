@@ -48,6 +48,7 @@ import IssueDrawer from '@/components/IssueDrawer.vue'
 import LabelChip from '@/components/LabelChip.vue'
 import Odometer from '@/components/Odometer.vue'
 import { withViewTransition } from '@/lib/viewTransition'
+import { rpc } from '@/lib/rpc'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -102,10 +103,16 @@ async function expandIssue() {
   }
   drawerDirty.value = false
   const iid = openIid.value
-  withViewTransition(async () => {
-    await router.push({ name: 'issue', params: { fullPath: props.fullPath, iid } })
-    await nextTick()
-  })
+  // Open (or focus) the issue's own native window. Only once it's open do we
+  // leave the list clean — clear ?issue= the same way closing the drawer does.
+  // If the host call fails, keep the drawer open so the user can retry.
+  try {
+    await rpc.openIssueWindow({ fullPath: props.fullPath, iid })
+  } catch {
+    return
+  }
+  const { issue: _issue, ...rest } = route.query
+  router.replace({ query: rest })
 }
 
 const {

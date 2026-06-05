@@ -33,6 +33,7 @@ const props = defineProps<{
   fullPath: string
   iid: string
   embedded?: boolean
+  windowed?: boolean
 }>()
 const emit = defineEmits<{ 'update:dirty': [value: boolean] }>()
 
@@ -324,7 +325,7 @@ if (!props.embedded) {
            the tick's lead position. Embedded in the drawer it stays inert text:
            the list is already behind it, and the dirty guard lives on the host. -->
       <RouterLink
-        v-if="!embedded"
+        v-if="!embedded && !windowed"
         :to="{ name: 'issues', params: { fullPath } }"
         data-testid="back-to-issues"
         class="group/back -mx-1 inline-flex max-w-full items-center gap-1.5 rounded-sm px-1 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase outline-none transition-colors hover:text-foreground focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"

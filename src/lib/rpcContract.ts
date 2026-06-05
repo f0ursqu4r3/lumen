@@ -56,6 +56,9 @@ export interface LumenRequests {
   // The Notification web API isn't available under the views:// origin, so this
   // round-trips to the host's Utils.showNotification.
   showNotification: (a: NotifyArgs) => Promise<{ ok: true }>
+  // Open a focused, single-issue native window (or focus the existing one for
+  // this issue). The window loads the SPA at the issue route with ?window=1.
+  openIssueWindow: (a: { fullPath: string; iid: string }) => Promise<{ ok: boolean }>
 }
 
 export type LumenRPC = {
