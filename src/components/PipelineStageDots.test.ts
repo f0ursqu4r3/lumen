@@ -3,9 +3,9 @@ import { mount } from '@vue/test-utils'
 import PipelineStageDots from './PipelineStageDots.vue'
 
 const stages = [
-  { id: '1', name: 'build', status: 'success' },
-  { id: '2', name: 'test', status: 'running' },
-  { id: '3', name: 'deploy', status: 'created' },
+  { id: '1', name: 'build', status: 'success', jobs: [] },
+  { id: '2', name: 'test', status: 'running', jobs: [] },
+  { id: '3', name: 'deploy', status: 'created', jobs: [] },
 ]
 
 describe('PipelineStageDots', () => {

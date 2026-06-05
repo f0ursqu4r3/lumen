@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electrobun build",
     "app:dev": "vite build && electrobun dev",
-    "app:hmr": "vite & LUMEN_HMR=1 electrobun dev",
+    "app:hmr": "vite & VITE_PID=$!; trap 'kill $VITE_PID 2>/dev/null' EXIT INT TERM; until nc -z localhost ${LUMEN_DEV_PORT:-5273}; do sleep 0.2; done; LUMEN_HMR=1 electrobun dev",
     "preview": "vite preview",
     "codegen": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts",
     "typecheck": "vue-tsc --noEmit",

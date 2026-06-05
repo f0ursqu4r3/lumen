@@ -35,6 +35,13 @@ const PIPELINES_QUERY = `
               id
               name
               status
+              jobs {
+                nodes {
+                  id
+                  name
+                  status
+                }
+              }
             }
           }
         }
@@ -49,11 +56,21 @@ export interface PipelineUser {
   avatarUrl: string | null
 }
 
+/** A single CI job within a stage (e.g. "docker-build"). */
+export interface PipelineJob {
+  id: string
+  name: string
+  /** GitLab returns a lowercase string here (e.g. "running", "success"). */
+  status: string
+}
+
 export interface PipelineStage {
   id: string
   name: string
   /** GitLab returns a lowercase string here (e.g. "running", "success"). */
   status: string
+  /** The jobs that ran in this stage, in the order GitLab reports them. */
+  jobs: PipelineJob[]
 }
 
 export interface Pipeline {
@@ -75,9 +92,13 @@ export interface Pipeline {
   stages: PipelineStage[]
 }
 
-// Raw shape from GraphQL: stages arrive wrapped in a connection that we flatten.
+// Raw shape from GraphQL: stages (and their jobs) arrive wrapped in connections
+// that we flatten into plain arrays.
+type RawStage = Omit<PipelineStage, 'jobs'> & {
+  jobs: { nodes: (PipelineJob | null)[] } | null
+}
 type RawPipeline = Omit<Pipeline, 'stages'> & {
-  stages: { nodes: (PipelineStage | null)[] } | null
+  stages: { nodes: (RawStage | null)[] } | null
 }
 
 interface PipelinesResult {
@@ -95,7 +116,12 @@ async function fetchPipelines(fullPath: string): Promise<Pipeline[]> {
       .filter((n): n is RawPipeline => !!n)
       .map((n) => ({
         ...n,
-        stages: (n.stages?.nodes ?? []).filter((s): s is PipelineStage => !!s),
+        stages: (n.stages?.nodes ?? [])
+          .filter((s): s is RawStage => !!s)
+          .map((s) => ({
+            ...s,
+            jobs: (s.jobs?.nodes ?? []).filter((j): j is PipelineJob => !!j),
+          })),
       }))
   } catch (e) {
     throw normalizeError(e)

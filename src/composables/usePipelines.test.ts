@@ -32,14 +32,26 @@ const node = (over: Record<string, unknown>) => ({
 })
 
 describe('usePipelines', () => {
-  it('flattens the stage connection into a plain array', async () => {
+  it('flattens the stage and job connections into plain arrays', async () => {
     request.mockResolvedValue({
       project: {
         pipelines: {
           nodes: [
             node({
               id: 'gid://p1',
-              stages: { nodes: [{ id: 's1', name: 'build', status: 'success' }, null] },
+              stages: {
+                nodes: [
+                  {
+                    id: 's1',
+                    name: 'build',
+                    status: 'success',
+                    jobs: {
+                      nodes: [{ id: 'j1', name: 'compile', status: 'success' }, null],
+                    },
+                  },
+                  null,
+                ],
+              },
             }),
           ],
         },
@@ -48,8 +60,31 @@ describe('usePipelines', () => {
     const { result } = withQuery(() => usePipelines(ref('g/p')))
     await flushPromises()
     expect(result().pipelines.value[0].stages).toEqual([
-      { id: 's1', name: 'build', status: 'success' },
+      {
+        id: 's1',
+        name: 'build',
+        status: 'success',
+        jobs: [{ id: 'j1', name: 'compile', status: 'success' }],
+      },
     ])
+  })
+
+  it('defaults jobs to an empty array when the stage omits them', async () => {
+    request.mockResolvedValue({
+      project: {
+        pipelines: {
+          nodes: [
+            node({
+              id: 'gid://p2',
+              stages: { nodes: [{ id: 's1', name: 'build', status: 'success' }] },
+            }),
+          ],
+        },
+      },
+    })
+    const { result } = withQuery(() => usePipelines(ref('g/p')))
+    await flushPromises()
+    expect(result().pipelines.value[0].stages[0].jobs).toEqual([])
   })
 
   it('sorts running pipelines ahead of finished ones', async () => {
