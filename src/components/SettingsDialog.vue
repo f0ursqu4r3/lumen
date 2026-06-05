@@ -70,16 +70,10 @@ async function swapToken() {
   }
 }
 
-const clearing = ref(false)
-async function clearCache() {
-  clearing.value = true
-  try {
-    queryClient.clear()
-    clearPersistedCache()
-    pushToast({ title: 'Cache cleared', tone: 'success' })
-  } finally {
-    clearing.value = false
-  }
+function clearCache() {
+  queryClient.clear()
+  clearPersistedCache()
+  pushToast({ title: 'Cache cleared', tone: 'success' })
 }
 
 async function disconnect() {
@@ -193,7 +187,6 @@ async function disconnect() {
           <Button
             data-testid="settings-clear-cache"
             variant="outline"
-            :disabled="clearing"
             @click="clearCache"
           >
             <Trash2 class="size-4" />

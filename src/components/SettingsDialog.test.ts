@@ -67,6 +67,25 @@ describe('SettingsDialog', () => {
     w.unmount()
   })
 
+  it('swaps token: saves, toasts success, and clears the input', async () => {
+    saveConfig.mockResolvedValue({ ok: true })
+    const w = mount(SettingsDialog, { attachTo: document.body })
+    settingsState.open = true
+    await flushPromises()
+    const input = document.querySelector<HTMLInputElement>('#settings-token')!
+    input.value = 'glpat-new'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await flushPromises()
+    document.querySelector<HTMLElement>('[data-testid="settings-swap-token"]')!.click()
+    await flushPromises()
+    expect(saveConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://gitlab.example.com', token: 'glpat-new' }),
+    )
+    expect(pushToast).toHaveBeenCalledWith(expect.objectContaining({ tone: 'success' }))
+    expect(input.value).toBe('')
+    w.unmount()
+  })
+
   it('disconnects: clears config + cache and routes to connect', async () => {
     const w = mount(SettingsDialog, { attachTo: document.body })
     settingsState.open = true
