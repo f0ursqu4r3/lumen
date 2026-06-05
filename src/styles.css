@@ -93,6 +93,36 @@
 @theme inline {
   --font-sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ---- Type scale ---------------------------------------------------------
+     Fixed rem — a dense instrument UI wants spatial predictability, never fluid
+     `clamp()` type. Two zones with a deliberate gap between them: a fine-grained
+     UI/label tier (micro → lg) tuned for scannable rows, and a DISPLAY tier
+     (title, hero) that jumps with strong contrast for the single h1 + hero
+     numeral each view carries. Every size lives here once, in rem; components
+     reference these tokens, never an arbitrary `text-[…]`. Metrics (line-height,
+     tracking) ride along with the small-label and display tiers since those have
+     fixed roles; the workhorse xs/sm/base/lg keep Tailwind's default leading so
+     existing `leading-*` overrides stay authoritative. */
+  --text-micro: 0.625rem; /* 10px — eyebrow kickers, in-circle glyphs, micro-meta */
+  --text-micro--line-height: 1.2;
+  --text-2xs: 0.6875rem; /* 11px — field labels, chips, pills, mono ids */
+  --text-2xs--line-height: 1.35;
+  --text-2xs--letter-spacing: 0.01em;
+  /* xs/sm/base/lg = Tailwind defaults, pinned here so the scale reads in one place. */
+  --text-xs: 0.75rem; /* 12px — secondary meta */
+  --text-sm: 0.875rem; /* 14px — dense row body, the workhorse */
+  --text-base: 1rem; /* 16px — comfortable detail prose */
+  --text-lg: 1.125rem; /* 18px — section subheads */
+  /* Display tier — tight leading + slight negative tracking so large slate type
+     reads as one solid mass rather than loose letters. */
+  --text-title: 1.875rem; /* 30px — the page h1 (one per view) */
+  --text-title--line-height: 1.05;
+  --text-title--letter-spacing: -0.02em;
+  --text-hero: 2.75rem; /* 44px — the animated hero count */
+  --text-hero--line-height: 0.85;
+  --text-hero--letter-spacing: -0.03em;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

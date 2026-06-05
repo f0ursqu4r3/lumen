@@ -105,7 +105,7 @@ function openPipeline(p: Pipeline) {
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="eyebrow-tick font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           Pipelines
         </p>
@@ -118,7 +118,7 @@ function openPipeline(p: Pipeline) {
             class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
           />
           <h1
-            class="min-w-0 truncate text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+            class="min-w-0 truncate text-title leading-none font-semibold text-foreground"
           >
             {{ repoName }}
           </h1>
@@ -172,7 +172,7 @@ function openPipeline(p: Pipeline) {
         aria-hidden="true"
       />
       <p
-        class="mt-3 font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+        class="mt-3 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
       >
         Standby
       </p>

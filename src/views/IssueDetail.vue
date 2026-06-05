@@ -327,7 +327,7 @@ if (!props.embedded) {
         v-if="!embedded"
         :to="{ name: 'issues', params: { fullPath } }"
         data-testid="back-to-issues"
-        class="group/back -mx-1 inline-flex max-w-full items-center gap-1.5 rounded-sm px-1 font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase outline-none transition-colors hover:text-foreground focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+        class="group/back -mx-1 inline-flex max-w-full items-center gap-1.5 rounded-sm px-1 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase outline-none transition-colors hover:text-foreground focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
       >
         <ArrowLeft
           class="size-3 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
@@ -336,7 +336,7 @@ if (!props.embedded) {
       </RouterLink>
       <p
         v-else
-        class="eyebrow-tick max-w-full font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+        class="eyebrow-tick max-w-full font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
       >
         <span class="min-w-0 truncate">{{ repoName }}</span>
       </p>
@@ -393,7 +393,7 @@ if (!props.embedded) {
           <span class="field-label">Title</span>
         </template>
         <template #view>
-          <h1 class="text-balance text-[2rem] leading-[1.08] font-semibold tracking-tight">
+          <h1 class="text-balance text-title leading-[1.08] font-semibold">
             {{ draft.title }}
           </h1>
         </template>
@@ -402,7 +402,7 @@ if (!props.embedded) {
             v-model="draft.title"
             data-testid="edit-title"
             aria-label="Issue title"
-            class="h-auto py-1.5 text-[2rem] font-semibold tracking-tight"
+            class="h-auto py-1.5 text-title font-semibold"
           />
         </template>
       </EditableField>
@@ -519,7 +519,7 @@ if (!props.embedded) {
               class="flex gap-3"
               :class="[i > 0 && 'mt-4 pl-10', fresh.has(n.id) && 'animate-note-in']"
             >
-              <Avatar class="mt-0.5 size-7 shrink-0 text-[11px] ring-1 ring-border/70">
+              <Avatar class="mt-0.5 size-7 shrink-0 text-2xs ring-1 ring-border/70">
                 <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
               </Avatar>
               <div class="min-w-0 flex-1">

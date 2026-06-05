@@ -106,7 +106,7 @@ function commit() {
       v-if="open"
       class="absolute z-50 mt-1 w-64 space-y-1 rounded-lg border border-border bg-popover p-1.5 shadow-md"
     >
-      <p class="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <p class="px-2 py-1 text-micro font-medium uppercase tracking-wide text-muted-foreground">
         Saved views
       </p>
 

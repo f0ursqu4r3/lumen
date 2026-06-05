@@ -54,7 +54,7 @@ const pickAuthor = (v: string) => emit('update:author', props.author === v ? '' 
       <span
         v-if="activeCount"
         data-testid="filter-count"
-        class="ml-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground tabular-nums"
+        class="ml-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-micro font-semibold text-primary-foreground tabular-nums"
       >
         {{ activeCount }}
       </span>
@@ -65,7 +65,7 @@ const pickAuthor = (v: string) => emit('update:author', props.author === v ? '' 
       class="absolute z-50 mt-1 w-72 space-y-3 rounded-lg border border-border bg-popover p-3 shadow-md"
     >
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p class="px-1 text-micro font-medium uppercase tracking-wide text-muted-foreground">
           Labels
         </p>
         <LabelGroupMenu
@@ -77,7 +77,7 @@ const pickAuthor = (v: string) => emit('update:author', props.author === v ? '' 
       </section>
 
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p class="px-1 text-micro font-medium uppercase tracking-wide text-muted-foreground">
           Assignee
         </p>
         <button
@@ -108,7 +108,7 @@ const pickAuthor = (v: string) => emit('update:author', props.author === v ? '' 
       </section>
 
       <section class="space-y-1">
-        <p class="px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p class="px-1 text-micro font-medium uppercase tracking-wide text-muted-foreground">
           Author
         </p>
         <div class="max-h-32 overflow-y-auto">

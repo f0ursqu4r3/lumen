@@ -52,7 +52,7 @@ const activeStep = computed(() => {
         class="absolute top-4 left-[calc(50%+1.25rem)] right-[calc(-50%+1.25rem)] h-0.5 rounded-full"
       />
       <StepperTitle
-        class="mt-2 max-w-20 truncate text-[0.6875rem] font-medium text-muted-foreground"
+        class="mt-2 max-w-20 truncate text-2xs font-medium text-muted-foreground"
       >
         {{ stage.name }}
       </StepperTitle>

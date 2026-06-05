@@ -139,7 +139,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       v-if="status"
       type="button"
       :title="`Filter: ${status.value}`"
-      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
+      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-2xs font-medium ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
       :style="{
         backgroundColor: tint(status.color, 0.18),
         color: status.color,
@@ -174,14 +174,14 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         @click="filterAssignee(a.username)"
       >
         <Avatar class="size-6 ring-2 ring-card">
-          <AvatarFallback class="bg-muted text-[10px] font-medium text-muted-foreground">
+          <AvatarFallback class="bg-muted text-micro font-medium text-muted-foreground">
             {{ initials(a.name) }}
           </AvatarFallback>
         </Avatar>
       </button>
       <span
         v-if="extraAssignees"
-        class="grid size-6 place-items-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-2 ring-card"
+        class="grid size-6 place-items-center rounded-full bg-muted text-micro font-medium text-muted-foreground ring-2 ring-card"
       >
         +{{ extraAssignees }}
       </span>

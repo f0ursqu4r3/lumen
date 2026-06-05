@@ -389,7 +389,7 @@ onKeyStroke(['c', 'C'], (e) => {
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="eyebrow-tick font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           Issues
         </p>
@@ -408,7 +408,7 @@ onKeyStroke(['c', 'C'], (e) => {
             class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
           />
           <h1
-            class="vt-project-title min-w-0 truncate text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+            class="vt-project-title min-w-0 truncate text-title leading-none font-semibold text-foreground"
           >
             {{ repoName }}
           </h1>
@@ -434,12 +434,12 @@ onKeyStroke(['c', 'C'], (e) => {
         >
           <span
             :key="count"
-            class="animate-count inline-block font-mono text-[2.75rem] leading-[0.85] font-semibold tabular-nums tracking-[-0.03em] text-foreground"
+            class="animate-count inline-block font-mono text-hero font-semibold tabular-nums text-foreground"
           >
             {{ count }}<span class="text-primary" v-if="hasMore">+</span>
           </span>
           <span
-            class="mt-2 font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+            class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
           >
             {{ count === 1 ? 'issue' : 'issues' }}
           </span>
@@ -632,7 +632,7 @@ onKeyStroke(['c', 'C'], (e) => {
 
     <!-- Active filter tokens -->
     <div v-if="activeCount" class="flex flex-wrap items-center gap-2">
-      <span class="text-[11px] tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
+      <span class="text-2xs tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
       <LabelChip
         v-for="l in labelChips"
         :key="l.title"
@@ -643,7 +643,7 @@ onKeyStroke(['c', 'C'], (e) => {
       />
       <span
         v-if="assignee"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
         <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
         <button
@@ -657,7 +657,7 @@ onKeyStroke(['c', 'C'], (e) => {
       </span>
       <span
         v-if="author"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-[11px] font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
         <span class="font-mono">author:@{{ author }}</span>
         <button
@@ -671,7 +671,7 @@ onKeyStroke(['c', 'C'], (e) => {
       </span>
       <button
         type="button"
-        class="text-[11px] font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
+        class="text-2xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
         @click="clearFilters"
       >
         Clear all
@@ -766,7 +766,7 @@ onKeyStroke(['c', 'C'], (e) => {
                   {{ g.label }}
                 </h2>
                 <span
-                  class="ml-auto rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums text-muted-foreground/80"
+                  class="ml-auto rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-2xs font-medium tabular-nums text-muted-foreground/80"
                 >
                   {{ g.issues.length }}
                 </span>
@@ -809,7 +809,7 @@ onKeyStroke(['c', 'C'], (e) => {
                     <span class="block truncate text-xs font-medium text-primary/90">
                       {{ dragging?.title }}
                     </span>
-                    <span class="mt-0.5 block text-[11px] text-primary/55">Move here</span>
+                    <span class="mt-0.5 block text-2xs text-primary/55">Move here</span>
                   </span>
                 </div>
                 <!-- Empty lane: a quiet placeholder gives the column presence and a
@@ -819,7 +819,7 @@ onKeyStroke(['c', 'C'], (e) => {
                   v-if="!g.issues.length && !isDropTarget(g)"
                   class="grid flex-1 place-items-center px-2 py-6 text-center"
                 >
-                  <span class="font-mono text-[11px] tracking-wide text-muted-foreground/35">
+                  <span class="font-mono text-2xs tracking-wide text-muted-foreground/35">
                     drop here
                   </span>
                 </div>

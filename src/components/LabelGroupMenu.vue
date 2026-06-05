@@ -35,7 +35,7 @@ const countSelected = (g: ScopeGroup) => g.options.filter((o) => isSelected(o.ti
         @click="toggleScope(g.key)"
       >
         <span class="flex-1 truncate text-foreground">{{ g.label }}</span>
-        <span v-if="countSelected(g)" class="font-mono text-[10px] text-primary tabular-nums">
+        <span v-if="countSelected(g)" class="font-mono text-micro text-primary tabular-nums">
           {{ countSelected(g) }}
         </span>
         <ChevronRight class="size-3.5 text-muted-foreground" />

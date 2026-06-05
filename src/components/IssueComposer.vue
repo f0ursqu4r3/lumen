@@ -143,11 +143,11 @@ function onKeydown(e: KeyboardEvent) {
         <div class="mt-auto flex items-center justify-between gap-2 border-t pt-4">
           <span class="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
             <kbd
-              class="rounded border border-border bg-muted/50 px-1 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
+              class="rounded border border-border bg-muted/50 px-1 py-0.5 font-mono text-micro leading-none text-muted-foreground"
               >⌘</kbd
             >
             <kbd
-              class="rounded border border-border bg-muted/50 px-1 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
+              class="rounded border border-border bg-muted/50 px-1 py-0.5 font-mono text-micro leading-none text-muted-foreground"
               >↵</kbd
             >
             to create

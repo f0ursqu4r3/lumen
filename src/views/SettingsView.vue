@@ -70,12 +70,12 @@ async function save() {
           <PlugZap class="size-[22px] text-primary" :stroke-width="2" />
         </div>
         <p
-          class="eyebrow-tick mt-5 font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+          class="eyebrow-tick mt-5 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           First run
         </p>
         <h1
-          class="mt-2 text-[1.625rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+          class="mt-2 text-title leading-none font-semibold text-foreground"
         >
           Connect to GitLab
         </h1>
@@ -90,7 +90,7 @@ async function save() {
           <div class="space-y-2">
             <Label
               for="gitlab-url"
-              class="font-mono text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase"
+              class="font-mono text-2xs font-medium tracking-[0.06em] text-muted-foreground uppercase"
             >
               <Server class="size-3.5 text-muted-foreground/70" />
               Instance URL
@@ -104,7 +104,7 @@ async function save() {
               spellcheck="false"
               placeholder="https://gitlab.example.com"
               :disabled="testing"
-              class="h-10 font-mono text-[0.9375rem]"
+              class="h-10 font-mono text-base"
               @keydown.enter.prevent="save"
             />
           </div>
@@ -112,7 +112,7 @@ async function save() {
           <div class="space-y-2">
             <Label
               for="gitlab-token"
-              class="font-mono text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase"
+              class="font-mono text-2xs font-medium tracking-[0.06em] text-muted-foreground uppercase"
             >
               <KeyRound class="size-3.5 text-muted-foreground/70" />
               Personal access token
@@ -125,13 +125,13 @@ async function save() {
               spellcheck="false"
               placeholder="glpat-…"
               :disabled="testing"
-              class="h-10 font-mono text-[0.9375rem]"
+              class="h-10 font-mono text-base"
               @keydown.enter.prevent="save"
             />
             <p class="text-xs leading-relaxed text-muted-foreground/70">
               Needs the
               <code
-                class="rounded bg-muted/60 px-1 py-0.5 font-mono text-[0.6875rem] text-foreground/90"
+                class="rounded bg-muted/60 px-1 py-0.5 font-mono text-2xs text-foreground/90"
                 >api</code
               >
               scope. Create one under
@@ -147,7 +147,7 @@ async function save() {
             role="alert"
           >
             <TriangleAlert class="mt-px size-4 shrink-0 text-destructive" :stroke-width="2" />
-            <p class="text-[0.8125rem] leading-relaxed text-foreground/90">{{ message }}</p>
+            <p class="text-sm leading-relaxed text-foreground/90">{{ message }}</p>
           </div>
 
           <Button type="submit" size="lg" class="mt-0.5 w-full" :disabled="!canSubmit">
@@ -159,7 +159,7 @@ async function save() {
         </form>
       </Card>
 
-      <p class="mt-5 text-center font-mono text-[11px] tracking-[0.04em] text-muted-foreground/50">
+      <p class="mt-5 text-center font-mono text-2xs tracking-[0.04em] text-muted-foreground/50">
         lumen ▸ awaiting connection
       </p>
     </div>

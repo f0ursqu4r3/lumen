@@ -57,7 +57,7 @@ const filteredSections = computed(() => {
       <template v-for="section in filteredSections" :key="section.rel">
         <p
           role="presentation"
-          class="px-2 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+          class="px-2 pt-2 pb-1 text-micro font-medium uppercase tracking-wide text-muted-foreground"
         >
           {{ section.label }}
         </p>
@@ -70,7 +70,7 @@ const filteredSections = computed(() => {
           class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
           @click="emit('select', p.username)"
         >
-          <Avatar class="size-5 text-[10px]">
+          <Avatar class="size-5 text-micro">
             <AvatarFallback>{{ personInitial(p) }}</AvatarFallback>
           </Avatar>
           <span class="min-w-0 flex-1 truncate text-foreground">

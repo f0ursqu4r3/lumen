@@ -261,12 +261,12 @@ useIntersectionObserver(sentinel, ([entry]) => {
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="eyebrow-tick font-mono text-[10px] font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
+          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           Workspace
         </p>
         <h1
-          class="mt-2 text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+          class="mt-2 text-title leading-none font-semibold text-foreground"
         >
           Projects
         </h1>
@@ -274,12 +274,12 @@ useIntersectionObserver(sentinel, ([entry]) => {
       <div v-if="!isLoading && !error" class="hidden shrink-0 flex-col items-end sm:flex">
         <span
           :key="count"
-          class="animate-count inline-block font-mono text-[2.75rem] leading-[0.85] font-semibold tabular-nums tracking-[-0.03em] text-foreground"
+          class="animate-count inline-block font-mono text-hero font-semibold tabular-nums text-foreground"
         >
           {{ count }}<span v-if="hasMore" class="text-primary">+</span>
         </span>
         <span
-          class="mt-2 font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+          class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
         >
           {{ count === 1 ? 'project' : 'projects' }}
         </span>
@@ -348,11 +348,11 @@ useIntersectionObserver(sentinel, ([entry]) => {
                 fill="currentColor"
               />
               <span
-                class="font-mono text-[10px] font-semibold tracking-[0.22em] text-muted-foreground/70 uppercase"
+                class="font-mono text-micro font-semibold tracking-[0.22em] text-muted-foreground/70 uppercase"
               >
                 {{ SECTION_LABELS[row.section] }}
               </span>
-              <span class="font-mono text-[10px] tabular-nums text-muted-foreground/40">
+              <span class="font-mono text-micro tabular-nums text-muted-foreground/40">
                 {{ sectionCount(row.section) }}
               </span>
             </div>
@@ -383,7 +383,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
 
               <span class="flex min-w-0 flex-1 items-baseline gap-2">
                 <span
-                  class="shrink-0 text-[0.9375rem] font-medium tracking-tight transition-colors"
+                  class="shrink-0 text-base font-medium tracking-tight transition-colors"
                   :class="i === active ? 'text-foreground' : 'text-foreground/90'"
                   :style="nameStyle(row)"
                 >
@@ -402,7 +402,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
               <span class="flex shrink-0 items-center gap-1.5">
                 <span
                   v-if="row.assignedOpen"
-                  class="mr-0.5 font-mono text-[11px] tabular-nums text-muted-foreground/65"
+                  class="mr-0.5 font-mono text-2xs tabular-nums text-muted-foreground/65"
                 >
                   {{ row.assignedOpen }} open
                 </span>
@@ -434,7 +434,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
                 />
                 <kbd
                   v-if="i < 9"
-                  class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-[10px] tabular-nums transition-colors"
+                  class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-micro tabular-nums transition-colors"
                   :class="
                     i === active
                       ? 'border-border bg-muted/60 text-muted-foreground'
@@ -482,7 +482,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
       <!-- Keyboard legend — the launcher tells you how to fly it. -->
       <div
         v-if="count"
-        class="hidden items-center gap-x-4 gap-y-1.5 px-1 font-mono text-[11px] text-muted-foreground/55 select-none sm:flex sm:flex-wrap"
+        class="hidden items-center gap-x-4 gap-y-1.5 px-1 font-mono text-2xs text-muted-foreground/55 select-none sm:flex sm:flex-wrap"
       >
         <span class="inline-flex items-center gap-1.5"><kbd class="kbd">type</kbd> filter</span>
         <span class="inline-flex items-center gap-1.5"><kbd class="kbd">↑↓</kbd> move</span>
