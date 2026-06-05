@@ -33,4 +33,5 @@ export const rpc: LumenRequests = {
   openExternal: (a) => client().openExternal(a),
   clipboardWriteText: (a) => client().clipboardWriteText(a),
   showNotification: (a) => client().showNotification(a),
+  openIssueWindow: (a) => client().openIssueWindow(a),
 }
