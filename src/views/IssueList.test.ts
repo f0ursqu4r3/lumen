@@ -281,6 +281,27 @@ describe('IssueList', () => {
   })
 })
 
+describe('IssueList — select mode', () => {
+  it('toggling select mode renders checkboxes on rows', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(false)
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(true)
+  })
+
+  it('shows the bulk action bar once an issue is selected', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
+    await w.get('[data-testid="issue-row"]').trigger('click')
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+  })
+})
+
 describe('IssueList — drawer dirty-guard', () => {
   const DrawerStub = {
     name: 'IssueDrawer',

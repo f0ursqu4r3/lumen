@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, ref, toRef, watch } from 'vue'
+import { computed, nextTick, onUnmounted, provide, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle, onKeyStroke, useElementBounding } from '@vueuse/core'
 import {
   Plus,
@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Workflow,
   RefreshCw,
+  CheckSquare,
 } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { usePipelines } from '@/composables/usePipelines'
@@ -21,7 +22,11 @@ import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useIssueFilters } from '@/composables/useIssueFilters'
 import { useRetagIssue, useReassignIssue } from '@/composables/useIssueMutations'
-import { useWorkItemStatuses, useSetIssueStatus } from '@/composables/useWorkItemStatus'
+import {
+  useWorkItemStatuses,
+  useSetIssueStatus,
+  type WorkItemStatus,
+} from '@/composables/useWorkItemStatus'
 import { useSavedViews } from '@/composables/useSavedViews'
 import IssueComposer from '@/components/IssueComposer.vue'
 import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
@@ -49,6 +54,9 @@ import LabelChip from '@/components/LabelChip.vue'
 import Odometer from '@/components/Odometer.vue'
 import { withViewTransition } from '@/lib/viewTransition'
 import { rpc } from '@/lib/rpc'
+import BulkActionBar from '@/components/BulkActionBar.vue'
+import { useIssueSelection, IssueSelectionKey } from '@/composables/useIssueSelection'
+import { useBulkIssueActions } from '@/composables/useBulkIssueActions'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -267,6 +275,45 @@ const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
 const { data: statusCatalog } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const labelCatalog = computed(() => projectLabels.value ?? [])
 const scopeOptions = computed(() => labelScopes(labelCatalog.value))
+
+// Multi-select state, shared with rows/cards via inject (see useIssueSelection).
+const selection = useIssueSelection(toRef(props, 'fullPath'))
+provide(IssueSelectionKey, selection)
+const bulk = useBulkIssueActions(props.fullPath)
+
+// The iids currently loaded (across pages) — what "Select all" selects.
+const loadedIids = computed(() => issues.value.map((i) => i.iid))
+
+function toggleSelectMode() {
+  selection.setMode(!selection.mode.value)
+}
+
+function selectedIids() {
+  return [...selection.selected.value]
+}
+function onAddLabels(labelIds: string[]) {
+  bulk.addLabels(selectedIids(), labelIds)
+}
+function onRemoveLabels(labelIds: string[]) {
+  bulk.removeLabels(selectedIids(), labelIds)
+}
+function onSetAssignee({ username }: { username: string | null }) {
+  const member = members.value?.find((m) => m.username === username)
+  const nextAssignees = member
+    ? [
+        {
+          id: member.id,
+          name: member.name,
+          username: member.username,
+          avatarUrl: member.avatarUrl ?? null,
+        },
+      ]
+    : []
+  bulk.setAssignees(selectedIids(), username ? [username] : [], nextAssignees)
+}
+function onSetStatus(status: WorkItemStatus) {
+  bulk.setStatus(selectedIids(), status.id, status)
+}
 const boardGroups = computed(() =>
   boardColumns(sorted.value, boardScope.value, {
     labelCatalog: labelCatalog.value,
@@ -607,6 +654,19 @@ onKeyStroke(['c', 'C'], (e) => {
         <RefreshCw class="size-4" :class="isRefreshing ? 'animate-spin' : ''" />
       </button>
 
+      <!-- Select mode: flips rows/cards into checkbox selection for bulk actions. -->
+      <button
+        type="button"
+        data-testid="toggle-select-mode"
+        aria-label="Toggle select mode"
+        :aria-pressed="selection.mode.value"
+        class="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+        :class="selection.mode.value ? 'bg-card text-foreground ring-1 ring-border' : ''"
+        @click="toggleSelectMode"
+      >
+        <CheckSquare class="size-4" />
+      </button>
+
       <!-- View toggle -->
       <div
         role="group"
@@ -873,14 +933,15 @@ onKeyStroke(['c', 'C'], (e) => {
                 <div
                   v-for="(issue, i) in g.issues"
                   :key="issue.iid"
-                  draggable="true"
-                  class="group/card cursor-grab transition-opacity active:cursor-grabbing"
+                  :draggable="!selection.mode.value"
+                  class="group/card transition-opacity"
                   :class="[
+                    selection.mode.value ? '' : 'cursor-grab active:cursor-grabbing',
                     draggingIid === issue.iid ? 'opacity-40' : '',
                     justDropped === issue.iid ? 'animate-drop-in' : '',
                   ]"
                   :style="{ order: i * 2, viewTransitionName: vtNameFor(issue.iid) }"
-                  @dragstart="onDragStart(issue, $event)"
+                  @dragstart="!selection.mode.value && onDragStart(issue, $event)"
                   @dragend="clearDrag"
                 >
                   <IssueCard
@@ -976,6 +1037,20 @@ onKeyStroke(['c', 'C'], (e) => {
       :full-path="fullPath"
       @update:open="composerOpen = $event"
       @created="onCreated"
+    />
+
+    <BulkActionBar
+      :count="selection.count.value"
+      :catalog="labelCatalog"
+      :members="members ?? []"
+      :statuses="statusCatalog ?? []"
+      @add-labels="onAddLabels"
+      @remove-labels="onRemoveLabels"
+      @set-assignee="onSetAssignee"
+      @set-status="onSetStatus"
+      @open-combined="() => {}"
+      @select-all="selection.selectAll(loadedIids)"
+      @clear="selection.clear()"
     />
   </section>
 </template>
