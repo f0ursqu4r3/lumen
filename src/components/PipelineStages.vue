@@ -26,7 +26,7 @@ const activeStep = computed(() => {
   <Stepper
     v-if="stages.length"
     :model-value="activeStep"
-    class="w-full items-start overflow-x-auto pb-1"
+    class="w-full items-start overflow-x-auto px-0.5 py-1"
   >
     <StepperItem
       v-for="(stage, i) in stages"
@@ -51,7 +51,9 @@ const activeStep = computed(() => {
         v-if="i < stages.length - 1"
         class="absolute top-4 left-[calc(50%+1.25rem)] right-[calc(-50%+1.25rem)] h-0.5 rounded-full"
       />
-      <StepperTitle class="mt-2 max-w-20 truncate text-[0.7rem] font-medium text-muted-foreground">
+      <StepperTitle
+        class="mt-2 max-w-20 truncate text-[0.6875rem] font-medium text-muted-foreground"
+      >
         {{ stage.name }}
       </StepperTitle>
     </StepperItem>

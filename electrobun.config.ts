@@ -9,7 +9,7 @@ export default {
       "dist/index.html": "views/mainview/index.html",
       "dist/assets": "views/mainview/assets",
     },
-    mac: { bundleCEF: false },
+    mac: { bundleCEF: false, icons: "assets/macos/AppIcon.iconset" },
     linux: { bundleCEF: false },
     win: { bundleCEF: false },
   },

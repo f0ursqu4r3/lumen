@@ -8,6 +8,9 @@ const props = defineProps<{
   name: string
   username: string
   avatarUrl?: string | null
+  // Avatar only (initials in the circle); the name still rides the title tooltip.
+  // Used in dense rows where the spelled-out name would crowd the line.
+  compact?: boolean
 }>()
 
 const initials = computed(() => {
@@ -23,6 +26,6 @@ const initials = computed(() => {
         {{ initials.toUpperCase() }}
       </AvatarFallback>
     </Avatar>
-    <span>{{ name }}</span>
+    <span v-if="!compact">{{ name }}</span>
   </span>
 </template>

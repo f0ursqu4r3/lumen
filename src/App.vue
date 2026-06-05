@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ToastHost from '@/components/ToastHost.vue'
 </script>
 
 <template>
@@ -12,6 +13,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
       <RouterView :key="$route.path" />
     </main>
   </div>
-  <!-- Single confirm dialog instance shared across the whole app -->
+  <!-- Single shared instances for the whole app -->
   <ConfirmDialog />
+  <ToastHost />
 </template>
