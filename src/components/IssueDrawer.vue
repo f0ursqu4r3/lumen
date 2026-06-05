@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Maximize2 } from '@lucide/vue'
+import { SquareArrowOutUpRight } from '@lucide/vue'
 import {
   Sheet,
   SheetContent,
@@ -32,7 +32,7 @@ const emit = defineEmits<{
           aria-label="Expand to full page"
           @click="emit('expand')"
         >
-          <Maximize2 />
+          <SquareArrowOutUpRight />
         </Button>
       </SheetHeader>
       <!-- No bottom padding: the save bar (sticky bottom-0 inside IssueDetail) must
