@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle, onKeyStroke, useElementBounding } from '@vueuse/core'
-import { Plus, Search, LoaderCircle, List, Columns3, X, GripVertical, ArrowLeft } from '@lucide/vue'
+import {
+  Plus,
+  Search,
+  LoaderCircle,
+  List,
+  Columns3,
+  X,
+  GripVertical,
+  ArrowLeft,
+  Workflow,
+} from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
@@ -395,6 +405,12 @@ onKeyStroke(['c', 'C'], (e) => {
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-3">
+        <Button variant="outline" data-testid="view-pipelines" as-child>
+          <RouterLink :to="{ name: 'pipelines', params: { fullPath } }">
+            <Workflow />
+            Pipelines
+          </RouterLink>
+        </Button>
         <Button data-testid="new-issue" @click="composerOpen = true">
           <Plus />
           New issue

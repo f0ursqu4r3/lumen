@@ -34,6 +34,10 @@ const rpc = BrowserView.defineRPC<any>({
         Utils.clipboardWriteText(text)
         return { ok: true }
       },
+      showNotification: async ({ title, body, subtitle, silent }) => {
+        Utils.showNotification({ title, body, subtitle, silent })
+        return { ok: true }
+      },
     },
     messages: {},
   },

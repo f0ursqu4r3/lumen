@@ -23,6 +23,12 @@ export const router = createRouter({
       props: true,
     },
     {
+      path: '/projects/:fullPath(.*)/pipelines',
+      name: 'pipelines',
+      component: () => import('@/views/PipelineList.vue'),
+      props: true,
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/views/SettingsView.vue'),

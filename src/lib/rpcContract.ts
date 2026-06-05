@@ -32,6 +32,12 @@ export interface SaveConfigArgs {
   url: string
   token: string
 }
+export interface NotifyArgs {
+  title: string
+  body?: string
+  subtitle?: string
+  silent?: boolean
+}
 
 export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
@@ -46,6 +52,10 @@ export interface LumenRequests {
   // Write text to the system clipboard via the host. navigator.clipboard is
   // unavailable under the views:// origin (not a secure context).
   clipboardWriteText: (a: { text: string }) => Promise<{ ok: true }>
+  // Show a native desktop notification (e.g. when a watched pipeline finishes).
+  // The Notification web API isn't available under the views:// origin, so this
+  // round-trips to the host's Utils.showNotification.
+  showNotification: (a: NotifyArgs) => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {

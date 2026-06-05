@@ -338,6 +338,28 @@
   }
 }
 
+/* An armed per-run alert bell breathes amber while its pipeline is in flight —
+   the same liveness idiom as the header lamp, here meaning "I'm listening for
+   this run to finish." Steady (just filled) when reduced-motion is preferred or
+   once the run is no longer active. */
+@keyframes bell-listen {
+  0%,
+  100% {
+    opacity: 0.7;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 4px oklch(0.82 0.142 81 / 0.6));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bell-listening {
+    animation: bell-listen 1.9s ease-in-out infinite;
+  }
+}
+
 /* New-issue confirmation: a brief amber wash that fades, so a freshly created
    issue announces itself in the list without a toast. Kin to .animate-status. */
 @keyframes flash-in {
