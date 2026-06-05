@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
+import pkg from './package.json' with { type: 'json' }
 
 // Vite builds the SPA; the Electrobun Bun process is the runtime that talks to
 // GitLab (see src/bun/). base:'./' keeps asset URLs relative for the views:// origin.
@@ -16,4 +17,7 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { port: devPort, strictPort: true },
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
 })
