@@ -3,7 +3,7 @@ import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
 import type { LumenRPC } from '@/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
-import { buildAppMenu, DEVTOOLS_ACTION } from './menu'
+import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
 
 // LumenRPC describes the RPC *config* shape; it is not the bun/webview *schema*
 // shape that BrowserView.defineRPC<Schema extends ElectrobunRPCSchema> expects,
@@ -57,8 +57,14 @@ const win = new BrowserWindow({
 // menu's "Toggle Developer Tools" opens the inspector (developer mode).
 ApplicationMenu.setApplicationMenu(buildAppMenu('Lumen'))
 ApplicationMenu.on('application-menu-clicked', (event) => {
-  if ((event as { data?: { action?: string } })?.data?.action === DEVTOOLS_ACTION) {
+  const action = (event as { data?: { action?: string } })?.data?.action
+  if (action === DEVTOOLS_ACTION) {
     win.webview.toggleDevTools()
+  } else if (action === SETTINGS_ACTION) {
+    // Bridge host → webview: dispatch the event the webview's useSettings listens for.
+    win.webview.executeJavascript(
+      "window.dispatchEvent(new CustomEvent('lumen:open-settings'))",
+    )
   }
 })
 

@@ -4,6 +4,10 @@ import type { ApplicationMenuItemConfig } from 'electrobun/bun'
 // calling win.webview.toggleDevTools().
 export const DEVTOOLS_ACTION = 'toggle-devtools'
 
+// Action id for the "Settings…" menu item; handled in index.ts by dispatching a
+// window event into the webview (see SETTINGS_ACTION handler).
+export const SETTINGS_ACTION = 'open-settings'
+
 const sep: ApplicationMenuItemConfig = { type: 'separator' }
 
 /**
@@ -20,6 +24,12 @@ export function buildAppMenu(appName: string): ApplicationMenuItemConfig[] {
       label: appName,
       submenu: [
         { role: 'about' },
+        sep,
+        {
+          label: 'Settings…',
+          action: SETTINGS_ACTION,
+          accelerator: 'CommandOrControl+,',
+        },
         sep,
         { role: 'hide', accelerator: 'CommandOrControl+H' },
         { role: 'hideOthers', accelerator: 'Alt+CommandOrControl+H' },
