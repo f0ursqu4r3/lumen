@@ -314,6 +314,10 @@ function onSetAssignee({ username }: { username: string | null }) {
 function onSetStatus(status: WorkItemStatus) {
   bulk.setStatus(selectedIids(), status.id, status)
 }
+function onOpenCombined() {
+  const iids = selectedIids()
+  if (iids.length) rpc.openIssuesWindow({ fullPath: props.fullPath, iids })
+}
 const boardGroups = computed(() =>
   boardColumns(sorted.value, boardScope.value, {
     labelCatalog: labelCatalog.value,
@@ -1049,7 +1053,7 @@ onKeyStroke(['c', 'C'], (e) => {
       @remove-labels="onRemoveLabels"
       @set-assignee="onSetAssignee"
       @set-status="onSetStatus"
-      @open-combined="() => {}"
+      @open-combined="onOpenCombined"
       @select-all="() => selection.selectAll(loadedIids)"
       @clear="selection.clear()"
     />

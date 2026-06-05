@@ -52,8 +52,12 @@ vi.mock('@/composables/useProjectMembers', () => ({
 }))
 
 const openIssueWindow = vi.fn().mockResolvedValue({ ok: true })
+const openIssuesWindow = vi.fn().mockResolvedValue({ ok: true })
 vi.mock('@/lib/rpc', () => ({
-  rpc: { openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a) },
+  rpc: {
+    openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a),
+    openIssuesWindow: (a: { fullPath: string; iids: string[] }) => openIssuesWindow(a),
+  },
 }))
 
 import IssueList from './IssueList.vue'
@@ -96,6 +100,7 @@ beforeEach(() => {
   confirmMock.mockReset()
   pipelinesRef.value = []
   openIssueWindow.mockClear()
+  openIssuesWindow.mockClear()
 })
 
 afterEach(async () => {
@@ -299,6 +304,16 @@ describe('IssueList — select mode', () => {
     expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
     await w.get('[data-testid="issue-row"]').trigger('click')
     expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+  })
+
+  it('opens a combined window with the selected iids', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    await w.get('[data-testid="issue-row"]').trigger('click') // selects issue #7
+    await w.get('[data-testid="bulk-open-combined"]').trigger('click')
+    expect(openIssuesWindow).toHaveBeenCalledWith({ fullPath: 'grp/proj', iids: ['7'] })
   })
 
   it('Select all selects every loaded issue', async () => {
