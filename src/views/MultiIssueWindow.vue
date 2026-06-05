@@ -5,6 +5,9 @@ import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import IssueDetail from '@/views/IssueDetail.vue'
 import { useConfirm } from '@/composables/useConfirm'
 
+// `windowed` is accepted for parity with the route's prop shape (the URL carries
+// ?window=1) but isn't read: this window owns its chrome and always renders
+// IssueDetail :embedded. Kept so the route's props mapping stays uniform.
 const props = defineProps<{ fullPath: string; iids: string[]; windowed?: boolean }>()
 
 const index = ref(0)

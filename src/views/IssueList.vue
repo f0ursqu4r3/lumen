@@ -505,6 +505,17 @@ onKeyStroke(['c', 'C'], (e) => {
   e.preventDefault()
   composerOpen.value = true
 })
+
+// Esc leaves select mode (and clears the selection) — but only when nothing else
+// (composer, drawer) owns Escape, and never while typing.
+onKeyStroke('Escape', (e) => {
+  if (!selection.mode.value) return
+  const t = e.target as HTMLElement | null
+  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return
+  if (composerOpen.value || openIid.value) return
+  e.preventDefault()
+  selection.exit()
+})
 </script>
 
 <template>

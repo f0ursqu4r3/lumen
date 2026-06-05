@@ -316,6 +316,19 @@ describe('IssueList — select mode', () => {
     expect(openIssuesWindow).toHaveBeenCalledWith({ fullPath: 'grp/proj', iids: ['7'] })
   })
 
+  it('pressing Escape exits select mode and clears the selection', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    await w.get('[data-testid="issue-row"]').trigger('click') // select #7, bar appears
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await flushPromises()
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(false) // mode off → no checkboxes
+  })
+
   it('Select all selects every loaded issue', async () => {
     const a = { ...issue, iid: '7' }
     const b = { ...issue, iid: '8' }
