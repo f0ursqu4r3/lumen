@@ -26,15 +26,16 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
   const repo = fullPath.split('/').at(-1) ?? fullPath
   // Cascade each new window so stacked issue windows don't perfectly overlap.
   const offset = issueWindows.size * 24
-  const win = new BrowserWindow({
+  const issueWin = new BrowserWindow({
     title: `#${iid} · ${repo}`,
     url: issueWindowUrl(url, fullPath, iid),
     frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
     rpc: buildRpc(),
   })
-  issueWindows.set(key, win)
   // Per-window close event (scoped by window id) keeps the registry accurate.
-  win.on('close', () => issueWindows.delete(key))
+  // Register before inserting so a synchronous close can't strand a stale entry.
+  issueWin.on('close', () => issueWindows.delete(key))
+  issueWindows.set(key, issueWin)
   return { ok: true }
 }
 
