@@ -14,6 +14,9 @@ import {
   RefreshCw,
 } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
+import { usePipelines } from '@/composables/usePipelines'
+import { isActivePipeline } from '@/gitlab/pipelineParams'
+import { TONE_VISUALS } from '@/components/pipelineTone'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useIssueFilters } from '@/composables/useIssueFilters'
@@ -187,6 +190,17 @@ async function refresh() {
 
 const count = computed(() => issues.value.length)
 const hasMore = computed(() => hasNextPage.value ?? false)
+
+// Mirror the Pipelines view's polling query so the toolbar button can flag live
+// CI at a glance without navigating away. Shares the same query cache key, so
+// this adds no network beyond the 10s poll the feature already runs and opening
+// Pipelines stays instant. Count every in-flight pipeline (anything not in a
+// terminal state) — queued/pending/manual still have work ahead of them.
+const { pipelines } = usePipelines(toRef(props, 'fullPath'))
+const runningPipelines = computed(
+  () => pipelines.value.filter((p) => isActivePipeline(p.status)).length,
+)
+const runningDotClass = TONE_VISUALS.running.dot
 
 // Board fills the page: its height is the viewport minus its own distance from
 // the top (measured, so it stays correct as the toolbar rows wrap/grow). It
@@ -477,6 +491,18 @@ onKeyStroke(['c', 'C'], (e) => {
           >
             <Workflow />
             Pipelines
+            <!-- Live CI tell: a pulsing sky dot + count when pipelines are
+                 running right now, so the button reads as "something's cooking"
+                 before you click through. Hidden entirely when nothing runs. -->
+            <span
+              v-if="runningPipelines > 0"
+              data-testid="pipelines-running"
+              class="-mr-0.5 inline-flex items-center gap-1.5 font-mono text-xs font-medium tabular-nums text-sky-300"
+              :title="`${runningPipelines} active`"
+            >
+              <span class="size-2 shrink-0 rounded-full animate-pulse" :class="runningDotClass" />
+              {{ runningPipelines }}
+            </span>
           </RouterLink>
         </Button>
         <Button data-testid="new-issue" @click="composerOpen = true">

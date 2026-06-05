@@ -21,6 +21,11 @@ const router = createRouter({
 const useIssues = vi.fn()
 vi.mock('@/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 
+const pipelinesRef = ref<Array<{ status: string }>>([])
+vi.mock('@/composables/usePipelines', () => ({
+  usePipelines: () => ({ pipelines: pipelinesRef }),
+}))
+
 const { createMutate } = vi.hoisted(() => ({ createMutate: vi.fn() }))
 const { confirmMock } = vi.hoisted(() => ({ confirmMock: vi.fn() }))
 vi.mock('@/composables/useConfirm', () => ({
@@ -84,6 +89,7 @@ beforeEach(() => {
   useIssues.mockReset()
   createMutate.mockReset()
   confirmMock.mockReset()
+  pipelinesRef.value = []
 })
 
 afterEach(async () => {
@@ -116,6 +122,33 @@ describe('IssueList', () => {
     // affordances: back-to-projects on the title and the Pipelines nav link.
     const testids = w.findAllComponents(RouterLinkStub).map((l) => l.attributes('data-testid'))
     expect(testids).toEqual(['back-to-projects', 'view-pipelines'])
+  })
+
+  it('flags in-flight pipelines on the Pipelines button', async () => {
+    mockQuery({ issues: ref([]) })
+    // Every non-terminal status counts; the terminal ones (SUCCESS/FAILED/
+    // CANCELED/SKIPPED) do not.
+    pipelinesRef.value = [
+      { status: 'RUNNING' },
+      { status: 'PENDING' },
+      { status: 'MANUAL' },
+      { status: 'SUCCESS' },
+      { status: 'FAILED' },
+    ]
+    const w = mountList()
+    await flushPromises()
+    const tell = w.find('[data-testid="pipelines-running"]')
+    expect(tell.exists()).toBe(true)
+    expect(tell.text()).toBe('3')
+    expect(tell.attributes('title')).toBe('3 active')
+  })
+
+  it('hides the running tell when every pipeline has finished', async () => {
+    mockQuery({ issues: ref([]) })
+    pipelinesRef.value = [{ status: 'SUCCESS' }, { status: 'FAILED' }, { status: 'SKIPPED' }]
+    const w = mountList()
+    await flushPromises()
+    expect(w.find('[data-testid="pipelines-running"]').exists()).toBe(false)
   })
 
   it('has no persistent quick-create bar', () => {
