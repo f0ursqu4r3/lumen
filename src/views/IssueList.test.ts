@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, RouterLinkStub, flushPromises } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import IssueDrawer from '@/components/IssueDrawer.vue'
 import IssueComposer from '@/components/IssueComposer.vue'
@@ -52,8 +52,12 @@ vi.mock('@/composables/useProjectMembers', () => ({
 }))
 
 const openIssueWindow = vi.fn().mockResolvedValue({ ok: true })
+const openIssuesWindow = vi.fn().mockResolvedValue({ ok: true })
 vi.mock('@/lib/rpc', () => ({
-  rpc: { openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a) },
+  rpc: {
+    openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a),
+    openIssuesWindow: (a: { fullPath: string; iids: string[] }) => openIssuesWindow(a),
+  },
 }))
 
 import IssueList from './IssueList.vue'
@@ -96,6 +100,7 @@ beforeEach(() => {
   confirmMock.mockReset()
   pipelinesRef.value = []
   openIssueWindow.mockClear()
+  openIssuesWindow.mockClear()
 })
 
 afterEach(async () => {
@@ -278,6 +283,65 @@ describe('IssueList', () => {
     w.findComponent(IssueDrawer).vm.$emit('update:open', false)
     await flushPromises()
     expect(router.currentRoute.value.query.issue).toBeUndefined()
+  })
+})
+
+describe('IssueList — select mode', () => {
+  it('toggling select mode renders checkboxes on rows', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(false)
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(true)
+  })
+
+  it('shows the bulk action bar once an issue is selected', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
+    await w.get('[data-testid="issue-row"]').trigger('click')
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+  })
+
+  it('opens a combined window with the selected iids', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    await w.get('[data-testid="issue-row"]').trigger('click') // selects issue #7
+    await w.get('[data-testid="bulk-open-combined"]').trigger('click')
+    expect(openIssuesWindow).toHaveBeenCalledWith({ fullPath: 'grp/proj', iids: ['7'] })
+  })
+
+  it('pressing Escape exits select mode and clears the selection', async () => {
+    mockQuery({ issues: ref([issue]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    await w.get('[data-testid="issue-row"]').trigger('click') // select #7, bar appears
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await flushPromises()
+    expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
+    expect(w.find('[data-slot="checkbox"]').exists()).toBe(false) // mode off → no checkboxes
+  })
+
+  it('Select all selects every loaded issue', async () => {
+    const a = { ...issue, iid: '7' }
+    const b = { ...issue, iid: '8' }
+    mockQuery({ issues: ref([a, b]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    // Select one row so the bulk bar (with its Select all button) appears.
+    await w.get('[data-testid="issue-row"]').trigger('click')
+    await w.get('[data-testid="bulk-select-all"]').trigger('click')
+    await nextTick()
+    // The bar's count text should confirm all loaded issues are selected.
+    expect(w.get('[data-testid="bulk-action-bar"]').text()).toContain('2 selected')
   })
 })
 

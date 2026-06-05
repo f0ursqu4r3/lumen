@@ -14,12 +14,20 @@ import {
   Tag,
 } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Checkbox } from '@/components/ui/checkbox'
 import { priorityOf, typeOf, parseLabel, tint } from '@/lib/labels'
 import type { Facet } from '@/lib/issueView'
 import type { IssueListItem } from '@/composables/useIssues'
+import { useInjectedSelection } from '@/composables/useIssueSelection'
 
 const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: boolean }>()
 const emit = defineEmits<{ filter: [facet: Facet] }>()
+
+const selection = useInjectedSelection()
+
+function onCardClick() {
+  if (selection.mode.value) selection.toggle(props.issue.iid)
+}
 
 const ICONS = {
   AlertOctagon,
@@ -59,9 +67,19 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
 
 <template>
   <div
+    data-testid="issue-card"
     class="group relative flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-card transition-[background-color,box-shadow,border-color] duration-150 hover:border-border/0 hover:bg-accent/50 hover:shadow-pop focus-within:bg-accent/50"
-    :class="{ 'animate-flash': highlight }"
+    :class="{ 'animate-flash': highlight, 'cursor-pointer select-none': selection.mode.value }"
+    @click="onCardClick"
   >
+    <Checkbox
+      v-if="selection.mode.value"
+      :model-value="selection.isSelected(issue.iid)"
+      :aria-label="`Select issue #${issue.iid}`"
+      class="absolute top-2 right-2 z-10"
+      @update:model-value="() => selection.toggle(issue.iid)"
+      @click.stop
+    />
     <RouterLink
       :to="{ query: { ...($route?.query ?? {}), issue: issue.iid } }"
       :aria-label="`Issue #${issue.iid}: ${issue.title}`"

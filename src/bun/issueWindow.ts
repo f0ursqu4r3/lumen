@@ -7,3 +7,10 @@
 export function issueWindowUrl(base: string, fullPath: string, iid: string): string {
   return `${base}#/projects/${fullPath}/issues/${iid}?window=1`
 }
+
+// Build the hash-routed URL a combined multi-issue window loads. Same base rules
+// as issueWindowUrl; the iids ride as a comma-joined query (order preserved =
+// pager order) and ?window=1 marks it a native window.
+export function issuesWindowUrl(base: string, fullPath: string, iids: string[]): string {
+  return `${base}#/projects/${fullPath}/issues-window?iids=${iids.join(',')}&window=1`
+}

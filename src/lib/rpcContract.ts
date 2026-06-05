@@ -59,6 +59,9 @@ export interface LumenRequests {
   // Open a focused, single-issue native window (or focus the existing one for
   // this issue). The window loads the SPA at the issue route with ?window=1.
   openIssueWindow: (a: { fullPath: string; iid: string }) => Promise<{ ok: boolean }>
+  // Open a combined native window paging through several issues (one window per
+  // call, no dedupe). The window loads the issues-window route with ?window=1.
+  openIssuesWindow: (a: { fullPath: string; iids: string[] }) => Promise<{ ok: boolean }>
 }
 
 export type LumenRPC = {

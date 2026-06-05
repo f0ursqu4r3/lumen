@@ -3,7 +3,7 @@ import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
 import type { LumenRPC } from '@/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
-import { issueWindowUrl } from './issueWindow'
+import { issueWindowUrl, issuesWindowUrl } from './issueWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
@@ -36,6 +36,24 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
   // Register before inserting so a synchronous close can't strand a stale entry.
   issueWin.on('close', () => issueWindows.delete(key))
   issueWindows.set(key, issueWin)
+  return { ok: true }
+}
+
+function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[] }): {
+  ok: boolean
+} {
+  const repo = fullPath.split('/').at(-1) ?? fullPath
+  // Cascade off the count of all open issue windows so a combined window doesn't
+  // land exactly on a single-issue one. No registry: combined windows are not
+  // deduped or focused — each "Open combined" is a fresh window.
+  const offset = issueWindows.size * 24
+  const issuesWin = new BrowserWindow({
+    title: `${iids.length} issues · ${repo}`,
+    url: issuesWindowUrl(url, fullPath, iids),
+    frame: { width: 760, height: 920, x: 140 + offset, y: 140 + offset },
+    rpc: buildRpc(),
+  })
+  void issuesWin
   return { ok: true }
 }
 
@@ -72,6 +90,7 @@ function buildRpc() {
           return { ok: true }
         },
         openIssueWindow: async ({ fullPath, iid }) => openIssueWindow({ fullPath, iid }),
+        openIssuesWindow: async ({ fullPath, iids }) => openIssuesWindow({ fullPath, iids }),
       },
       messages: {},
     },
