@@ -440,6 +440,13 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Default cadence for every morph group — chiefly the per-issue cards that
+     FLIP between their list-row and board-card positions on a view switch. The
+     named groups below are more specific, so their bespoke timings still win. */
+  ::view-transition-group(*) {
+    animation-duration: 0.34s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
   ::view-transition-group(project-title) {
     animation-duration: 0.42s;
     animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -448,5 +455,60 @@
   ::view-transition-new(root) {
     animation-duration: 0.26s;
     animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* A card that just landed in a new lane (drag-to-retag) settles in: a brief
+   scale relax plus a fading amber ring, so the optimistic move reads as the card
+   *arriving* rather than blinking into its new column. Keyed off the moved iid
+   like the new-issue flash, and reduced-motion keeps it instant. */
+@keyframes drop-in {
+  0% {
+    transform: scale(1.035);
+    box-shadow:
+      0 8px 20px -6px oklch(0 0 0 / 0.5),
+      0 0 0 1.5px oklch(0.82 0.142 81 / 0.5);
+  }
+  100% {
+    transform: none;
+    box-shadow:
+      0 0 0 0 transparent,
+      0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-drop-in {
+    animation: drop-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* Active filter tokens enter and leave with a quick, well-damped scale+fade — a
+   chip springs in when a facet is added and recoils out when removed, so the
+   filter bar feels assembled by hand. No bounce (the brand bans it); the ease-out
+   curve gives the snap without the overshoot. `move` keeps the surviving chips
+   sliding to close the gap. Reduced motion drops all of it. */
+@media (prefers-reduced-motion: no-preference) {
+  .facet-enter-active {
+    transition:
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .facet-leave-active {
+    transition:
+      transform 0.16s cubic-bezier(0.4, 0, 1, 1),
+      opacity 0.16s cubic-bezier(0.4, 0, 1, 1);
+    position: absolute;
+  }
+  .facet-enter-from {
+    opacity: 0;
+    transform: scale(0.8) translateY(2px);
+  }
+  .facet-leave-to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  .facet-move {
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }

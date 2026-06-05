@@ -10,6 +10,7 @@ import {
 } from '@/composables/useProjectBrowser'
 import { useToggleStar } from '@/composables/useToggleStar'
 import ErrorNotice from '@/components/ErrorNotice.vue'
+import Odometer from '@/components/Odometer.vue'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -265,18 +266,14 @@ useIntersectionObserver(sentinel, ([entry]) => {
         >
           Workspace
         </p>
-        <h1
-          class="mt-2 text-title leading-none font-semibold text-foreground"
-        >
-          Projects
-        </h1>
+        <h1 class="mt-2 text-title leading-none font-semibold text-foreground">Projects</h1>
       </div>
       <div v-if="!isLoading && !error" class="hidden shrink-0 flex-col items-end sm:flex">
         <span
-          :key="count"
-          class="animate-count inline-block font-mono text-hero font-semibold tabular-nums text-foreground"
+          class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
         >
-          {{ count }}<span v-if="hasMore" class="text-primary">+</span>
+          <Odometer :value="count" />
+          <span v-if="hasMore" class="text-primary">+</span>
         </span>
         <span
           class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"

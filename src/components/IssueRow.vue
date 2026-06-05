@@ -25,6 +25,9 @@ const props = defineProps<{
   fullPath: string
   index?: number
   highlight?: boolean
+  // When set, names this row for the View Transitions API so it morphs into the
+  // matching board card (which carries the same name) on a list ⇄ board switch.
+  vtName?: string
 }>()
 
 const emit = defineEmits<{ filter: [facet: Facet] }>()
@@ -86,7 +89,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
   <div
     class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
     :class="highlight ? 'animate-flash' : 'animate-row-in'"
-    :style="{ animationDelay: delay }"
+    :style="{ animationDelay: delay, viewTransitionName: vtName }"
   >
     <RouterLink
       :to="{ query: { ...($route?.query ?? {}), issue: issue.iid } }"

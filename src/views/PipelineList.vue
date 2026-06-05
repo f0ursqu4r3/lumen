@@ -24,8 +24,25 @@ import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { rpc } from '@/lib/rpc'
+import { nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { withViewTransition } from '@/lib/viewTransition'
 
 const props = defineProps<{ fullPath: string }>()
+
+const router = useRouter()
+
+// Hopping back to this project's issues morphs the shared repo title and
+// cross-fades the rest — the mirror of the issues → pipelines handoff. Modified
+// clicks fall through to the real href.
+function onTabNav(e: MouseEvent, to: Parameters<typeof router.push>[0]) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+  e.preventDefault()
+  withViewTransition(async () => {
+    await router.push(to)
+    await nextTick()
+  })
+}
 
 const fullPath = toRef(props, 'fullPath')
 const pathParts = computed(() => props.fullPath.split('/'))
@@ -113,12 +130,13 @@ function openPipeline(p: Pipeline) {
           :to="{ name: 'issues', params: { fullPath } }"
           data-testid="back-to-issues"
           class="group/back -ml-1 mt-2 flex max-w-full items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+          @click="onTabNav($event, { name: 'issues', params: { fullPath } })"
         >
           <ArrowLeft
             class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
           />
           <h1
-            class="min-w-0 truncate text-title leading-none font-semibold text-foreground"
+            class="vt-project-title min-w-0 truncate text-title leading-none font-semibold text-foreground"
           >
             {{ repoName }}
           </h1>

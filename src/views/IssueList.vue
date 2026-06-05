@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, toRef, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle, onKeyStroke, useElementBounding } from '@vueuse/core'
 import {
   Plus,
@@ -43,6 +43,8 @@ import IssueRow from '@/components/IssueRow.vue'
 import IssueCard from '@/components/IssueCard.vue'
 import IssueDrawer from '@/components/IssueDrawer.vue'
 import LabelChip from '@/components/LabelChip.vue'
+import Odometer from '@/components/Odometer.vue'
+import { withViewTransition } from '@/lib/viewTransition'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -96,9 +98,10 @@ async function expandIssue() {
     if (!ok) return
   }
   drawerDirty.value = false
-  router.push({
-    name: 'issue',
-    params: { fullPath: props.fullPath, iid: openIid.value },
+  const iid = openIid.value
+  withViewTransition(async () => {
+    await router.push({ name: 'issue', params: { fullPath: props.fullPath, iid } })
+    await nextTick()
   })
 }
 
@@ -201,6 +204,35 @@ const boardStyle = computed(() => ({
 const sorted = computed(() => sortIssues(issues.value, sortKey.value))
 const listGroups = computed(() => groupIssues(sorted.value, groupKey.value))
 
+// --- view switch as a morph -------------------------------------------------
+// Toggling list ⇄ board runs inside a View Transition so each visible issue's
+// row FLIPs into its board card (and back) rather than the layout hard-cutting.
+// Only the first VT_CAP issues are named for the transition — enough to carry
+// the eye, bounded so a large loaded set never snapshots hundreds of elements.
+const VT_CAP = 30
+const vtNamed = computed(() => new Set(sorted.value.slice(0, VT_CAP).map((i) => i.iid)))
+const vtNameFor = (iid: string) => (vtNamed.value.has(iid) ? `issue-${iid}` : undefined)
+
+function setView(next: 'list' | 'board') {
+  if (view.value === next) return
+  withViewTransition(async () => {
+    view.value = next
+    await nextTick()
+  })
+}
+
+// Tab-style hops to this project's other surfaces (→ pipelines) morph the shared
+// repo title and cross-fade the rest, the same handoff the picker → issues uses.
+// Modified clicks fall through to the real href so "open in new window" still works.
+function onTabNav(e: MouseEvent, to: Parameters<typeof router.push>[0]) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+  e.preventDefault()
+  withViewTransition(async () => {
+    await router.push(to)
+    await nextTick()
+  })
+}
+
 const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
 const { data: statusCatalog } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const labelCatalog = computed(() => projectLabels.value ?? [])
@@ -227,6 +259,10 @@ const setStatus = useSetIssueStatus(props.fullPath)
 const dragging = ref<IssueListItem | null>(null)
 const draggingIid = ref<string | null>(null)
 const dragOverKey = ref<string | null>(null)
+// The iid that just landed in a new lane — it wears the settle animation briefly
+// so an optimistic move reads as the card arriving, not blinking into place.
+const justDropped = ref<string | null>(null)
+let dropTimer: ReturnType<typeof setTimeout> | undefined
 
 // A compact "in-hand" ghost that follows the cursor while dragging, in place of
 // the browser's default full-card snapshot. Built imperatively (it lives outside
@@ -289,6 +325,10 @@ function onDrop(group: IssueGroup) {
   if (!issue) return
   const move = planBoardMove(issue, boardScope.value, group)
   if (!move) return
+  // Mark the moved card so it settles into its new lane (cleared after the anim).
+  justDropped.value = issue.iid
+  clearTimeout(dropTimer)
+  dropTimer = setTimeout(() => (justDropped.value = null), 450)
   if (move.kind === 'retag') {
     retag.mutate({ iid: issue.iid, ...move })
   } else if (move.kind === 'status') {
@@ -370,7 +410,10 @@ function onCreated(iid: string) {
   highlightTimer = setTimeout(() => (highlightIid.value = null), 1600)
 }
 
-onUnmounted(() => clearTimeout(highlightTimer))
+onUnmounted(() => {
+  clearTimeout(highlightTimer)
+  clearTimeout(dropTimer)
+})
 
 // `C` opens the composer — but never while typing or with another surface open.
 // Accept both cases so Caps Lock / Shift don't swallow the shortcut.
@@ -419,7 +462,10 @@ onKeyStroke(['c', 'C'], (e) => {
       </div>
       <div class="flex shrink-0 items-center gap-3">
         <Button variant="outline" data-testid="view-pipelines" as-child>
-          <RouterLink :to="{ name: 'pipelines', params: { fullPath } }">
+          <RouterLink
+            :to="{ name: 'pipelines', params: { fullPath } }"
+            @click="onTabNav($event, { name: 'pipelines', params: { fullPath } })"
+          >
             <Workflow />
             Pipelines
           </RouterLink>
@@ -433,10 +479,10 @@ onKeyStroke(['c', 'C'], (e) => {
           :class="isLoading ? 'opacity-0' : 'opacity-100'"
         >
           <span
-            :key="count"
-            class="animate-count inline-block font-mono text-hero font-semibold tabular-nums text-foreground"
+            class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
           >
-            {{ count }}<span class="text-primary" v-if="hasMore">+</span>
+            <Odometer :value="count" />
+            <span class="text-primary" v-if="hasMore">+</span>
           </span>
           <span
             class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
@@ -535,7 +581,7 @@ onKeyStroke(['c', 'C'], (e) => {
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground'
           "
-          @click="view = 'list'"
+          @click="setView('list')"
         >
           <List class="size-4" />
         </button>
@@ -549,7 +595,7 @@ onKeyStroke(['c', 'C'], (e) => {
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground'
           "
-          @click="view = 'board'"
+          @click="setView('board')"
         >
           <Columns3 class="size-4" />
         </button>
@@ -631,44 +677,53 @@ onKeyStroke(['c', 'C'], (e) => {
     </div>
 
     <!-- Active filter tokens -->
-    <div v-if="activeCount" class="flex flex-wrap items-center gap-2">
+    <div v-if="activeCount" class="relative flex flex-wrap items-center gap-2">
       <span class="text-2xs tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
-      <LabelChip
-        v-for="l in labelChips"
-        :key="l.title"
-        :title="l.title"
-        :color="l.color"
-        closeable
-        @remove="removeLabel(l.title)"
-      />
-      <span
-        v-if="assignee"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
-      >
-        <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
-        <button
-          type="button"
-          aria-label="Remove assignee filter"
-          class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-          @click="assignee = ''"
+      <!-- Tokens animate as a group: each springs in on add, recoils out on
+           remove, and the survivors slide to close the gap (see .facet-* in
+           styles.css). `contents` keeps the group transparent to the flex row. -->
+      <TransitionGroup name="facet" tag="div" class="contents">
+        <LabelChip
+          v-for="l in labelChips"
+          :key="`label:${l.title}`"
+          :title="l.title"
+          :color="l.color"
+          closeable
+          @remove="removeLabel(l.title)"
+        />
+        <span
+          v-if="assignee"
+          key="facet:assignee"
+          class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
         >
-          <X class="size-3" />
-        </button>
-      </span>
-      <span
-        v-if="author"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
-      >
-        <span class="font-mono">author:@{{ author }}</span>
-        <button
-          type="button"
-          aria-label="Remove author filter"
-          class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-          @click="author = ''"
+          <span class="font-mono">{{
+            assignee === '__none__' ? 'Unassigned' : '@' + assignee
+          }}</span>
+          <button
+            type="button"
+            aria-label="Remove assignee filter"
+            class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+            @click="assignee = ''"
+          >
+            <X class="size-3" />
+          </button>
+        </span>
+        <span
+          v-if="author"
+          key="facet:author"
+          class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
         >
-          <X class="size-3" />
-        </button>
-      </span>
+          <span class="font-mono">author:@{{ author }}</span>
+          <button
+            type="button"
+            aria-label="Remove author filter"
+            class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+            @click="author = ''"
+          >
+            <X class="size-3" />
+          </button>
+        </span>
+      </TransitionGroup>
       <button
         type="button"
         class="text-2xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
@@ -717,6 +772,7 @@ onKeyStroke(['c', 'C'], (e) => {
                 :full-path="fullPath"
                 :index="i"
                 :highlight="issue.iid === highlightIid"
+                :vt-name="vtNameFor(issue.iid)"
                 @filter="applyFacet"
               />
             </Card>
@@ -777,8 +833,11 @@ onKeyStroke(['c', 'C'], (e) => {
                   :key="issue.iid"
                   draggable="true"
                   class="group/card cursor-grab transition-opacity active:cursor-grabbing"
-                  :class="draggingIid === issue.iid ? 'opacity-40' : ''"
-                  :style="{ order: i * 2 }"
+                  :class="[
+                    draggingIid === issue.iid ? 'opacity-40' : '',
+                    justDropped === issue.iid ? 'animate-drop-in' : '',
+                  ]"
+                  :style="{ order: i * 2, viewTransitionName: vtNameFor(issue.iid) }"
                   @dragstart="onDragStart(issue, $event)"
                   @dragend="clearDrag"
                 >
