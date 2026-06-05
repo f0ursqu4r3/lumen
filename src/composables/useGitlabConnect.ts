@@ -3,6 +3,9 @@ import { rpc } from '@/lib/rpc'
 
 export type ConnectStatus = 'idle' | 'testing' | 'error'
 
+/** Cheapest authenticated probe — a clean 200 with no errors proves the token works. */
+export const PROBE_QUERY = '{ currentUser { username } }'
+
 /**
  * Shared GitLab connect state + probe. `save()` persists the config and probes
  * with the cheapest authenticated query; it sets `status`/`message` and resolves
@@ -32,7 +35,7 @@ export function useGitlabConnect() {
     message.value = ''
     try {
       await rpc.saveConfig({ url: url.value.trim(), token: token.value.trim() })
-      const res = await rpc.gitlabGraphql({ query: '{ currentUser { username } }' })
+      const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
       if (res.status === 200 && !res.errors?.length) {
         status.value = 'idle'
         return true

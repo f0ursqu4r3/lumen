@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { rpc } from '@/lib/rpc'
 import { clearPersistedCache } from '@/lib/persist'
-import { useGitlabConnect } from '@/composables/useGitlabConnect'
+import { useGitlabConnect, PROBE_QUERY } from '@/composables/useGitlabConnect'
 import { useConfirm } from '@/composables/useConfirm'
 import { pushToast } from '@/composables/useToast'
 import { settingsState, closeSettings } from '@/composables/useSettings'
@@ -37,8 +37,10 @@ async function hydrate() {
   const cfg = await rpc.getConfig()
   url.value = cfg.url ?? ''
   token.value = ''
+  status.value = 'idle'
+  message.value = ''
   try {
-    const res = await rpc.gitlabGraphql({ query: '{ currentUser { username } }' })
+    const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
     const u = (res.data as { currentUser?: { username?: string } } | undefined)?.currentUser
       ?.username
     username.value = u ?? null
