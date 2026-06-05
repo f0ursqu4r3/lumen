@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, RouterLinkStub, flushPromises } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import IssueDrawer from '@/components/IssueDrawer.vue'
 import IssueComposer from '@/components/IssueComposer.vue'
@@ -299,6 +299,21 @@ describe('IssueList — select mode', () => {
     expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(false)
     await w.get('[data-testid="issue-row"]').trigger('click')
     expect(w.find('[data-testid="bulk-action-bar"]').exists()).toBe(true)
+  })
+
+  it('Select all selects every loaded issue', async () => {
+    const a = { ...issue, iid: '7' }
+    const b = { ...issue, iid: '8' }
+    mockQuery({ issues: ref([a, b]) })
+    const w = mountList()
+    await flushPromises()
+    await w.get('[data-testid="toggle-select-mode"]').trigger('click')
+    // Select one row so the bulk bar (with its Select all button) appears.
+    await w.get('[data-testid="issue-row"]').trigger('click')
+    await w.get('[data-testid="bulk-select-all"]').trigger('click')
+    await nextTick()
+    // The bar's count text should confirm all loaded issues are selected.
+    expect(w.get('[data-testid="bulk-action-bar"]').text()).toContain('2 selected')
   })
 })
 

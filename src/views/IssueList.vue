@@ -659,6 +659,7 @@ onKeyStroke(['c', 'C'], (e) => {
         type="button"
         data-testid="toggle-select-mode"
         aria-label="Toggle select mode"
+        title="Select mode"
         :aria-pressed="selection.mode.value"
         class="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
         :class="selection.mode.value ? 'bg-card text-foreground ring-1 ring-border' : ''"
@@ -1049,7 +1050,7 @@ onKeyStroke(['c', 'C'], (e) => {
       @set-assignee="onSetAssignee"
       @set-status="onSetStatus"
       @open-combined="() => {}"
-      @select-all="selection.selectAll(loadedIids)"
+      @select-all="() => selection.selectAll(loadedIids)"
       @clear="selection.clear()"
     />
   </section>
