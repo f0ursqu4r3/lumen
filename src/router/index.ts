@@ -20,7 +20,11 @@ export const router = createRouter({
       path: '/projects/:fullPath(.*)/issues/:iid',
       name: 'issue',
       component: () => import('@/views/IssueDetail.vue'),
-      props: true,
+      props: (route) => ({
+        fullPath: route.params.fullPath,
+        iid: route.params.iid,
+        windowed: route.query.window === '1',
+      }),
     },
     {
       path: '/projects/:fullPath(.*)/pipelines',
