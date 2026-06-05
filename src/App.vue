@@ -1,6 +1,17 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import SettingsDialog from '@/components/SettingsDialog.vue'
 import ToastHost from '@/components/ToastHost.vue'
+import { registerSettingsShortcut } from '@/composables/useSettings'
+
+// The native app menu (⌘,) dispatches lumen:open-settings into the webview;
+// listen for it app-wide so the single mounted dialog opens from anywhere.
+let stop: (() => void) | null = null
+onMounted(() => {
+  stop = registerSettingsShortcut()
+})
+onUnmounted(() => stop?.())
 </script>
 
 <template>
@@ -15,5 +26,6 @@ import ToastHost from '@/components/ToastHost.vue'
   </div>
   <!-- Single shared instances for the whole app -->
   <ConfirmDialog />
+  <SettingsDialog />
   <ToastHost />
 </template>
