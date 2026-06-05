@@ -27,8 +27,7 @@ const filteredSections = computed(() => {
     .map((s) => ({
       ...s,
       people: s.people.filter(
-        (p) =>
-          (p.name ?? '').toLowerCase().includes(q) || p.username.toLowerCase().includes(q),
+        (p) => (p.name ?? '').toLowerCase().includes(q) || p.username.toLowerCase().includes(q),
       ),
     }))
     .filter((s) => s.people.length)

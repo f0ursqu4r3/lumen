@@ -106,7 +106,11 @@ describe('IssueList', () => {
     mockQuery({ issues: ref([]) })
     const w = mountList()
     expect(w.text()).toContain('No issues')
-    expect(w.findComponent(RouterLinkStub).exists()).toBe(false)
+    // No issue rows render in the empty state — the only link is the header's
+    // back-to-projects affordance on the project title.
+    const links = w.findAllComponents(RouterLinkStub)
+    expect(links).toHaveLength(1)
+    expect(links[0].attributes('data-testid')).toBe('back-to-projects')
   })
 
   it('has no persistent quick-create bar', () => {

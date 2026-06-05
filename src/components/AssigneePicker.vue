@@ -31,17 +31,14 @@ const current = computed(() => props.members.find((m) => m.id === props.modelVal
 
 // Roster reads best alphabetically by display name, falling back to username.
 const sortedMembers = computed(() =>
-  [...props.members].sort((a, b) =>
-    (a.name || a.username).localeCompare(b.name || b.username),
-  ),
+  [...props.members].sort((a, b) => (a.name || a.username).localeCompare(b.name || b.username)),
 )
 
 const filteredMembers = computed(() => {
   const q = query.value.trim().toLowerCase()
   if (!q) return sortedMembers.value
   return sortedMembers.value.filter(
-    (m) =>
-      (m.name ?? '').toLowerCase().includes(q) || m.username.toLowerCase().includes(q),
+    (m) => (m.name ?? '').toLowerCase().includes(q) || m.username.toLowerCase().includes(q),
   )
 })
 
@@ -86,25 +83,25 @@ const initial = (m: ProjectMember) => (m.name || m.username).charAt(0).toUpperCa
           />
         </div>
         <div class="-mr-1 overflow-y-auto pr-1">
-        <button
-          v-for="m in filteredMembers"
-          :key="m.id"
-          type="button"
-          :data-testid="`assignee-option-${m.username}`"
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
-          @click="select(m.id)"
-        >
-          <Avatar class="size-5 text-[10px]"
-            ><AvatarFallback>{{ initial(m) }}</AvatarFallback></Avatar
+          <button
+            v-for="m in filteredMembers"
+            :key="m.id"
+            type="button"
+            :data-testid="`assignee-option-${m.username}`"
+            class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
+            @click="select(m.id)"
           >
-          <span class="flex-1 truncate text-foreground"
-            >{{ m.name }} <span class="text-muted-foreground">@{{ m.username }}</span></span
-          >
-          <Check v-if="modelValue === m.id" class="size-3.5 text-primary" />
-        </button>
-        <p v-if="!filteredMembers.length" class="px-2 py-1.5 text-xs text-muted-foreground">
-          No members found.
-        </p>
+            <Avatar class="size-5 text-[10px]"
+              ><AvatarFallback>{{ initial(m) }}</AvatarFallback></Avatar
+            >
+            <span class="flex-1 truncate text-foreground"
+              >{{ m.name }} <span class="text-muted-foreground">@{{ m.username }}</span></span
+            >
+            <Check v-if="modelValue === m.id" class="size-3.5 text-primary" />
+          </button>
+          <p v-if="!filteredMembers.length" class="px-2 py-1.5 text-xs text-muted-foreground">
+            No members found.
+          </p>
         </div>
       </div>
     </div>

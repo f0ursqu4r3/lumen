@@ -182,25 +182,6 @@
   }
 }
 
-/* Masthead signal bleed — the amber identity doesn't sit in a dot alone; it
-   washes a hairline along the bottom of the header, brightest under the lamp at
-   the left and fading to nothing across the bar. A telemetry signature, not a
-   border accent: it lives on the masthead edge, never on a card or list item. */
-.masthead-signal::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: -1px;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    oklch(0.82 0.142 81 / 0.55) 0%,
-    oklch(0.82 0.142 81 / 0.12) 16%,
-    oklch(0.82 0.142 81 / 0) 46%
-  );
-  pointer-events: none;
-}
-
 /* Keycap — a small physical key for keyboard legends, reinforcing the launcher
    identity. A faint top inner-highlight catches light like the surface tokens. */
 .kbd {

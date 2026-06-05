@@ -38,11 +38,7 @@ describe('AssigneePicker', () => {
     const order = w
       .findAll('[data-testid^="assignee-option-"]')
       .map((b) => b.attributes('data-testid'))
-    expect(order).toEqual([
-      'assignee-option-amy',
-      'assignee-option-mira',
-      'assignee-option-zed',
-    ])
+    expect(order).toEqual(['assignee-option-amy', 'assignee-option-mira', 'assignee-option-zed'])
   })
 
   it('filters members by name or username as you type', async () => {

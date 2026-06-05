@@ -74,7 +74,9 @@ async function save() {
         >
           First run
         </p>
-        <h1 class="mt-2 text-[1.625rem] leading-none font-semibold tracking-[-0.02em] text-foreground">
+        <h1
+          class="mt-2 text-[1.625rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+        >
           Connect to GitLab
         </h1>
         <p class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -128,7 +130,8 @@ async function save() {
             />
             <p class="text-xs leading-relaxed text-muted-foreground/70">
               Needs the
-              <code class="rounded bg-muted/60 px-1 py-0.5 font-mono text-[0.6875rem] text-foreground/90"
+              <code
+                class="rounded bg-muted/60 px-1 py-0.5 font-mono text-[0.6875rem] text-foreground/90"
                 >api</code
               >
               scope. Create one under
@@ -156,9 +159,7 @@ async function save() {
         </form>
       </Card>
 
-      <p
-        class="mt-5 text-center font-mono text-[11px] tracking-[0.04em] text-muted-foreground/50"
-      >
+      <p class="mt-5 text-center font-mono text-[11px] tracking-[0.04em] text-muted-foreground/50">
         lumen ▸ awaiting connection
       </p>
     </div>

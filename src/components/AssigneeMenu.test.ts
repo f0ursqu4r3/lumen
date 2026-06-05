@@ -8,14 +8,26 @@ const sections: AssigneeSection[] = [
     rel: 'assignee',
     label: 'Assigned',
     people: [
-      { username: 'ada', name: 'Ada Lovelace', avatarUrl: null, relationship: 'assignee', isAssigned: true },
+      {
+        username: 'ada',
+        name: 'Ada Lovelace',
+        avatarUrl: null,
+        relationship: 'assignee',
+        isAssigned: true,
+      },
     ],
   },
   {
     rel: 'member',
     label: 'Project members',
     people: [
-      { username: 'bob', name: 'Bob Bk', avatarUrl: null, relationship: 'member', isAssigned: false },
+      {
+        username: 'bob',
+        name: 'Bob Bk',
+        avatarUrl: null,
+        relationship: 'member',
+        isAssigned: false,
+      },
       { username: 'dee', name: 'Dee', avatarUrl: null, relationship: 'member', isAssigned: false },
     ],
   },

@@ -63,11 +63,18 @@ function srcFor(path: string): string {
   // need RPC resolution to a blob URL. Routing an external URL through the asset RPC
   // builds a garbage `${gitlabUrl}/api<url>` endpoint.
   if (!needsAssetResolution(path)) return path
-  if (!resolved[path]) resolveAsset(path).then((u) => { resolved[path] = u }).catch(() => {})
+  if (!resolved[path])
+    resolveAsset(path)
+      .then((u) => {
+        resolved[path] = u
+      })
+      .catch(() => {})
   return resolved[path] ?? ''
 }
 // Eagerly resolve the current item so it shows without waiting for a thumbnail pass.
-watchEffect(() => { if (current.value?.src) srcFor(current.value.src) })
+watchEffect(() => {
+  if (current.value?.src) srcFor(current.value.src)
+})
 
 function go(delta: number) {
   index.value = clamp(index.value + delta)

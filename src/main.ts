@@ -18,10 +18,7 @@ console.log(
 async function boot() {
   const { url } = await rpc.getConfig()
   const queryClient = createPersistedQueryClient(url)
-  createApp(App)
-    .use(router)
-    .use(VueQueryPlugin, { queryClient })
-    .mount('#app')
+  createApp(App).use(router).use(VueQueryPlugin, { queryClient }).mount('#app')
 }
 void boot().catch((err) => {
   console.error('[lumen] failed to start', err)

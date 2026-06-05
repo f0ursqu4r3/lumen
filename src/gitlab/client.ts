@@ -7,7 +7,10 @@ import { rpc } from '@/lib/rpc'
 // rebuild a Response (preserving the upstream status so errors.ts maps 401/403).
 export async function rpcGraphqlFetch(_url: string, init?: RequestInit): Promise<Response> {
   const body = typeof init?.body === 'string' ? init.body : '{}'
-  const { query, variables } = JSON.parse(body) as { query: string; variables?: Record<string, unknown> }
+  const { query, variables } = JSON.parse(body) as {
+    query: string
+    variables?: Record<string, unknown>
+  }
   const { status, data, errors } = await rpc.gitlabGraphql({ query, variables })
   return new Response(JSON.stringify({ data, errors }), {
     status,

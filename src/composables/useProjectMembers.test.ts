@@ -37,7 +37,15 @@ describe('useProjectMembers', () => {
       project: {
         projectMembers: {
           nodes: [
-            { user: { id: 'gid://user/1', username: 'kdougan', name: 'K D', avatarUrl: null, bot: false } },
+            {
+              user: {
+                id: 'gid://user/1',
+                username: 'kdougan',
+                name: 'K D',
+                avatarUrl: null,
+                bot: false,
+              },
+            },
             {
               user: {
                 id: 'gid://user/9',

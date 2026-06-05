@@ -14,9 +14,9 @@ function base64ToBlob(base64: string, contentType: string): Blob {
 export function resolveAsset(path: string): Promise<string> {
   const hit = cache.get(path)
   if (hit) return hit
-  const p = rpc.gitlabAsset({ path }).then(({ base64, contentType }) =>
-    URL.createObjectURL(base64ToBlob(base64, contentType)),
-  )
+  const p = rpc
+    .gitlabAsset({ path })
+    .then(({ base64, contentType }) => URL.createObjectURL(base64ToBlob(base64, contentType)))
   cache.set(path, p)
   return p
 }
@@ -31,7 +31,14 @@ export function useGitlabAsset(path: Ref<string> | (() => string)) {
   const url = ref<string | null>(null)
   watchEffect(() => {
     const p = typeof path === 'function' ? path() : path.value
-    if (p) resolveAsset(p).then((u) => { url.value = u }).catch(() => { url.value = null })
+    if (p)
+      resolveAsset(p)
+        .then((u) => {
+          url.value = u
+        })
+        .catch(() => {
+          url.value = null
+        })
   })
   return url
 }

@@ -1,10 +1,10 @@
-import type { ApplicationMenuItemConfig } from "electrobun/bun";
+import type { ApplicationMenuItemConfig } from 'electrobun/bun'
 
 // Action id for the "Toggle Developer Tools" menu item; handled in index.ts by
 // calling win.webview.toggleDevTools().
-export const DEVTOOLS_ACTION = "toggle-devtools";
+export const DEVTOOLS_ACTION = 'toggle-devtools'
 
-const sep: ApplicationMenuItemConfig = { type: "separator" };
+const sep: ApplicationMenuItemConfig = { type: 'separator' }
 
 /**
  * The macOS application menu. A native webview app has NO clipboard support
@@ -19,46 +19,46 @@ export function buildAppMenu(appName: string): ApplicationMenuItemConfig[] {
     {
       label: appName,
       submenu: [
-        { role: "about" },
+        { role: 'about' },
         sep,
-        { role: "hide", accelerator: "CommandOrControl+H" },
-        { role: "hideOthers", accelerator: "Alt+CommandOrControl+H" },
-        { role: "showAll" },
+        { role: 'hide', accelerator: 'CommandOrControl+H' },
+        { role: 'hideOthers', accelerator: 'Alt+CommandOrControl+H' },
+        { role: 'showAll' },
         sep,
-        { role: "quit", accelerator: "CommandOrControl+Q" },
+        { role: 'quit', accelerator: 'CommandOrControl+Q' },
       ],
     },
     {
-      label: "Edit",
+      label: 'Edit',
       submenu: [
-        { role: "undo", accelerator: "CommandOrControl+Z" },
-        { role: "redo", accelerator: "Shift+CommandOrControl+Z" },
+        { role: 'undo', accelerator: 'CommandOrControl+Z' },
+        { role: 'redo', accelerator: 'Shift+CommandOrControl+Z' },
         sep,
-        { role: "cut", accelerator: "CommandOrControl+X" },
-        { role: "copy", accelerator: "CommandOrControl+C" },
-        { role: "paste", accelerator: "CommandOrControl+V" },
-        { role: "selectAll", accelerator: "CommandOrControl+A" },
+        { role: 'cut', accelerator: 'CommandOrControl+X' },
+        { role: 'copy', accelerator: 'CommandOrControl+C' },
+        { role: 'paste', accelerator: 'CommandOrControl+V' },
+        { role: 'selectAll', accelerator: 'CommandOrControl+A' },
       ],
     },
     {
-      label: "Develop",
+      label: 'Develop',
       submenu: [
         {
-          label: "Toggle Developer Tools",
+          label: 'Toggle Developer Tools',
           action: DEVTOOLS_ACTION,
-          accelerator: "Alt+CommandOrControl+I",
+          accelerator: 'Alt+CommandOrControl+I',
         },
       ],
     },
     {
-      label: "Window",
+      label: 'Window',
       submenu: [
-        { role: "minimize", accelerator: "CommandOrControl+M" },
-        { role: "zoom" },
-        { role: "toggleFullScreen", accelerator: "Control+CommandOrControl+F" },
+        { role: 'minimize', accelerator: 'CommandOrControl+M' },
+        { role: 'zoom' },
+        { role: 'toggleFullScreen', accelerator: 'Control+CommandOrControl+F' },
         sep,
-        { role: "close", accelerator: "CommandOrControl+W" },
+        { role: 'close', accelerator: 'CommandOrControl+W' },
       ],
     },
-  ];
+  ]
 }

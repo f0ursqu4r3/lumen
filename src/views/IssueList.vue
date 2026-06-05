@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle, onKeyStroke, useElementBounding } from '@vueuse/core'
-import { Plus, Search, LoaderCircle, List, Columns3, X, GripVertical } from '@lucide/vue'
+import { Plus, Search, LoaderCircle, List, Columns3, X, GripVertical, ArrowLeft } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
@@ -326,11 +326,26 @@ onKeyStroke(['c', 'C'], (e) => {
         >
           Issues
         </p>
-        <h1
-          class="vt-project-title mt-2 truncate text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+        <!-- The title doubles as the way back. With the app masthead gone this is
+             the only route up to the project picker, so the project name itself is
+             the link — the arrow takes the lead position and slides on hover, the
+             same affordance the detail view uses to step back to this list. The
+             view-transition name stays on the <h1> so the picker→issues morph
+             still lands on the title text. -->
+        <RouterLink
+          :to="{ name: 'projects' }"
+          data-testid="back-to-projects"
+          class="group/back -ml-1 mt-2 flex max-w-full items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
         >
-          {{ repoName }}
-        </h1>
+          <ArrowLeft
+            class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
+          />
+          <h1
+            class="vt-project-title min-w-0 truncate text-[1.875rem] leading-none font-semibold tracking-[-0.02em] text-foreground"
+          >
+            {{ repoName }}
+          </h1>
+        </RouterLink>
         <p v-if="pathPrefix" class="mt-1.5 truncate font-mono text-xs text-muted-foreground/75">
           {{ pathPrefix }}/
         </p>

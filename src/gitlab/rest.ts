@@ -10,7 +10,8 @@ function httpError(status: number, statusText: string): GitLabError {
   if (status === 401 || status === 403) {
     return {
       kind: 'auth',
-      message: 'Authentication failed — open Settings and check the GitLab URL and token (scope: api).',
+      message:
+        'Authentication failed — open Settings and check the GitLab URL and token (scope: api).',
     }
   }
   return { kind: 'network', message: `GitLab request failed (${status} ${statusText || 'error'}).` }

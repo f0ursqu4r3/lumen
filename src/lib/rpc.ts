@@ -1,5 +1,5 @@
-import Electrobun, { Electroview } from "electrobun/view";
-import type { LumenRequests } from "./rpcContract";
+import Electrobun, { Electroview } from 'electrobun/view'
+import type { LumenRequests } from './rpcContract'
 
 // One typed funnel over the loosely-typed framework client.
 //
@@ -10,17 +10,17 @@ import type { LumenRequests } from "./rpcContract";
 // This is request-response only (no unsolicited bun->webview messages), so
 // building the bridge right before the first request is safe -- it registers
 // synchronously before anything is sent.
-let request: LumenRequests | null = null;
+let request: LumenRequests | null = null
 function client(): LumenRequests {
   if (!request) {
     const rpcDef = Electroview.defineRPC<any>({
       maxRequestTime: 30000,
       handlers: { requests: {}, messages: {} },
-    });
-    const electrobun = new Electrobun.Electroview({ rpc: rpcDef });
-    request = (electrobun.rpc as any).request as LumenRequests;
+    })
+    const electrobun = new Electrobun.Electroview({ rpc: rpcDef })
+    request = (electrobun.rpc as any).request as LumenRequests
   }
-  return request;
+  return request
 }
 
 export const rpc: LumenRequests = {
@@ -32,4 +32,4 @@ export const rpc: LumenRequests = {
   clearConfig: () => client().clearConfig(),
   openExternal: (a) => client().openExternal(a),
   clipboardWriteText: (a) => client().clipboardWriteText(a),
-};
+}
