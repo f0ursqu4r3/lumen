@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Tag, UserPlus, ExternalLink, X, CheckCheck } from '@lucide/vue'
+import { ref, computed, watch } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { Tag, UserPlus, CircleDot, ExternalLink, X, CheckCheck } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
-import StatusPicker from '@/components/StatusPicker.vue'
 import type { ProjectLabel } from '@/composables/useProjectLabels'
 import type { ProjectMember } from '@/composables/useProjectMembers'
 import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
@@ -26,11 +26,40 @@ const emit = defineEmits<{
   clear: []
 }>()
 
-// --- Labels popover (titles <-> ids via catalog) ----------------------------
-const labelsOpen = ref(false)
+// One menu open at a time (mutual exclusion). Clicking outside the bar — or
+// clearing the selection — closes whatever is open and drops its pending picks.
+type Menu = 'labels' | 'assignee' | 'status'
+const openMenu = ref<Menu | null>(null)
+const barRoot = ref<HTMLElement | null>(null)
+onClickOutside(barRoot, () => closeMenu())
+watch(
+  () => props.count,
+  (c) => {
+    if (c === 0) closeMenu()
+  },
+)
+
 const pendingTitles = ref<string[]>([])
 const labelMode = ref<'add' | 'remove'>('add')
+const pendingAssignee = ref<string | null>(null)
 const titleToId = computed(() => new Map(props.catalog.map((l) => [l.title, l.id])))
+
+function closeMenu() {
+  openMenu.value = null
+  pendingTitles.value = []
+  pendingAssignee.value = null
+}
+function toggleMenu(m: Menu) {
+  if (openMenu.value === m) {
+    closeMenu()
+    return
+  }
+  // Switching menus drops the prior menu's pending picks.
+  pendingTitles.value = []
+  pendingAssignee.value = null
+  openMenu.value = m
+}
+
 function applyLabels() {
   const ids = pendingTitles.value
     .map((t) => titleToId.value.get(t))
@@ -38,33 +67,18 @@ function applyLabels() {
   if (!ids.length) return
   if (labelMode.value === 'add') emit('add-labels', ids)
   else emit('remove-labels', ids)
-  pendingTitles.value = []
-  labelsOpen.value = false
+  closeMenu()
 }
 
-// --- Assignee popover -------------------------------------------------------
-const assigneeOpen = ref(false)
-const pendingAssignee = ref<string | null>(null)
 function applyAssignee() {
   const username = props.members.find((m) => m.id === pendingAssignee.value)?.username ?? null
   emit('set-assignee', { username })
-  pendingAssignee.value = null
-  assigneeOpen.value = false
+  closeMenu()
 }
 
-function toggleLabels() {
-  if (labelsOpen.value) pendingTitles.value = []
-  labelsOpen.value = !labelsOpen.value
-}
-
-function toggleAssignee() {
-  if (assigneeOpen.value) pendingAssignee.value = null
-  assigneeOpen.value = !assigneeOpen.value
-}
-
-// --- Status (StatusPicker emits immediately on select) ----------------------
-function onSelectStatus(status: WorkItemStatus) {
+function pickStatus(status: WorkItemStatus) {
   emit('set-status', status)
+  closeMenu()
 }
 </script>
 
@@ -72,22 +86,25 @@ function onSelectStatus(status: WorkItemStatus) {
   <Transition name="bulk-bar">
     <div
       v-if="count > 0"
+      ref="barRoot"
       data-testid="bulk-action-bar"
       class="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
     >
-      <span class="px-1 font-mono text-xs font-medium tabular-nums text-foreground" aria-live="polite">
+      <span
+        class="px-1 font-mono text-xs font-medium tabular-nums text-foreground"
+        aria-live="polite"
+      >
         {{ count }} selected
       </span>
       <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
 
       <!-- Labels -->
       <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="toggleLabels">
+        <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="toggleMenu('labels')">
           <Tag /> Labels
         </Button>
-        <!-- v1: popovers close via their trigger button or Apply, not outside-click -->
         <div
-          v-if="labelsOpen"
+          v-if="openMenu === 'labels'"
           class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
         >
           <div class="mb-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
@@ -123,11 +140,11 @@ function onSelectStatus(status: WorkItemStatus) {
 
       <!-- Assign -->
       <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-assign" @click="toggleAssignee">
+        <Button variant="ghost" size="sm" data-testid="bulk-assign" @click="toggleMenu('assignee')">
           <UserPlus /> Assign
         </Button>
         <div
-          v-if="assigneeOpen"
+          v-if="openMenu === 'assignee'"
           class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
         >
           <AssigneePicker v-model="pendingAssignee" :members="members" label="Assignee" />
@@ -143,18 +160,45 @@ function onSelectStatus(status: WorkItemStatus) {
         </div>
       </div>
 
-      <!-- Status (applies on pick) -->
-      <StatusPicker
-        v-if="statuses.length"
-        :statuses="statuses"
-        :current="null"
-        label="Status"
-        @select="onSelectStatus"
-      />
+      <!-- Status: a ghost trigger matching Labels/Assign, opening an upward popover
+           (the bar is bottom-anchored, so a downward menu would clip off-screen). -->
+      <div v-if="statuses.length" class="relative">
+        <Button variant="ghost" size="sm" data-testid="bulk-status" @click="toggleMenu('status')">
+          <CircleDot /> Status
+        </Button>
+        <div
+          v-if="openMenu === 'status'"
+          data-testid="bulk-status-panel"
+          class="absolute bottom-full left-0 mb-2 w-56 rounded-lg border border-border bg-popover p-1 shadow-pop"
+        >
+          <ul class="max-h-64 overflow-y-auto">
+            <li v-for="s in statuses" :key="s.id">
+              <button
+                type="button"
+                :data-testid="`bulk-status-opt-${s.name}`"
+                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
+                @click="pickStatus(s)"
+              >
+                <span
+                  class="size-2.5 shrink-0 rounded-full"
+                  :style="{ backgroundColor: s.color }"
+                  aria-hidden="true"
+                />
+                <span class="min-w-0 flex-1 truncate">{{ s.name }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
 
-      <Button variant="ghost" size="sm" data-testid="bulk-open-combined" @click="emit('open-combined')">
+      <Button
+        variant="ghost"
+        size="sm"
+        data-testid="bulk-open-combined"
+        @click="emit('open-combined')"
+      >
         <ExternalLink /> Open combined
       </Button>
       <Button variant="ghost" size="sm" data-testid="bulk-select-all" @click="emit('select-all')">
