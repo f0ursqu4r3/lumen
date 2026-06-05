@@ -23,6 +23,7 @@ export const router = createRouter({
       props: (route) => ({
         fullPath: route.params.fullPath,
         iid: route.params.iid,
+        // Only '1' is canonical — issueWindowUrl always emits ?window=1.
         windowed: route.query.window === '1',
       }),
     },
