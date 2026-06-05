@@ -6,15 +6,22 @@ export interface IssueDraft {
   state: 'opened' | 'closed'
   labelIds: string[]
   assigneeUsernames: string[]
+  // GitLab's native work-item Status (a status GlobalID), or null when unset.
+  // Seeded from a separate work-item query, so it is passed into draftFromIssue
+  // rather than read off the issue.
+  statusId: string | null
 }
 
-export function draftFromIssue(issue: {
-  title: string
-  description?: string | null
-  state: string
-  labels?: { nodes?: ({ id: string } | null)[] | null } | null
-  assignees?: { nodes?: ({ username: string } | null)[] | null } | null
-}): IssueDraft {
+export function draftFromIssue(
+  issue: {
+    title: string
+    description?: string | null
+    state: string
+    labels?: { nodes?: ({ id: string } | null)[] | null } | null
+    assignees?: { nodes?: ({ username: string } | null)[] | null } | null
+  },
+  statusId: string | null = null,
+): IssueDraft {
   return {
     title: issue.title,
     description: issue.description ?? '',
@@ -23,6 +30,7 @@ export function draftFromIssue(issue: {
     assigneeUsernames: (issue.assignees?.nodes ?? [])
       .filter((a): a is { username: string } => !!a)
       .map((a) => a.username),
+    statusId,
   }
 }
 
@@ -37,6 +45,7 @@ export function isDirty(o: IssueDraft, d: IssueDraft): boolean {
     o.title !== d.title ||
     o.description !== d.description ||
     o.state !== d.state ||
+    o.statusId !== d.statusId ||
     !sameSet(o.labelIds, d.labelIds) ||
     !sameSet(o.assigneeUsernames, d.assigneeUsernames)
   )
@@ -51,6 +60,9 @@ export interface IssueEditDiff {
     removeLabelIds?: string[]
   }
   assignees?: string[]
+  // The work-item status to apply (a status GlobalID). Set only when it changed
+  // to a concrete value — it rides the same save() as the rest of the diff.
+  statusId?: string
 }
 
 export function diffIssueEdit(o: IssueDraft, d: IssueDraft): IssueEditDiff {
@@ -66,5 +78,6 @@ export function diffIssueEdit(o: IssueDraft, d: IssueDraft): IssueEditDiff {
   const diff: IssueEditDiff = {}
   if (Object.keys(update).length) diff.update = update
   if (!sameSet(o.assigneeUsernames, d.assigneeUsernames)) diff.assignees = d.assigneeUsernames
+  if (o.statusId !== d.statusId && d.statusId) diff.statusId = d.statusId
   return diff
 }

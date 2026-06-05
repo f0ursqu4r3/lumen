@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, nextTick } from 'vue'
 import { withQuery } from '@/test/withQuery'
 
-const { updateAsync, setAsync, addNoteAsync } = vi.hoisted(() => ({
+const { updateAsync, setAsync, addNoteAsync, setStatusAsync, statusState } = vi.hoisted(() => ({
   updateAsync: vi.fn(),
   setAsync: vi.fn(),
   addNoteAsync: vi.fn(),
+  setStatusAsync: vi.fn(),
+  statusState: { value: { workItemId: 'gid://wi/9', status: null } as Record<string, unknown> },
 }))
 vi.mock('@/composables/useIssueMutations', () => ({
   useUpdateIssue: () => ({
@@ -20,6 +22,14 @@ vi.mock('@/composables/useIssueMutations', () => ({
   }),
   useAddNote: () => ({
     mutateAsync: addNoteAsync,
+    isPending: { value: false },
+    error: { value: null },
+  }),
+}))
+vi.mock('@/composables/useWorkItemStatus', () => ({
+  useWorkItemStatus: () => ({ data: statusState }),
+  useSetWorkItemStatus: () => ({
+    mutateAsync: setStatusAsync,
     isPending: { value: false },
     error: { value: null },
   }),
@@ -40,6 +50,8 @@ beforeEach(() => {
   updateAsync.mockReset().mockResolvedValue({})
   setAsync.mockReset().mockResolvedValue({})
   addNoteAsync.mockReset().mockResolvedValue({})
+  setStatusAsync.mockReset().mockResolvedValue({})
+  statusState.value = { workItemId: 'gid://wi/9', status: null }
 })
 
 describe('useIssueDraft', () => {
@@ -73,6 +85,35 @@ describe('useIssueDraft', () => {
     expect(setAsync).toHaveBeenCalledWith({
       assigneeUsernames: ['ada', 'bob'],
     })
+  })
+
+  it('buffers a status change and persists it on save (nothing applied early)', async () => {
+    statusState.value = { workItemId: 'gid://wi/9', status: { id: 'gid://s/1' } }
+    const issueRef = ref({ ...issue })
+    const { result } = withQuery(() => useIssueDraft('grp/proj', '9', issueRef))
+    await nextTick()
+    // Seeded clean from the current status; selecting a new one buffers it.
+    expect(result().dirty.value).toBe(false)
+    result().draft.value!.statusId = 'gid://s/2'
+    await nextTick()
+    expect(result().dirty.value).toBe(true)
+    expect(setStatusAsync).not.toHaveBeenCalled() // not hot — waits for save
+    await result().save()
+    expect(setStatusAsync).toHaveBeenCalledWith({
+      workItemId: 'gid://wi/9',
+      statusId: 'gid://s/2',
+    })
+    expect(result().dirty.value).toBe(false)
+  })
+
+  it('save with only metadata change does not call setStatus', async () => {
+    statusState.value = { workItemId: 'gid://wi/9', status: { id: 'gid://s/1' } }
+    const issueRef = ref({ ...issue })
+    const { result } = withQuery(() => useIssueDraft('grp/proj', '9', issueRef))
+    result().draft.value!.description = 'd2'
+    await nextTick()
+    await result().save()
+    expect(setStatusAsync).not.toHaveBeenCalled()
   })
 
   it('save with only metadata change does not call setAssignees', async () => {

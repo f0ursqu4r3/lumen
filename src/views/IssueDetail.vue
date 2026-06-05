@@ -8,11 +8,13 @@ import { useAddNote } from '@/composables/useIssueMutations'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useProjectContributors } from '@/composables/useProjectContributors'
 import { useProjectLabels } from '@/composables/useProjectLabels'
+import { useWorkItemStatuses, type WorkItemStatus } from '@/composables/useWorkItemStatus'
 import { useConfirm } from '@/composables/useConfirm'
 import { rpc } from '@/lib/rpc'
 import QuickAssign from '@/components/QuickAssign.vue'
 import AssigneeEditor from '@/components/AssigneeEditor.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
+import StatusPicker from '@/components/StatusPicker.vue'
 import StateBadge from '@/components/StateBadge.vue'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import { Check, Link, ExternalLink, Images, ArrowLeft } from '@lucide/vue'
@@ -38,6 +40,11 @@ const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toR
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
 const { data: contributors } = useProjectContributors(toRef(props, 'fullPath'))
 const { data: labelCatalog } = useProjectLabels(toRef(props, 'fullPath'))
+// Work-item Status (To do / In progress / Done / …) — a native GitLab field,
+// separate from labels and from open/closed state. The list of options is read
+// here; the current value and its persistence live in the issue draft, so a
+// status change buffers and saves exactly like every other field (nothing hot).
+const { data: statusOptions } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const draftApi = useIssueDraft(props.fullPath, props.iid, issue)
 const { draft, comment, dirty, saving, save, reset, error: saveError } = draftApi
 const { confirm } = useConfirm()
@@ -59,6 +66,15 @@ const draftLabelTitles = computed<string[]>({
       .filter((id): id is string => !!id)
   },
 })
+
+// The picker shows/sets the draft's buffered status (resolved against the
+// options list); selecting just mutates the draft, so it persists on Save.
+const currentStatus = computed<WorkItemStatus | null>(
+  () => statusOptions.value?.find((s) => s.id === draft.value?.statusId) ?? null,
+)
+function onSelectStatus(status: WorkItemStatus) {
+  if (draft.value) draft.value.statusId = status.id
+}
 
 const actionError = computed(() => saveError.value)
 
@@ -448,6 +464,14 @@ if (!props.embedded) {
         class="issue__meta animate-row-in space-y-5 rounded-xl border border-border bg-card/55 p-4 shadow-card"
         style="animation-delay: 90ms"
       >
+        <StatusPicker
+          v-if="statusOptions?.length"
+          :statuses="statusOptions"
+          :current="currentStatus"
+          label="Status"
+          @select="onSelectStatus"
+        />
+
         <LabelPicker v-model="draftLabelTitles" :catalog="catalog" label="Labels" />
 
         <AssigneeEditor

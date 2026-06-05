@@ -19,8 +19,13 @@ describe('issueEdit', () => {
       state: 'opened',
       labelIds: ['l1', 'l2'],
       assigneeUsernames: ['ada'],
+      statusId: null,
     })
     expect(draftFromIssue({ ...issue, description: null }).description).toBe('')
+  })
+
+  it('draftFromIssue carries the seeded status id', () => {
+    expect(draftFromIssue(issue, 'gid://s/2').statusId).toBe('gid://s/2')
   })
 
   it('isDirty is false for an identical draft, true on any field change', () => {
@@ -28,6 +33,7 @@ describe('issueEdit', () => {
     expect(isDirty(base(), { ...base(), title: 'X' })).toBe(true)
     expect(isDirty(base(), { ...base(), labelIds: ['l1'] })).toBe(true)
     expect(isDirty(base(), { ...base(), assigneeUsernames: [] })).toBe(true)
+    expect(isDirty(base(), { ...base(), statusId: 'gid://s/3' })).toBe(true)
   })
 
   it('isDirty ignores label/assignee ordering', () => {
@@ -74,5 +80,16 @@ describe('issueEdit', () => {
         assigneeUsernames: ['bob'],
       }),
     ).toEqual({ update: { title: 'New' }, assignees: ['bob'] })
+  })
+
+  it('diff emits statusId only when it changed to a concrete value', () => {
+    const seeded: IssueDraft = { ...base(), statusId: 'gid://s/1' }
+    expect(diffIssueEdit(seeded, { ...seeded, statusId: 'gid://s/2' })).toEqual({
+      statusId: 'gid://s/2',
+    })
+    // No status write when it didn't change…
+    expect(diffIssueEdit(seeded, { ...seeded }).statusId).toBeUndefined()
+    // …and never emit a null clear (GitLab status can't be unset this way).
+    expect(diffIssueEdit(seeded, { ...seeded, statusId: null }).statusId).toBeUndefined()
   })
 })
