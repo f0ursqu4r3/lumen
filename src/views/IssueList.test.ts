@@ -75,6 +75,7 @@ const mockQuery = (over: Record<string, unknown> = {}) =>
     hasNextPage: ref(false),
     isFetchingNextPage: ref(false),
     fetchNextPage: vi.fn(),
+    refetch: vi.fn().mockResolvedValue(undefined),
     ...over,
   })
 
@@ -128,6 +129,15 @@ describe('IssueList', () => {
     const w = mountList()
     await w.get('[data-testid="new-issue"]').trigger('click')
     expect(w.findComponent(IssueComposer).props('open')).toBe(true)
+  })
+
+  it('refetches the loaded pages when the refresh button is clicked', async () => {
+    const refetch = vi.fn().mockResolvedValue(undefined)
+    mockQuery({ issues: ref([issue]), refetch })
+    const w = mountList()
+    await w.get('[data-testid="refresh-issues"]').trigger('click')
+    await flushPromises()
+    expect(refetch).toHaveBeenCalledOnce()
   })
 
   it('opens the composer from the empty-state Create issue button', async () => {

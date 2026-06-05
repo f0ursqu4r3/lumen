@@ -11,6 +11,7 @@ import {
   GripVertical,
   ArrowLeft,
   Workflow,
+  RefreshCw,
 } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { useProjectLabels } from '@/composables/useProjectLabels'
@@ -164,10 +165,22 @@ const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'))
 // that lives across many tabs.
 useTitle(computed(() => `${repoName.value} · lumen`))
 
-const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } = useIssues(
-  toRef(props, 'fullPath'),
-  filters,
-)
+const { issues, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } =
+  useIssues(toRef(props, 'fullPath'), filters)
+
+// Manual refresh: refetch every loaded page on demand. We track our own flag
+// (rather than the query's `isFetching`) so the spinner reflects only the user's
+// click, not the background poll or pagination fetches.
+const isRefreshing = ref(false)
+async function refresh() {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await refetch()
+  } finally {
+    isRefreshing.value = false
+  }
+}
 
 const count = computed(() => issues.value.length)
 const hasMore = computed(() => hasNextPage.value ?? false)
@@ -491,6 +504,20 @@ onKeyStroke(['c', 'C'], (e) => {
         @rename="savedViews.rename"
         @remove="removeView"
       />
+
+      <!-- Manual refresh: re-fetches loaded pages on demand, on top of the
+           background poll. Spins only while the user's own refresh is in flight. -->
+      <button
+        type="button"
+        data-testid="refresh-issues"
+        aria-label="Refresh issues"
+        title="Refresh"
+        :disabled="isRefreshing"
+        class="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-60"
+        @click="refresh"
+      >
+        <RefreshCw class="size-4" :class="isRefreshing ? 'animate-spin' : ''" />
+      </button>
 
       <!-- View toggle -->
       <div
