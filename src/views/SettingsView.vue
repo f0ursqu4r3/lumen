@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitle } from '@vueuse/core'
 import { PlugZap, KeyRound, Server, LoaderCircle, ArrowRight, TriangleAlert } from '@lucide/vue'
-import { rpc } from '@/lib/rpc'
+import { useGitlabConnect } from '@/composables/useGitlabConnect'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,46 +12,16 @@ import { Button } from '@/components/ui/button'
 useTitle('Connect · lumen')
 
 const router = useRouter()
+const { url, token, status, message, testing, canSubmit, loadUrl, save } = useGitlabConnect()
 
-const url = ref('')
-const token = ref('')
-const status = ref<'idle' | 'testing' | 'error'>('idle')
-const message = ref('')
-
-// Prefill the URL from any persisted config so re-running settings (e.g. to swap
+// Prefill the URL from any persisted config so re-running connect (e.g. to swap
 // a token) doesn't make you retype the instance address.
-onMounted(async () => {
-  const cfg = await rpc.getConfig()
-  if (cfg.url) url.value = cfg.url
-})
+onMounted(loadUrl)
 
-const testing = computed(() => status.value === 'testing')
-// The connect action is the one amber moment here, so it should only invite a
-// click when there's something to connect with.
-const canSubmit = computed(
-  () => !testing.value && url.value.trim().length > 0 && token.value.trim().length > 0,
-)
-
-// Save first, then probe with the cheapest authenticated query GitLab offers.
-// A clean 200 with no GraphQL errors is the only thing that earns the handoff
-// to the workspace — anything else surfaces as an inline, recoverable error.
-async function save() {
-  if (!canSubmit.value) return
-  status.value = 'testing'
-  message.value = ''
-  try {
-    await rpc.saveConfig({ url: url.value.trim(), token: token.value.trim() })
-    const res = await rpc.gitlabGraphql({ query: '{ currentUser { username } }' })
-    if (res.status === 200 && !res.errors?.length) {
-      router.replace({ name: 'projects' })
-    } else {
-      status.value = 'error'
-      message.value = res.errors?.[0]?.message ?? `GitLab returned ${res.status}`
-    }
-  } catch (e) {
-    status.value = 'error'
-    message.value = e instanceof Error ? e.message : 'Could not reach GitLab'
-  }
+// A clean probe earns the handoff to the workspace; anything else stays put as
+// an inline, recoverable error (surfaced by the composable's status/message).
+async function onSubmit() {
+  if (await save()) router.replace({ name: 'projects' })
 }
 </script>
 
@@ -84,7 +54,7 @@ async function save() {
       </div>
 
       <Card class="gap-0 p-0 shadow-pop">
-        <form class="flex flex-col gap-5 p-6" @submit.prevent="save">
+        <form class="flex flex-col gap-5 p-6" @submit.prevent="onSubmit">
           <div class="space-y-2">
             <Label
               for="gitlab-url"
@@ -103,7 +73,7 @@ async function save() {
               placeholder="https://gitlab.example.com"
               :disabled="testing"
               class="h-10 font-mono text-base"
-              @keydown.enter.prevent="save"
+              @keydown.enter.prevent="onSubmit"
             />
           </div>
 
@@ -124,7 +94,7 @@ async function save() {
               placeholder="glpat-…"
               :disabled="testing"
               class="h-10 font-mono text-base"
-              @keydown.enter.prevent="save"
+              @keydown.enter.prevent="onSubmit"
             />
             <p class="text-xs leading-relaxed text-muted-foreground/70">
               Needs the
