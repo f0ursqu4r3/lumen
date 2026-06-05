@@ -104,7 +104,7 @@
      tracking) ride along with the small-label and display tiers since those have
      fixed roles; the workhorse xs/sm/base/lg keep Tailwind's default leading so
      existing `leading-*` overrides stay authoritative. */
-  --text-micro: 0.625rem; /* 10px — eyebrow kickers, in-circle glyphs, micro-meta */
+  --text-micro: 0.625rem; /* 10px — eyebrow kickers, micro-meta, count badges */
   --text-micro--line-height: 1.2;
   --text-2xs: 0.6875rem; /* 11px — field labels, chips, pills, mono ids */
   --text-2xs--line-height: 1.35;

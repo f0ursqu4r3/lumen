@@ -174,17 +174,16 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         @click="filterAssignee(a.username)"
       >
         <Avatar class="size-6 ring-2 ring-card">
-          <AvatarFallback class="bg-muted text-micro font-medium text-muted-foreground">
+          <AvatarFallback class="bg-muted text-muted-foreground">
             {{ initials(a.name) }}
           </AvatarFallback>
         </Avatar>
       </button>
-      <span
-        v-if="extraAssignees"
-        class="grid size-6 place-items-center rounded-full bg-muted text-micro font-medium text-muted-foreground ring-2 ring-card"
-      >
-        +{{ extraAssignees }}
-      </span>
+      <Avatar v-if="extraAssignees" class="size-6 ring-2 ring-card">
+        <AvatarFallback class="bg-muted text-muted-foreground">
+          +{{ extraAssignees }}
+        </AvatarFallback>
+      </Avatar>
     </span>
   </div>
 </template>

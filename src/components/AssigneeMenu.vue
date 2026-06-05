@@ -70,7 +70,7 @@ const filteredSections = computed(() => {
           class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none hover:bg-accent focus-visible:bg-accent"
           @click="emit('select', p.username)"
         >
-          <Avatar class="size-5 text-micro">
+          <Avatar class="size-5">
             <AvatarFallback>{{ personInitial(p) }}</AvatarFallback>
           </Avatar>
           <span class="min-w-0 flex-1 truncate text-foreground">

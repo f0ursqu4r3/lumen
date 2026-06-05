@@ -22,7 +22,7 @@ const initials = computed(() => {
 <template>
   <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground" :title="username">
     <Avatar class="size-5">
-      <AvatarFallback class="text-micro">
+      <AvatarFallback>
         {{ initials.toUpperCase() }}
       </AvatarFallback>
     </Avatar>

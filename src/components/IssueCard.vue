@@ -118,17 +118,16 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
           @click="filterAssignee(a.username)"
         >
           <Avatar class="size-5 ring-2 ring-card">
-            <AvatarFallback class="bg-muted text-micro font-medium text-muted-foreground">
+            <AvatarFallback class="bg-muted text-muted-foreground">
               {{ initials(a.username) }}
             </AvatarFallback>
           </Avatar>
         </button>
-        <span
-          v-if="extraAssignees"
-          class="grid size-5 place-items-center rounded-full bg-muted text-micro font-medium text-muted-foreground ring-2 ring-card"
-        >
-          +{{ extraAssignees }}
-        </span>
+        <Avatar v-if="extraAssignees" class="size-5 ring-2 ring-card">
+          <AvatarFallback class="bg-muted text-muted-foreground">
+            +{{ extraAssignees }}
+          </AvatarFallback>
+        </Avatar>
       </span>
     </div>
   </div>

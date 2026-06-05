@@ -14,7 +14,15 @@ const delegatedProps = reactiveOmit(props, 'class')
   <AvatarFallback
     data-slot="avatar-fallback"
     v-bind="delegatedProps"
-    :class="cn('bg-muted flex size-full items-center justify-center rounded-full', props.class)"
+    :class="
+      cn(
+        // Initials scale to the circle: ~40% of its width keeps a two-letter
+        // monogram comfortably inside the ring at any avatar size. Tight tracking
+        // so wide pairs (MI, GW) don't crowd the edges.
+        'bg-muted flex size-full items-center justify-center rounded-full text-[40cqi] leading-none font-medium tracking-[-0.02em]',
+        props.class,
+      )
+    "
   >
     <slot />
   </AvatarFallback>
