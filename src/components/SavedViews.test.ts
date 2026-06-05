@@ -19,6 +19,13 @@ describe('SavedViews', () => {
     expect(w.get('[data-testid="views-trigger"]').text()).toContain('Team board')
   })
 
+  it('labels the trigger with the active view name when none was loaded', () => {
+    // After navigating away and back the loadedId is gone but the query still
+    // matches a saved view (activeId) — the label must still name that view.
+    const w = mountIt({ loadedId: null, activeId: 'a' })
+    expect(w.get('[data-testid="views-trigger"]').text()).toContain('My bugs')
+  })
+
   it('lists saved views and applies one on click', async () => {
     const w = mountIt()
     await w.get('[data-testid="views-trigger"]').trigger('click')

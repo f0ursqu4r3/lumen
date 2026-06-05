@@ -36,6 +36,13 @@ const setNameInput = (el: unknown) => {
 }
 
 const loadedView = computed(() => props.views.find((v) => v.id === props.loadedId) ?? null)
+const activeView = computed(() => props.views.find((v) => v.id === props.activeId) ?? null)
+// The view whose name labels the trigger: the one explicitly loaded this
+// session, else the saved view matching the live query. `loadedId` is ephemeral
+// (it resets when the list remounts on navigation) but the query persists, so
+// without the activeView fallback the label would drop back to "Views" on
+// return even though a saved view is still in effect.
+const currentView = computed(() => loadedView.value ?? activeView.value)
 // A view was loaded and then the filters were changed away from it.
 const modified = computed(() => !!loadedView.value && loadedView.value.id !== props.activeId)
 
@@ -91,7 +98,7 @@ function commit() {
     >
       <Bookmark class="size-4" :class="activeId ? 'fill-primary text-primary' : ''" />
       <span :class="activeId ? 'text-foreground' : ''" class="max-w-32 truncate">
-        {{ loadedView ? loadedView.name : 'Views' }}
+        {{ currentView ? currentView.name : 'Views' }}
       </span>
       <span
         v-if="modified"

@@ -193,8 +193,13 @@ const hasMore = computed(() => hasNextPage.value ?? false)
 // reaches the true viewport bottom — the `-mb-6` on the element cancels <main>'s
 // bottom padding so the horizontal scrollbar sits flush at the bottom edge with
 // no gap beneath it, and the page gains no vertical scroll.
-const boardEl = ref<HTMLElement | null>(null)
-const { top: boardTop } = useElementBounding(boardEl)
+// Measure the board's top off a zero-size sentinel pinned to its top edge, not
+// the board itself: deriving the board's height from its own measured bounds
+// would feed every height change back into the observer ("ResizeObserver loop
+// completed with undelivered notifications"). The sentinel never resizes, so
+// the loop can't form, while still tracking the top as the toolbar grows.
+const boardTopEl = ref<HTMLElement | null>(null)
+const { top: boardTop } = useElementBounding(boardTopEl)
 const boardStyle = computed(() => ({
   height: `calc(100dvh - ${Math.max(0, Math.round(boardTop.value))}px)`,
 }))
@@ -217,6 +222,10 @@ function setView(next: 'list' | 'board') {
   if (view.value === next) return
   withViewTransition(async () => {
     view.value = next
+    // The board is bounded to the viewport height and full-bleed — start it at
+    // the top so the whole board is in view (and its measured top is correct)
+    // rather than stranded below a scrolled-down list.
+    if (next === 'board') window.scrollTo({ top: 0 })
     await nextTick()
   })
 }
@@ -785,10 +794,10 @@ onKeyStroke(['c', 'C'], (e) => {
              viewport and scroll from the left edge (no clipping) when they don't. -->
         <div
           v-else
-          ref="boardEl"
           :style="boardStyle"
           class="relative left-1/2 -mb-6 w-screen -translate-x-1/2 overflow-x-auto pb-4"
         >
+          <span ref="boardTopEl" aria-hidden="true" class="absolute top-0 left-0 h-0 w-0" />
           <div class="mx-auto flex h-full min-h-80 w-max gap-3 px-6">
             <section
               v-for="g in boardGroups"

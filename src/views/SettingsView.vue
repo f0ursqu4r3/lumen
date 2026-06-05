@@ -67,16 +67,14 @@ async function save() {
           class="grid size-12 place-items-center rounded-xl border border-border bg-card shadow-pop"
           :class="testing && 'lamp-busy'"
         >
-          <PlugZap class="size-[22px] text-primary" :stroke-width="2" />
+          <PlugZap class="size-5.5 text-primary" :stroke-width="2" />
         </div>
         <p
           class="eyebrow-tick mt-5 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >
           First run
         </p>
-        <h1
-          class="mt-2 text-title leading-none font-semibold text-foreground"
-        >
+        <h1 class="mt-2 text-title leading-none font-semibold text-foreground">
           Connect to GitLab
         </h1>
         <p class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -130,10 +128,9 @@ async function save() {
             />
             <p class="text-xs leading-relaxed text-muted-foreground/70">
               Needs the
-              <code
-                class="rounded bg-muted/60 px-1 py-0.5 font-mono text-2xs text-foreground/90"
-                >api</code
-              >
+              <code class="rounded bg-muted/60 px-1 py-0.5 font-mono text-2xs text-foreground/90">
+                api
+              </code>
               scope. Create one under
               <span class="text-muted-foreground">Settings → Access Tokens</span>.
             </p>
