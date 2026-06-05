@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, type Component } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-import {
-  Circle,
-  CircleDotDashed,
-  CircleCheck,
-  CircleSlash,
-  Check,
-  ChevronDown,
-  Search,
-} from '@lucide/vue'
+import { Circle, CircleDotDashed, CircleCheck, CircleSlash, Check, ChevronDown } from '@lucide/vue'
 import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
 
 const props = withDefaults(
@@ -42,12 +34,8 @@ const isCurrent = (s: WorkItemStatus) => props.current?.id === s.id
 
 async function toggleOpen() {
   open.value = !open.value
-  if (open.value) {
-    search.value = ''
-    await nextTick()
-    searchInput.value?.focus()
-  }
 }
+
 function choose(s: WorkItemStatus) {
   open.value = false
   if (!isCurrent(s)) emit('select', s)

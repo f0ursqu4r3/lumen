@@ -4,7 +4,13 @@ import StatusPicker from './StatusPicker.vue'
 import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
 
 const statuses: WorkItemStatus[] = [
-  { id: 'gid://s/1', name: 'To do', color: '#737278', iconName: 'status-waiting', category: 'to_do' },
+  {
+    id: 'gid://s/1',
+    name: 'To do',
+    color: '#737278',
+    iconName: 'status-waiting',
+    category: 'to_do',
+  },
   {
     id: 'gid://s/2',
     name: 'In progress',
@@ -38,14 +44,6 @@ describe('StatusPicker', () => {
     await w.get('[data-testid="status-picker-trigger"]').trigger('click')
     await w.get('[data-testid="status-opt-To do"]').trigger('click')
     expect(w.emitted('select')).toBeUndefined()
-  })
-
-  it('filters the list by the search box', async () => {
-    const w = mount(StatusPicker, { props: { statuses, current: statuses[0] } })
-    await w.get('[data-testid="status-picker-trigger"]').trigger('click')
-    await w.get('[data-testid="status-search"]').setValue('prog')
-    expect(w.find('[data-testid="status-opt-In progress"]').exists()).toBe(true)
-    expect(w.find('[data-testid="status-opt-To do"]').exists()).toBe(false)
   })
 
   it('disables the trigger while a change is pending', () => {
