@@ -16,9 +16,19 @@ import {
 import LabelChip from './LabelChip.vue'
 import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Checkbox } from '@/components/ui/checkbox'
 import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/lib/labels'
 import type { Facet } from '@/lib/issueView'
 import type { IssueListItem } from '@/composables/useIssues'
+import { useInjectedSelection } from '@/composables/useIssueSelection'
+
+const selection = useInjectedSelection()
+
+// In select mode the whole row toggles selection; out of it, clicks fall through
+// to the stretched RouterLink as before.
+function onRowClick() {
+  if (selection.mode.value) selection.toggle(props.issue.iid)
+}
 
 const props = defineProps<{
   issue: IssueListItem
@@ -87,14 +97,26 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
        facet buttons sit above it so clicking a label/priority/assignee filters
        instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
   <div
+    data-testid="issue-row"
     class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
-    :class="highlight ? 'animate-flash' : 'animate-row-in'"
+    :class="[highlight ? 'animate-flash' : 'animate-row-in', selection.mode.value ? 'cursor-pointer select-none' : '']"
     :style="{ animationDelay: delay, viewTransitionName: vtName }"
+    @click="onRowClick"
   >
     <RouterLink
+      v-if="!selection.mode.value"
       :to="{ query: { ...($route?.query ?? {}), issue: issue.iid } }"
       :aria-label="`Issue #${issue.iid}: ${issue.title}`"
       class="absolute inset-0 rounded-[inherit] outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+    />
+
+    <Checkbox
+      v-if="selection.mode.value"
+      :model-value="selection.isSelected(issue.iid)"
+      :aria-label="`Select issue #${issue.iid}`"
+      class="relative z-10 shrink-0"
+      @update:model-value="() => selection.toggle(issue.iid)"
+      @click.stop
     />
 
     <StateBadge :state="issue.state" compact />
