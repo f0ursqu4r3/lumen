@@ -48,7 +48,18 @@ const pendingAssignee = ref<string | null>(null)
 function applyAssignee() {
   const username = props.members.find((m) => m.id === pendingAssignee.value)?.username ?? null
   emit('set-assignee', { username })
+  pendingAssignee.value = null
   assigneeOpen.value = false
+}
+
+function toggleLabels() {
+  if (labelsOpen.value) pendingTitles.value = []
+  labelsOpen.value = !labelsOpen.value
+}
+
+function toggleAssignee() {
+  if (assigneeOpen.value) pendingAssignee.value = null
+  assigneeOpen.value = !assigneeOpen.value
 }
 
 // --- Status (StatusPicker emits immediately on select) ----------------------
@@ -64,19 +75,20 @@ function onSelectStatus(status: WorkItemStatus) {
       data-testid="bulk-action-bar"
       class="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
     >
-      <span class="px-1 font-mono text-xs font-medium tabular-nums text-foreground">
+      <span class="px-1 font-mono text-xs font-medium tabular-nums text-foreground" aria-live="polite">
         {{ count }} selected
       </span>
       <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
 
       <!-- Labels -->
       <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="labelsOpen = !labelsOpen">
+        <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="toggleLabels">
           <Tag /> Labels
         </Button>
+        <!-- v1: popovers close via their trigger button or Apply, not outside-click -->
         <div
           v-if="labelsOpen"
-          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-card p-2 shadow-pop"
+          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
         >
           <div class="mb-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
             <button
@@ -97,7 +109,13 @@ function onSelectStatus(status: WorkItemStatus) {
             </button>
           </div>
           <LabelPicker v-model="pendingTitles" :catalog="catalog" label="Labels" />
-          <Button class="mt-2 w-full" size="sm" data-testid="bulk-apply-labels" @click="applyLabels">
+          <Button
+            class="mt-2 w-full"
+            size="sm"
+            data-testid="bulk-apply-labels"
+            :aria-label="`${labelMode === 'add' ? 'Add labels to' : 'Remove labels from'} ${count} issues`"
+            @click="applyLabels"
+          >
             {{ labelMode === 'add' ? 'Add to' : 'Remove from' }} {{ count }}
           </Button>
         </div>
@@ -105,15 +123,21 @@ function onSelectStatus(status: WorkItemStatus) {
 
       <!-- Assign -->
       <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-assign" @click="assigneeOpen = !assigneeOpen">
+        <Button variant="ghost" size="sm" data-testid="bulk-assign" @click="toggleAssignee">
           <UserPlus /> Assign
         </Button>
         <div
           v-if="assigneeOpen"
-          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-card p-2 shadow-pop"
+          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
         >
           <AssigneePicker v-model="pendingAssignee" :members="members" label="Assignee" />
-          <Button class="mt-2 w-full" size="sm" data-testid="bulk-apply-assignee" @click="applyAssignee">
+          <Button
+            class="mt-2 w-full"
+            size="sm"
+            data-testid="bulk-apply-assignee"
+            :aria-label="`Assign ${count} issues`"
+            @click="applyAssignee"
+          >
             Assign {{ count }}
           </Button>
         </div>
