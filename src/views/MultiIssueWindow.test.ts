@@ -54,13 +54,25 @@ describe('MultiIssueWindow', () => {
     expect(w.get('[data-testid="pager-position"]').text()).toBe('1 of 2')
   })
 
-  it('pages when the page is dirty and discard is confirmed', async () => {
+  it('pages when the page is dirty and discard is confirmed, and resets dirty', async () => {
     const w = mountWindow(['1', '2'])
     await w.get('[data-testid="make-dirty"]').trigger('click')
     confirmMock.mockResolvedValue(true)
     await w.get('[data-testid="pager-next"]').trigger('click')
     await flushPromises()
     expect(w.get('[data-testid="pager-position"]').text()).toBe('2 of 2')
+    // Paging away must reset dirty so the next page turn doesn't spuriously confirm.
+    confirmMock.mockClear()
+    await w.get('[data-testid="pager-prev"]').trigger('click')
+    await flushPromises()
+    expect(confirmMock).not.toHaveBeenCalled()
+    expect(w.get('[data-testid="pager-position"]').text()).toBe('1 of 2')
+  })
+
+  it('shows "No issues." when iids is empty', () => {
+    const w = mountWindow([])
+    expect(w.text()).toContain('No issues.')
+    expect(w.find('[data-testid="pager-prev"]').exists()).toBe(false)
   })
 
   it('renders 1 of 1 with both buttons disabled for a single iid', () => {
