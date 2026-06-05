@@ -29,14 +29,14 @@ export const router = createRouter({
       props: true,
     },
     {
-      path: '/settings',
-      name: 'settings',
-      component: () => import('@/views/SettingsView.vue'),
+      path: '/connect',
+      name: 'connect',
+      component: () => import('@/views/ConnectView.vue'),
     },
   ],
 })
 
-// Send first-run / unconfigured users to Settings before anything tries to query.
+// Send first-run / unconfigured users to Connect before anything tries to query.
 router.beforeEach(async (to) => {
   const { configured } = await rpc.getConfig()
   return nextRoute(to.name as string | undefined, configured)

@@ -20,4 +20,6 @@ metadata:
 
 **File structure:** `src/composables/` for query composables, `src/components/` for presentational components, `src/views/` for route-level views, `src/gitlab/` for API helpers.
 
+**Composable conventions (two flavors):** query-backed composables (e.g. `useGitlabUrl`) wrap TanStack `useQuery`; imperative form/mutation composables (e.g. `useGitlabConnect`) are plain `ref`/`computed` factories returning a flat object, calling `rpc` from `@/lib/rpc` directly (no Vue Query). The latter favor returning `Promise<boolean>` so callers own the success side-effect rather than the composable navigating/toasting itself. Imperative composables are tested with a module-level `vi.mock('@/lib/rpc')` (no `withQuery` harness). The RPC bridge contract lives in `src/lib/rpcContract.ts` (`GraphqlResult.errors` is `{message:string}[]|undefined`, `ConfigStatus.url` is `string|null`).
+
 **Why:** [[feedback_review_severity]] — this is an early-stage personal tool; severity calibrated accordingly (minor ergonomic issues don't warrant blocking).
