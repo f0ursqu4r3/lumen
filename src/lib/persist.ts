@@ -4,6 +4,14 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 
 const APP_VERSION = '1'
 
+/** localStorage key for the TanStack Query persister; shared by write + clear. */
+export const PERSIST_KEY = 'lumen:query-cache'
+
+/** Drop the persisted query cache from localStorage (used by Settings → Clear cache). */
+export function clearPersistedCache(): void {
+  window.localStorage.removeItem(PERSIST_KEY)
+}
+
 /** Cache key generation: changing instance (or app schema) invalidates the cache. */
 export function makeBuster(url: string | null): string {
   return `lumen:${APP_VERSION}:${url ?? 'unconfigured'}`
@@ -14,7 +22,7 @@ export function createPersistedQueryClient(url: string | null): QueryClient {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { staleTime: 30_000, gcTime: 1000 * 60 * 60 * 24 } },
   })
-  const persister = createSyncStoragePersister({ storage: window.localStorage })
+  const persister = createSyncStoragePersister({ storage: window.localStorage, key: PERSIST_KEY })
   persistQueryClient({
     queryClient,
     persister,
