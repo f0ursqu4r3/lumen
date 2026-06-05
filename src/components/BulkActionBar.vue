@@ -212,15 +212,35 @@ function pickStatus(status: WorkItemStatus) {
 </template>
 
 <style scoped>
-.bulk-bar-enter-active,
+/* The bar is bottom-anchored (fixed bottom-5, centered via -translate-x-1/2), so
+   it enters like a sheet rising from the bottom edge. Enter uses a strong iOS-
+   drawer ease-out; exit is snappier (the system responding, not arriving). */
+.bulk-bar-enter-active {
+  transition:
+    opacity 260ms ease-out,
+    transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
 .bulk-bar-leave-active {
   transition:
-    opacity 150ms ease,
-    transform 150ms ease;
+    opacity 160ms ease-out,
+    transform 200ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 .bulk-bar-enter-from,
 .bulk-bar-leave-to {
   opacity: 0;
-  transform: translate(-50%, 8px);
+  /* Down by its own height + the bottom-5 gap → starts just below the viewport
+     edge and slides up into place. Keeps the -50% horizontal centering. */
+  transform: translate(-50%, calc(100% + 1.25rem));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulk-bar-enter-active,
+  .bulk-bar-leave-active {
+    transition: opacity 160ms ease;
+  }
+  .bulk-bar-enter-from,
+  .bulk-bar-leave-to {
+    transform: translate(-50%, 0);
+  }
 }
 </style>
