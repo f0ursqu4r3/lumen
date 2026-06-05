@@ -1,5 +1,6 @@
 import { Marked, type TokenizerAndRendererExtension } from 'marked'
 import DOMPurify from 'dompurify'
+import { needsAssetResolution } from './media'
 
 export interface RenderOptions {
   /**
@@ -140,24 +141,35 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
         (height ? ` height="${escapeAttr(height)}"` : '')
       const titleAttr = token.title ? ` title="${escapeAttr(token.title)}"` : ''
 
+      // A rewritten upload path 404s under the views:// origin until
+      // applyResolvedMedia() swaps in a blob URL. For those, withhold the src so the
+      // browser never attempts that doomed load — no broken-image icon flashes — and
+      // tag the element data-media-loading for the CSS placeholder, carrying the path
+      // in data-media-src for the resolver. Scheme-qualified URLs (http(s):, data:,
+      // blob:) load directly: keep their src and skip the resolver entirely.
+      const deferred = needsAssetResolution(src)
+      const srcAttr = deferred ? '' : ` src="${escapeAttr(src)}"`
+      const loadingAttr = deferred ? ' data-media-loading' : ''
+      const mediaSrcAttr = deferred ? ` data-media-src="${escapeAttr(src)}"` : ''
+
       if (kind === 'video') {
         return (
           `<span class="media-frame">` +
-          `<video controls preload="metadata" src="${escapeAttr(src)}"` +
-          ` data-media-src="${escapeAttr(src)}" data-media-kind="video"${dim}${titleAttr}></video>` +
+          `<video controls preload="metadata"${srcAttr}` +
+          `${mediaSrcAttr} data-media-kind="video"${loadingAttr}${dim}${titleAttr}></video>` +
           `<button type="button" class="media-expand" data-media-trigger` +
-          ` data-media-src="${escapeAttr(src)}" aria-label="Open in viewer">⤢</button>` +
+          `${mediaSrcAttr} aria-label="Open in viewer">⤢</button>` +
           `</span>`
         )
       }
       if (kind === 'audio') {
-        return `<audio controls src="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}"${titleAttr}></audio>`
+        return `<audio controls${srcAttr}${mediaSrcAttr}${titleAttr}></audio>`
       }
       if (kind === 'file') {
-        return `<a class="file-card" href="${escapeAttr(src)}" data-media-src="${escapeAttr(src)}" download>${escapeAttr(uploadFilename(token.href))}</a>`
+        return `<a class="file-card" href="${escapeAttr(src)}"${mediaSrcAttr} download>${escapeAttr(uploadFilename(token.href))}</a>`
       }
-      let html = `<img src="${escapeAttr(src)}" alt="${escapeAttr(token.alt)}"`
-      html += ` data-media-src="${escapeAttr(src)}" data-media-kind="image" data-media-trigger`
+      let html = `<img${srcAttr} alt="${escapeAttr(token.alt)}"`
+      html += `${mediaSrcAttr} data-media-kind="image" data-media-trigger${loadingAttr}`
       if (token.title) html += ` title="${escapeAttr(token.title)}"`
       if (width) html += ` width="${escapeAttr(width)}"`
       if (height) html += ` height="${escapeAttr(height)}"`

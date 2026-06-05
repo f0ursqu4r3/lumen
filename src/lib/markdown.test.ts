@@ -27,13 +27,13 @@ describe('renderMarkdown', () => {
     const out = renderMarkdown(`![img](/uploads/${s}/pic.png)`, {
       projectPath: 'group/sub/repo',
     })
-    expect(out).toContain(`src="/v4/projects/group%2Fsub%2Frepo/uploads/${s}/pic.png"`)
+    expect(out).toContain(`data-media-src="/v4/projects/group%2Fsub%2Frepo/uploads/${s}/pic.png"`)
   })
 
   it('routes /-/project/<id>/uploads images through the proxy by numeric id', () => {
     const s = secret('b')
     const out = renderMarkdown(`![img](/-/project/42/uploads/${s}/pic.png)`)
-    expect(out).toContain(`src="/v4/projects/42/uploads/${s}/pic.png"`)
+    expect(out).toContain(`data-media-src="/v4/projects/42/uploads/${s}/pic.png"`)
   })
 
   it('applies GitLab {width= height=} attributes instead of leaking them as text', () => {
@@ -54,7 +54,7 @@ describe('renderMarkdown', () => {
   it('leaves relative uploads unresolved when no projectPath is given', () => {
     const s = secret('d')
     const out = renderMarkdown(`![img](/uploads/${s}/pic.png)`)
-    expect(out).toContain(`src="/uploads/${s}/pic.png"`)
+    expect(out).toContain(`data-media-src="/uploads/${s}/pic.png"`)
   })
 
   it('does not rewrite upload-looking text inside code spans', () => {
@@ -104,6 +104,27 @@ describe('renderMarkdown', () => {
     expect(out).toContain('<img')
     expect(out).toContain('data-media-kind="image"')
     expect(out).toContain('data-media-trigger')
+  })
+
+  it('defers upload src so no broken-image load is attempted before resolution', () => {
+    const s = secret('j')
+    const out = renderMarkdown(`![pic](/uploads/${s}/pic.png)`, { projectPath: 'g/r' })
+    // The unresolvable proxy path lives only in data-media-src, never in src.
+    expect(out).toContain('data-media-loading')
+    expect(out).not.toContain('src="/v4/')
+  })
+
+  it('keeps the src on directly-loadable external images (no deferral)', () => {
+    const out = renderMarkdown('![x](https://example.com/a.png)')
+    expect(out).toContain('src="https://example.com/a.png"')
+    expect(out).not.toContain('data-media-loading')
+  })
+
+  it('does not tag external images for RPC resolution', () => {
+    // data-media-src drives applyResolvedMedia; omitting it for scheme-qualified
+    // URLs keeps them off the asset RPC, which only understands upload paths.
+    const out = renderMarkdown('![x](https://example.com/a.png)')
+    expect(out).not.toContain('data-media-src')
   })
 })
 

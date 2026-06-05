@@ -104,6 +104,37 @@ watch(
 .markdown :deep(img[data-media-trigger]) {
   cursor: zoom-in;
 }
+/* Placeholder shown while a deferred upload resolves to a blob URL. The marker is
+   removed in applyResolvedMedia() once the real src is set. */
+.markdown :deep([data-media-loading]) {
+  display: inline-block;
+  max-width: 100%;
+  border-radius: 0.5rem;
+  background: var(--muted);
+  animation: media-loading-pulse 1.4s ease-in-out infinite;
+}
+/* Reserve space only along axes the author didn't pin, so explicit
+   {width=/height=} dimensions are never overridden. */
+.markdown :deep([data-media-loading]:not([width])) {
+  min-width: 12rem;
+}
+.markdown :deep([data-media-loading]:not([height])) {
+  min-height: 9rem;
+}
+@keyframes media-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .markdown :deep([data-media-loading]) {
+    animation: none;
+  }
+}
 .markdown :deep(.media-frame) {
   position: relative;
   display: inline-block;

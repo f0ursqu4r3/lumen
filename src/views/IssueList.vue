@@ -7,8 +7,10 @@ import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useIssueFilters } from '@/composables/useIssueFilters'
 import { useRetagIssue } from '@/composables/useIssueMutations'
+import { useSavedViews } from '@/composables/useSavedViews'
 import IssueComposer from '@/components/IssueComposer.vue'
 import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
+import SavedViews from '@/components/SavedViews.vue'
 import type { IssueFilters } from '@/gitlab/issueParams'
 import {
   sortIssues,
@@ -97,8 +99,38 @@ const {
   toggleLabel,
   clearAll,
   filters,
+  viewSlice,
+  applyView,
 } = useIssueFilters()
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
+
+// Named snapshots of the whole view (filters + sort + group + view + scope +
+// state + search), saved per project.
+const savedViews = useSavedViews(toRef(props, 'fullPath'))
+const activeViewId = computed(() => savedViews.activeId(viewSlice.value))
+const canSaveView = computed(() => Object.keys(viewSlice.value).length > 0)
+// Remember which view was loaded so we can offer "update" once its filters
+// drift. Reset when switching projects (the view list re-keys).
+const loadedViewId = ref<string | null>(null)
+watch(
+  () => props.fullPath,
+  () => (loadedViewId.value = null),
+)
+
+function loadView(view: { id: string; query: typeof viewSlice.value }) {
+  applyView(view.query)
+  loadedViewId.value = view.id
+}
+function saveCurrentView(name: string) {
+  loadedViewId.value = savedViews.add(name, viewSlice.value)?.id ?? null
+}
+function updateView(id: string) {
+  savedViews.update(id, viewSlice.value)
+}
+function removeView(id: string) {
+  savedViews.remove(id)
+  if (loadedViewId.value === id) loadedViewId.value = null
+}
 
 type StateValue = NonNullable<IssueFilters['state']>
 const STATES: { value: StateValue; label: string }[] = [
@@ -125,13 +157,14 @@ const count = computed(() => issues.value.length)
 const hasMore = computed(() => hasNextPage.value ?? false)
 
 // Board fills the page: its height is the viewport minus its own distance from
-// the top (measured, so it stays correct as the toolbar rows wrap/grow) minus
-// the main column's bottom padding — so the horizontal scrollbar lands at the
-// true bottom of the page instead of floating mid-screen.
+// the top (measured, so it stays correct as the toolbar rows wrap/grow). It
+// reaches the true viewport bottom — the `-mb-6` on the element cancels <main>'s
+// bottom padding so the horizontal scrollbar sits flush at the bottom edge with
+// no gap beneath it, and the page gains no vertical scroll.
 const boardEl = ref<HTMLElement | null>(null)
 const { top: boardTop } = useElementBounding(boardEl)
 const boardStyle = computed(() => ({
-  height: `calc(100dvh - ${Math.max(0, Math.round(boardTop.value))}px - 1.5rem)`,
+  height: `calc(100dvh - ${Math.max(0, Math.round(boardTop.value))}px)`,
 }))
 
 // Sort/group happen client-side on the loaded set — priority & status live in
@@ -157,12 +190,54 @@ const dragging = ref<IssueListItem | null>(null)
 const draggingIid = ref<string | null>(null)
 const dragOverKey = ref<string | null>(null)
 
+// A compact "in-hand" ghost that follows the cursor while dragging, in place of
+// the browser's default full-card snapshot. Built imperatively (it lives outside
+// Vue's tree, only long enough to be snapshotted) and styled with theme tokens so
+// it matches light/dark. Rendered off-screen so it never flashes in the page.
+function buildDragGhost(issue: IssueListItem): HTMLElement {
+  const el = document.createElement('div')
+  el.style.cssText = [
+    'position:fixed',
+    'top:-1000px',
+    'left:-1000px',
+    'display:flex',
+    'align-items:center',
+    'gap:0.5rem',
+    'max-width:18rem',
+    'padding:0.5rem 0.75rem',
+    'border-radius:0.625rem',
+    'background:var(--card)',
+    'color:var(--foreground)',
+    'border:1px solid color-mix(in oklab, var(--primary) 55%, transparent)',
+    'box-shadow:0 12px 30px rgba(0,0,0,0.45), 0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent)',
+    'font-size:0.75rem',
+    'font-weight:500',
+    'line-height:1.2',
+    'white-space:nowrap',
+    'overflow:hidden',
+  ].join(';')
+  const dot = document.createElement('span')
+  dot.style.cssText =
+    'flex:0 0 auto;width:0.5rem;height:0.5rem;border-radius:9999px;background:var(--primary)'
+  const text = document.createElement('span')
+  text.textContent = issue.title
+  text.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap'
+  el.append(dot, text)
+  return el
+}
+
 function onDragStart(issue: IssueListItem, e: DragEvent) {
   dragging.value = issue
   draggingIid.value = issue.iid
   if (e.dataTransfer) {
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', String(issue.iid))
+    // Custom drag image: append off-screen, snapshot, then drop on the next tick
+    // (the snapshot is taken synchronously, so the live node isn't needed after).
+    const ghost = buildDragGhost(issue)
+    document.body.appendChild(ghost)
+    e.dataTransfer.setDragImage(ghost, 14, 16)
+    setTimeout(() => ghost.remove(), 0)
   }
 }
 function clearDrag() {
@@ -176,6 +251,15 @@ function onDrop(group: IssueGroup) {
   if (!issue) return
   const plan = planRetag(issue, boardScope.value, group.repLabel ?? null)
   if (plan) retag.mutate({ iid: issue.iid, ...plan })
+}
+
+// A column is a live drop target only while it's hovered AND dropping there
+// would actually move the card — `planRetag` returns null for the card's own
+// column. We use this for both the lane highlight and the ghost placeholder, so
+// the source lane stays quiet and the ghost marks exactly where a real move lands.
+function isDropTarget(group: IssueGroup): boolean {
+  if (!dragging.value || dragOverKey.value !== group.key) return false
+  return planRetag(dragging.value, boardScope.value, group.repLabel ?? null) != null
 }
 
 // --- active filters ---------------------------------------------------------
@@ -319,6 +403,18 @@ onKeyStroke(['c', 'C'], (e) => {
         :catalog="labelCatalog"
         :members="members ?? []"
         :active-count="activeCount"
+      />
+
+      <SavedViews
+        :views="savedViews.views.value"
+        :active-id="activeViewId"
+        :loaded-id="loadedViewId"
+        :can-save="canSaveView"
+        @apply="loadView"
+        @save="saveCurrentView"
+        @update="updateView"
+        @rename="savedViews.rename"
+        @remove="removeView"
       />
 
       <!-- View toggle -->
@@ -499,14 +595,14 @@ onKeyStroke(['c', 'C'], (e) => {
           v-else
           ref="boardEl"
           :style="boardStyle"
-          class="relative left-1/2 flex min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
+          class="relative left-1/2 -mb-6 flex min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
         >
           <section
             v-for="g in boardGroups"
             :key="g.key"
-            class="relative flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-xl ring-1 ring-inset transition-[background-color,box-shadow,outline-color] duration-150 outline outline-1 outline-offset-2 outline-transparent"
+            class="relative flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-xl ring-1 ring-inset transition-[background-color,box-shadow,outline-color] duration-150 outline outline-offset-2 outline-transparent"
             :class="
-              dragOverKey === g.key
+              isDropTarget(g)
                 ? 'bg-primary/12 shadow-pop ring-primary/55 outline-primary/45'
                 : 'bg-card/55 shadow-card ring-border/70'
             "
@@ -559,10 +655,26 @@ onKeyStroke(['c', 'C'], (e) => {
                   />
                 </IssueCard>
               </div>
-              <!-- Empty lane: a quiet placeholder gives the column presence and a
-                   visible target to drop a card into. -->
+              <!-- Ghost: a placeholder card at the landing spot, showing the
+                   dragged issue so it's clear what moves and where. Only renders
+                   in lanes where the drop is a real move (see isDropTarget). -->
               <div
-                v-if="!g.issues.length"
+                v-if="isDropTarget(g)"
+                class="ghost-card pointer-events-none flex items-start gap-2 rounded-lg border border-dashed border-primary/60 bg-primary/8 px-3 py-2.5"
+              >
+                <span class="mt-1 size-2 shrink-0 rounded-full bg-primary/70" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-xs font-medium text-primary/90">
+                    {{ dragging?.title }}
+                  </span>
+                  <span class="mt-0.5 block text-[11px] text-primary/55">Move here</span>
+                </span>
+              </div>
+              <!-- Empty lane: a quiet placeholder gives the column presence and a
+                   visible target to drop a card into. Hidden while it's the live
+                   drop target — the ghost takes over. -->
+              <div
+                v-if="!g.issues.length && !isDropTarget(g)"
                 class="grid flex-1 place-items-center px-2 py-6 text-center"
               >
                 <span class="font-mono text-[11px] tracking-wide text-muted-foreground/35">

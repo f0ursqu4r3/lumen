@@ -15,8 +15,9 @@ const asArray = (v: unknown): string[] =>
       : []
 const asString = (v: unknown): string => (typeof v === 'string' ? v : '')
 
-// URL keys that make up the persisted, per-project view-state slice.
-const FILTER_KEYS = [
+// URL keys that make up the persisted, per-project view-state slice. This is
+// the unit a "saved view" snapshots and what the auto-save mirrors.
+export const FILTER_KEYS = [
   'state',
   'label',
   'assignee',
@@ -27,6 +28,9 @@ const FILTER_KEYS = [
   'view',
   'scope',
 ] as const
+
+/** A snapshot of the view-defining query keys (what a saved view stores). */
+export type ViewSlice = Record<string, string | string[]>
 
 const storageKey = (fullPath: string) => `lumen:issue-filters:${fullPath}`
 
@@ -160,6 +164,27 @@ export function useIssueFilters() {
     author: author.value || undefined,
   }))
 
+  // The current view-defining query slice — the same keys the auto-save mirrors
+  // and the unit a saved view captures.
+  const viewSlice = computed<ViewSlice>(() => {
+    const slice: ViewSlice = {}
+    for (const k of FILTER_KEYS) {
+      const v = route.query[k]
+      if (v != null) slice[k] = v as string | string[]
+    }
+    return slice
+  })
+
+  // Replace the whole filter slice with a saved view: every filter key is set
+  // (present ones to their value, absent ones cleared) so nothing leaks from the
+  // prior view. Unrelated keys (e.g. ?issue=) are preserved; the search ref
+  // re-hydrates via its existing watch on route.query.q.
+  function applyView(slice: ViewSlice) {
+    const next: Partial<Record<string, string | string[] | undefined>> = {}
+    for (const k of FILTER_KEYS) next[k] = slice[k] ?? undefined
+    patch(next)
+  }
+
   const fullPath = computed(() => asString(route.params.fullPath))
 
   // On arrival / project switch, restore saved state — but only when the URL
@@ -216,5 +241,7 @@ export function useIssueFilters() {
     toggleLabel,
     clearAll,
     filters,
+    viewSlice,
+    applyView,
   }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, reactive, watchEffect } from 'vue'
 import { resolveAsset } from '@/composables/useGitlabAsset'
+import { needsAssetResolution } from '@/lib/media'
 import {
   DialogRoot,
   DialogPortal,
@@ -12,7 +13,15 @@ import {
   VisuallyHidden,
 } from 'reka-ui'
 import { onKeyStroke } from '@vueuse/core'
-import { Captions, MessageCircle, ChevronLeft, ChevronRight, X, Film } from '@lucide/vue'
+import {
+  Captions,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Film,
+  LoaderCircle,
+} from '@lucide/vue'
 import type { ViewerItem } from '@/composables/useIssueMedia'
 
 const props = defineProps<{ items: ViewerItem[]; startIndex?: number }>()
@@ -50,6 +59,10 @@ const hasMany = computed(() => props.items.length > 1)
 // blob URL via RPC, lazily and memoized. Empty string until the blob is ready.
 const resolved = reactive<Record<string, string>>({})
 function srcFor(path: string): string {
+  // Scheme-qualified URLs (external media) load directly; only GitLab upload paths
+  // need RPC resolution to a blob URL. Routing an external URL through the asset RPC
+  // builds a garbage `${gitlabUrl}/api<url>` endpoint.
+  if (!needsAssetResolution(path)) return path
   if (!resolved[path]) resolveAsset(path).then((u) => { resolved[path] = u }).catch(() => {})
   return resolved[path] ?? ''
 }
@@ -116,19 +129,30 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
             class="flex min-h-0 min-w-0 flex-1 items-center justify-center"
             @click.self="open = false"
           >
-            <img
-              v-if="current?.kind === 'image'"
-              :src="srcFor(current.src)"
-              :alt="current.alt"
-              class="max-h-full max-w-full object-contain"
-            />
-            <video
-              v-else-if="current?.kind === 'video'"
-              :key="current.src"
-              :src="srcFor(current.src)"
-              controls
-              class="max-h-full max-w-full object-contain"
-            />
+            <template v-if="current">
+              <img
+                v-if="current.kind === 'image' && srcFor(current.src)"
+                :src="srcFor(current.src)"
+                :alt="current.alt"
+                class="max-h-full max-w-full object-contain"
+              />
+              <video
+                v-else-if="current.kind === 'video' && srcFor(current.src)"
+                :key="current.src"
+                :src="srcFor(current.src)"
+                controls
+                class="max-h-full max-w-full object-contain"
+              />
+              <!-- Blob URL not ready yet: hold the stage with a spinner instead of a broken <img>. -->
+              <div
+                v-else
+                data-testid="media-loading"
+                aria-busy="true"
+                class="grid size-full place-items-center"
+              >
+                <LoaderCircle class="size-8 animate-spin text-white/40" />
+              </div>
+            </template>
           </div>
 
           <button
@@ -174,11 +198,17 @@ onKeyStroke('ArrowRight', (e) => navKey(e, 1))
             @click="index = i"
           >
             <img
-              v-if="item.kind === 'image'"
+              v-if="item.kind === 'image' && srcFor(item.src)"
               :src="srcFor(item.src)"
               :alt="item.alt"
               class="size-full object-cover"
             />
+            <span
+              v-else-if="item.kind === 'image'"
+              class="grid size-full place-items-center bg-white/10 text-white/50"
+            >
+              <LoaderCircle class="size-4 animate-spin" />
+            </span>
             <span v-else class="grid size-full place-items-center bg-white/10 text-white/70">
               <Film class="size-5" />
             </span>

@@ -284,6 +284,26 @@
   }
 }
 
+/* Drag-to-retag ghost — the placeholder card that marks where a dragged board
+   item will land. Quick, gentle pop so it reads as "appearing at the drop spot"
+   rather than a layout jump. Reduced-motion keeps it instant. */
+@keyframes ghost-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ghost-card {
+    animation: ghost-in 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 /* The header signal lamp doubles as a liveness readout: steady when idle, a slow
    amber breath while the instrument is fetching. This is a loading affordance
    (kin to the existing spinners), not decorative perpetual motion — it only runs
