@@ -228,3 +228,56 @@ export function useSetAssignees(fullPath: string, iid: string) {
     },
   })
 }
+
+type AssigneeNode = { id: string; name: string; username: string; avatarUrl: string | null }
+// Shape of the cached infinite-issues data the reassign patch touches.
+type IssuesAssigneeCache =
+  | { pages: { nodes: { iid: string; assignees: { nodes: AssigneeNode[] } }[] }[] }
+  | null
+  | undefined
+
+/**
+ * Reassign an issue from the board (by iid), replacing its assignees with the
+ * target column's member (or clearing them for the Unassigned column).
+ * Optimistically moves the card so it jumps columns instantly — the assignee
+ * analogue of useRetagIssue.
+ */
+export function useReassignIssue(fullPath: string) {
+  const qc = useQueryClient()
+  return useMutation<
+    SetAssigneesPayload,
+    GitLabError,
+    { iid: string; assigneeUsernames: string[]; nextAssignees: AssigneeNode[] },
+    { previous: [readonly unknown[], unknown][] }
+  >({
+    mutationFn: ({ iid, assigneeUsernames }) =>
+      run(
+        () =>
+          gqlClient.request(SetAssigneesDocument, {
+            input: { projectPath: fullPath, iid, assigneeUsernames },
+          }),
+        (d: { issueSetAssignees?: SetAssigneesPayload | null }) => d.issueSetAssignees,
+      ),
+    onMutate: async ({ iid, nextAssignees }) => {
+      await qc.cancelQueries({ queryKey: ['issues', fullPath] })
+      const previous = qc.getQueriesData({ queryKey: ['issues', fullPath] })
+      qc.setQueriesData({ queryKey: ['issues', fullPath] }, (old: IssuesAssigneeCache) => {
+        if (!old?.pages) return old
+        return {
+          ...old,
+          pages: old.pages.map((p) => ({
+            ...p,
+            nodes: p.nodes.map((n) =>
+              n.iid === iid ? { ...n, assignees: { nodes: nextAssignees } } : n,
+            ),
+          })),
+        }
+      })
+      return { previous }
+    },
+    onError: (_e, _v, ctx) => {
+      ctx?.previous.forEach(([key, data]) => qc.setQueryData(key, data))
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['issues', fullPath] }),
+  })
+}

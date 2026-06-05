@@ -162,6 +162,93 @@ export function useSetWorkItemStatus(fullPath: Ref<string>, iid: Ref<string>) {
       }
       return payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['workItemStatus', fullPath.value, iid.value] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['workItemStatus', fullPath.value, iid.value] }),
+  })
+}
+
+// Board drag sets status by issue iid. The status widget is updated by WorkItem
+// id (not iid), so we resolve the id first, then update.
+const WORK_ITEM_ID_QUERY = `
+  query WorkItemId($fullPath: ID!, $iid: String!) {
+    project(fullPath: $fullPath) {
+      workItems(iid: $iid) {
+        nodes { id }
+      }
+    }
+  }
+`
+
+interface WorkItemIdResult {
+  project: { workItems: { nodes: { id: string }[] } | null } | null
+}
+
+// The slice of the cached infinite-issues data we patch optimistically.
+type IssuesStatusCache =
+  | { pages: { nodes: { iid: string; status: WorkItemStatus | null }[] }[] }
+  | null
+  | undefined
+
+/**
+ * Set an issue's native Status from the board by iid. Resolves the WorkItem id,
+ * updates the status widget, and optimistically moves the card to the target
+ * column (rolling back on error) — the board's analogue of useRetagIssue.
+ */
+export function useSetIssueStatus(fullPath: string) {
+  const qc = useQueryClient()
+  return useMutation<
+    WorkItemStatus | null,
+    GitLabError,
+    { iid: string; statusId: string; nextStatus: WorkItemStatus },
+    { previous: [readonly unknown[], unknown][] }
+  >({
+    mutationFn: async ({ iid, statusId }) => {
+      let idData: WorkItemIdResult
+      try {
+        idData = await gqlClient.request<WorkItemIdResult, { fullPath: string; iid: string }>(
+          WORK_ITEM_ID_QUERY,
+          { fullPath, iid },
+        )
+      } catch (e) {
+        throw normalizeError(e)
+      }
+      const workItemId = idData.project?.workItems?.nodes?.[0]?.id
+      if (!workItemId) {
+        throw { kind: 'graphql', message: 'Work item not found for issue' } satisfies GitLabError
+      }
+      let data: UpdateResult
+      try {
+        data = await gqlClient.request<UpdateResult, { id: string; status: string }>(
+          UPDATE_MUTATION,
+          { id: workItemId, status: statusId },
+        )
+      } catch (e) {
+        throw normalizeError(e)
+      }
+      const payload = data.workItemUpdate
+      if (payload?.errors?.length) {
+        throw { kind: 'graphql', message: payload.errors[0] } satisfies GitLabError
+      }
+      return payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
+    },
+    onMutate: async ({ iid, nextStatus }) => {
+      await qc.cancelQueries({ queryKey: ['issues', fullPath] })
+      const previous = qc.getQueriesData({ queryKey: ['issues', fullPath] })
+      qc.setQueriesData({ queryKey: ['issues', fullPath] }, (old: IssuesStatusCache) => {
+        if (!old?.pages) return old
+        return {
+          ...old,
+          pages: old.pages.map((p) => ({
+            ...p,
+            nodes: p.nodes.map((n) => (n.iid === iid ? { ...n, status: nextStatus } : n)),
+          })),
+        }
+      })
+      return { previous }
+    },
+    onError: (_e, _v, ctx) => {
+      ctx?.previous.forEach(([key, data]) => qc.setQueryData(key, data))
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['issues', fullPath] }),
   })
 }

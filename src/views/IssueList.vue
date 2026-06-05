@@ -6,7 +6,8 @@ import { useIssues, type IssueListItem } from '@/composables/useIssues'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useIssueFilters } from '@/composables/useIssueFilters'
-import { useRetagIssue } from '@/composables/useIssueMutations'
+import { useRetagIssue, useReassignIssue } from '@/composables/useIssueMutations'
+import { useWorkItemStatuses, useSetIssueStatus } from '@/composables/useWorkItemStatus'
 import { useSavedViews } from '@/composables/useSavedViews'
 import IssueComposer from '@/components/IssueComposer.vue'
 import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
@@ -15,11 +16,13 @@ import type { IssueFilters } from '@/gitlab/issueParams'
 import {
   sortIssues,
   groupIssues,
-  groupByScope,
+  boardColumns,
+  boardDropIndex,
   labelScopes,
-  planRetag,
+  planBoardMove,
   SORTS,
   GROUPS,
+  BOARD_GROUPS,
   type Facet,
   type IssueGroup,
 } from '@/lib/issueView'
@@ -37,7 +40,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -173,19 +179,28 @@ const sorted = computed(() => sortIssues(issues.value, sortKey.value))
 const listGroups = computed(() => groupIssues(sorted.value, groupKey.value))
 
 const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
+const { data: statusCatalog } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const labelCatalog = computed(() => projectLabels.value ?? [])
 const scopeOptions = computed(() => labelScopes(labelCatalog.value))
-const boardGroups = computed(() => groupByScope(sorted.value, boardScope.value, labelCatalog.value))
-// When the chosen scope isn't present (e.g. first load), fall back to the first.
+const boardGroups = computed(() =>
+  boardColumns(sorted.value, boardScope.value, {
+    labelCatalog: labelCatalog.value,
+    statusCatalog: statusCatalog.value ?? [],
+  }),
+)
+// If the board is grouped by a label scope that's no longer in the catalog
+// (project changed, label deleted), fall back to the always-available Status.
 watch(scopeOptions, (opts) => {
-  if (!opts.length) return
-  const raw = typeof route.query.scope === 'string' ? route.query.scope : ''
-  const effective = raw || 'assigned'
-  if (!opts.includes(effective)) boardScope.value = opts[0]
+  const key = boardScope.value
+  if (key.startsWith('label:') && opts.length && !opts.includes(key.slice('label:'.length))) {
+    boardScope.value = 'status'
+  }
 })
 
-// --- drag to retag ----------------------------------------------------------
+// --- drag to update (retag / set status / reassign) -------------------------
 const retag = useRetagIssue(props.fullPath)
+const reassign = useReassignIssue(props.fullPath)
+const setStatus = useSetIssueStatus(props.fullPath)
 const dragging = ref<IssueListItem | null>(null)
 const draggingIid = ref<string | null>(null)
 const dragOverKey = ref<string | null>(null)
@@ -249,17 +264,46 @@ function onDrop(group: IssueGroup) {
   const issue = dragging.value
   clearDrag()
   if (!issue) return
-  const plan = planRetag(issue, boardScope.value, group.repLabel ?? null)
-  if (plan) retag.mutate({ iid: issue.iid, ...plan })
+  const move = planBoardMove(issue, boardScope.value, group)
+  if (!move) return
+  if (move.kind === 'retag') {
+    retag.mutate({ iid: issue.iid, ...move })
+  } else if (move.kind === 'status') {
+    // The column key is the status id; pull the full status for the optimistic patch.
+    const nextStatus = statusCatalog.value?.find((s) => s.id === group.key)
+    if (nextStatus) setStatus.mutate({ iid: issue.iid, statusId: move.statusId, nextStatus })
+  } else {
+    // Reassign to the column's member (or clear for Unassigned). group.key is the
+    // username; build the optimistic assignee node from the project members.
+    const member = members.value?.find((m) => m.username === group.key)
+    const nextAssignees = member
+      ? [
+          {
+            id: member.id,
+            name: member.name,
+            username: member.username,
+            avatarUrl: member.avatarUrl ?? null,
+          },
+        ]
+      : []
+    reassign.mutate({ iid: issue.iid, assigneeUsernames: move.assigneeUsernames, nextAssignees })
+  }
 }
 
 // A column is a live drop target only while it's hovered AND dropping there
-// would actually move the card — `planRetag` returns null for the card's own
-// column. We use this for both the lane highlight and the ghost placeholder, so
-// the source lane stays quiet and the ghost marks exactly where a real move lands.
+// would actually move the card — `planBoardMove` returns null for the card's own
+// column (and the un-clearable "No status" lane). We use this for both the lane
+// highlight and the ghost placeholder, so the source lane stays quiet and the
+// ghost marks exactly where a real move lands.
 function isDropTarget(group: IssueGroup): boolean {
   if (!dragging.value || dragOverKey.value !== group.key) return false
-  return planRetag(dragging.value, boardScope.value, group.repLabel ?? null) != null
+  return planBoardMove(dragging.value, boardScope.value, group) != null
+}
+
+// Where the ghost sits in a target lane: the position the card will sort into
+// once dropped (see boardDropIndex), so the placeholder previews the real spot.
+function ghostIndex(group: IssueGroup): number {
+  return dragging.value ? boardDropIndex(group.issues, dragging.value, sortKey.value) : 0
 }
 
 // --- active filters ---------------------------------------------------------
@@ -491,24 +535,56 @@ onKeyStroke(['c', 'C'], (e) => {
           <SelectItem v-for="g in GROUPS" :key="g.value" :value="g.value">
             {{ g.label }}
           </SelectItem>
+          <!-- One entry per scoped-label group present in the project (team::,
+               type::, …), grouping the list the same way the board's columns do. -->
+          <template v-if="scopeOptions.length">
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>Labels</SelectLabel>
+              <SelectItem v-for="s in scopeOptions" :key="s" :value="`label:${s}`">
+                {{ s }}
+              </SelectItem>
+            </SelectGroup>
+          </template>
         </SelectContent>
       </Select>
     </div>
 
-    <!-- Toolbar row 2 (board): which scoped-label group becomes the columns -->
-    <div v-else-if="scopeOptions.length" class="flex flex-wrap items-center gap-2">
+    <!-- Toolbar row 2 (board): sort cards + which facet becomes the columns -->
+    <div v-else class="flex flex-wrap items-center gap-2">
+      <Select v-model="sortKey">
+        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Sort issues">
+          <span class="text-muted-foreground">Sort</span>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="s in SORTS" :key="s.value" :value="s.value">
+            {{ s.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
       <Select v-model="boardScope">
         <SelectTrigger class="h-8 w-52 text-xs" aria-label="Column grouping">
           <span class="text-muted-foreground">Columns by</span>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="s in scopeOptions" :key="s" :value="s">
-            {{ s }}<span class="text-muted-foreground">::</span>
+          <SelectItem v-for="g in BOARD_GROUPS" :key="g.value" :value="g.value">
+            {{ g.label }}
           </SelectItem>
+          <!-- Same scoped-label groups the list offers — each becomes a column set. -->
+          <template v-if="scopeOptions.length">
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>Labels</SelectLabel>
+              <SelectItem v-for="s in scopeOptions" :key="s" :value="`label:${s}`">
+                {{ s }}
+              </SelectItem>
+            </SelectGroup>
+          </template>
         </SelectContent>
       </Select>
-      <span class="text-xs text-muted-foreground/60">Drag cards to retag</span>
+      <span class="text-xs text-muted-foreground/60">Drag cards to update</span>
     </div>
 
     <!-- Active filter tokens -->
@@ -605,99 +681,108 @@ onKeyStroke(['c', 'C'], (e) => {
         </div>
 
         <!-- Board view: full-bleed (breaks out of the centered column), bounded
-             height, each column scrolls on its own, drag to retag. -->
+             height, each column scrolls on its own, drag to retag. The inner
+             track is w-max + mx-auto so the columns center when they fit the
+             viewport and scroll from the left edge (no clipping) when they don't. -->
         <div
           v-else
           ref="boardEl"
           :style="boardStyle"
-          class="relative left-1/2 -mb-6 flex min-h-80 w-screen -translate-x-1/2 gap-3 overflow-x-auto px-6"
+          class="relative left-1/2 -mb-6 w-screen -translate-x-1/2 overflow-x-auto pb-4"
         >
-          <section
-            v-for="g in boardGroups"
-            :key="g.key"
-            class="relative flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-xl ring-1 ring-inset transition-[background-color,box-shadow,outline-color] duration-150 outline outline-offset-2 outline-transparent"
-            :class="
-              isDropTarget(g)
-                ? 'bg-primary/12 shadow-pop ring-primary/55 outline-primary/45'
-                : 'bg-card/55 shadow-card ring-border/70'
-            "
-            @dragover.prevent="dragOverKey = g.key"
-            @dragenter.prevent="dragOverKey = g.key"
-            @drop.prevent="onDrop(g)"
-          >
-            <!-- Per-column status signal: a 1px border lit in the lane's own
+          <div class="mx-auto flex h-full min-h-80 w-max gap-3 px-6">
+            <section
+              v-for="g in boardGroups"
+              :key="g.key"
+              class="relative flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-xl ring-1 ring-inset transition-[background-color,box-shadow,outline-color] duration-150 outline outline-offset-2 outline-transparent"
+              :class="
+                isDropTarget(g)
+                  ? 'bg-primary/12 shadow-pop ring-primary/55 outline-primary/45'
+                  : 'bg-card/55 shadow-card ring-border/70'
+              "
+              @dragover.prevent="dragOverKey = g.key"
+              @dragenter.prevent="dragOverKey = g.key"
+              @drop.prevent="onDrop(g)"
+            >
+              <!-- Per-column status signal: a 1px border lit in the lane's own
                  workflow-status color from the top-left corner, fading into the
                  plain border — each column color-keyed to its state at a glance. -->
-            <span
-              v-if="g.color"
-              aria-hidden="true"
-              class="col-signal"
-              :style="{ '--signal-color': g.color }"
-            />
-            <header class="relative flex shrink-0 items-center gap-2 px-3 pt-3 pb-2.5">
               <span
                 v-if="g.color"
-                class="size-2 shrink-0 rounded-full"
-                :style="{ backgroundColor: g.color, boxShadow: `0 0 0 3px ${g.color}2e` }"
+                aria-hidden="true"
+                class="col-signal"
+                :style="{ '--signal-color': g.color }"
               />
-              <h2 class="truncate text-sm font-semibold tracking-tight text-foreground">
-                {{ g.label }}
-              </h2>
-              <span
-                class="ml-auto rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums text-muted-foreground/80"
-              >
-                {{ g.issues.length }}
-              </span>
-            </header>
-            <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5">
-              <div
-                v-for="issue in g.issues"
-                :key="issue.iid"
-                draggable="true"
-                class="group/card cursor-grab transition-opacity active:cursor-grabbing"
-                :class="draggingIid === issue.iid ? 'opacity-40' : ''"
-                @dragstart="onDragStart(issue, $event)"
-                @dragend="clearDrag"
-              >
-                <IssueCard
-                  :issue="issue"
-                  :full-path="fullPath"
-                  :highlight="issue.iid === highlightIid"
-                  @filter="applyFacet"
+              <header class="relative flex shrink-0 items-center gap-2 px-3 pt-3 pb-2.5">
+                <span
+                  v-if="g.color"
+                  class="size-2 shrink-0 rounded-full"
+                  :style="{ backgroundColor: g.color, boxShadow: `0 0 0 3px ${g.color}2e` }"
+                />
+                <h2 class="truncate text-sm font-semibold tracking-tight text-foreground">
+                  {{ g.label }}
+                </h2>
+                <span
+                  class="ml-auto rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-[11px] font-medium tabular-nums text-muted-foreground/80"
                 >
-                  <GripVertical
-                    class="size-3.5 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover/card:opacity-100"
-                  />
-                </IssueCard>
-              </div>
-              <!-- Ghost: a placeholder card at the landing spot, showing the
-                   dragged issue so it's clear what moves and where. Only renders
-                   in lanes where the drop is a real move (see isDropTarget). -->
-              <div
-                v-if="isDropTarget(g)"
-                class="ghost-card pointer-events-none flex items-start gap-2 rounded-lg border border-dashed border-primary/60 bg-primary/8 px-3 py-2.5"
-              >
-                <span class="mt-1 size-2 shrink-0 rounded-full bg-primary/70" />
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate text-xs font-medium text-primary/90">
-                    {{ dragging?.title }}
-                  </span>
-                  <span class="mt-0.5 block text-[11px] text-primary/55">Move here</span>
+                  {{ g.issues.length }}
                 </span>
-              </div>
-              <!-- Empty lane: a quiet placeholder gives the column presence and a
+              </header>
+              <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5">
+                <div
+                  v-for="(issue, i) in g.issues"
+                  :key="issue.iid"
+                  draggable="true"
+                  class="group/card cursor-grab transition-opacity active:cursor-grabbing"
+                  :class="draggingIid === issue.iid ? 'opacity-40' : ''"
+                  :style="{ order: i * 2 }"
+                  @dragstart="onDragStart(issue, $event)"
+                  @dragend="clearDrag"
+                >
+                  <IssueCard
+                    :issue="issue"
+                    :full-path="fullPath"
+                    :highlight="issue.iid === highlightIid"
+                    @filter="applyFacet"
+                  >
+                    <GripVertical
+                      class="size-3.5 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover/card:opacity-100"
+                    />
+                  </IssueCard>
+                </div>
+                <!-- Ghost: a placeholder card at the landing spot, showing the
+                   dragged issue so it's clear what moves and where. Only renders
+                   in lanes where the drop is a real move (see isDropTarget). The
+                   flex `order` slots it at the sorted index it'll drop into —
+                   cards take even orders, the ghost the odd slot just before its
+                   target card (ghostIndex 0 ⇒ order -1, i.e. the top of the lane). -->
+                <div
+                  v-if="isDropTarget(g)"
+                  :style="{ order: ghostIndex(g) * 2 - 1 }"
+                  class="ghost-card pointer-events-none flex items-start gap-2 rounded-lg border border-dashed border-primary/60 bg-primary/8 px-3 py-2.5"
+                >
+                  <span class="mt-1 size-2 shrink-0 rounded-full bg-primary/70" />
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-medium text-primary/90">
+                      {{ dragging?.title }}
+                    </span>
+                    <span class="mt-0.5 block text-[11px] text-primary/55">Move here</span>
+                  </span>
+                </div>
+                <!-- Empty lane: a quiet placeholder gives the column presence and a
                    visible target to drop a card into. Hidden while it's the live
                    drop target — the ghost takes over. -->
-              <div
-                v-if="!g.issues.length && !isDropTarget(g)"
-                class="grid flex-1 place-items-center px-2 py-6 text-center"
-              >
-                <span class="font-mono text-[11px] tracking-wide text-muted-foreground/35">
-                  drop here
-                </span>
+                <div
+                  v-if="!g.issues.length && !isDropTarget(g)"
+                  class="grid flex-1 place-items-center px-2 py-6 text-center"
+                >
+                  <span class="font-mono text-[11px] tracking-wide text-muted-foreground/35">
+                    drop here
+                  </span>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
 
         <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->

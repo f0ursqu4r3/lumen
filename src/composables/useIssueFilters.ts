@@ -123,9 +123,18 @@ export function useIssueFilters() {
     get: () => (asString(route.query.view) as View) || 'list',
     set: (v) => patch({ view: v === 'list' ? undefined : v }),
   })
-  const scope = computed<string>({
-    get: () => asString(route.query.scope) || 'assigned',
-    set: (v) => patch({ scope: v && v !== 'assigned' ? v : undefined }),
+  // Board column grouping. Shares the list's GroupKey vocabulary — 'status',
+  // 'assignee', or 'label:<scope>'. Defaults to native Status; a legacy bare
+  // scope (?scope=team, from when this only held label scopes) migrates to
+  // label:<scope> on read so old links and saved views still resolve.
+  const scope = computed<GroupKey>({
+    get: () => {
+      const raw = asString(route.query.scope)
+      if (!raw) return 'status'
+      if (raw === 'status' || raw === 'assignee' || raw.startsWith('label:')) return raw as GroupKey
+      return `label:${raw}` as GroupKey
+    },
+    set: (v) => patch({ scope: v === 'status' ? undefined : v }),
   })
 
   // Search: local ref bound to the input, debounced out to the URL, hydrated

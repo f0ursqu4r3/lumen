@@ -3,10 +3,14 @@ import {
   sortIssues,
   groupIssues,
   groupByScope,
+  boardColumns,
+  boardDropIndex,
+  planBoardMove,
   availableScopes,
   labelScopes,
   planRetag,
 } from './issueView'
+import type { IssueGroup } from './issueView'
 import type { IssueListItem } from '@/composables/useIssues'
 
 // Minimal issue factory — only the fields the view helpers read.
@@ -16,6 +20,7 @@ const mk = (
   labels: { title: string; color: string }[] = [],
   assignees: string[] = [],
   createdAt = '2026-01-01T00:00:00Z',
+  status: { name: string; category: string } | null = null,
 ): IssueListItem =>
   ({
     iid,
@@ -23,6 +28,7 @@ const mk = (
     state: 'opened',
     webUrl: '#',
     createdAt,
+    status: status && { id: `st-${status.name}`, color: '#abc', iconName: 'x', ...status },
     labels: { nodes: labels.map((l, i) => ({ id: `${iid}-${i}`, ...l })) },
     assignees: {
       nodes: assignees.map((u) => ({ id: u, username: u, avatarUrl: null })),
@@ -58,7 +64,12 @@ describe('sortIssues', () => {
 })
 
 describe('groupIssues', () => {
-  const issues = [mk('1', 'a', [S('in-review')]), mk('2', 'b', [S('on-deck')]), mk('3', 'c', [])]
+  const at = '2026-01-01T00:00:00Z'
+  const issues = [
+    mk('1', 'a', [], [], at, { name: 'In progress', category: 'in_progress' }),
+    mk('2', 'b', [], [], at, { name: 'To do', category: 'to_do' }),
+    mk('3', 'c'),
+  ]
 
   it('returns a single group when ungrouped', () => {
     const g = groupIssues(issues, 'none')
@@ -66,12 +77,21 @@ describe('groupIssues', () => {
     expect(g[0].issues).toHaveLength(3)
   })
 
-  it('orders status groups by workflow, no-status last', () => {
+  it('orders native status groups by lifecycle category, no-status last', () => {
     expect(groupIssues(issues, 'status').map((g) => g.label)).toEqual([
-      'on-deck',
-      'in-review',
+      'To do',
+      'In progress',
       'No status',
     ])
+  })
+
+  it('groups by a scoped-label group via label:<scope>', () => {
+    const li = [
+      mk('1', 'a', [{ title: 'team::HMI', color: '#00f' }]),
+      mk('2', 'b', [{ title: 'team::sensors', color: '#0d9488' }]),
+      mk('3', 'c', []),
+    ]
+    expect(groupIssues(li, 'label:team').map((g) => g.label)).toEqual(['HMI', 'sensors', 'No team'])
   })
 
   it('groups by priority with a canonical order', () => {
@@ -145,6 +165,119 @@ describe('groupByScope', () => {
     expect(cols.find((c) => c.label === 'stalled')!.repLabel).toMatchObject({
       id: 'l3',
     })
+  })
+})
+
+describe('boardColumns', () => {
+  const at = '2026-01-01T00:00:00Z'
+  // Catalog ids match the factory's `st-${name}` so issues file into seeded columns.
+  const status = (name: string, category: string) => ({
+    id: `st-${name}`,
+    name,
+    color: '#abc',
+    category,
+  })
+  const statusCatalog = [
+    status('To do', 'to_do'),
+    status('In progress', 'in_progress'),
+    status('Done', 'done'),
+  ]
+
+  it('seeds a status column per catalog entry in order, No status last', () => {
+    const issues = [
+      mk('1', 'a', [], [], at, { name: 'Done', category: 'done' }),
+      mk('2', 'b'),
+      mk('3', 'c', [], [], at, { name: 'To do', category: 'to_do' }),
+    ]
+    const cols = boardColumns(issues, 'status', { statusCatalog })
+    expect(cols.map((c) => c.label)).toEqual(['To do', 'In progress', 'Done', 'No status'])
+    // Seeded but unused columns are present (drop targets).
+    expect(cols.find((c) => c.label === 'In progress')!.issues).toHaveLength(0)
+    expect(cols.find((c) => c.label === 'To do')!.issues.map((i) => i.iid)).toEqual(['3'])
+  })
+
+  it('groups by assignee, unassigned last', () => {
+    const issues = [mk('1', 'a', [], ['zoe']), mk('2', 'b'), mk('3', 'c', [], ['amy'])]
+    expect(boardColumns(issues, 'assignee').map((c) => c.label)).toEqual([
+      'amy',
+      'zoe',
+      'Unassigned',
+    ])
+  })
+
+  it('groups by a label scope, seeding empty columns from the catalog', () => {
+    const issues = [mk('1', 'a', [{ title: 'team::HMI', color: '#00f' }]), mk('2', 'b', [])]
+    const labelCatalog = [
+      { id: 'l1', title: 'team::HMI', color: '#00f' },
+      { id: 'l2', title: 'team::sensors', color: '#0d9488' },
+    ]
+    expect(boardColumns(issues, 'label:team', { labelCatalog }).map((c) => c.label)).toEqual([
+      'HMI',
+      'sensors',
+      'No team',
+    ])
+  })
+})
+
+describe('planBoardMove', () => {
+  const at = '2026-01-01T00:00:00Z'
+  const col = (key: string, extra: Partial<IssueGroup> = {}): IssueGroup =>
+    ({ key, label: key, issues: [], ...extra }) as IssueGroup
+
+  it('plans a status change, ignoring the same and No-status columns', () => {
+    const issue = mk('1', 'a', [], [], at, { name: 'To do', category: 'to_do' })
+    expect(planBoardMove(issue, 'status', col('st-Done'))).toEqual({
+      kind: 'status',
+      statusId: 'st-Done',
+    })
+    expect(planBoardMove(issue, 'status', col('st-To do'))).toBeNull()
+    expect(planBoardMove(issue, 'status', col('__none'))).toBeNull()
+  })
+
+  it('plans a reassign, clearing assignees for the Unassigned column', () => {
+    const issue = mk('1', 'a', [], ['amy'])
+    expect(planBoardMove(issue, 'assignee', col('zoe'))).toEqual({
+      kind: 'assignee',
+      assigneeUsernames: ['zoe'],
+    })
+    expect(planBoardMove(issue, 'assignee', col('__none'))).toEqual({
+      kind: 'assignee',
+      assigneeUsernames: [],
+    })
+    expect(planBoardMove(issue, 'assignee', col('amy'))).toBeNull()
+  })
+
+  it('plans a retag for label-scope columns', () => {
+    const issue = mk('1', 'a', [{ title: 'team::HMI', color: '#00f' }])
+    const target = col('sensors', {
+      repLabel: { id: 'x', title: 'team::sensors', color: '#0d9488' },
+    })
+    expect(planBoardMove(issue, 'label:team', target)).toMatchObject({ kind: 'retag' })
+  })
+})
+
+describe('boardDropIndex', () => {
+  it('drops a recently-updated card at the start', () => {
+    const col = [mk('1', 'b'), mk('2', 'c')]
+    expect(boardDropIndex(col, mk('9', 'a'), 'updated')).toBe(0)
+  })
+
+  it('inserts alphabetically for title sort', () => {
+    const col = [mk('1', 'Apple'), mk('2', 'Mango'), mk('3', 'Zebra')]
+    expect(boardDropIndex(col, mk('9', 'Lemon'), 'title')).toBe(1)
+  })
+
+  it('inserts by priority weight (between high and low)', () => {
+    const col = [mk('1', 'a', [P('High')]), mk('2', 'b', [P('Low')])]
+    expect(boardDropIndex(col, mk('9', 'x', [P('Medium')]), 'priority')).toBe(1)
+  })
+
+  it('inserts by created date, newest first', () => {
+    const col = [
+      mk('1', 'a', [], [], '2026-03-01T00:00:00Z'),
+      mk('2', 'b', [], [], '2026-01-01T00:00:00Z'),
+    ]
+    expect(boardDropIndex(col, mk('9', 'x', [], [], '2026-02-01T00:00:00Z'), 'created')).toBe(1)
   })
 })
 

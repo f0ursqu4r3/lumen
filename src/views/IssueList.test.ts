@@ -33,6 +33,11 @@ vi.mock('@/composables/useIssueMutations', () => ({
     error: { value: null },
   }),
   useRetagIssue: () => ({ mutate: vi.fn() }),
+  useReassignIssue: () => ({ mutate: vi.fn() }),
+}))
+vi.mock('@/composables/useWorkItemStatus', () => ({
+  useWorkItemStatuses: () => ({ data: ref([]) }),
+  useSetIssueStatus: () => ({ mutate: vi.fn() }),
 }))
 vi.mock('@/composables/useProjectLabels', () => ({
   useProjectLabels: () => ({ data: ref([]) }),

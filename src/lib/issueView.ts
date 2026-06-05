@@ -3,7 +3,7 @@
 // priority and workflow status live in scoped labels — GitLab can't sort or
 // group by them, but we can. Pure functions, easy to test.
 import type { IssueListItem } from '@/composables/useIssues'
-import { priorityOf, statusOf, parseLabel } from './labels'
+import { priorityOf, parseLabel } from './labels'
 
 export interface LabelNode {
   id: string
@@ -12,7 +12,9 @@ export interface LabelNode {
 }
 
 export type SortKey = 'priority' | 'title' | 'updated' | 'created'
-export type GroupKey = 'none' | 'status' | 'priority' | 'assignee'
+// `label:<scope>` groups by a scoped-label group (team::, type::, …), reusing the
+// board's groupByScope. The fixed keys cover the native/derived facets.
+export type GroupKey = 'none' | 'status' | 'priority' | 'assignee' | `label:${string}`
 
 export const SORTS: { value: SortKey; label: string }[] = [
   { value: 'updated', label: 'Recently updated' },
@@ -24,7 +26,6 @@ export const SORTS: { value: SortKey; label: string }[] = [
 export const GROUPS: { value: GroupKey; label: string }[] = [
   { value: 'none', label: 'No grouping' },
   { value: 'status', label: 'Status' },
-  { value: 'priority', label: 'Priority' },
   { value: 'assignee', label: 'Assignee' },
 ]
 
@@ -62,31 +63,45 @@ export interface IssueGroup {
   issues: IssueListItem[]
 }
 
-// Preferred left-to-right / top-to-bottom ordering for known workflow statuses.
+// Preferred left-to-right / top-to-bottom ordering for known workflow statuses
+// (board columns built from scoped labels).
 const STATUS_ORDER = ['on-deck', 'blocked', 'in-progress', 'in-review', 'done']
 const statusRank = (value: string) => {
   const i = STATUS_ORDER.indexOf(value.toLowerCase())
   return i === -1 ? STATUS_ORDER.length : i
 }
 
+// Lifecycle order for the native work-item Status category, used to sort the
+// status groups. GitLab serializes the category lowercased (to_do, in_progress,
+// …); normalize so it ranks regardless of casing.
+const CATEGORY_ORDER = ['triage', 'to_do', 'in_progress', 'done', 'canceled']
+const categoryRank = (category?: string | null) => {
+  const i = CATEGORY_ORDER.indexOf((category ?? '').toLowerCase())
+  return i === -1 ? CATEGORY_ORDER.length : i
+}
+
+// Groups by the issue's native work-item Status (To do / In progress / Done / …),
+// ordered by lifecycle category. Issues without a status fall into a trailing
+// "No status" group.
 function groupByStatus(issues: readonly IssueListItem[]): IssueGroup[] {
   const map = new Map<string, IssueGroup>()
+  const category = new Map<string, string>()
   for (const issue of issues) {
-    const s = statusOf(labelsOf(issue))
-    const key = s ? s.value : '__none'
-    if (!map.has(key))
-      map.set(key, {
-        key,
-        label: s ? s.value : 'No status',
-        color: s?.color,
-        issues: [],
-      })
+    const s = issue.status ?? null
+    const key = s?.id ?? '__none'
+    if (!map.has(key)) {
+      map.set(key, { key, label: s?.name ?? 'No status', color: s?.color ?? undefined, issues: [] })
+      category.set(key, (s?.category ?? '').toLowerCase())
+    }
     map.get(key)!.issues.push(issue)
   }
   return [...map.values()].sort((a, b) => {
     if (a.key === '__none') return 1
     if (b.key === '__none') return -1
-    return statusRank(a.label) - statusRank(b.label)
+    return (
+      categoryRank(category.get(a.key)) - categoryRank(category.get(b.key)) ||
+      a.label.localeCompare(b.label)
+    )
   })
 }
 
@@ -124,6 +139,9 @@ function groupByAssignee(issues: readonly IssueListItem[]): IssueGroup[] {
 }
 
 export function groupIssues(issues: readonly IssueListItem[], key: GroupKey): IssueGroup[] {
+  // `label:<scope>` reuses the board grouping — no catalog, so only scopes the
+  // loaded issues actually use produce groups (no empty columns in the list).
+  if (key.startsWith('label:')) return groupByScope(issues, key.slice('label:'.length))
   switch (key) {
     case 'status':
       return groupByStatus(issues)
@@ -223,6 +241,76 @@ export function groupByScope(
   })
 }
 
+/** Minimal native-status shape the board needs to seed and order columns. */
+export interface StatusOption {
+  id: string
+  name: string
+  color: string
+  category?: string | null
+}
+
+/**
+ * Board columns by native work-item Status. Seeds a column for every status in
+ * `catalog` (so empty lifecycle columns exist as drop targets) in the catalog's
+ * order, then files issues into them; unknown statuses fall back to category
+ * order and "No status" trails. The column key is the status id — the drop
+ * target a card is dragged onto.
+ */
+function columnsByStatus(
+  issues: readonly IssueListItem[],
+  catalog?: readonly StatusOption[],
+): IssueGroup[] {
+  const map = new Map<string, IssueGroup>()
+  const category = new Map<string, string>()
+  const order = new Map<string, number>()
+  if (catalog)
+    catalog.forEach((s, i) => {
+      order.set(s.id, i)
+      map.set(s.id, { key: s.id, label: s.name, color: s.color, issues: [] })
+      category.set(s.id, (s.category ?? '').toLowerCase())
+    })
+  for (const issue of issues) {
+    const s = issue.status ?? null
+    const key = s?.id ?? '__none'
+    if (!map.has(key)) {
+      map.set(key, { key, label: s?.name ?? 'No status', color: s?.color ?? undefined, issues: [] })
+      category.set(key, (s?.category ?? '').toLowerCase())
+    }
+    map.get(key)!.issues.push(issue)
+  }
+  // Catalog order wins; statuses outside it sort after by lifecycle category.
+  const rank = (key: string) => order.get(key) ?? 1000 + categoryRank(category.get(key))
+  return [...map.values()].sort((a, b) => {
+    if (a.key === '__none') return 1
+    if (b.key === '__none') return -1
+    return rank(a.key) - rank(b.key) || a.label.localeCompare(b.label)
+  })
+}
+
+/**
+ * Columns for the board for any grouping key — native Status, Assignee, or a
+ * `label:<scope>` group. Mirrors the list's groupIssues, but seeds empty columns
+ * (from the status/label catalogs) so the board always has drop targets.
+ */
+export function boardColumns(
+  issues: readonly IssueListItem[],
+  key: GroupKey,
+  opts: { labelCatalog?: readonly LabelNode[]; statusCatalog?: readonly StatusOption[] } = {},
+): IssueGroup[] {
+  if (key === 'status') return columnsByStatus(issues, opts.statusCatalog)
+  if (key === 'assignee') return groupByAssignee(issues)
+  if (key.startsWith('label:'))
+    return groupByScope(issues, key.slice('label:'.length), opts.labelCatalog)
+  // 'none'/'priority' have no board column model; show everything in one lane.
+  return [{ key: 'all', label: '', issues: [...issues] }]
+}
+
+/** The grouping keys the board can render as columns (drag-editable). */
+export const BOARD_GROUPS: { value: GroupKey; label: string }[] = [
+  { value: 'status', label: 'Status' },
+  { value: 'assignee', label: 'Assignee' },
+]
+
 /**
  * Plan a drag-to-retag: move `issue` into the column whose label is `target`
  * (or out of the scope entirely when `target` is null). Returns the label id
@@ -252,6 +340,68 @@ export function planRetag(
     addLabelIds: target ? [target.id] : [],
     nextLabels: [...labs.filter((l) => l.id !== current?.id), ...(target ? [target] : [])],
   }
+}
+
+/** A planned board drag, discriminated by which mutation carries it out. */
+export type BoardMove =
+  | { kind: 'retag'; addLabelIds: string[]; removeLabelIds: string[]; nextLabels: LabelNode[] }
+  | { kind: 'status'; statusId: string }
+  | { kind: 'assignee'; assigneeUsernames: string[] }
+
+/**
+ * Plan dropping `issue` into `column` while the board is grouped by `key`.
+ * Returns the move to run (label retag / status set / reassign) or null when it
+ * wouldn't change anything — or when the target can't be set (the "No status"
+ * column, since the status widget can't be cleared by a drop). Assignee/label
+ * "none" columns ARE valid targets: they clear the assignee / scoped label.
+ */
+export function planBoardMove(
+  issue: IssueListItem,
+  key: GroupKey,
+  column: IssueGroup,
+): BoardMove | null {
+  if (key === 'status') {
+    if (column.key === '__none') return null
+    if ((issue.status?.id ?? null) === column.key) return null
+    return { kind: 'status', statusId: column.key }
+  }
+  if (key === 'assignee') {
+    const target = column.key === '__none' ? null : column.key
+    if ((firstAssignee(issue)?.username ?? null) === target) return null
+    return { kind: 'assignee', assigneeUsernames: target ? [target] : [] }
+  }
+  if (key.startsWith('label:')) {
+    const plan = planRetag(issue, key.slice('label:'.length), column.repLabel ?? null)
+    return plan ? { kind: 'retag', ...plan } : null
+  }
+  return null
+}
+
+/**
+ * The index at which `issue` will land in `columnIssues` once dropped, given the
+ * active sort — so the board ghost can preview its real resting place rather than
+ * sit at the bottom. 'updated' orders by server UPDATED_DESC and a drop bumps the
+ * issue's updatedAt, so it always lands at the start (index 0); the other keys
+ * insert by their comparator, after any ties (mirroring sortIssues' stability).
+ */
+export function boardDropIndex(
+  columnIssues: readonly IssueListItem[],
+  issue: IssueListItem,
+  key: SortKey,
+): number {
+  if (key === 'updated') return 0
+  const weight = (i: IssueListItem) => priorityOf(labelsOf(i))?.weight ?? 0
+  const time = (i: IssueListItem) => new Date(i.createdAt).getTime()
+  // Negative ⇒ `a` sorts before `b`, matching sortIssues' order for `key`.
+  const before = (a: IssueListItem, b: IssueListItem) =>
+    key === 'title'
+      ? a.title.localeCompare(b.title)
+      : key === 'priority'
+        ? weight(b) - weight(a)
+        : time(b) - time(a) // 'created': newest first
+  let i = 0
+  while (i < columnIssues.length && before(columnIssues[i], issue) <= 0) i++
+  return i
 }
 
 // --- active filters ---------------------------------------------------------

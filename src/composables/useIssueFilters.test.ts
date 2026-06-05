@@ -98,13 +98,19 @@ describe('useIssueFilters', () => {
       sort: 'priority',
       group: 'status',
       view: 'board',
-      scope: 'team',
+      scope: 'label:team',
     })
     const api = await mountIt()
     expect(api.sort.value).toBe('priority')
     expect(api.group.value).toBe('status')
     expect(api.view.value).toBe('board')
-    expect(api.scope.value).toBe('team')
+    expect(api.scope.value).toBe('label:team')
+  })
+
+  it('migrates a legacy bare scope (?scope=team) to a label group', async () => {
+    const { mountIt } = setup({ scope: 'team' })
+    const api = await mountIt()
+    expect(api.scope.value).toBe('label:team')
   })
 
   it('defaults sort/group/view/scope when the keys are absent', async () => {
@@ -113,7 +119,7 @@ describe('useIssueFilters', () => {
     expect(api.sort.value).toBe('updated')
     expect(api.group.value).toBe('none')
     expect(api.view.value).toBe('list')
-    expect(api.scope.value).toBe('assigned')
+    expect(api.scope.value).toBe('status')
   })
 
   it('writes non-default sort/group/view/scope and omits defaults', async () => {
@@ -122,16 +128,16 @@ describe('useIssueFilters', () => {
     api.sort.value = 'title'
     api.view.value = 'board'
     api.group.value = 'status'
-    api.scope.value = 'team'
+    api.scope.value = 'label:team'
     await flushPromises()
     expect(router.currentRoute.value.query.sort).toBe('title')
     expect(router.currentRoute.value.query.view).toBe('board')
     expect(router.currentRoute.value.query.group).toBe('status')
-    expect(router.currentRoute.value.query.scope).toBe('team')
+    expect(router.currentRoute.value.query.scope).toBe('label:team')
     api.sort.value = 'updated'
     api.view.value = 'list'
     api.group.value = 'none'
-    api.scope.value = 'assigned'
+    api.scope.value = 'status'
     await flushPromises()
     expect(router.currentRoute.value.query.sort).toBeUndefined()
     expect(router.currentRoute.value.query.view).toBeUndefined()
