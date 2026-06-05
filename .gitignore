@@ -41,3 +41,6 @@ yarn-error.log*
 
 # Electrobun build outputs (dist/ already ignored above)
 /build
+
+# Subagent persistent memory — not project source
+.claude/agent-memory/
