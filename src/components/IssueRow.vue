@@ -13,7 +13,7 @@ import {
   FlaskConical,
   Tag,
 } from '@lucide/vue'
-import LabelChip from './LabelChip.vue'
+import LabelChip from '@/components/LabelChip.vue'
 import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'

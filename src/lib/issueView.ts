@@ -3,7 +3,7 @@
 // priority and workflow status live in scoped labels — GitLab can't sort or
 // group by them, but we can. Pure functions, easy to test.
 import type { IssueListItem } from '@/composables/useIssues'
-import { priorityOf, parseLabel } from './labels'
+import { priorityOf, parseLabel } from '@/lib/labels'
 
 export interface LabelNode {
   id: string
