@@ -3,10 +3,26 @@ import { computed, ref, watch, nextTick } from 'vue'
 import { renderMarkdown } from '@/lib/markdown'
 import { applyResolvedMedia } from '@/lib/media'
 import { resolveAsset } from '@/composables/useGitlabAsset'
+import { rpc } from '@/lib/rpc'
 
 const props = defineProps<{ source?: string | null; projectPath?: string }>()
 const html = computed(() => renderMarkdown(props.source, { projectPath: props.projectPath }))
 const host = ref<HTMLElement | null>(null)
+
+// Links render via v-html, so intercept clicks by delegation. The native webview
+// ignores <a target="_blank"> and otherwise navigates the app window itself, so
+// absolute web links must round-trip through the host to reach the OS browser.
+// We match on the raw href: only http(s):// links are external. Relative/internal
+// links (served under the views:// origin) and file-card download anchors (which
+// point at resolved asset paths) are left to navigate in place.
+function onClick(e: MouseEvent) {
+  const anchor = (e.target as HTMLElement | null)?.closest('a')
+  if (!anchor || anchor.hasAttribute('download')) return
+  const href = anchor.getAttribute('href') ?? ''
+  if (!/^https?:\/\//i.test(href)) return
+  e.preventDefault()
+  void rpc.openExternal({ url: href })
+}
 
 // After each render, swap GitLab upload paths for blob URLs fetched via RPC.
 watch(
@@ -21,7 +37,7 @@ watch(
 
 <template>
   <!-- eslint-disable-next-line vue/no-v-html — sanitized in renderMarkdown -->
-  <div ref="host" class="markdown" v-html="html" />
+  <div ref="host" class="markdown" @click="onClick" v-html="html" />
 </template>
 
 <style scoped>
