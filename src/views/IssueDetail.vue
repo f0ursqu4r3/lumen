@@ -18,7 +18,7 @@ import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Images } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
 import { Textarea } from '@/shared/ui/textarea'
-import { Skeleton } from '@/shared/ui/skeleton'
+import IssueDetailSkeleton from '@/features/issues/components/IssueDetailSkeleton.vue'
 import MarkdownText from '@/shared/components/MarkdownText.vue'
 import EditableField from '@/shared/components/EditableField.vue'
 import Scratchpad from '@/shared/components/Scratchpad.vue'
@@ -133,55 +133,7 @@ if (!props.embedded) {
   <ErrorNotice v-if="error" :error="error" />
   <!-- Skeleton mirrors the real masthead + rail composition (same container/grid)
        so resolved content lands in place instead of reflowing. -->
-  <div v-else-if="isLoading" class="issue" role="status" aria-busy="true">
-    <span class="sr-only">Loading issue…</span>
-    <header>
-      <div class="flex items-center gap-2.5">
-        <Skeleton class="h-5 w-16 rounded-full" />
-        <Skeleton class="h-4 w-10" />
-        <Skeleton class="ml-auto h-8 w-24 rounded-md" />
-      </div>
-      <Skeleton class="mt-4 h-8 w-3/4" />
-      <Skeleton class="mt-3 h-3 w-48" />
-    </header>
-
-    <div class="issue__body mt-8">
-      <section class="issue__desc min-w-0 space-y-2.5">
-        <Skeleton class="h-2.5 w-20" />
-        <Skeleton class="h-3.5 w-full" />
-        <Skeleton class="h-3.5 w-[92%]" />
-        <Skeleton class="h-3.5 w-[78%]" />
-        <Skeleton class="h-3.5 w-[85%]" />
-      </section>
-
-      <aside class="issue__meta space-y-6">
-        <div class="space-y-2">
-          <Skeleton class="h-2.5 w-14" />
-          <Skeleton class="h-6 w-24 rounded-md" />
-        </div>
-        <div class="space-y-2">
-          <Skeleton class="h-2.5 w-20" />
-          <Skeleton class="h-6 w-28 rounded-md" />
-        </div>
-        <div class="space-y-1.5">
-          <Skeleton class="h-2.5 w-16" />
-          <Skeleton class="h-4 w-20" />
-        </div>
-      </aside>
-
-      <section class="issue__talk min-w-0 space-y-4">
-        <Skeleton class="h-2.5 w-20" />
-        <div class="flex gap-3">
-          <Skeleton class="size-7 shrink-0 rounded-full" />
-          <div class="flex-1 space-y-2">
-            <Skeleton class="h-3 w-32" />
-            <Skeleton class="h-3.5 w-full" />
-            <Skeleton class="h-3.5 w-2/3" />
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
+  <IssueDetailSkeleton v-else-if="isLoading" />
   <article v-else-if="issue && draft" class="issue pb-20">
     <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
     <IssueMasthead
