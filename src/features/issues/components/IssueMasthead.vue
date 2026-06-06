@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { Check, Link, ExternalLink, ArrowLeft } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
 import StateBadge from '@/features/issues/components/StateBadge.vue'
-import EditableField from '@/shared/components/EditableField.vue'
 
 defineProps<{
   issue: {
@@ -20,8 +18,6 @@ defineProps<{
   linkCopied: null | 'url' | 'md'
   fullPath: string
 }>()
-const draftTitle = defineModel<string>('title', { required: true })
-const editingTitle = defineModel<boolean>('editingTitle', { required: true })
 defineEmits<{ copy: [e: MouseEvent]; 'open-external': []; 'toggle-state': [] }>()
 
 // two-letter-free name helper (avatars elsewhere are initials; this is the byline)
@@ -97,31 +93,7 @@ function nameOrUsername(user?: { name?: string | null; username: string } | null
       </Button>
     </div>
 
-    <EditableField
-      v-model:editing="editingTitle"
-      label="Title"
-      toggle-testid="edit-title-toggle"
-      class="mt-4"
-    >
-      <template #label>
-        <span class="field-label">Title</span>
-      </template>
-      <template #view>
-        <h1 class="text-balance text-title leading-[1.08] font-semibold">
-          {{ draftTitle }}
-        </h1>
-      </template>
-      <template #edit>
-        <Input
-          v-model="draftTitle"
-          data-testid="edit-title"
-          aria-label="Issue title"
-          class="h-auto py-1.5 text-title font-semibold"
-        />
-      </template>
-    </EditableField>
-
-    <p class="mt-2.5 text-xs text-muted-foreground">
+    <p class="mt-4 text-xs text-muted-foreground">
       Opened by
       <span class="font-medium text-foreground">{{ nameOrUsername(issue.author) }}</span>
       <span class="px-1 text-muted-foreground/50">·</span>

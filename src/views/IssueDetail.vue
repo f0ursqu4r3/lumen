@@ -17,6 +17,7 @@ import IssueDiscussion from '@/features/issues/components/IssueDiscussion.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Images } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
 import IssueDetailSkeleton from '@/features/issues/components/IssueDetailSkeleton.vue'
 import MarkdownText from '@/shared/components/MarkdownText.vue'
@@ -144,8 +145,6 @@ if (!props.embedded) {
       :windowed="windowed"
       :link-copied="linkCopied"
       :full-path="fullPath"
-      v-model:title="draft.title"
-      v-model:editing-title="editingTitle"
       @copy="onCopyClick"
       @open-external="openInGitLab"
       @toggle-state="toggleState"
@@ -154,8 +153,32 @@ if (!props.embedded) {
     <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
 
     <div class="issue__body my-8" @click="onBodyMediaClick">
-      <!-- Main column: the document. -->
+      <!-- Main column: the document. The title leads it — the issue's identity
+           sits with its body, not up in the masthead's instrument cluster. -->
       <section class="issue__desc min-w-0 animate-row-in" style="animation-delay: 60ms">
+        <EditableField
+          v-model:editing="editingTitle"
+          label="Title"
+          toggle-testid="edit-title-toggle"
+          class="mb-6"
+        >
+          <template #label>
+            <span class="field-label">Title</span>
+          </template>
+          <template #view>
+            <h1 class="text-balance text-title leading-[1.08] font-semibold">
+              {{ draft.title }}
+            </h1>
+          </template>
+          <template #edit>
+            <Input
+              v-model="draft.title"
+              data-testid="edit-title"
+              aria-label="Issue title"
+              class="h-auto py-1.5 text-title font-semibold"
+            />
+          </template>
+        </EditableField>
         <button
           v-if="media.length"
           type="button"
@@ -320,6 +343,8 @@ if (!props.embedded) {
     background: transparent;
     box-shadow: none;
     padding: 0;
+    position: sticky;
+    top: 1.5rem;
   }
   .issue__talk {
     grid-area: talk;

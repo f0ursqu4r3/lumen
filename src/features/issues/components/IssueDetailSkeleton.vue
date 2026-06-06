@@ -11,12 +11,12 @@ import { Skeleton } from '@/shared/ui/skeleton'
         <Skeleton class="h-4 w-10" />
         <Skeleton class="ml-auto h-8 w-24 rounded-md" />
       </div>
-      <Skeleton class="mt-4 h-8 w-3/4" />
-      <Skeleton class="mt-3 h-3 w-48" />
+      <Skeleton class="mt-4 h-3 w-48" />
     </header>
 
     <div class="issue__body mt-8">
       <section class="issue__desc min-w-0 space-y-2.5">
+        <Skeleton class="mb-6 h-8 w-3/4" />
         <Skeleton class="h-2.5 w-20" />
         <Skeleton class="h-3.5 w-full" />
         <Skeleton class="h-3.5 w-[92%]" />

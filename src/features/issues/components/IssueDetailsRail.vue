@@ -45,7 +45,7 @@ function onSelectStatus(status: WorkItemStatus) {
 
 <template>
   <aside
-    class="issue__meta animate-row-in space-y-5 rounded-xl border border-border bg-card/55 p-4 shadow-card"
+    class="issue__meta animate-row-in space-y-6 border-y border-border py-6"
     style="animation-delay: 90ms"
   >
     <StatusPicker
