@@ -17,6 +17,7 @@ import { useRepoPath } from '@/shared/composables/useRepoPath'
 import { usePipelineNotifications } from '@/features/pipelines/composables/usePipelineNotifications'
 import { usePipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
+import { shortSha, timing } from '@/features/pipelines/lib/pipelineFormat'
 import PipelineStatusBadge from '@/features/pipelines/components/PipelineStatusBadge.vue'
 import PipelineStages from '@/features/pipelines/components/PipelineStages.vue'
 import PipelineStageDots from '@/features/pipelines/components/PipelineStageDots.vue'
@@ -50,8 +51,6 @@ useTitle(computed(() => `Pipelines · ${repoName.value} · lumen`))
 // label reads "active" rather than the narrower "running".
 const activeCount = computed(() => pipelines.value.filter((p) => isActivePipeline(p.status)).length)
 
-const shortSha = (sha: string | null) => sha?.slice(0, 8) ?? ''
-
 // Staggered list entrance, same cadence as the issue rows (capped so a long list
 // doesn't crawl in). New rows arriving on a later poll animate in on their own;
 // reordered ones don't replay (keyed nodes move, not remount).
@@ -65,34 +64,6 @@ function toggleOpen(id: string) {
   const next = new Set(expanded.value)
   if (!next.delete(id)) next.add(id)
   expanded.value = next
-}
-
-function formatDuration(seconds: number | null): string {
-  if (seconds == null) return ''
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return m ? `${m}m ${s}s` : `${s}s`
-}
-
-const RELATIVE = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
-const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
-  ['day', 86_400],
-  ['hour', 3_600],
-  ['minute', 60],
-  ['second', 1],
-]
-function timeAgo(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000
-  for (const [unit, secs] of UNITS) {
-    if (diff >= secs || unit === 'second') return RELATIVE.format(-Math.floor(diff / secs), unit)
-  }
-  return ''
-}
-
-function timing(p: Pipeline): string {
-  const ago = timeAgo(p.createdAt)
-  const dur = formatDuration(p.duration)
-  return dur && !isActivePipeline(p.status) ? `${ago} · ${dur}` : ago
 }
 
 function openPipeline(p: Pipeline) {
