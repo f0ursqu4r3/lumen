@@ -428,23 +428,15 @@ export function applyOrder(groups: IssueGroup[], order: readonly string[]): Issu
 }
 
 /**
- * Compute the new key sequence after dragging `dragKey` onto `overKey` within
- * `keys`. Dragging forward (down/right) drops just after the target; dragging
- * backward drops just before it. Pure — returns a fresh array.
+ * Move `key` to `index` within `keys` (index is in the array with `key`
+ * removed; clamped to a valid slot). Used by the pointer-driven reorder, which
+ * thinks in terms of a landing index rather than an over-key. Pure — returns a
+ * fresh array.
  */
-export function reorderKeys(
-  keys: readonly string[],
-  dragKey: string,
-  overKey: string,
-): string[] {
-  if (dragKey === overKey) return [...keys]
-  const from = keys.indexOf(dragKey)
-  const to = keys.indexOf(overKey)
-  if (from === -1 || to === -1) return [...keys]
-  const without = keys.filter((k) => k !== dragKey)
-  const target = without.indexOf(overKey)
-  const insertAt = from < to ? target + 1 : target
-  without.splice(insertAt, 0, dragKey)
+export function reorderToIndex(keys: readonly string[], key: string, index: number): string[] {
+  const without = keys.filter((k) => k !== key)
+  const clamped = Math.max(0, Math.min(index, without.length))
+  without.splice(clamped, 0, key)
   return without
 }
 

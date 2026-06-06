@@ -14,9 +14,13 @@ export function useGroupOrder(fullPath: Ref<string>) {
   // flush: 'sync' ensures the key-change watcher runs synchronously so
   // orderFor() returns the correct project's data immediately after a
   // fullPath change (important for tests and same-tick reads).
-  const stored = useLocalStorage<Record<string, string[]>>(() => storageKey(fullPath.value), {}, {
-    flush: 'sync',
-  })
+  const stored = useLocalStorage<Record<string, string[]>>(
+    () => storageKey(fullPath.value),
+    {},
+    {
+      flush: 'sync',
+    },
+  )
 
   const orderFor = (dimension: string): string[] => stored.value[dimension] ?? []
   const hasOrder = (dimension: string): boolean => (stored.value[dimension]?.length ?? 0) > 0

@@ -10,7 +10,7 @@ import {
   labelScopes,
   planRetag,
   applyOrder,
-  reorderKeys,
+  reorderToIndex,
 } from './issueView'
 import type { IssueGroup } from './issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
@@ -336,24 +336,33 @@ describe('applyOrder', () => {
   })
 })
 
-describe('reorderKeys', () => {
-  it('moves a key forward to just after its target', () => {
-    expect(reorderKeys(['a', 'b', 'c', 'd'], 'a', 'c')).toEqual(['b', 'c', 'a', 'd'])
+describe('reorderToIndex', () => {
+  it('moves a key forward to a later index', () => {
+    expect(reorderToIndex(['a', 'b', 'c', 'd'], 'a', 2)).toEqual(['b', 'c', 'a', 'd'])
   })
 
-  it('moves a key backward to just before its target', () => {
-    expect(reorderKeys(['a', 'b', 'c', 'd'], 'd', 'b')).toEqual(['a', 'd', 'b', 'c'])
+  it('moves a key backward to an earlier index', () => {
+    expect(reorderToIndex(['a', 'b', 'c', 'd'], 'd', 1)).toEqual(['a', 'd', 'b', 'c'])
   })
 
-  it('is a no-op when dragging onto itself', () => {
-    expect(reorderKeys(['a', 'b', 'c'], 'b', 'b')).toEqual(['a', 'b', 'c'])
+  it('moves a key to the start', () => {
+    expect(reorderToIndex(['a', 'b', 'c', 'd'], 'c', 0)).toEqual(['c', 'a', 'b', 'd'])
   })
 
-  it('returns a copy when a key is missing', () => {
-    expect(reorderKeys(['a', 'b'], 'x', 'a')).toEqual(['a', 'b'])
+  it('moves a key to the end', () => {
+    expect(reorderToIndex(['a', 'b', 'c', 'd'], 'a', 3)).toEqual(['b', 'c', 'd', 'a'])
   })
 
-  it('returns a copy when overKey is missing', () => {
-    expect(reorderKeys(['a', 'b'], 'a', 'x')).toEqual(['a', 'b'])
+  it('clamps an out-of-range index to the end', () => {
+    expect(reorderToIndex(['a', 'b', 'c'], 'a', 99)).toEqual(['b', 'c', 'a'])
+  })
+
+  it('is a no-op when the index matches the current position', () => {
+    expect(reorderToIndex(['a', 'b', 'c', 'd'], 'b', 1)).toEqual(['a', 'b', 'c', 'd'])
+  })
+
+  it('returns a fresh array', () => {
+    const keys = ['a', 'b', 'c']
+    expect(reorderToIndex(keys, 'a', 1)).not.toBe(keys)
   })
 })
