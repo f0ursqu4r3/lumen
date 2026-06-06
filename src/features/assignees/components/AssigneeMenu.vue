@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { Check, Search } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
-import { personInitial, type AssigneeSection } from '@/lib/assigneeOrder'
+import { personInitial, type AssigneeSection } from '@/features/assignees/lib/assigneeOrder'
 
 // Presentational people-menu shared by the Assign and Quick-assign popovers:
 // renders the search box plus relationship-grouped sections and emits the

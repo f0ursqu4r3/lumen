@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AssigneeMenu from './AssigneeMenu.vue'
-import type { AssigneeSection } from '@/lib/assigneeOrder'
+import type { AssigneeSection } from '@/features/assignees/lib/assigneeOrder'
 
 const sections: AssigneeSection[] = [
   {
