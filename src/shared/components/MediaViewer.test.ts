@@ -6,7 +6,9 @@ import type { ViewerItem } from '@/features/issues/composables/useIssueMedia'
 
 // resolveAsset() would hit the real RPC/Electroview (crashes in jsdom); identity-mock it
 // so the resolved blob URL equals the original path and the [src=...] selectors still match.
-vi.mock('@/shared/composables/useGitlabAsset', () => ({ resolveAsset: (p: string) => Promise.resolve(p) }))
+vi.mock('@/shared/composables/useGitlabAsset', () => ({
+  resolveAsset: (p: string) => Promise.resolve(p),
+}))
 
 const items: ViewerItem[] = [
   {

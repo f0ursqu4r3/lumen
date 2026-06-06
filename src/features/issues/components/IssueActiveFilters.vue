@@ -35,9 +35,7 @@ defineEmits<{
         key="facet:assignee"
         class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
-        <span class="font-mono">{{
-          assignee === '__none__' ? 'Unassigned' : '@' + assignee
-        }}</span>
+        <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
         <button
           type="button"
           aria-label="Remove assignee filter"

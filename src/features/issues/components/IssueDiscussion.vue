@@ -20,13 +20,21 @@ const props = defineProps<{
 }>()
 const comment = defineModel<string>('comment', { required: true })
 
-const { fresh, replyingTo, replyBody, replyPending, replyError, openReply, cancelReply, submitReply } =
-  useIssueDiscussion({
-    fullPath: props.fullPath,
-    iid: props.iid,
-    issue: computed(() => props.issue),
-    notes: computed(() => props.notes),
-  })
+const {
+  fresh,
+  replyingTo,
+  replyBody,
+  replyPending,
+  replyError,
+  openReply,
+  cancelReply,
+  submitReply,
+} = useIssueDiscussion({
+  fullPath: props.fullPath,
+  iid: props.iid,
+  issue: computed(() => props.issue),
+  notes: computed(() => props.notes),
+})
 
 function nameOrUsername(user?: NoteAuthor) {
   return user?.name || `@${user?.username}` || '(deleted user)'

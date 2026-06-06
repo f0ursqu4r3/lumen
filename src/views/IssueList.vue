@@ -40,7 +40,9 @@ import { Skeleton } from '@/shared/ui/skeleton'
 
 const props = defineProps<{ fullPath: string }>()
 
-const { drawerDirty, openIid, setDrawerOpen, expandIssue } = useIssueDrawerRoute(toRef(props, 'fullPath'))
+const { drawerDirty, openIid, setDrawerOpen, expandIssue } = useIssueDrawerRoute(
+  toRef(props, 'fullPath'),
+)
 
 const {
   state,
@@ -174,8 +176,17 @@ watch(scopeOptions, (opts) => {
 })
 
 // --- drag to update (retag / set status / reassign) -------------------------
-const { dragging, draggingIid, dragOverKey, justDropped, onDragStart, clearDrag, onDrop, isDropTarget, ghostIndex } =
-  useIssueBoardDnd({ fullPath: props.fullPath, boardScope, sortKey, statusCatalog, members })
+const {
+  dragging,
+  draggingIid,
+  dragOverKey,
+  justDropped,
+  onDragStart,
+  clearDrag,
+  onDrop,
+  isDropTarget,
+  ghostIndex,
+} = useIssueBoardDnd({ fullPath: props.fullPath, boardScope, sortKey, statusCatalog, members })
 
 // --- active filters ---------------------------------------------------------
 function applyFacet(f: Facet) {

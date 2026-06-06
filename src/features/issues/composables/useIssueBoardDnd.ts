@@ -1,8 +1,16 @@
 import { ref, onUnmounted, type Ref } from 'vue'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useRetagIssue, useReassignIssue } from '@/features/issues/composables/useIssueMutations'
-import { useSetIssueStatus, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
-import { boardDropIndex, planBoardMove, type IssueGroup, type SortKey } from '@/features/issues/lib/issueView'
+import {
+  useSetIssueStatus,
+  type WorkItemStatus,
+} from '@/features/issues/composables/useWorkItemStatus'
+import {
+  boardDropIndex,
+  planBoardMove,
+  type IssueGroup,
+  type SortKey,
+} from '@/features/issues/lib/issueView'
 import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 
 export function useIssueBoardDnd(opts: {
@@ -130,5 +138,15 @@ export function useIssueBoardDnd(opts: {
 
   onUnmounted(() => clearTimeout(dropTimer))
 
-  return { dragging, draggingIid, dragOverKey, justDropped, onDragStart, clearDrag, onDrop, isDropTarget, ghostIndex }
+  return {
+    dragging,
+    draggingIid,
+    dragOverKey,
+    justDropped,
+    onDragStart,
+    clearDrag,
+    onDrop,
+    isDropTarget,
+    ghostIndex,
+  }
 }

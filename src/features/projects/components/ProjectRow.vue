@@ -92,11 +92,7 @@ const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
         "
         @click.stop.prevent="$emit('toggle-star')"
       >
-        <Star
-          class="size-4"
-          :fill="row.starred ? 'currentColor' : 'none'"
-          :stroke-width="2"
-        />
+        <Star class="size-4" :fill="row.starred ? 'currentColor' : 'none'" :stroke-width="2" />
       </button>
 
       <CornerDownLeft

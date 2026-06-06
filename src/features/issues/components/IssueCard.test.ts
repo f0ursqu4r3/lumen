@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import { ref } from 'vue'
 import IssueCard from './IssueCard.vue'
-import { IssueSelectionKey, useIssueSelection } from '@/features/issues/composables/useIssueSelection'
+import {
+  IssueSelectionKey,
+  useIssueSelection,
+} from '@/features/issues/composables/useIssueSelection'
 
 const issue = {
   iid: '7',

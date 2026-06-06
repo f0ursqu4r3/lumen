@@ -114,9 +114,7 @@ ApplicationMenu.on('application-menu-clicked', (event) => {
     win.webview.toggleDevTools()
   } else if (action === SETTINGS_ACTION) {
     // Bridge host → webview: dispatch the event the webview's useSettings listens for.
-    win.webview.executeJavascript(
-      "window.dispatchEvent(new CustomEvent('lumen:open-settings'))",
-    )
+    win.webview.executeJavascript("window.dispatchEvent(new CustomEvent('lumen:open-settings'))")
   }
 })
 

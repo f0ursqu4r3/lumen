@@ -1,10 +1,7 @@
 import { ref, type Ref } from 'vue'
 import { rpc } from '@/shared/lib/rpc'
 
-type IssueLike =
-  | { iid: string; title: string; webUrl: string }
-  | null
-  | undefined
+type IssueLike = { iid: string; title: string; webUrl: string } | null | undefined
 
 export function useIssueLinks(issue: Ref<IssueLike>) {
   const linkCopied = ref<null | 'url' | 'md'>(null)

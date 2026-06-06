@@ -34,9 +34,7 @@ export const routes: RouteRecordRaw[] = [
       fullPath: String(route.params.fullPath),
       // Comma-joined in issuesWindowUrl; split back to the pager's iid list.
       iids:
-        typeof route.query.iids === 'string' && route.query.iids
-          ? route.query.iids.split(',')
-          : [],
+        typeof route.query.iids === 'string' && route.query.iids ? route.query.iids.split(',') : [],
       windowed: route.query.window === '1',
     }),
   },

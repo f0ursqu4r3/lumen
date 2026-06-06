@@ -8,7 +8,9 @@ describe('issues-window route', () => {
     const resolved = router.resolve('/projects/grp/proj/issues-window?iids=42,7,13&window=1')
     expect(resolved.name).toBe('issues-window')
     const record = resolved.matched.at(-1)!
-    const props = (record.props.default as (r: typeof resolved) => Record<string, unknown>)(resolved)
+    const props = (record.props.default as (r: typeof resolved) => Record<string, unknown>)(
+      resolved,
+    )
     expect(props).toEqual({ fullPath: 'grp/proj', iids: ['42', '7', '13'], windowed: true })
   })
 
@@ -16,7 +18,9 @@ describe('issues-window route', () => {
     const router = createRouter({ history: createMemoryHistory(), routes })
     const resolved = router.resolve('/projects/grp/proj/issues-window')
     const record = resolved.matched.at(-1)!
-    const props = (record.props.default as (r: typeof resolved) => Record<string, unknown>)(resolved)
+    const props = (record.props.default as (r: typeof resolved) => Record<string, unknown>)(
+      resolved,
+    )
     expect(props).toEqual({ fullPath: 'grp/proj', iids: [], windowed: false })
   })
 })

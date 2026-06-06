@@ -69,5 +69,14 @@ export function useIssueDiscussion(opts: {
     }
   }
 
-  return { fresh, replyingTo, replyBody, replyPending, replyError, openReply, cancelReply, submitReply }
+  return {
+    fresh,
+    replyingTo,
+    replyBody,
+    replyPending,
+    replyError,
+    openReply,
+    cancelReply,
+    submitReply,
+  }
 }

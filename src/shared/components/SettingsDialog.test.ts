@@ -39,7 +39,11 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.stubGlobal('__APP_VERSION__', '9.9.9')
   getConfig.mockResolvedValue({ url: 'https://gitlab.example.com', configured: true })
-  gitlabGraphql.mockResolvedValue({ status: 200, data: { currentUser: { username: 'kyle' } }, errors: [] })
+  gitlabGraphql.mockResolvedValue({
+    status: 200,
+    data: { currentUser: { username: 'kyle' } },
+    errors: [],
+  })
   closeSettings()
 })
 

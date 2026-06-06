@@ -66,10 +66,9 @@ const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
           :stages="pipeline.stages"
           class="hidden shrink-0 md:flex"
         />
-        <span
-          class="ml-auto shrink-0 pl-2 text-xs whitespace-nowrap text-muted-foreground/80"
-          >{{ timing(pipeline) }}</span
-        >
+        <span class="ml-auto shrink-0 pl-2 text-xs whitespace-nowrap text-muted-foreground/80">{{
+          timing(pipeline)
+        }}</span>
       </component>
 
       <!-- Actions live outside the toggle so they never trip the expand. -->
@@ -91,16 +90,8 @@ const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
           size="icon-sm"
           :data-testid="`watch-${pipeline.iid}`"
           :aria-pressed="watched"
-          :class="
-            watched
-              ? 'text-primary hover:text-primary'
-              : 'text-muted-foreground'
-          "
-          :title="
-            watched
-              ? 'Stop alerting when this finishes'
-              : 'Alert me when this finishes'
-          "
+          :class="watched ? 'text-primary hover:text-primary' : 'text-muted-foreground'"
+          :title="watched ? 'Stop alerting when this finishes' : 'Alert me when this finishes'"
           :aria-label="
             watched
               ? `Stop alerting for pipeline #${pipeline.iid}`

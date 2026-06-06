@@ -115,7 +115,9 @@ async function disconnect() {
       <div class="flex flex-col gap-6">
         <!-- Connection -->
         <section class="space-y-3">
-          <p class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <p
+            class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
+          >
             Connection
           </p>
           <p class="font-mono text-sm text-foreground/90">{{ url || '—' }}</p>
@@ -172,7 +174,9 @@ async function disconnect() {
 
         <!-- About -->
         <section class="space-y-1">
-          <p class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <p
+            class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
+          >
             About
           </p>
           <p class="text-sm text-muted-foreground">
@@ -183,14 +187,12 @@ async function disconnect() {
 
         <!-- Cache -->
         <section class="space-y-2">
-          <p class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <p
+            class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
+          >
             Cache
           </p>
-          <Button
-            data-testid="settings-clear-cache"
-            variant="outline"
-            @click="clearCache"
-          >
+          <Button data-testid="settings-clear-cache" variant="outline" @click="clearCache">
             <Trash2 class="size-4" />
             Clear cached data
           </Button>

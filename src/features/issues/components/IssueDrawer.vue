@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { SquareArrowOutUpRight } from '@lucide/vue'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/shared/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/ui/sheet'
 import { Button } from '@/shared/ui/button'
 import IssueDetail from '@/views/IssueDetail.vue'
 

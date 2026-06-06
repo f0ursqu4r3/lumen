@@ -1,5 +1,8 @@
 import { useRetagIssue, useReassignIssue } from '@/features/issues/composables/useIssueMutations'
-import { useSetIssueStatus, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
+import {
+  useSetIssueStatus,
+  type WorkItemStatus,
+} from '@/features/issues/composables/useWorkItemStatus'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import { pushToast } from '@/shared/composables/useToast'
 

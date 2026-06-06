@@ -8,7 +8,10 @@ import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemSt
 // Owns multi-select state + the bulk-action handlers the BulkActionBar drives.
 // The view still `provide()`s the returned `selection` (so rows/cards inject it)
 // and passes `loadedIids` to selectAll.
-export function useIssueBulkHandlers(fullPath: Ref<string>, members: Ref<ProjectMember[] | undefined>) {
+export function useIssueBulkHandlers(
+  fullPath: Ref<string>,
+  members: Ref<ProjectMember[] | undefined>,
+) {
   const selection = useIssueSelection(fullPath)
   const bulk = useBulkIssueActions(fullPath.value)
 

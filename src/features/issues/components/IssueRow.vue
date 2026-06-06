@@ -17,7 +17,14 @@ import LabelChip from '@/features/labels/components/LabelChip.vue'
 import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Checkbox } from '@/shared/ui/checkbox'
-import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/features/labels/lib/labels'
+import {
+  priorityOf,
+  typeOf,
+  statusOf,
+  remainingLabels,
+  parseLabel,
+  tint,
+} from '@/features/labels/lib/labels'
 import type { Facet } from '@/features/issues/lib/issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'
@@ -99,7 +106,10 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
   <div
     data-testid="issue-row"
     class="group relative flex items-center gap-3 px-4 py-2 transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
-    :class="[highlight ? 'animate-flash' : 'animate-row-in', selection.mode.value ? 'cursor-pointer select-none' : '']"
+    :class="[
+      highlight ? 'animate-flash' : 'animate-row-in',
+      selection.mode.value ? 'cursor-pointer select-none' : '',
+    ]"
     :style="{ animationDelay: delay, viewTransitionName: vtName }"
     @click="onRowClick"
   >
