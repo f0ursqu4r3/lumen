@@ -35,9 +35,7 @@ const reorderable = () => props.groupKey !== 'none' && props.groups.length > 1
         class="flex items-center gap-2 rounded-md px-1 py-0.5 transition-[box-shadow,opacity] duration-150"
         :class="[
           reorderDragKey === g.key ? 'opacity-50' : '',
-          reorderOverKey === g.key && reorderDragKey !== g.key
-            ? 'ring-1 ring-primary/50'
-            : '',
+          reorderOverKey === g.key && reorderDragKey !== g.key ? 'ring-1 ring-primary/50' : '',
         ]"
         @dragover.prevent="reorderable() && $emit('reorder-over', g.key)"
         @drop.prevent="reorderable() && $emit('reorder-drop', g.key)"

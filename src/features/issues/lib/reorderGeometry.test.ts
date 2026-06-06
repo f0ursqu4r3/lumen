@@ -40,7 +40,10 @@ describe('insertionIndexFor (x axis)', () => {
   })
 
   it('adds container scroll to the bar offset', () => {
-    const r = insertionIndexFor(itemsX, { x: 165, y: 50 }, 'x', 'a', { rect: rect(0, 320), scroll: 30 })
+    const r = insertionIndexFor(itemsX, { x: 165, y: 50 }, 'x', 'a', {
+      rect: rect(0, 320),
+      scroll: 30,
+    })
     expect(r.barOffset).toBeCloseTo(245)
   })
 })

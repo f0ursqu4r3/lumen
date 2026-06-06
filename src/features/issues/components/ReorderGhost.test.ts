@@ -6,7 +6,8 @@ afterEach(() => {
   document.querySelectorAll('[data-testid="reorder-ghost"]').forEach((n) => n.remove())
 })
 
-const ghost = () => document.body.querySelector('[data-testid="reorder-ghost"]') as HTMLElement | null
+const ghost = () =>
+  document.body.querySelector('[data-testid="reorder-ghost"]') as HTMLElement | null
 
 describe('ReorderGhost', () => {
   it('renders the label and count, teleported to body', () => {
