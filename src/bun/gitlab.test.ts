@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { buildGraphql, buildRest, buildAsset } from './gitlab'
+
+const { loadConfig } = vi.hoisted(() => ({ loadConfig: vi.fn() }))
+vi.mock('./config', () => ({ loadConfig }))
+
+import { gitlabGraphql, gitlabRest } from './gitlab'
 
 const cfg = { gitlabUrl: 'https://gl.example.com', token: 'glpat-xyz' }
 
@@ -25,5 +30,29 @@ describe('gitlab request builders', () => {
     const { url, init } = buildAsset(cfg, { path: '/v4/projects/1/uploads/abc/x.png' })
     expect(url).toBe('https://gl.example.com/api/v4/projects/1/uploads/abc/x.png')
     expect((init.headers as Record<string, string>)['PRIVATE-TOKEN']).toBe('glpat-xyz')
+  })
+})
+
+describe('host transport-failure handling', () => {
+  beforeEach(() => {
+    loadConfig.mockReturnValue({ gitlabUrl: 'https://gl.example.com', token: 't' })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns a 503 sentinel when the graphql fetch throws', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
+    const res = await gitlabGraphql({ query: '{ x }' })
+    expect(res.status).toBe(503)
+    expect(res.errors?.[0]?.message).toBe('GitLab is unreachable')
+  })
+
+  it('returns ok:false status 503 when the rest fetch throws', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ETIMEDOUT')))
+    const res = await gitlabRest({ method: 'GET', path: '/v4/projects/7' })
+    expect(res.ok).toBe(false)
+    expect(res.status).toBe(503)
   })
 })

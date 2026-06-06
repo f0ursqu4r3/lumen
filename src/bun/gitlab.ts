@@ -57,7 +57,15 @@ function requireCfg(): Cfg {
 
 export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
   const { url, init } = buildGraphql(requireCfg(), a)
-  const res = await fetch(url, init as RequestInit)
+  let res: Response
+  try {
+    res = await fetch(url, init as RequestInit)
+  } catch {
+    // Transport failure (DNS, connection refused, timeout): the server is
+    // unreachable, not the token. Surface a 503 so the client maps it to
+    // `unavailable` (see src/gitlab/errors.ts) rather than a re-auth prompt.
+    return { status: 503, errors: [{ message: 'GitLab is unreachable' }] }
+  }
   if (!res.ok && res.status === 401) return { status: 401, errors: [{ message: 'Unauthorized' }] }
   const json = (await res.json().catch(() => ({}))) as {
     data?: unknown
@@ -68,7 +76,13 @@ export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
 
 export async function gitlabRest(a: RestArgs): Promise<RestResult> {
   const { url, init } = buildRest(requireCfg(), a)
-  const res = await fetch(url, init as RequestInit)
+  let res: Response
+  try {
+    res = await fetch(url, init as RequestInit)
+  } catch {
+    // See gitlabGraphql: transport failure → 503 so rest.ts maps to `unavailable`.
+    return { ok: false, status: 503, statusText: 'Service Unavailable', body: '' }
+  }
   const body = await res.text()
   return { ok: res.ok, status: res.status, statusText: res.statusText, body }
 }
