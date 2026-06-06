@@ -7,8 +7,8 @@ import {
   useProjectBrowser,
   type BrowserRow,
   type BrowserSectionKey,
-} from '@/composables/useProjectBrowser'
-import { useToggleStar } from '@/composables/useToggleStar'
+} from '@/features/projects/composables/useProjectBrowser'
+import { useToggleStar } from '@/features/projects/composables/useToggleStar'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import Odometer from '@/shared/components/Odometer.vue'
 import { Input } from '@/shared/ui/input'

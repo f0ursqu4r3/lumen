@@ -6,8 +6,8 @@ import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
 import AssigneeMenu from '@/components/AssigneeMenu.vue'
 import { assigneeSections, type OrderedPerson } from '@/lib/assigneeOrder'
 import type { IssueDetail } from '@/features/issues/composables/useIssue'
-import type { ProjectMember } from '@/composables/useProjectMembers'
-import type { ProjectContributor } from '@/composables/useProjectContributors'
+import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
+import type { ProjectContributor } from '@/features/projects/composables/useProjectContributors'
 
 const props = withDefaults(
   defineProps<{

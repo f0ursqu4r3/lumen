@@ -14,11 +14,11 @@ const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
     comment: null as null | { value: string },
   },
 }))
-vi.mock('@/composables/useProjectMembers', async () => {
+vi.mock('@/features/projects/composables/useProjectMembers', async () => {
   const { ref } = await import('vue')
   return { useProjectMembers: () => ({ data: ref([]) }) }
 })
-vi.mock('@/composables/useProjectContributors', async () => {
+vi.mock('@/features/projects/composables/useProjectContributors', async () => {
   const { ref } = await import('vue')
   return { useProjectContributors: () => ({ data: ref([]) }) }
 })

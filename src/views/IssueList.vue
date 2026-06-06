@@ -19,7 +19,7 @@ import { usePipelines } from '@/features/pipelines/composables/usePipelines'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
 import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
 import { useProjectLabels } from '@/composables/useProjectLabels'
-import { useProjectMembers } from '@/composables/useProjectMembers'
+import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useIssueFilters } from '@/features/issues/composables/useIssueFilters'
 import { useRetagIssue, useReassignIssue } from '@/features/issues/composables/useIssueMutations'
 import {

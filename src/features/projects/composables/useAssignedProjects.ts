@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { restGet } from '@/gitlab/rest'
-import { aggregateAssigned, type AssignedProject, type RestIssue } from '@/lib/assignedProjects'
+import { aggregateAssigned, type AssignedProject, type RestIssue } from '@/features/projects/lib/assignedProjects'
 import type { GitLabError } from '@/gitlab/errors'
 
 export const ASSIGNED_KEY = ['projects', 'assigned'] as const

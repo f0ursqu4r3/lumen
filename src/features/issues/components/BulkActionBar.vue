@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/button'
 import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
 import type { ProjectLabel } from '@/composables/useProjectLabels'
-import type { ProjectMember } from '@/composables/useProjectMembers'
+import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 
 const props = defineProps<{

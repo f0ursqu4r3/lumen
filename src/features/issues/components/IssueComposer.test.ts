@@ -19,7 +19,7 @@ vi.mock('@/composables/useProjectLabels', () => ({
     data: ref([{ id: 'l1', title: 'bug', color: '#f00' }]),
   }),
 }))
-vi.mock('@/composables/useProjectMembers', () => ({
+vi.mock('@/features/projects/composables/useProjectMembers', () => ({
   useProjectMembers: () => ({
     data: ref([{ id: 'gid://user/1', username: 'kdougan', name: 'K D', avatarUrl: null }]),
   }),

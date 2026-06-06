@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Check, Search, UserPlus } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
-import type { ProjectMember } from '@/composables/useProjectMembers'
+import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 
 const props = withDefaults(
   defineProps<{ members: ProjectMember[]; modelValue: string | null; label?: string }>(),

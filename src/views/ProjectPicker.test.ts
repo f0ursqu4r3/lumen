@@ -3,7 +3,7 @@ import { mount, RouterLinkStub } from '@vue/test-utils'
 import { computed, ref, type Ref } from 'vue'
 
 const useProjects = vi.fn()
-vi.mock('@/composables/useProjects', () => ({
+vi.mock('@/features/projects/composables/useProjects', () => ({
   useProjects: () => useProjects(),
 }))
 
@@ -11,16 +11,16 @@ vi.mock('@/composables/useProjects', () => ({
 // Query provider; useProjectBrowser itself stays real, so its section + dedup
 // logic is exercised through the component.
 const useStarredProjects = vi.fn()
-vi.mock('@/composables/useStarredProjects', () => ({
+vi.mock('@/features/projects/composables/useStarredProjects', () => ({
   useStarredProjects: () => useStarredProjects(),
 }))
 const useAssignedProjects = vi.fn()
-vi.mock('@/composables/useAssignedProjects', () => ({
+vi.mock('@/features/projects/composables/useAssignedProjects', () => ({
   useAssignedProjects: () => useAssignedProjects(),
 }))
 
 const { toggleMutate } = vi.hoisted(() => ({ toggleMutate: vi.fn() }))
-vi.mock('@/composables/useToggleStar', () => ({
+vi.mock('@/features/projects/composables/useToggleStar', () => ({
   useToggleStar: () => ({ mutate: toggleMutate }),
 }))
 
