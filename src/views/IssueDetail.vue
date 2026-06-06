@@ -8,13 +8,10 @@ import { useIssueLinks } from '@/features/issues/composables/useIssueLinks'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useProjectContributors } from '@/features/projects/composables/useProjectContributors'
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
-import { useWorkItemStatuses, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
+import { useWorkItemStatuses } from '@/features/issues/composables/useWorkItemStatus'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
-import QuickAssign from '@/features/assignees/components/QuickAssign.vue'
-import AssigneeEditor from '@/features/assignees/components/AssigneeEditor.vue'
-import LabelPicker from '@/features/labels/components/LabelPicker.vue'
-import StatusPicker from '@/features/issues/components/StatusPicker.vue'
+import IssueDetailsRail from '@/features/issues/components/IssueDetailsRail.vue'
 import IssueMasthead from '@/features/issues/components/IssueMasthead.vue'
 import IssueDiscussion from '@/features/issues/components/IssueDiscussion.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
@@ -51,30 +48,6 @@ const { confirm } = useConfirm()
 
 // Surface the dirty state to a host (the drawer) so it can guard closing.
 watch(dirty, (v) => emit('update:dirty', v), { immediate: true })
-
-// Convert label ids <-> titles for the LabelPicker (which works in titles).
-const catalog = computed(() => labelCatalog.value ?? [])
-const draftLabelTitles = computed<string[]>({
-  get: () =>
-    (draft.value?.labelIds ?? [])
-      .map((id) => catalog.value.find((l) => l.id === id)?.title)
-      .filter((t): t is string => !!t),
-  set: (titles) => {
-    if (!draft.value) return
-    draft.value.labelIds = titles
-      .map((t) => catalog.value.find((l) => l.title === t)?.id)
-      .filter((id): id is string => !!id)
-  },
-})
-
-// The picker shows/sets the draft's buffered status (resolved against the
-// options list); selecting just mutates the draft, so it persists on Save.
-const currentStatus = computed<WorkItemStatus | null>(
-  () => statusOptions.value?.find((s) => s.id === draft.value?.statusId) ?? null,
-)
-function onSelectStatus(status: WorkItemStatus) {
-  if (draft.value) draft.value.statusId = status.id
-}
 
 const actionError = computed(() => saveError.value)
 
@@ -271,44 +244,16 @@ if (!props.embedded) {
 
       <!-- Details rail: the issue's attributes, grouped into a sculpted panel so
            they read as one scannable instrument cluster rather than loose fields. -->
-      <aside
-        class="issue__meta animate-row-in space-y-5 rounded-xl border border-border bg-card/55 p-4 shadow-card"
-        style="animation-delay: 90ms"
-      >
-        <StatusPicker
-          v-if="statusOptions?.length"
-          :statuses="statusOptions"
-          :current="currentStatus"
-          label="Status"
-          @select="onSelectStatus"
-        />
-
-        <LabelPicker v-model="draftLabelTitles" :catalog="catalog" label="Labels" />
-
-        <AssigneeEditor
-          v-model:usernames="draft.assigneeUsernames"
-          :issue="issue"
-          :members="members ?? []"
-          :contributors="contributors ?? []"
-          label="Assignees"
-        >
-          <template #actions>
-            <QuickAssign
-              v-model:usernames="draft.assigneeUsernames"
-              :issue="issue"
-              :members="members ?? []"
-              :contributors="contributors ?? []"
-            />
-          </template>
-        </AssigneeEditor>
-
-        <div class="space-y-1.5">
-          <span class="field-label">Milestone</span>
-          <p class="text-sm" :class="issue.milestone ? 'text-foreground' : 'text-muted-foreground'">
-            {{ issue.milestone?.title ?? 'None' }}
-          </p>
-        </div>
-      </aside>
+      <IssueDetailsRail
+        :issue="issue"
+        :members="members ?? []"
+        :contributors="contributors ?? []"
+        :catalog="labelCatalog ?? []"
+        :status-options="statusOptions ?? []"
+        v-model:label-ids="draft.labelIds"
+        v-model:status-id="draft.statusId"
+        v-model:assignee-usernames="draft.assigneeUsernames"
+      />
 
       <IssueDiscussion
         :threads="threads"
