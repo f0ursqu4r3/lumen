@@ -13,8 +13,8 @@ import {
   FlaskConical,
   Tag,
 } from '@lucide/vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
+import { Checkbox } from '@/shared/ui/checkbox'
 import { priorityOf, typeOf, parseLabel, tint } from '@/lib/labels'
 import type { Facet } from '@/lib/issueView'
 import type { IssueListItem } from '@/composables/useIssues'

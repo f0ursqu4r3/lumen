@@ -61,42 +61,39 @@ const navBtn =
 </script>
 
 <template>
-  <div
-    v-if="total === 0"
-    class="grid place-items-center py-24 text-sm text-muted-foreground"
-  >
+  <div v-if="total === 0" class="grid place-items-center py-24 text-sm text-muted-foreground">
     No issues.
   </div>
   <div v-else>
-    <header
-      class="mb-5 flex items-center justify-center gap-3 border-b border-border pb-3"
-    >
-      <button
-        type="button"
-        data-testid="pager-prev"
-        aria-label="Previous issue"
-        :class="navBtn"
-        :disabled="index === 0"
-        @click="prev"
-      >
-        <ChevronLeft class="size-4" />
-      </button>
+    <header class="relative mb-5 flex items-center justify-end gap-3 border-b border-border pb-3">
       <span
         data-testid="pager-position"
-        class="min-w-20 text-center font-mono text-sm font-medium tabular-nums text-foreground"
+        class="absolute left-1/2 -translate-x-1/2 min-w-20 text-center font-mono text-sm font-medium tabular-nums text-foreground"
       >
         {{ index + 1 }} of {{ total }}
       </span>
-      <button
-        type="button"
-        data-testid="pager-next"
-        aria-label="Next issue"
-        :class="navBtn"
-        :disabled="index >= total - 1"
-        @click="next"
-      >
-        <ChevronRight class="size-4" />
-      </button>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          data-testid="pager-prev"
+          aria-label="Previous issue"
+          :class="navBtn"
+          :disabled="index === 0"
+          @click="prev"
+        >
+          <ChevronLeft class="size-4" />
+        </button>
+        <button
+          type="button"
+          data-testid="pager-next"
+          aria-label="Next issue"
+          :class="navBtn"
+          :disabled="index >= total - 1"
+          @click="next"
+        >
+          <ChevronRight class="size-4" />
+        </button>
+      </div>
     </header>
 
     <IssueDetail

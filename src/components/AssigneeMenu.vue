@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { Check, Search } from '@lucide/vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { personInitial, type AssigneeSection } from '@/lib/assigneeOrder'
 
 // Presentational people-menu shared by the Assign and Quick-assign popovers:

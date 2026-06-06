@@ -2,7 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Check, Search, UserPlus } from '@lucide/vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import type { ProjectMember } from '@/composables/useProjectMembers'
 
 const props = withDefaults(

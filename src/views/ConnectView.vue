@@ -4,10 +4,10 @@ import { useRouter } from 'vue-router'
 import { useTitle } from '@vueuse/core'
 import { PlugZap, KeyRound, Server, LoaderCircle, ArrowRight, TriangleAlert } from '@lucide/vue'
 import { useGitlabConnect } from '@/composables/useGitlabConnect'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { Card } from '@/shared/ui/card'
+import { Input } from '@/shared/ui/input'
+import { Label } from '@/shared/ui/label'
+import { Button } from '@/shared/ui/button'
 
 useTitle('Connect · lumen')
 

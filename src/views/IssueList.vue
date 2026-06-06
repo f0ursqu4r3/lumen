@@ -58,10 +58,10 @@ import BulkActionBar from '@/components/BulkActionBar.vue'
 import { useIssueSelection, IssueSelectionKey } from '@/composables/useIssueSelection'
 import { useBulkIssueActions } from '@/composables/useBulkIssueActions'
 import ErrorNotice from '@/components/ErrorNotice.vue'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/shared/ui/input'
+import { Button } from '@/shared/ui/button'
+import { Card } from '@/shared/ui/card'
+import { Skeleton } from '@/shared/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -71,7 +71,7 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/shared/ui/select'
 
 const props = defineProps<{ fullPath: string }>()
 

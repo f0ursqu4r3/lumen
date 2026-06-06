@@ -11,9 +11,9 @@ import {
 import { useToggleStar } from '@/composables/useToggleStar'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import Odometer from '@/components/Odometer.vue'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/shared/ui/input'
+import { Card } from '@/shared/ui/card'
+import { Skeleton } from '@/shared/ui/skeleton'
 
 useTitle('Projects · lumen')
 

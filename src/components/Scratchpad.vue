@@ -3,7 +3,7 @@ import { computed, ref, toRef, watch } from 'vue'
 import { useDebounceFn, useLocalStorage } from '@vueuse/core'
 import { ChevronRight } from '@lucide/vue'
 import { useScratchpad } from '@/composables/useScratchpad'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@/shared/ui/textarea'
 
 const props = defineProps<{ fullPath: string; iid: string }>()
 const note = useScratchpad(toRef(props, 'fullPath'), toRef(props, 'iid'))

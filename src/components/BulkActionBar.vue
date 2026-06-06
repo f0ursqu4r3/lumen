@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Tag, UserPlus, CircleDot, ExternalLink, X, CheckCheck } from '@lucide/vue'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
 import type { ProjectLabel } from '@/composables/useProjectLabels'

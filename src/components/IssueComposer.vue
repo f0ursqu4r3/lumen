@@ -7,10 +7,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
+} from '@/shared/ui/sheet'
+import { Input } from '@/shared/ui/input'
+import { Textarea } from '@/shared/ui/textarea'
+import { Button } from '@/shared/ui/button'
 import ErrorNotice from '@/components/ErrorNotice.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'

@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/shared/ui/alert-dialog'
 import { confirmState } from '@/composables/useConfirm'
 
 // Track what was chosen before the dialog closes so onOpenChange can pick the

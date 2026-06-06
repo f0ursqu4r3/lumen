@@ -6,8 +6,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+} from '@/shared/ui/sheet'
+import { Button } from '@/shared/ui/button'
 import IssueDetail from '@/views/IssueDetail.vue'
 
 defineProps<{ open: boolean; fullPath: string; iid: string | null }>()

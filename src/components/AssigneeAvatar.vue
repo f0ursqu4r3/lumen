@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 
 // GitLab avatars need a live web session to load (the PAT 401s on the avatar
 // route), so always show initials instead of attempting the image.
