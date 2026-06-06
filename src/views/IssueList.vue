@@ -21,9 +21,12 @@ import {
   sortIssues,
   groupIssues,
   boardColumns,
+  applyOrder,
   labelScopes,
   type Facet,
 } from '@/features/issues/lib/issueView'
+import { useGroupOrder } from '@/features/issues/composables/useGroupOrder'
+import { useGroupReorder } from '@/features/issues/composables/useGroupReorder'
 import { withViewTransition } from '@/shared/lib/viewTransition'
 import IssueListHeader from '@/features/issues/components/IssueListHeader.vue'
 import IssueListToolbar from '@/features/issues/components/IssueListToolbar.vue'
@@ -117,7 +120,11 @@ const runningDotClass = TONE_VISUALS.running.dot
 // Sort/group happen client-side on the loaded set — priority & status live in
 // scoped labels, which the server can't order by.
 const sorted = computed(() => sortIssues(issues.value, sortKey.value))
-const listGroups = computed(() => groupIssues(sorted.value, groupKey.value))
+const { orderFor, hasOrder, setOrder, reset } = useGroupOrder(toRef(props, 'fullPath'))
+
+const listGroups = computed(() =>
+  applyOrder(groupIssues(sorted.value, groupKey.value), orderFor(groupKey.value)),
+)
 
 // --- view switch as a morph -------------------------------------------------
 // Toggling list ⇄ board runs inside a View Transition so each visible issue's
@@ -161,10 +168,13 @@ provide(IssueSelectionKey, selection)
 const loadedIids = computed(() => issues.value.map((i) => i.iid))
 
 const boardGroups = computed(() =>
-  boardColumns(sorted.value, boardScope.value, {
-    labelCatalog: labelCatalog.value,
-    statusCatalog: statusCatalog.value ?? [],
-  }),
+  applyOrder(
+    boardColumns(sorted.value, boardScope.value, {
+      labelCatalog: labelCatalog.value,
+      statusCatalog: statusCatalog.value ?? [],
+    }),
+    orderFor(boardScope.value),
+  ),
 )
 // If the board is grouped by a label scope that's no longer in the catalog
 // (project changed, label deleted), fall back to the always-available Status.
@@ -187,6 +197,21 @@ const {
   isDropTarget,
   ghostIndex,
 } = useIssueBoardDnd({ fullPath: props.fullPath, boardScope, sortKey, statusCatalog, members })
+
+// --- drag to reorder groups / columns ---------------------------------------
+const {
+  dragKey: reorderDragKey,
+  overKey: reorderOverKey,
+  onReorderStart,
+  onReorderOver,
+  onReorderDrop,
+  clearReorder,
+} = useGroupReorder({ setOrder })
+
+// The grouping dimension the active view arranges (list groups vs board cols).
+const activeDimension = computed(() => (view.value === 'list' ? groupKey.value : boardScope.value))
+const hasCustomOrder = computed(() => hasOrder(activeDimension.value))
+const resetOrder = () => reset(activeDimension.value)
 
 // --- active filters ---------------------------------------------------------
 function applyFacet(f: Facet) {
@@ -254,6 +279,8 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
       @refresh="refresh"
       @toggle-select="toggleSelectMode"
       @set-view="setView"
+      :has-custom-order="hasCustomOrder"
+      @reset-order="resetOrder"
     >
       <template #saved-views>
         <SavedViews
@@ -307,6 +334,12 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           :highlight-iid="highlightIid"
           :vt-name-for="vtNameFor"
           @filter="applyFacet"
+          :reorder-drag-key="reorderDragKey"
+          :reorder-over-key="reorderOverKey"
+          @reorder-start="onReorderStart"
+          @reorder-over="onReorderOver"
+          @reorder-drop="() => onReorderDrop(groupKey, listGroups.map((g) => g.key))"
+          @reorder-end="clearReorder"
         />
 
         <IssueBoard
@@ -326,6 +359,12 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           @drag-end="clearDrag"
           @drop="onDrop"
           @drag-over="dragOverKey = $event"
+          :reorder-drag-key="reorderDragKey"
+          :reorder-over-key="reorderOverKey"
+          @reorder-start="onReorderStart"
+          @reorder-over="onReorderOver"
+          @reorder-drop="() => onReorderDrop(boardScope, boardGroups.map((g) => g.key))"
+          @reorder-end="clearReorder"
         />
 
         <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
