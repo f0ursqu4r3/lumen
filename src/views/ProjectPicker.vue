@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
 import { useTitle, useIntersectionObserver } from '@vueuse/core'
 import { Search, FolderGit2, LoaderCircle, Star } from '@lucide/vue'
 import {
   useProjectBrowser,
-  type BrowserRow,
   type BrowserSectionKey,
 } from '@/features/projects/composables/useProjectBrowser'
-import { useToggleStar } from '@/features/projects/composables/useToggleStar'
 import { useSpringCursor } from '@/shared/composables/useSpringCursor'
+import { useProjectLauncher } from '@/features/projects/composables/useProjectLauncher'
+import { useProjectKeyboard } from '@/features/projects/composables/useProjectKeyboard'
 import ProjectRow from '@/features/projects/components/ProjectRow.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import Odometer from '@/shared/components/Odometer.vue'
@@ -19,12 +18,9 @@ import { Skeleton } from '@/shared/ui/skeleton'
 
 useTitle('Projects · lumen')
 
-const router = useRouter()
-
 const search = ref('')
 const { flatRows, count, searching, isLoading, error, hasMore, fetchNextPage, isFetchingNextPage } =
   useProjectBrowser(search)
-const toggleStar = useToggleStar()
 
 const SECTION_LABELS: Record<BrowserSectionKey, string> = {
   starred: 'Starred',
@@ -47,9 +43,6 @@ const startsSection = (i: number) =>
 // the flattened row list); the amber rail (`cursor`) chases it with a
 // critically-damped spring so it has weight without the tackiness of a bounce.
 const listEl = ref<HTMLElement | null>(null)
-const reduce =
-  typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
-
 const { active, cursor, pinTo, springTo, move } = useSpringCursor({
   count,
   listEl,
@@ -57,117 +50,10 @@ const { active, cursor, pinTo, springTo, move } = useSpringCursor({
   rows: flatRows,
 })
 
-// --- launch + morph ---------------------------------------------------------
-// Launching morphs the chosen project's name into the issues header via a View
-// Transition, so the picker → issues handoff reads as one instrument retuning
-// rather than a page swap. Degrades to a plain push where VT is unavailable or
-// motion is reduced.
-const morphingPath = ref<string | null>(null)
-const nameStyle = (row: BrowserRow) =>
-  row.fullPath === morphingPath.value ? { viewTransitionName: 'project-title' } : undefined
-
-function navigate(row: BrowserRow) {
-  return router.push({ name: 'issues', params: { fullPath: row.fullPath } })
-}
-
-async function launch(row: BrowserRow, i: number) {
-  active.value = i
-  const canMorph = typeof document.startViewTransition === 'function' && !reduce?.matches
-  if (!canMorph) {
-    navigate(row)
-    return
-  }
-  morphingPath.value = row.fullPath
-  await nextTick() // ensure the name carries the transition-name before snapshot
-  document.startViewTransition(async () => {
-    await navigate(row)
-    await nextTick()
-  })
-}
-
-function onRowClick(e: MouseEvent, row: BrowserRow, i: number) {
-  // Let the browser handle modified clicks (open in new tab) via the real href.
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-  e.preventDefault()
-  launch(row, i)
-}
-
-// Toggle the star; pin the selection to this project so the rail follows it as it
-// hops into (or out of) the Starred section.
-function onToggleStar(row: BrowserRow) {
-  pinTo.value = row.fullPath
-  toggleStar.mutate({ fullPath: row.fullPath, name: row.name, starred: row.starred })
-}
-
-// --- keyboard ---------------------------------------------------------------
-const searchInput = ref<{ $el?: HTMLElement } | null>(null)
-const focusSearch = () => searchInput.value?.$el?.focus?.()
-const searchFocused = () =>
-  !!searchInput.value?.$el && document.activeElement === searchInput.value.$el
-
-function onKeydown(e: KeyboardEvent) {
-  // ⌘1–9 (or Ctrl): jump straight to a project and launch it, from anywhere.
-  if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key)) {
-    const i = Number(e.key) - 1
-    const row = flatRows.value[i]
-    if (row) {
-      e.preventDefault()
-      launch(row, i)
-    }
-    return
-  }
-
-  switch (e.key) {
-    case 'ArrowDown':
-      e.preventDefault()
-      move(1)
-      return
-    case 'ArrowUp':
-      e.preventDefault()
-      move(-1)
-      return
-    case 'Enter': {
-      const row = flatRows.value[active.value]
-      if (row) {
-        e.preventDefault()
-        launch(row, active.value)
-      }
-      return
-    }
-    case 'Escape':
-      if (search.value) {
-        search.value = ''
-      } else {
-        searchInput.value?.$el?.blur?.()
-      }
-      return
-  }
-
-  if (searchFocused()) {
-    // j/k are nav only when not typing into the field.
-    return
-  }
-
-  if (e.key === 'j') {
-    e.preventDefault()
-    move(1)
-  } else if (e.key === 'k') {
-    e.preventDefault()
-    move(-1)
-  } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
-    // Type-to-filter from anywhere: focus the field and let the keypress land.
-    // (No single-letter star shortcut — it would shadow type-to-filter.)
-    focusSearch()
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown)
-  nextTick(() => springTo(true))
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown)
-})
+// Launch/morph + star toggle, and the command-palette keyboard surface (arrows /
+// j-k / Enter / ⌘1–9 / type-to-filter), which also snaps the rail on mount.
+const { nameStyle, launch, onRowClick, onToggleStar } = useProjectLauncher({ active, pinTo })
+const { searchInput } = useProjectKeyboard({ flatRows, active, search, move, launch, springTo })
 
 // --- infinite load ----------------------------------------------------------
 function loadMore() {
