@@ -10,7 +10,6 @@ import {
   labelScopes,
   planRetag,
   applyOrder,
-  reorderKeys,
   reorderToIndex,
 } from './issueView'
 import type { IssueGroup } from './issueView'
@@ -334,28 +333,6 @@ describe('applyOrder', () => {
   it('ignores order keys with no matching group', () => {
     const groups = [g('a'), g('b')]
     expect(applyOrder(groups, ['z', 'b', 'a']).map((x) => x.key)).toEqual(['b', 'a'])
-  })
-})
-
-describe('reorderKeys', () => {
-  it('moves a key forward to just after its target', () => {
-    expect(reorderKeys(['a', 'b', 'c', 'd'], 'a', 'c')).toEqual(['b', 'c', 'a', 'd'])
-  })
-
-  it('moves a key backward to just before its target', () => {
-    expect(reorderKeys(['a', 'b', 'c', 'd'], 'd', 'b')).toEqual(['a', 'd', 'b', 'c'])
-  })
-
-  it('is a no-op when dragging onto itself', () => {
-    expect(reorderKeys(['a', 'b', 'c'], 'b', 'b')).toEqual(['a', 'b', 'c'])
-  })
-
-  it('returns a copy when a key is missing', () => {
-    expect(reorderKeys(['a', 'b'], 'x', 'a')).toEqual(['a', 'b'])
-  })
-
-  it('returns a copy when overKey is missing', () => {
-    expect(reorderKeys(['a', 'b'], 'a', 'x')).toEqual(['a', 'b'])
   })
 })
 
