@@ -313,9 +313,11 @@ describe('planRetag', () => {
 const g = (key: string): IssueGroup => ({ key, label: key, issues: [] })
 
 describe('applyOrder', () => {
-  it('returns groups unchanged when order is empty', () => {
+  it('returns a new array (not the input) when order is empty', () => {
     const groups = [g('a'), g('b'), g('c')]
-    expect(applyOrder(groups, []).map((x) => x.key)).toEqual(['a', 'b', 'c'])
+    const out = applyOrder(groups, [])
+    expect(out.map((x) => x.key)).toEqual(['a', 'b', 'c'])
+    expect(out).not.toBe(groups)
   })
 
   it('re-sequences groups to match the given order', () => {
@@ -349,5 +351,9 @@ describe('reorderKeys', () => {
 
   it('returns a copy when a key is missing', () => {
     expect(reorderKeys(['a', 'b'], 'x', 'a')).toEqual(['a', 'b'])
+  })
+
+  it('returns a copy when overKey is missing', () => {
+    expect(reorderKeys(['a', 'b'], 'a', 'x')).toEqual(['a', 'b'])
   })
 })

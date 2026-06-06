@@ -412,7 +412,7 @@ export function boardDropIndex(
  * ignored. Stable; pure.
  */
 export function applyOrder(groups: IssueGroup[], order: readonly string[]): IssueGroup[] {
-  if (!order.length) return groups
+  if (!order.length) return [...groups]
   const rank = new Map(order.map((k, i) => [k, i] as const))
   return groups
     .map((group, i) => ({ group, i }))
