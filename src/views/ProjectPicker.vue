@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitle, useIntersectionObserver } from '@vueuse/core'
 import { Search, CornerDownLeft, FolderGit2, LoaderCircle, Star } from '@lucide/vue'
@@ -9,6 +9,7 @@ import {
   type BrowserSectionKey,
 } from '@/features/projects/composables/useProjectBrowser'
 import { useToggleStar } from '@/features/projects/composables/useToggleStar'
+import { useSpringCursor } from '@/shared/composables/useSpringCursor'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import Odometer from '@/shared/components/Odometer.vue'
 import { Input } from '@/shared/ui/input'
@@ -56,81 +57,15 @@ const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 // keyboard like a command palette. `active` is the logical cursor (an index into
 // the flattened row list); the amber rail (`cursor`) chases it with a
 // critically-damped spring so it has weight without the tackiness of a bounce.
-const active = ref(0)
 const listEl = ref<HTMLElement | null>(null)
 const reduce =
   typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
 
-const cursor = reactive({ y: 0, h: 0, visible: false })
-let velocity = 0
-let raf = 0
-let lastTs = 0
-
-const rowAt = (i: number) => listEl.value?.querySelectorAll<HTMLElement>('[data-row]')[i] ?? null
-
-function springTo(snap = false) {
-  const el = rowAt(active.value)
-  if (!el) {
-    cursor.visible = false
-    return
-  }
-  cursor.visible = true
-  cursor.h = el.offsetHeight
-  const target = el.offsetTop
-  cancelAnimationFrame(raf)
-
-  if (snap || reduce?.matches) {
-    cursor.y = target
-    velocity = 0
-    return
-  }
-
-  lastTs = performance.now()
-  const step = (now: number) => {
-    const dt = Math.min((now - lastTs) / 1000, 1 / 30)
-    lastTs = now
-    // stiffness/damping tuned just past critical: snappy arrival, no overshoot.
-    const accel = -210 * (cursor.y - target) - 30 * velocity
-    velocity += accel * dt
-    cursor.y += velocity * dt
-    if (Math.abs(cursor.y - target) < 0.3 && Math.abs(velocity) < 0.3) {
-      cursor.y = target
-      velocity = 0
-      return
-    }
-    raf = requestAnimationFrame(step)
-  }
-  raf = requestAnimationFrame(step)
-}
-
-function move(delta: number) {
-  if (!count.value) return
-  active.value = Math.max(0, Math.min(count.value - 1, active.value + delta))
-  rowAt(active.value)?.scrollIntoView({ block: 'nearest' })
-}
-
-// Glide whenever the cursor target changes.
-watch(active, () => springTo())
-
-// A new search is a new context — reset to the top and snap (no glide across a
-// list that just changed underneath). Appended pages must NOT reset the cursor.
-watch(search, () => {
-  active.value = 0
-  nextTick(() => springTo(true))
-})
-
-// The row set changed: first data, an appended page, or a star toggle that hops a
-// project between sections. Keep the selection on the same project where we can
-// (`pinTo`), clamp it in range, then (re)place the rail.
-const pinTo = ref<string | null>(null)
-watch(flatRows, (rows, prev) => {
-  if (pinTo.value) {
-    const i = rows.findIndex((r) => r.fullPath === pinTo.value)
-    if (i >= 0) active.value = i
-    pinTo.value = null
-  }
-  if (active.value > rows.length - 1) active.value = Math.max(0, rows.length - 1)
-  nextTick(() => springTo((prev?.length ?? 0) === 0))
+const { active, cursor, pinTo, springTo, move } = useSpringCursor({
+  count,
+  listEl,
+  resetKey: search,
+  rows: flatRows,
 })
 
 // --- launch + morph ---------------------------------------------------------
@@ -243,7 +178,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
-  cancelAnimationFrame(raf)
 })
 
 // --- infinite load ----------------------------------------------------------
