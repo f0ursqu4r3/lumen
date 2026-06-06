@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { watch } from 'vue'
 import { KeyRound, LoaderCircle, ShieldAlert, TriangleAlert, Unplug } from '@lucide/vue'
 import { Card } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
@@ -13,8 +13,14 @@ import { useGitlabConnect } from '@/shared/composables/useGitlabConnect'
 // read-only), `token` is the new token, `save()` re-probes and returns ok.
 const { url, token, status, message, testing, canSubmit, loadUrl, save } = useGitlabConnect()
 
-// Prefill the instance URL so the user only re-enters the token.
-onMounted(loadUrl)
+// Prefill the instance URL each time the overlay appears (not just at boot, so
+// a transient boot-time getConfig failure can't leave Reconnect disabled).
+watch(
+  () => sessionState.expired,
+  (expired) => {
+    if (expired) void loadUrl()
+  },
+)
 
 // A clean re-probe earns a full reload — the bulletproof "restart": a clean
 // boot re-probes and refetches every stuck query under the valid token. The
@@ -26,7 +32,9 @@ async function reconnect() {
 // Escape hatch: drop the token and reload. The router guard sends the now
 // unconfigured app to ConnectView.
 async function disconnect() {
-  await rpc.clearConfig()
+  // The user's intent is to escape regardless; reload even if clearConfig fails
+  // (a stuck overlay is worse than a best-effort disconnect).
+  await rpc.clearConfig().catch(() => {})
   window.location.reload()
 }
 </script>
@@ -40,6 +48,7 @@ async function disconnect() {
     role="alertdialog"
     aria-modal="true"
     aria-labelledby="session-expired-title"
+    aria-describedby="session-expired-desc"
   >
     <div class="w-full max-w-md animate-row-in">
       <div class="mb-7 flex flex-col items-center text-center">
@@ -60,7 +69,7 @@ async function disconnect() {
         >
           Re-connect to GitLab
         </h1>
-        <p class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
+        <p id="session-expired-desc" class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
           Your access token is no longer valid. Enter a new one to pick up where you left off.
         </p>
       </div>
@@ -83,6 +92,7 @@ async function disconnect() {
               type="password"
               autocomplete="off"
               spellcheck="false"
+              autofocus
               placeholder="glpat-…"
               :disabled="testing"
               class="h-10 font-mono text-base"
