@@ -66,6 +66,9 @@ export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
     // `unavailable` (see src/gitlab/errors.ts) rather than a re-auth prompt.
     return { status: 503, errors: [{ message: 'GitLab is unreachable' }] }
   }
+  // Only 401 needs a synthesized errors array (the body may be empty/non-JSON).
+  // Every other status — 403 and real 5xx included — passes through below with
+  // its status preserved, so errors.ts can classify it (auth / unavailable).
   if (!res.ok && res.status === 401) return { status: 401, errors: [{ message: 'Unauthorized' }] }
   const json = (await res.json().catch(() => ({}))) as {
     data?: unknown
