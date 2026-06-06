@@ -4,6 +4,7 @@ import { useTitle } from '@vueuse/core'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/features/issues/composables/useIssue'
 import { useIssueDraft } from '@/features/issues/composables/useIssueDraft'
+import { useIssueLinks } from '@/features/issues/composables/useIssueLinks'
 import { useAddNote } from '@/features/issues/composables/useIssueMutations'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useProjectContributors } from '@/features/projects/composables/useProjectContributors'
@@ -11,16 +12,14 @@ import { useProjectLabels } from '@/features/labels/composables/useProjectLabels
 import { useWorkItemStatuses, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
-import { rpc } from '@/shared/lib/rpc'
 import QuickAssign from '@/features/assignees/components/QuickAssign.vue'
 import AssigneeEditor from '@/features/assignees/components/AssigneeEditor.vue'
 import LabelPicker from '@/features/labels/components/LabelPicker.vue'
 import StatusPicker from '@/features/issues/components/StatusPicker.vue'
-import StateBadge from '@/features/issues/components/StateBadge.vue'
+import IssueMasthead from '@/features/issues/components/IssueMasthead.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
-import { Check, Link, ExternalLink, Images, ArrowLeft } from '@lucide/vue'
+import { Images } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -116,24 +115,7 @@ function openViewer(i: number) {
 // URLs itself). Copy defaults to the bare URL; Shift+Click copies a markdown link.
 // We deliberately avoid ⌘/Ctrl chords — Electrobun's preload intercepts those on
 // links before our handler runs.
-async function openInGitLab() {
-  if (issue.value) await rpc.openExternal({ url: issue.value.webUrl })
-}
-
-const linkCopied = ref<null | 'url' | 'md'>(null)
-let copiedTimer: ReturnType<typeof setTimeout> | undefined
-
-async function onCopyClick(e: MouseEvent) {
-  if (!issue.value) return
-  const url = issue.value.webUrl
-  const markdown = e.shiftKey
-  const text = markdown ? `[#${issue.value.iid} ${issue.value.title}](${url})` : url
-  // navigator.clipboard is undefined under the views:// origin; write via the host.
-  await rpc.clipboardWriteText({ text })
-  linkCopied.value = markdown ? 'md' : 'url'
-  clearTimeout(copiedTimer)
-  copiedTimer = setTimeout(() => (linkCopied.value = null), 1400)
-}
+const { linkCopied, onCopyClick, openInGitLab } = useIssueLinks(issue)
 
 // Inline media is rendered via v-html, so intercept clicks by delegation. The
 // clicked trigger's ordinal among all [data-media-trigger] elements in the body
@@ -319,103 +301,20 @@ if (!props.embedded) {
   </div>
   <article v-else-if="issue && draft" class="issue pb-20">
     <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
-    <header class="animate-row-in">
-      <!-- The eyebrow doubles as the way back. Full-page (deep link / refresh —
-           the cards and rows open the drawer, so this view is the only one that
-           strands you) it's a link to this repo's issue list, the arrow taking
-           the tick's lead position. Embedded in the drawer it stays inert text:
-           the list is already behind it, and the dirty guard lives on the host. -->
-      <RouterLink
-        v-if="!embedded && !windowed"
-        :to="{ name: 'issues', params: { fullPath } }"
-        data-testid="back-to-issues"
-        class="group/back -mx-1 inline-flex max-w-full items-center gap-1.5 rounded-sm px-1 font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase outline-none transition-colors hover:text-foreground focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
-      >
-        <ArrowLeft
-          class="size-3 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
-        />
-        <span class="min-w-0 truncate">{{ repoName }}</span>
-      </RouterLink>
-      <p
-        v-else
-        class="eyebrow-tick max-w-full font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
-      >
-        <span class="min-w-0 truncate">{{ repoName }}</span>
-      </p>
-      <div class="mt-2.5 flex items-center gap-2.5">
-        <!-- Keyed by state so toggling open/closed re-triggers the quiet status flash. -->
-        <StateBadge :key="draft.state" :state="draft.state" class="animate-status" />
-        <span
-          class="inline-flex items-center rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm font-medium tabular-nums text-foreground/90 ring-1 ring-inset ring-border/60"
-        >
-          <span class="text-muted-foreground/45">#</span>{{ issue.iid }}
-        </span>
-        <Button
-          type="button"
-          data-testid="copy-link"
-          variant="ghost"
-          size="icon-xs"
-          class="text-muted-foreground"
-          title="Copy link · Shift+Click to copy a markdown link"
-          @click="onCopyClick"
-        >
-          <component :is="linkCopied ? Check : Link" class="size-3.5" />
-        </Button>
-
-        <Button
-          type="button"
-          data-testid="open-in-gitlab"
-          variant="ghost"
-          size="sm"
-          class="ml-auto text-muted-foreground"
-          title="Open this issue in GitLab"
-          @click="openInGitLab"
-        >
-          <ExternalLink class="size-3.5" />
-          Open in GitLab
-        </Button>
-        <Button
-          type="button"
-          data-testid="toggle-state"
-          variant="outline"
-          size="sm"
-          @click="toggleState"
-        >
-          {{ draft.state === 'opened' ? 'Close issue' : 'Reopen issue' }}
-        </Button>
-      </div>
-
-      <EditableField
-        v-model:editing="editingTitle"
-        label="Title"
-        toggle-testid="edit-title-toggle"
-        class="mt-4"
-      >
-        <template #label>
-          <span class="field-label">Title</span>
-        </template>
-        <template #view>
-          <h1 class="text-balance text-title leading-[1.08] font-semibold">
-            {{ draft.title }}
-          </h1>
-        </template>
-        <template #edit>
-          <Input
-            v-model="draft.title"
-            data-testid="edit-title"
-            aria-label="Issue title"
-            class="h-auto py-1.5 text-title font-semibold"
-          />
-        </template>
-      </EditableField>
-
-      <p class="mt-2.5 text-xs text-muted-foreground">
-        Opened by
-        <span class="font-medium text-foreground">{{ nameOrUsername(issue.author) }}</span>
-        <span class="px-1 text-muted-foreground/50">·</span>
-        <span class="font-mono">{{ new Date(issue.createdAt).toLocaleDateString() }}</span>
-      </p>
-    </header>
+    <IssueMasthead
+      :issue="issue"
+      :repo-name="repoName"
+      :state="draft.state"
+      :embedded="embedded"
+      :windowed="windowed"
+      :link-copied="linkCopied"
+      :full-path="fullPath"
+      v-model:title="draft.title"
+      v-model:editing-title="editingTitle"
+      @copy="onCopyClick"
+      @open-external="openInGitLab"
+      @toggle-state="toggleState"
+    />
 
     <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
 
