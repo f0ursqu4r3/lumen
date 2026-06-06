@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { Check } from '@lucide/vue'
 
 const useIssue = vi.fn()
-vi.mock('@/composables/useIssue', () => ({ useIssue: () => useIssue() }))
+vi.mock('@/features/issues/composables/useIssue', () => ({ useIssue: () => useIssue() }))
 
 const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
   draftSave: vi.fn(),
@@ -26,13 +26,13 @@ vi.mock('@/composables/useProjectLabels', async () => {
   const { ref } = await import('vue')
   return { useProjectLabels: () => ({ data: ref([]) }) }
 })
-vi.mock('@/composables/useWorkItemStatus', async () => {
+vi.mock('@/features/issues/composables/useWorkItemStatus', async () => {
   const { ref } = await import('vue')
   // IssueDetail reads only the options list; current value + persistence live in
   // the (mocked) issue draft, so the other exports aren't exercised here.
   return { useWorkItemStatuses: () => ({ data: ref([]) }) }
 })
-vi.mock('@/composables/useIssueDraft', async () => {
+vi.mock('@/features/issues/composables/useIssueDraft', async () => {
   const { ref, computed } = await import('vue')
   return {
     useIssueDraft: () => {
@@ -62,7 +62,7 @@ vi.mock('@/composables/useIssueDraft', async () => {
 const { addNoteMutate } = vi.hoisted(() => ({
   addNoteMutate: vi.fn(() => Promise.resolve({ note: { id: 'new' } })),
 }))
-vi.mock('@/composables/useIssueMutations', async () => {
+vi.mock('@/features/issues/composables/useIssueMutations', async () => {
   const { ref } = await import('vue')
   return {
     useAddNote: () => ({

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import StatusPicker from './StatusPicker.vue'
-import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
+import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 
 const statuses: WorkItemStatus[] = [
   {

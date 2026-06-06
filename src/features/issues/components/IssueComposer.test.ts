@@ -7,7 +7,7 @@ const { createMutate, isPending, mutationError } = vi.hoisted(() => ({
   isPending: { value: false },
   mutationError: { value: null as unknown },
 }))
-vi.mock('@/composables/useIssueMutations', () => ({
+vi.mock('@/features/issues/composables/useIssueMutations', () => ({
   useCreateIssue: () => ({
     mutate: createMutate,
     isPending,

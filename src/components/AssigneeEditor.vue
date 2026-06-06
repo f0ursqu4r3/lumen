@@ -5,7 +5,7 @@ import { UserPen, X } from '@lucide/vue'
 import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
 import AssigneeMenu from '@/components/AssigneeMenu.vue'
 import { assigneeSections, type OrderedPerson } from '@/lib/assigneeOrder'
-import type { IssueDetail } from '@/composables/useIssue'
+import type { IssueDetail } from '@/features/issues/composables/useIssue'
 import type { ProjectMember } from '@/composables/useProjectMembers'
 import type { ProjectContributor } from '@/composables/useProjectContributors'
 

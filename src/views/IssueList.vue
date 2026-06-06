@@ -14,22 +14,22 @@ import {
   RefreshCw,
   CheckSquare,
 } from '@lucide/vue'
-import { useIssues, type IssueListItem } from '@/composables/useIssues'
+import { useIssues, type IssueListItem } from '@/features/issues/composables/useIssues'
 import { usePipelines } from '@/composables/usePipelines'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
 import { TONE_VISUALS } from '@/components/pipelineTone'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
-import { useIssueFilters } from '@/composables/useIssueFilters'
-import { useRetagIssue, useReassignIssue } from '@/composables/useIssueMutations'
+import { useIssueFilters } from '@/features/issues/composables/useIssueFilters'
+import { useRetagIssue, useReassignIssue } from '@/features/issues/composables/useIssueMutations'
 import {
   useWorkItemStatuses,
   useSetIssueStatus,
   type WorkItemStatus,
-} from '@/composables/useWorkItemStatus'
+} from '@/features/issues/composables/useWorkItemStatus'
 import { useSavedViews } from '@/shared/composables/useSavedViews'
-import IssueComposer from '@/components/IssueComposer.vue'
-import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
+import IssueComposer from '@/features/issues/components/IssueComposer.vue'
+import IssueFilterPanel from '@/features/issues/components/IssueFilterPanel.vue'
 import SavedViews from '@/shared/components/SavedViews.vue'
 import type { IssueFilters } from '@/gitlab/issueParams'
 import {
@@ -44,19 +44,19 @@ import {
   BOARD_GROUPS,
   type Facet,
   type IssueGroup,
-} from '@/lib/issueView'
+} from '@/features/issues/lib/issueView'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
-import IssueRow from '@/components/IssueRow.vue'
-import IssueCard from '@/components/IssueCard.vue'
-import IssueDrawer from '@/components/IssueDrawer.vue'
+import IssueRow from '@/features/issues/components/IssueRow.vue'
+import IssueCard from '@/features/issues/components/IssueCard.vue'
+import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
 import LabelChip from '@/components/LabelChip.vue'
 import Odometer from '@/shared/components/Odometer.vue'
 import { withViewTransition } from '@/shared/lib/viewTransition'
 import { rpc } from '@/shared/lib/rpc'
-import BulkActionBar from '@/components/BulkActionBar.vue'
-import { useIssueSelection, IssueSelectionKey } from '@/composables/useIssueSelection'
-import { useBulkIssueActions } from '@/composables/useBulkIssueActions'
+import BulkActionBar from '@/features/issues/components/BulkActionBar.vue'
+import { useIssueSelection, IssueSelectionKey } from '@/features/issues/composables/useIssueSelection'
+import { useBulkIssueActions } from '@/features/issues/composables/useBulkIssueActions'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Input } from '@/shared/ui/input'
 import { Button } from '@/shared/ui/button'

@@ -18,9 +18,9 @@ import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/lib/labels'
-import type { Facet } from '@/lib/issueView'
-import type { IssueListItem } from '@/composables/useIssues'
-import { useInjectedSelection } from '@/composables/useIssueSelection'
+import type { Facet } from '@/features/issues/lib/issueView'
+import type { IssueListItem } from '@/features/issues/composables/useIssues'
+import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'
 
 const selection = useInjectedSelection()
 

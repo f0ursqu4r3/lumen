@@ -11,7 +11,7 @@ import {
   planRetag,
 } from './issueView'
 import type { IssueGroup } from './issueView'
-import type { IssueListItem } from '@/composables/useIssues'
+import type { IssueListItem } from '@/features/issues/composables/useIssues'
 
 // Minimal issue factory — only the fields the view helpers read.
 const mk = (

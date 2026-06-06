@@ -4,7 +4,7 @@ import { onClickOutside } from '@vueuse/core'
 import { UserStar } from '@lucide/vue'
 import AssigneeMenu from '@/components/AssigneeMenu.vue'
 import { assigneeSections } from '@/lib/assigneeOrder'
-import type { IssueDetail } from '@/composables/useIssue'
+import type { IssueDetail } from '@/features/issues/composables/useIssue'
 import type { ProjectMember } from '@/composables/useProjectMembers'
 import type { ProjectContributor } from '@/composables/useProjectContributors'
 

@@ -14,7 +14,7 @@ import { Button } from '@/shared/ui/button'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
-import { useCreateIssue } from '@/composables/useIssueMutations'
+import { useCreateIssue } from '@/features/issues/composables/useIssueMutations'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 

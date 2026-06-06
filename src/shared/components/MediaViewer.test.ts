@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import MediaViewer from './MediaViewer.vue'
-import type { ViewerItem } from '@/composables/useIssueMedia'
+import type { ViewerItem } from '@/features/issues/composables/useIssueMedia'
 
 // resolveAsset() would hit the real RPC/Electroview (crashes in jsdom); identity-mock it
 // so the resolved blob URL equals the original path and the [src=...] selectors still match.

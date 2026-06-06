@@ -2,7 +2,7 @@
 import { computed, ref, watch, nextTick, type Component } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Circle, CircleDotDashed, CircleCheck, CircleSlash, Check, ChevronDown } from '@lucide/vue'
-import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
+import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 
 const props = withDefaults(
   defineProps<{

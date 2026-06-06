@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
 import type { IssueFilters } from '@/gitlab/issueParams'
-import type { SortKey, GroupKey } from '@/lib/issueView'
+import type { SortKey, GroupKey } from '@/features/issues/lib/issueView'
 
 type State = NonNullable<IssueFilters['state']>
 type View = 'list' | 'board'

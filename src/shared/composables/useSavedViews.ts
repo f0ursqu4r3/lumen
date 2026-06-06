@@ -1,6 +1,6 @@
 import { useLocalStorage } from '@vueuse/core'
 import { computed, type Ref } from 'vue'
-import { FILTER_KEYS, type ViewSlice } from '@/composables/useIssueFilters'
+import { FILTER_KEYS, type ViewSlice } from '@/features/issues/composables/useIssueFilters'
 
 // A named snapshot of the view-defining query slice (filters, sort, group,
 // view, scope, state, search). Stored per-project so a user can flip between

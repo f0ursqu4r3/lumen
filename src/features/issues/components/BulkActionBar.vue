@@ -7,7 +7,7 @@ import LabelPicker from '@/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
 import type { ProjectLabel } from '@/composables/useProjectLabels'
 import type { ProjectMember } from '@/composables/useProjectMembers'
-import type { WorkItemStatus } from '@/composables/useWorkItemStatus'
+import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 
 const props = defineProps<{
   count: number

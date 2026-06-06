@@ -22,7 +22,7 @@ import {
   Film,
   LoaderCircle,
 } from '@lucide/vue'
-import type { ViewerItem } from '@/composables/useIssueMedia'
+import type { ViewerItem } from '@/features/issues/composables/useIssueMedia'
 
 const props = defineProps<{ items: ViewerItem[]; startIndex?: number }>()
 const open = defineModel<boolean>('open', { default: false })

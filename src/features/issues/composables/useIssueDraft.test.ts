@@ -9,7 +9,7 @@ const { updateAsync, setAsync, addNoteAsync, setStatusAsync, statusState } = vi.
   setStatusAsync: vi.fn(),
   statusState: { value: { workItemId: 'gid://wi/9', status: null } as Record<string, unknown> },
 }))
-vi.mock('@/composables/useIssueMutations', () => ({
+vi.mock('@/features/issues/composables/useIssueMutations', () => ({
   useUpdateIssue: () => ({
     mutateAsync: updateAsync,
     isPending: { value: false },
@@ -26,7 +26,7 @@ vi.mock('@/composables/useIssueMutations', () => ({
     error: { value: null },
   }),
 }))
-vi.mock('@/composables/useWorkItemStatus', () => ({
+vi.mock('@/features/issues/composables/useWorkItemStatus', () => ({
   useWorkItemStatus: () => ({ data: statusState }),
   useSetWorkItemStatus: () => ({
     mutateAsync: setStatusAsync,

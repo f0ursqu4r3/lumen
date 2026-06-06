@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, RouterLinkStub, flushPromises } from '@vue/test-utils'
 import { ref, nextTick } from 'vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
-import IssueDrawer from '@/components/IssueDrawer.vue'
-import IssueComposer from '@/components/IssueComposer.vue'
-import IssueRow from '@/components/IssueRow.vue'
+import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
+import IssueComposer from '@/features/issues/components/IssueComposer.vue'
+import IssueRow from '@/features/issues/components/IssueRow.vue'
 
 const router = createRouter({
   history: createMemoryHistory(),
@@ -19,7 +19,7 @@ const router = createRouter({
 })
 
 const useIssues = vi.fn()
-vi.mock('@/composables/useIssues', () => ({ useIssues: () => useIssues() }))
+vi.mock('@/features/issues/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 
 const pipelinesRef = ref<Array<{ status: string }>>([])
 vi.mock('@/composables/usePipelines', () => ({
@@ -31,7 +31,7 @@ const { confirmMock } = vi.hoisted(() => ({ confirmMock: vi.fn() }))
 vi.mock('@/shared/composables/useConfirm', () => ({
   useConfirm: () => ({ confirm: confirmMock }),
 }))
-vi.mock('@/composables/useIssueMutations', () => ({
+vi.mock('@/features/issues/composables/useIssueMutations', () => ({
   useCreateIssue: () => ({
     mutate: createMutate,
     isPending: { value: false },
@@ -40,7 +40,7 @@ vi.mock('@/composables/useIssueMutations', () => ({
   useRetagIssue: () => ({ mutate: vi.fn() }),
   useReassignIssue: () => ({ mutate: vi.fn() }),
 }))
-vi.mock('@/composables/useWorkItemStatus', () => ({
+vi.mock('@/features/issues/composables/useWorkItemStatus', () => ({
   useWorkItemStatuses: () => ({ data: ref([]) }),
   useSetIssueStatus: () => ({ mutate: vi.fn() }),
 }))

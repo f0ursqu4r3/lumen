@@ -4,11 +4,11 @@ import { clearToasts, toasts } from '@/shared/composables/useToast'
 const retagMutate = vi.fn()
 const reassignMutate = vi.fn()
 const setStatusMutate = vi.fn()
-vi.mock('@/composables/useIssueMutations', () => ({
+vi.mock('@/features/issues/composables/useIssueMutations', () => ({
   useRetagIssue: () => ({ mutateAsync: retagMutate }),
   useReassignIssue: () => ({ mutateAsync: reassignMutate }),
 }))
-vi.mock('@/composables/useWorkItemStatus', () => ({
+vi.mock('@/features/issues/composables/useWorkItemStatus', () => ({
   useSetIssueStatus: () => ({ mutateAsync: setStatusMutate }),
 }))
 const confirmMock = vi.fn()

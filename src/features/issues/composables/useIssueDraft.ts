@@ -1,7 +1,7 @@
 import { computed, ref, watch, type Ref } from 'vue'
-import { useAddNote, useSetAssignees, useUpdateIssue } from '@/composables/useIssueMutations'
-import { useSetWorkItemStatus, useWorkItemStatus } from '@/composables/useWorkItemStatus'
-import { diffIssueEdit, draftFromIssue, isDirty, type IssueDraft } from '@/lib/issueEdit'
+import { useAddNote, useSetAssignees, useUpdateIssue } from '@/features/issues/composables/useIssueMutations'
+import { useSetWorkItemStatus, useWorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
+import { diffIssueEdit, draftFromIssue, isDirty, type IssueDraft } from '@/features/issues/lib/issueEdit'
 
 // The issue must also carry `id` (the gid) so a pending comment can be posted.
 type IssueLike = (Parameters<typeof draftFromIssue>[0] & { id?: string }) | null | undefined
