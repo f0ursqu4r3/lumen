@@ -14,6 +14,11 @@ function httpError(status: number, statusText: string): GitLabError {
         'Authentication failed — open Settings and check the GitLab URL and token (scope: api).',
     }
   }
+  // A 5xx means the server is unreachable or erroring, not the token. Mirrors
+  // normalizeError in src/gitlab/errors.ts.
+  if (status >= 500) {
+    return { kind: 'unavailable', message: `GitLab is unavailable (${status}).` }
+  }
   return { kind: 'network', message: `GitLab request failed (${status} ${statusText || 'error'}).` }
 }
 

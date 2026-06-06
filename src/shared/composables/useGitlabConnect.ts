@@ -6,6 +6,21 @@ export type ConnectStatus = 'idle' | 'testing' | 'error'
 /** Cheapest authenticated probe — a clean 200 with no errors proves the token works. */
 export const PROBE_QUERY = '{ currentUser { username } }'
 
+/** Map a connect-probe result to a kind-specific, recoverable message. */
+function connectErrorMessage(
+  statusCode: number,
+  errors: { message: string }[] | undefined,
+  host: string,
+): string {
+  if (statusCode === 401 || statusCode === 403) {
+    return 'Token rejected — check the token and its `api` scope.'
+  }
+  if (statusCode >= 500) {
+    return `Couldn’t reach ${host || 'GitLab'} — is the server up?`
+  }
+  return errors?.[0]?.message ?? `GitLab returned ${statusCode}`
+}
+
 /**
  * Shared GitLab connect state + probe. `save()` persists the config and probes
  * with the cheapest authenticated query; it sets `status`/`message` and resolves
@@ -41,11 +56,13 @@ export function useGitlabConnect() {
         return true
       }
       status.value = 'error'
-      message.value = res.errors?.[0]?.message ?? `GitLab returned ${res.status}`
+      message.value = connectErrorMessage(res.status, res.errors, url.value.trim())
       return false
-    } catch (e) {
+    } catch {
+      // A thrown rpc means the host's fetch threw — treat as unreachable, never
+      // as a token problem.
       status.value = 'error'
-      message.value = e instanceof Error ? e.message : 'Could not reach GitLab'
+      message.value = `Couldn't reach ${url.value.trim() || 'GitLab'} — is the server up?`
       return false
     }
   }

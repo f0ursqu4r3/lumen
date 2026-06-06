@@ -4,6 +4,7 @@ import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
 import SettingsDialog from '@/shared/components/SettingsDialog.vue'
 import ToastHost from '@/shared/components/ToastHost.vue'
 import SessionExpiredOverlay from '@/shared/components/SessionExpiredOverlay.vue'
+import ConnectionBanner from '@/shared/components/ConnectionBanner.vue'
 import { registerSettingsShortcut } from '@/shared/composables/useSettings'
 
 // The native app menu (⌘,) dispatches lumen:open-settings into the webview;
@@ -30,4 +31,5 @@ onUnmounted(() => stop?.())
   <SettingsDialog />
   <ToastHost />
   <SessionExpiredOverlay />
+  <ConnectionBanner />
 </template>

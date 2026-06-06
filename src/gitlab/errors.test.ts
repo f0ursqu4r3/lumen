@@ -22,8 +22,13 @@ describe('normalizeError', () => {
     expect(e.message).toBe('Field x not found')
   })
 
-  it('maps a ClientError with no GraphQL errors to network', () => {
-    expect(normalizeError(clientError(500)).kind).toBe('network')
+  it('maps 5xx to an unavailable error', () => {
+    expect(normalizeError(clientError(500)).kind).toBe('unavailable')
+    expect(normalizeError(clientError(503)).kind).toBe('unavailable')
+  })
+
+  it('maps a non-5xx ClientError with no GraphQL errors to network', () => {
+    expect(normalizeError(clientError(404)).kind).toBe('network')
   })
 
   it('falls back to the message for a plain Error', () => {

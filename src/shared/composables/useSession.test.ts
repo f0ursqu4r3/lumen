@@ -1,9 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { sessionState, isAuthError, markSessionExpired, installAuthWatch } from './useSession'
+import {
+  sessionState,
+  isAuthError,
+  isUnavailableError,
+  markSessionExpired,
+  markServerUnavailable,
+  clearServerUnavailable,
+  installAuthWatch,
+} from './useSession'
 import { QueryClient, MutationObserver } from '@tanstack/vue-query'
 
 beforeEach(() => {
   sessionState.expired = false
+  sessionState.unavailable = false
 })
 
 describe('isAuthError', () => {
@@ -83,6 +92,71 @@ describe('installAuthWatch', () => {
         queryFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
       })
       .catch(() => {})
+    expect(sessionState.expired).toBe(false)
+    stop()
+  })
+})
+
+describe('isUnavailableError', () => {
+  it('is true only for kind "unavailable"', () => {
+    expect(isUnavailableError({ kind: 'unavailable', message: 'x' })).toBe(true)
+    expect(isUnavailableError({ kind: 'auth', message: 'x' })).toBe(false)
+    expect(isUnavailableError(null)).toBe(false)
+  })
+
+  it('is false for null and non-objects', () => {
+    expect(isUnavailableError(undefined)).toBe(false)
+    expect(isUnavailableError('unavailable')).toBe(false)
+    expect(isUnavailableError(503)).toBe(false)
+  })
+})
+
+describe('auth wins over unavailable', () => {
+  it('markServerUnavailable is a no-op once expired', () => {
+    markSessionExpired()
+    markServerUnavailable()
+    expect(sessionState.expired).toBe(true)
+    expect(sessionState.unavailable).toBe(false)
+  })
+
+  it('markSessionExpired clears an existing unavailable banner', () => {
+    markServerUnavailable()
+    expect(sessionState.unavailable).toBe(true)
+    markSessionExpired()
+    expect(sessionState.expired).toBe(true)
+    expect(sessionState.unavailable).toBe(false)
+  })
+
+  it('clearServerUnavailable lowers the flag', () => {
+    markServerUnavailable()
+    clearServerUnavailable()
+    expect(sessionState.unavailable).toBe(false)
+  })
+})
+
+describe('installAuthWatch — unavailable', () => {
+  it('flips unavailable when a query fails with an unavailable error', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    await qc
+      .fetchQuery({
+        queryKey: ['probe'],
+        queryFn: () => Promise.reject({ kind: 'unavailable', message: 'down' }),
+      })
+      .catch(() => {})
+    expect(sessionState.unavailable).toBe(true)
+    expect(sessionState.expired).toBe(false)
+    stop()
+  })
+
+  it('flips unavailable when a mutation fails with an unavailable error', async () => {
+    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    const observer = new MutationObserver(qc, {
+      mutationFn: () => Promise.reject({ kind: 'unavailable', message: 'down' }),
+    })
+    await observer.mutate().catch(() => {})
+    expect(sessionState.unavailable).toBe(true)
     expect(sessionState.expired).toBe(false)
     stop()
   })
