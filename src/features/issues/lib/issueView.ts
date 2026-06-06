@@ -404,6 +404,50 @@ export function boardDropIndex(
   return i
 }
 
+/**
+ * Re-sequence groups by a stored key order without losing any. Groups whose
+ * `key` is in `order` come first, in that sequence; groups absent from `order`
+ * keep their default relative order and append after (so a newly-appeared
+ * status/label column lands at the end). Order keys with no matching group are
+ * ignored. Stable; pure.
+ */
+export function applyOrder(groups: IssueGroup[], order: readonly string[]): IssueGroup[] {
+  if (!order.length) return groups
+  const rank = new Map(order.map((k, i) => [k, i] as const))
+  return groups
+    .map((group, i) => ({ group, i }))
+    .sort((a, b) => {
+      const ra = rank.get(a.group.key)
+      const rb = rank.get(b.group.key)
+      if (ra != null && rb != null) return ra - rb
+      if (ra != null) return -1
+      if (rb != null) return 1
+      return a.i - b.i
+    })
+    .map((x) => x.group)
+}
+
+/**
+ * Compute the new key sequence after dragging `dragKey` onto `overKey` within
+ * `keys`. Dragging forward (down/right) drops just after the target; dragging
+ * backward drops just before it. Pure — returns a fresh array.
+ */
+export function reorderKeys(
+  keys: readonly string[],
+  dragKey: string,
+  overKey: string,
+): string[] {
+  if (dragKey === overKey) return [...keys]
+  const from = keys.indexOf(dragKey)
+  const to = keys.indexOf(overKey)
+  if (from === -1 || to === -1) return [...keys]
+  const without = keys.filter((k) => k !== dragKey)
+  const target = without.indexOf(overKey)
+  const insertAt = from < to ? target + 1 : target
+  without.splice(insertAt, 0, dragKey)
+  return without
+}
+
 // --- active filters ---------------------------------------------------------
 
 /**

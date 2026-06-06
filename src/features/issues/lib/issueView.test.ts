@@ -9,6 +9,8 @@ import {
   availableScopes,
   labelScopes,
   planRetag,
+  applyOrder,
+  reorderKeys,
 } from './issueView'
 import type { IssueGroup } from './issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
@@ -305,5 +307,47 @@ describe('planRetag', () => {
   it('returns null when already in the target column', () => {
     const same = { id: '1-0', title: 'assigned::on-deck', color: '#0f0' }
     expect(planRetag(issue, 'assigned', same)).toBeNull()
+  })
+})
+
+const g = (key: string): IssueGroup => ({ key, label: key, issues: [] })
+
+describe('applyOrder', () => {
+  it('returns groups unchanged when order is empty', () => {
+    const groups = [g('a'), g('b'), g('c')]
+    expect(applyOrder(groups, []).map((x) => x.key)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('re-sequences groups to match the given order', () => {
+    const groups = [g('a'), g('b'), g('c')]
+    expect(applyOrder(groups, ['c', 'a', 'b']).map((x) => x.key)).toEqual(['c', 'a', 'b'])
+  })
+
+  it('appends groups absent from the order after, in default order', () => {
+    const groups = [g('a'), g('b'), g('c'), g('d')]
+    expect(applyOrder(groups, ['c', 'a']).map((x) => x.key)).toEqual(['c', 'a', 'b', 'd'])
+  })
+
+  it('ignores order keys with no matching group', () => {
+    const groups = [g('a'), g('b')]
+    expect(applyOrder(groups, ['z', 'b', 'a']).map((x) => x.key)).toEqual(['b', 'a'])
+  })
+})
+
+describe('reorderKeys', () => {
+  it('moves a key forward to just after its target', () => {
+    expect(reorderKeys(['a', 'b', 'c', 'd'], 'a', 'c')).toEqual(['b', 'c', 'a', 'd'])
+  })
+
+  it('moves a key backward to just before its target', () => {
+    expect(reorderKeys(['a', 'b', 'c', 'd'], 'd', 'b')).toEqual(['a', 'd', 'b', 'c'])
+  })
+
+  it('is a no-op when dragging onto itself', () => {
+    expect(reorderKeys(['a', 'b', 'c'], 'b', 'b')).toEqual(['a', 'b', 'c'])
+  })
+
+  it('returns a copy when a key is missing', () => {
+    expect(reorderKeys(['a', 'b'], 'x', 'a')).toEqual(['a', 'b'])
   })
 })
