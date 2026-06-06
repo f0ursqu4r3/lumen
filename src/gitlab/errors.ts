@@ -1,6 +1,6 @@
 import { ClientError } from 'graphql-request'
 
-export type GitLabErrorKind = 'auth' | 'graphql' | 'network' | 'unknown'
+export type GitLabErrorKind = 'auth' | 'unavailable' | 'graphql' | 'network' | 'unknown'
 
 export interface GitLabError {
   kind: GitLabErrorKind
@@ -17,9 +17,14 @@ export function normalizeError(err: unknown): GitLabError {
           'Authentication failed — check GITLAB_URL and GITLAB_TOKEN in .env (token scope: api).',
       }
     }
+    // A 5xx means the server is unreachable or erroring — the token is fine.
+    // Checked before the GraphQL-message branch so a 5xx is never mislabeled
+    // `graphql`.
+    if (typeof status === 'number' && status >= 500) {
+      return { kind: 'unavailable', message: 'GitLab is unavailable.' }
+    }
     const gql = err.response?.errors?.[0]?.message
     if (gql) return { kind: 'graphql', message: gql }
-    // Fires for a ClientError response carrying no GraphQL errors (e.g. a 5xx).
     return { kind: 'network', message: err.message }
   }
   if (err instanceof Error) return { kind: 'unknown', message: err.message }
