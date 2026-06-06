@@ -8,8 +8,11 @@ const dragEvent = () =>
 describe('useGroupReorder', () => {
   it('tracks drag and over keys', () => {
     const r = useGroupReorder({ setOrder: vi.fn() })
-    r.onReorderStart('a', dragEvent())
+    const e = dragEvent()
+    r.onReorderStart('a', e)
     expect(r.dragKey.value).toBe('a')
+    expect(e.dataTransfer!.effectAllowed).toBe('move')
+    expect(e.dataTransfer!.setData).toHaveBeenCalledWith('application/x-lumen-group', 'a')
     r.onReorderOver('b')
     expect(r.overKey.value).toBe('b')
     expect(r.isReorderTarget('b')).toBe(true)
@@ -40,5 +43,7 @@ describe('useGroupReorder', () => {
     r.onReorderStart('a', dragEvent())
     r.onReorderDrop('status', ['a', 'b'])
     expect(setOrder).not.toHaveBeenCalled()
+    expect(r.dragKey.value).toBeNull()
+    expect(r.overKey.value).toBeNull()
   })
 })
