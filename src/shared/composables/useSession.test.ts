@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { sessionState, isAuthError, markSessionExpired } from './useSession'
+import { sessionState, isAuthError, markSessionExpired, installAuthWatch } from './useSession'
+import { QueryClient, MutationObserver } from '@tanstack/vue-query'
 
 beforeEach(() => {
   sessionState.expired = false
@@ -31,5 +32,58 @@ describe('markSessionExpired', () => {
     expect(sessionState.expired).toBe(true)
     markSessionExpired()
     expect(sessionState.expired).toBe(true)
+  })
+})
+
+describe('installAuthWatch', () => {
+  it('flips expired when a query fails with an auth error', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    await qc
+      .fetchQuery({
+        queryKey: ['probe'],
+        queryFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
+      })
+      .catch(() => {})
+    expect(sessionState.expired).toBe(true)
+    stop()
+  })
+
+  it('does NOT flip on a non-auth query error', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    await qc
+      .fetchQuery({
+        queryKey: ['probe'],
+        queryFn: () => Promise.reject({ kind: 'network', message: 'down' }),
+      })
+      .catch(() => {})
+    expect(sessionState.expired).toBe(false)
+    stop()
+  })
+
+  it('flips expired when a mutation fails with an auth error', async () => {
+    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    const observer = new MutationObserver(qc, {
+      mutationFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
+    })
+    await observer.mutate().catch(() => {})
+    expect(sessionState.expired).toBe(true)
+    stop()
+  })
+
+  it('stops flipping after the returned cleanup runs', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    stop()
+    await qc
+      .fetchQuery({
+        queryKey: ['probe'],
+        queryFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
+      })
+      .catch(() => {})
+    expect(sessionState.expired).toBe(false)
+    stop()
   })
 })
