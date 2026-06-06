@@ -448,6 +448,19 @@ export function reorderKeys(
   return without
 }
 
+/**
+ * Move `key` to `index` within `keys` (index is in the array with `key`
+ * removed; clamped to a valid slot). Used by the pointer-driven reorder, which
+ * thinks in terms of a landing index rather than an over-key. Pure — returns a
+ * fresh array.
+ */
+export function reorderToIndex(keys: readonly string[], key: string, index: number): string[] {
+  const without = keys.filter((k) => k !== key)
+  const clamped = Math.max(0, Math.min(index, without.length))
+  without.splice(clamped, 0, key)
+  return without
+}
+
 // --- active filters ---------------------------------------------------------
 
 /**
