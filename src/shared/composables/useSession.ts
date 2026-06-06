@@ -13,9 +13,7 @@ export const sessionState = reactive<{ expired: boolean }>({ expired: false })
  * src/gitlab/errors.ts.
  */
 export function isAuthError(err: unknown): boolean {
-  return (
-    typeof err === 'object' && err !== null && (err as { kind?: unknown }).kind === 'auth'
-  )
+  return typeof err === 'object' && err !== null && (err as { kind?: unknown }).kind === 'auth'
 }
 
 /** Flip the session into the expired state (idempotent). */

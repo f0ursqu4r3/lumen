@@ -44,7 +44,11 @@ describe('SessionExpiredOverlay', () => {
 
   it('reloads the app after a successful reconnect', async () => {
     saveConfig.mockResolvedValue({ ok: true })
-    gitlabGraphql.mockResolvedValue({ status: 200, data: { currentUser: { username: 'kyle' } }, errors: [] })
+    gitlabGraphql.mockResolvedValue({
+      status: 200,
+      data: { currentUser: { username: 'kyle' } },
+      errors: [],
+    })
     const w = mount(SessionExpiredOverlay, { attachTo: document.body })
     sessionState.expired = true
     await flushPromises()

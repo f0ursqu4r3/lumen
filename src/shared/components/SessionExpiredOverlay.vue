@@ -69,7 +69,10 @@ async function disconnect() {
         >
           Re-connect to GitLab
         </h1>
-        <p id="session-expired-desc" class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
+        <p
+          id="session-expired-desc"
+          class="mt-2.5 max-w-xs text-sm leading-relaxed text-muted-foreground"
+        >
           Your access token is no longer valid. Enter a new one to pick up where you left off.
         </p>
       </div>
