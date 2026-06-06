@@ -2,7 +2,7 @@
 import { computed, ref, toRef, watch } from 'vue'
 import { useDebounceFn, useLocalStorage } from '@vueuse/core'
 import { ChevronRight } from '@lucide/vue'
-import { useScratchpad } from '@/composables/useScratchpad'
+import { useScratchpad } from '@/shared/composables/useScratchpad'
 import { Textarea } from '@/shared/ui/textarea'
 
 const props = defineProps<{ fullPath: string; iid: string }>()

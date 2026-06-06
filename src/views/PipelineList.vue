@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from '@lucide/vue'
 import { usePipelines, type Pipeline } from '@/composables/usePipelines'
-import { useGitlabUrl } from '@/composables/useGitlabUrl'
+import { useGitlabUrl } from '@/shared/composables/useGitlabUrl'
 import { usePipelineNotifications } from '@/composables/usePipelineNotifications'
 import { usePipelineWatch } from '@/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'

@@ -1,7 +1,7 @@
 import { useRetagIssue, useReassignIssue } from '@/composables/useIssueMutations'
 import { useSetIssueStatus, type WorkItemStatus } from '@/composables/useWorkItemStatus'
-import { useConfirm } from '@/composables/useConfirm'
-import { pushToast } from '@/composables/useToast'
+import { useConfirm } from '@/shared/composables/useConfirm'
+import { pushToast } from '@/shared/composables/useToast'
 
 export interface BulkResult {
   succeeded: number

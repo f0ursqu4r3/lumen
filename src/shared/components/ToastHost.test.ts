@@ -7,7 +7,7 @@ const { openExternal } = vi.hoisted(() => ({
 vi.mock('@/lib/rpc', () => ({ rpc: { openExternal } }))
 
 import ToastHost from './ToastHost.vue'
-import { pushToast, clearToasts, toasts } from '@/composables/useToast'
+import { pushToast, clearToasts, toasts } from '@/shared/composables/useToast'
 
 beforeEach(() => {
   clearToasts()

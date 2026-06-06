@@ -3,7 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
 import SettingsDialog from '@/shared/components/SettingsDialog.vue'
 import ToastHost from '@/shared/components/ToastHost.vue'
-import { registerSettingsShortcut } from '@/composables/useSettings'
+import { registerSettingsShortcut } from '@/shared/composables/useSettings'
 
 // The native app menu (⌘,) dispatches lumen:open-settings into the webview;
 // listen for it app-wide so the single mounted dialog opens from anywhere.

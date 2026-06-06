@@ -15,10 +15,10 @@ import { Label } from '@/shared/ui/label'
 import { Button } from '@/shared/ui/button'
 import { rpc } from '@/lib/rpc'
 import { clearPersistedCache } from '@/lib/persist'
-import { useGitlabConnect, PROBE_QUERY } from '@/composables/useGitlabConnect'
-import { useConfirm } from '@/composables/useConfirm'
-import { pushToast } from '@/composables/useToast'
-import { settingsState, closeSettings } from '@/composables/useSettings'
+import { useGitlabConnect, PROBE_QUERY } from '@/shared/composables/useGitlabConnect'
+import { useConfirm } from '@/shared/composables/useConfirm'
+import { pushToast } from '@/shared/composables/useToast'
+import { settingsState, closeSettings } from '@/shared/composables/useSettings'
 
 const router = useRouter()
 const queryClient = useQueryClient()

@@ -28,7 +28,7 @@ vi.mock('@/composables/usePipelines', () => ({
 
 const { createMutate } = vi.hoisted(() => ({ createMutate: vi.fn() }))
 const { confirmMock } = vi.hoisted(() => ({ confirmMock: vi.fn() }))
-vi.mock('@/composables/useConfirm', () => ({
+vi.mock('@/shared/composables/useConfirm', () => ({
   useConfirm: () => ({ confirm: confirmMock }),
 }))
 vi.mock('@/composables/useIssueMutations', () => ({

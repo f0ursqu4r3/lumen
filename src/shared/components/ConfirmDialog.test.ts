@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
-import { confirmState, useConfirm } from '@/composables/useConfirm'
+import { confirmState, useConfirm } from '@/shared/composables/useConfirm'
 
 beforeEach(() => {
   confirmState.open = false

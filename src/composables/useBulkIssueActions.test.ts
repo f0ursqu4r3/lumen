@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { clearToasts, toasts } from '@/composables/useToast'
+import { clearToasts, toasts } from '@/shared/composables/useToast'
 
 const retagMutate = vi.fn()
 const reassignMutate = vi.fn()
@@ -12,7 +12,7 @@ vi.mock('@/composables/useWorkItemStatus', () => ({
   useSetIssueStatus: () => ({ mutateAsync: setStatusMutate }),
 }))
 const confirmMock = vi.fn()
-vi.mock('@/composables/useConfirm', () => ({ useConfirm: () => ({ confirm: confirmMock }) }))
+vi.mock('@/shared/composables/useConfirm', () => ({ useConfirm: () => ({ confirm: confirmMock }) }))
 
 import { useBulkIssueActions } from './useBulkIssueActions'
 

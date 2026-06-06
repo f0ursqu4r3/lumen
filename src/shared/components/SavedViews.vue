@@ -2,7 +2,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Bookmark, Check, ChevronDown, Pencil, Plus, Save, Trash2 } from '@lucide/vue'
-import type { SavedView } from '@/composables/useSavedViews'
+import type { SavedView } from '@/shared/composables/useSavedViews'
 
 const props = defineProps<{
   views: SavedView[]

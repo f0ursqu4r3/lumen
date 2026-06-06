@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/shared/ui/alert-dialog'
-import { confirmState } from '@/composables/useConfirm'
+import { confirmState } from '@/shared/composables/useConfirm'
 
 // Track what was chosen before the dialog closes so onOpenChange can pick the
 // right outcome. Set to true on accept, false on cancel/dismiss.

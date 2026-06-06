@@ -27,7 +27,7 @@ import {
   useSetIssueStatus,
   type WorkItemStatus,
 } from '@/composables/useWorkItemStatus'
-import { useSavedViews } from '@/composables/useSavedViews'
+import { useSavedViews } from '@/shared/composables/useSavedViews'
 import IssueComposer from '@/components/IssueComposer.vue'
 import IssueFilterPanel from '@/components/IssueFilterPanel.vue'
 import SavedViews from '@/shared/components/SavedViews.vue'
@@ -46,7 +46,7 @@ import {
   type IssueGroup,
 } from '@/lib/issueView'
 import { useRoute, useRouter } from 'vue-router'
-import { useConfirm } from '@/composables/useConfirm'
+import { useConfirm } from '@/shared/composables/useConfirm'
 import IssueRow from '@/components/IssueRow.vue'
 import IssueCard from '@/components/IssueCard.vue'
 import IssueDrawer from '@/components/IssueDrawer.vue'

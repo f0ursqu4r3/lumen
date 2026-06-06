@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useTitle, onKeyStroke } from '@vueuse/core'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import IssueDetail from '@/views/IssueDetail.vue'
-import { useConfirm } from '@/composables/useConfirm'
+import { useConfirm } from '@/shared/composables/useConfirm'
 
 // `windowed` is accepted for parity with the route's prop shape (the URL carries
 // ?window=1) but isn't read: this window owns its chrome and always renders

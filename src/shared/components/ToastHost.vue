@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import { X, CircleCheck, CircleX, Info } from '@lucide/vue'
-import { toasts, dismissToast, type Toast, type ToastTone } from '@/composables/useToast'
+import { toasts, dismissToast, type Toast, type ToastTone } from '@/shared/composables/useToast'
 import { rpc } from '@/lib/rpc'
 
 // One mounted instance (in App.vue, beside ConfirmDialog) renders the shared

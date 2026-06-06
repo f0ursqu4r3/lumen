@@ -2,7 +2,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import { renderMarkdown } from '@/lib/markdown'
 import { applyResolvedMedia } from '@/lib/media'
-import { resolveAsset } from '@/composables/useGitlabAsset'
+import { resolveAsset } from '@/shared/composables/useGitlabAsset'
 import { rpc } from '@/lib/rpc'
 
 const props = defineProps<{ source?: string | null; projectPath?: string }>()

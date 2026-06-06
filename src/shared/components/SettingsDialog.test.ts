@@ -25,15 +25,15 @@ const queryClientClear = vi.fn()
 vi.mock('@tanstack/vue-query', () => ({ useQueryClient: () => ({ clear: queryClientClear }) }))
 
 const pushToast = vi.fn()
-vi.mock('@/composables/useToast', () => ({ pushToast: (a: unknown) => pushToast(a) }))
+vi.mock('@/shared/composables/useToast', () => ({ pushToast: (a: unknown) => pushToast(a) }))
 
 // confirm() resolves true so the disconnect path proceeds in tests.
-vi.mock('@/composables/useConfirm', () => ({
+vi.mock('@/shared/composables/useConfirm', () => ({
   useConfirm: () => ({ confirm: () => Promise.resolve(true) }),
 }))
 
 import SettingsDialog from './SettingsDialog.vue'
-import { settingsState, closeSettings } from '@/composables/useSettings'
+import { settingsState, closeSettings } from '@/shared/composables/useSettings'
 
 beforeEach(() => {
   vi.clearAllMocks()

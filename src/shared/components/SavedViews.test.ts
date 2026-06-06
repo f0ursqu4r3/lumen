@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SavedViews from './SavedViews.vue'
-import type { SavedView } from '@/composables/useSavedViews'
+import type { SavedView } from '@/shared/composables/useSavedViews'
 
 const views: SavedView[] = [
   { id: 'a', name: 'My bugs', query: { label: ['bug'], sort: 'priority' } },

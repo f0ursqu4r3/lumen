@@ -7,7 +7,7 @@ const { showNotification } = vi.hoisted(() => ({
 vi.mock('@/lib/rpc', () => ({ rpc: { showNotification } }))
 
 const { pushToast } = vi.hoisted(() => ({ pushToast: vi.fn() }))
-vi.mock('@/composables/useToast', () => ({ pushToast }))
+vi.mock('@/shared/composables/useToast', () => ({ pushToast }))
 
 // Default to "app not active" so the OS-notification path runs unless a test
 // overrides it.
