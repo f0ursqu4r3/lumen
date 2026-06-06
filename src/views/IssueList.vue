@@ -48,6 +48,7 @@ import {
 } from '@/features/issues/lib/issueView'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from '@/shared/composables/useConfirm'
+import { useTabNav } from '@/shared/composables/useTabNav'
 import IssueRow from '@/features/issues/components/IssueRow.vue'
 import IssueCard from '@/features/issues/components/IssueCard.vue'
 import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
@@ -258,17 +259,7 @@ function setView(next: 'list' | 'board') {
   })
 }
 
-// Tab-style hops to this project's other surfaces (→ pipelines) morph the shared
-// repo title and cross-fade the rest, the same handoff the picker → issues uses.
-// Modified clicks fall through to the real href so "open in new window" still works.
-function onTabNav(e: MouseEvent, to: Parameters<typeof router.push>[0]) {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-  e.preventDefault()
-  withViewTransition(async () => {
-    await router.push(to)
-    await nextTick()
-  })
-}
+const { onTabNav } = useTabNav()
 
 const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
 const { data: statusCatalog } = useWorkItemStatuses(toRef(props, 'fullPath'))

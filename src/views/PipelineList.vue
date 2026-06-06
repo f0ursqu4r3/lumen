@@ -25,25 +25,11 @@ import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { rpc } from '@/shared/lib/rpc'
-import { nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { withViewTransition } from '@/shared/lib/viewTransition'
+import { useTabNav } from '@/shared/composables/useTabNav'
 
 const props = defineProps<{ fullPath: string }>()
 
-const router = useRouter()
-
-// Hopping back to this project's issues morphs the shared repo title and
-// cross-fades the rest — the mirror of the issues → pipelines handoff. Modified
-// clicks fall through to the real href.
-function onTabNav(e: MouseEvent, to: Parameters<typeof router.push>[0]) {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-  e.preventDefault()
-  withViewTransition(async () => {
-    await router.push(to)
-    await nextTick()
-  })
-}
+const { onTabNav } = useTabNav()
 
 const fullPath = toRef(props, 'fullPath')
 const { repoName, pathPrefix } = useRepoPath(fullPath)
