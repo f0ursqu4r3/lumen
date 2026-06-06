@@ -5,13 +5,9 @@ import {
   Plus,
   Search,
   LoaderCircle,
-  List,
-  Columns3,
   GripVertical,
   ArrowLeft,
   Workflow,
-  RefreshCw,
-  CheckSquare,
 } from '@lucide/vue'
 import { useIssues } from '@/features/issues/composables/useIssues'
 import { usePipelines } from '@/features/pipelines/composables/usePipelines'
@@ -25,17 +21,13 @@ import { useIssueBoardDnd } from '@/features/issues/composables/useIssueBoardDnd
 import { useSavedViews } from '@/shared/composables/useSavedViews'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
 import IssueComposer from '@/features/issues/components/IssueComposer.vue'
-import IssueFilterPanel from '@/features/issues/components/IssueFilterPanel.vue'
 import SavedViews from '@/shared/components/SavedViews.vue'
-import type { IssueFilters } from '@/gitlab/issueParams'
+import IssueListToolbar from '@/features/issues/components/IssueListToolbar.vue'
 import {
   sortIssues,
   groupIssues,
   boardColumns,
   labelScopes,
-  SORTS,
-  GROUPS,
-  BOARD_GROUPS,
   type Facet,
 } from '@/features/issues/lib/issueView'
 import { useTabNav } from '@/shared/composables/useTabNav'
@@ -51,20 +43,9 @@ import BulkActionBar from '@/features/issues/components/BulkActionBar.vue'
 import { useIssueSelection, IssueSelectionKey } from '@/features/issues/composables/useIssueSelection'
 import { useBulkIssueActions } from '@/features/issues/composables/useBulkIssueActions'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
-import { Input } from '@/shared/ui/input'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
 
 const props = defineProps<{ fullPath: string }>()
 
@@ -116,13 +97,6 @@ function removeView(id: string) {
   savedViews.remove(id)
   if (loadedViewId.value === id) loadedViewId.value = null
 }
-
-type StateValue = NonNullable<IssueFilters['state']>
-const STATES: { value: StateValue; label: string }[] = [
-  { value: 'opened', label: 'Open' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'all', label: 'All' },
-]
 
 // Split the project path so the final segment (the repo) can be emphasized.
 const { repoName, pathPrefix } = useRepoPath(toRef(props, 'fullPath'))
@@ -418,202 +392,40 @@ onKeyStroke('Escape', (e) => {
       </div>
     </div>
 
-    <!-- Toolbar row 1: state · search · view -->
-    <div class="flex flex-wrap items-center gap-2">
-      <div
-        role="group"
-        aria-label="Filter issues by state"
-        class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
-      >
-        <button
-          v-for="s in STATES"
-          :key="s.value"
-          type="button"
-          :aria-pressed="state === s.value"
-          class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
-          :class="
-            state === s.value
-              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
-              : 'text-muted-foreground hover:text-foreground'
-          "
-          @click="state = s.value"
-        >
-          {{ s.label }}
-        </button>
-      </div>
-
-      <div class="relative min-w-50 flex-1">
-        <Search
-          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+    <IssueListToolbar
+      v-model:state="state"
+      v-model:search="search"
+      v-model:labels="labelTitles"
+      v-model:assignee="assignee"
+      v-model:author="author"
+      v-model:sort="sortKey"
+      v-model:group="groupKey"
+      v-model:scope="boardScope"
+      :catalog="labelCatalog"
+      :members="members ?? []"
+      :active-count="activeCount"
+      :view="view"
+      :select-mode="selection.mode.value"
+      :is-refreshing="isRefreshing"
+      :scope-options="scopeOptions"
+      @refresh="refresh"
+      @toggle-select="toggleSelectMode"
+      @set-view="setView"
+    >
+      <template #saved-views>
+        <SavedViews
+          :views="savedViews.views.value"
+          :active-id="activeViewId"
+          :loaded-id="loadedViewId"
+          :can-save="canSaveView"
+          @apply="loadView"
+          @save="saveCurrentView"
+          @update="updateView"
+          @rename="savedViews.rename"
+          @remove="removeView"
         />
-        <Input
-          v-model="search"
-          type="search"
-          placeholder="Search issues…"
-          aria-label="Search issues"
-          class="pl-9"
-        />
-      </div>
-
-      <IssueFilterPanel
-        v-model:labels="labelTitles"
-        v-model:assignee="assignee"
-        v-model:author="author"
-        :catalog="labelCatalog"
-        :members="members ?? []"
-        :active-count="activeCount"
-      />
-
-      <SavedViews
-        :views="savedViews.views.value"
-        :active-id="activeViewId"
-        :loaded-id="loadedViewId"
-        :can-save="canSaveView"
-        @apply="loadView"
-        @save="saveCurrentView"
-        @update="updateView"
-        @rename="savedViews.rename"
-        @remove="removeView"
-      />
-
-      <!-- Manual refresh: re-fetches loaded pages on demand, on top of the
-           background poll. Spins only while the user's own refresh is in flight. -->
-      <button
-        type="button"
-        data-testid="refresh-issues"
-        aria-label="Refresh issues"
-        title="Refresh"
-        :disabled="isRefreshing"
-        class="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-60"
-        @click="refresh"
-      >
-        <RefreshCw class="size-4" :class="isRefreshing ? 'animate-spin' : ''" />
-      </button>
-
-      <!-- Select mode: flips rows/cards into checkbox selection for bulk actions. -->
-      <button
-        type="button"
-        data-testid="toggle-select-mode"
-        aria-label="Toggle select mode"
-        title="Select mode"
-        :aria-pressed="selection.mode.value"
-        class="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
-        :class="selection.mode.value ? 'bg-card text-foreground ring-1 ring-border' : ''"
-        @click="toggleSelectMode"
-      >
-        <CheckSquare class="size-4" />
-      </button>
-
-      <!-- View toggle -->
-      <div
-        role="group"
-        aria-label="Switch view"
-        class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
-      >
-        <button
-          type="button"
-          aria-label="List view"
-          :aria-pressed="view === 'list'"
-          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
-          :class="
-            view === 'list'
-              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
-              : 'text-muted-foreground hover:text-foreground'
-          "
-          @click="setView('list')"
-        >
-          <List class="size-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="Board view"
-          :aria-pressed="view === 'board'"
-          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
-          :class="
-            view === 'board'
-              ? 'bg-card text-foreground shadow-card ring-1 ring-border'
-              : 'text-muted-foreground hover:text-foreground'
-          "
-          @click="setView('board')"
-        >
-          <Columns3 class="size-4" />
-        </button>
-      </div>
-    </div>
-
-    <!-- Toolbar row 2: sort + group (list only) -->
-    <div v-if="view === 'list'" class="flex flex-wrap items-center gap-2">
-      <Select v-model="sortKey">
-        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Sort issues">
-          <span class="text-muted-foreground">Sort</span>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="s in SORTS" :key="s.value" :value="s.value">
-            {{ s.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      <Select v-model="groupKey">
-        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Group issues">
-          <span class="text-muted-foreground">Group</span>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="g in GROUPS" :key="g.value" :value="g.value">
-            {{ g.label }}
-          </SelectItem>
-          <!-- One entry per scoped-label group present in the project (team::,
-               type::, …), grouping the list the same way the board's columns do. -->
-          <template v-if="scopeOptions.length">
-            <SelectSeparator />
-            <SelectGroup>
-              <SelectLabel>Labels</SelectLabel>
-              <SelectItem v-for="s in scopeOptions" :key="s" :value="`label:${s}`">
-                {{ s }}
-              </SelectItem>
-            </SelectGroup>
-          </template>
-        </SelectContent>
-      </Select>
-    </div>
-
-    <!-- Toolbar row 2 (board): sort cards + which facet becomes the columns -->
-    <div v-else class="flex flex-wrap items-center gap-2">
-      <Select v-model="sortKey">
-        <SelectTrigger class="h-8 w-44 text-xs" aria-label="Sort issues">
-          <span class="text-muted-foreground">Sort</span>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="s in SORTS" :key="s.value" :value="s.value">
-            {{ s.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      <Select v-model="boardScope">
-        <SelectTrigger class="h-8 w-52 text-xs" aria-label="Column grouping">
-          <span class="text-muted-foreground">Columns by</span>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="g in BOARD_GROUPS" :key="g.value" :value="g.value">
-            {{ g.label }}
-          </SelectItem>
-          <!-- Same scoped-label groups the list offers — each becomes a column set. -->
-          <template v-if="scopeOptions.length">
-            <SelectSeparator />
-            <SelectGroup>
-              <SelectLabel>Labels</SelectLabel>
-              <SelectItem v-for="s in scopeOptions" :key="s" :value="`label:${s}`">
-                {{ s }}
-              </SelectItem>
-            </SelectGroup>
-          </template>
-        </SelectContent>
-      </Select>
-      <span class="text-xs text-muted-foreground/60">Drag cards to update</span>
-    </div>
+      </template>
+    </IssueListToolbar>
 
     <!-- Active filter tokens -->
     <IssueActiveFilters
