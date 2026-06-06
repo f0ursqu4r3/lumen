@@ -198,15 +198,10 @@ const {
   ghostIndex,
 } = useIssueBoardDnd({ fullPath: props.fullPath, boardScope, sortKey, statusCatalog, members })
 
-// --- drag to reorder groups / columns ---------------------------------------
-const {
-  dragKey: reorderDragKey,
-  overKey: reorderOverKey,
-  onReorderStart,
-  onReorderOver,
-  onReorderDrop,
-  clearReorder,
-} = useGroupReorder({ setOrder })
+// --- drag to reorder groups / columns (pointer-driven) ----------------------
+const { activeKey, insertIndex, pointer, barOffset, justReordered, start } = useGroupReorder({
+  setOrder,
+})
 
 // The grouping dimension the active view arranges (list groups vs board cols).
 const activeDimension = computed(() => (view.value === 'list' ? groupKey.value : boardScope.value))
@@ -334,12 +329,13 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           :highlight-iid="highlightIid"
           :vt-name-for="vtNameFor"
           @filter="applyFacet"
-          :reorder-drag-key="reorderDragKey"
-          :reorder-over-key="reorderOverKey"
-          @reorder-start="onReorderStart"
-          @reorder-over="onReorderOver"
-          @reorder-drop="() => onReorderDrop(groupKey, listGroups.map((g) => g.key))"
-          @reorder-end="clearReorder"
+          :active-key="activeKey"
+          :insert-index="insertIndex"
+          :bar-offset="barOffset"
+          :pointer="pointer"
+          :just-reordered="justReordered"
+          :dimension="groupKey"
+          :start="start"
         />
 
         <IssueBoard
@@ -359,12 +355,13 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           @drag-end="clearDrag"
           @drop="onDrop"
           @drag-over="dragOverKey = $event"
-          :reorder-drag-key="reorderDragKey"
-          :reorder-over-key="reorderOverKey"
-          @reorder-start="onReorderStart"
-          @reorder-over="onReorderOver"
-          @reorder-drop="() => onReorderDrop(boardScope, boardGroups.map((g) => g.key))"
-          @reorder-end="clearReorder"
+          :active-key="activeKey"
+          :insert-index="insertIndex"
+          :bar-offset="barOffset"
+          :pointer="pointer"
+          :just-reordered="justReordered"
+          :dimension="boardScope"
+          :start="start"
         />
 
         <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
