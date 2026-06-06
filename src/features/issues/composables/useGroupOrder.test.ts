@@ -28,6 +28,14 @@ describe('useGroupOrder', () => {
     expect(orderFor('assignee')).toEqual(['x'])
   })
 
+  it('setOrder with an empty array clears the dimension', () => {
+    const { orderFor, hasOrder, setOrder } = useGroupOrder(ref('grp/proj'))
+    setOrder('status', ['a', 'b'])
+    setOrder('status', [])
+    expect(orderFor('status')).toEqual([])
+    expect(hasOrder('status')).toBe(false)
+  })
+
   it('isolates order by project path', () => {
     const fullPath = ref('grp/one')
     const a = useGroupOrder(fullPath)

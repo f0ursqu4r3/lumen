@@ -22,6 +22,10 @@ export function useGroupOrder(fullPath: Ref<string>) {
   const hasOrder = (dimension: string): boolean => (stored.value[dimension]?.length ?? 0) > 0
 
   function setOrder(dimension: string, keys: string[]): void {
+    if (!keys.length) {
+      reset(dimension)
+      return
+    }
     stored.value = { ...stored.value, [dimension]: keys }
   }
   function reset(dimension: string): void {
