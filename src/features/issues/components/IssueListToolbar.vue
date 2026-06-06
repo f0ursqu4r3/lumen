@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search, RefreshCw, CheckSquare, List, Columns3 } from '@lucide/vue'
+import { Search, RefreshCw, CheckSquare, List, Columns3, RotateCcw } from '@lucide/vue'
 import { Input } from '@/shared/ui/input'
 import IssueFilterPanel from '@/features/issues/components/IssueFilterPanel.vue'
 import {
@@ -32,6 +32,7 @@ defineProps<{
   selectMode: boolean
   isRefreshing: boolean
   scopeOptions: string[]
+  hasCustomOrder: boolean
 }>()
 
 const state = defineModel<StateValue>('state', { required: true })
@@ -43,7 +44,12 @@ const sortKey = defineModel<string>('sort', { required: true })
 const groupKey = defineModel<string>('group', { required: true })
 const boardScope = defineModel<string>('scope', { required: true })
 
-defineEmits<{ refresh: []; 'toggle-select': []; 'set-view': [next: 'list' | 'board'] }>()
+defineEmits<{
+  refresh: []
+  'toggle-select': []
+  'set-view': [next: 'list' | 'board']
+  'reset-order': []
+}>()
 </script>
 
 <template>
@@ -195,6 +201,16 @@ defineEmits<{ refresh: []; 'toggle-select': []; 'set-view': [next: 'list' | 'boa
         </template>
       </SelectContent>
     </Select>
+    <button
+      v-if="hasCustomOrder"
+      type="button"
+      data-testid="reset-group-order"
+      class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+      @click="$emit('reset-order')"
+    >
+      <RotateCcw class="size-3.5" />
+      Reset order
+    </button>
   </div>
 
   <!-- Toolbar row 2 (board): sort cards + which facet becomes the columns -->
@@ -232,5 +248,15 @@ defineEmits<{ refresh: []; 'toggle-select': []; 'set-view': [next: 'list' | 'boa
       </SelectContent>
     </Select>
     <span class="text-xs text-muted-foreground/60">Drag cards to update</span>
+    <button
+      v-if="hasCustomOrder"
+      type="button"
+      data-testid="reset-column-order"
+      class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+      @click="$emit('reset-order')"
+    >
+      <RotateCcw class="size-3.5" />
+      Reset order
+    </button>
   </div>
 </template>
