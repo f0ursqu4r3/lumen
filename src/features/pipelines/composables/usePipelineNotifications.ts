@@ -3,8 +3,8 @@ import { rpc } from '@/shared/lib/rpc'
 import { isTerminalPipeline, statusMeta } from '@/gitlab/pipelineParams'
 import { pushToast, type ToastTone } from '@/shared/composables/useToast'
 import { isAppActive } from '@/shared/lib/appActive'
-import type { Pipeline } from '@/composables/usePipelines'
-import type { PipelineWatch } from '@/composables/usePipelineWatch'
+import type { Pipeline } from '@/features/pipelines/composables/usePipelines'
+import type { PipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 
 // Alerts when a pipeline the user has *subscribed to* (via the per-run bell)
 // reaches a terminal status. Notifications are opt-in: nothing alerts unless its

@@ -22,7 +22,7 @@ const useIssues = vi.fn()
 vi.mock('@/features/issues/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 
 const pipelinesRef = ref<Array<{ status: string }>>([])
-vi.mock('@/composables/usePipelines', () => ({
+vi.mock('@/features/pipelines/composables/usePipelines', () => ({
   usePipelines: () => ({ pipelines: pipelinesRef }),
 }))
 

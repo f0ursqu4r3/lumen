@@ -15,9 +15,9 @@ import {
   CheckSquare,
 } from '@lucide/vue'
 import { useIssues, type IssueListItem } from '@/features/issues/composables/useIssues'
-import { usePipelines } from '@/composables/usePipelines'
+import { usePipelines } from '@/features/pipelines/composables/usePipelines'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
-import { TONE_VISUALS } from '@/components/pipelineTone'
+import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
 import { useProjectLabels } from '@/composables/useProjectLabels'
 import { useProjectMembers } from '@/composables/useProjectMembers'
 import { useIssueFilters } from '@/features/issues/composables/useIssueFilters'

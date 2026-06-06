@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { statusMeta } from '@/gitlab/pipelineParams'
-import { TONE_VISUALS } from '@/components/pipelineTone'
+import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
 
 const props = defineProps<{ status: string; compact?: boolean }>()
 

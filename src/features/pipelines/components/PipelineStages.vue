@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { statusMeta } from '@/gitlab/pipelineParams'
-import { TONE_VISUALS } from '@/components/pipelineTone'
-import type { PipelineStage, PipelineJob } from '@/composables/usePipelines'
+import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
+import type { PipelineStage, PipelineJob } from '@/features/pipelines/composables/usePipelines'
 
 defineProps<{ stages: PipelineStage[] }>()
 

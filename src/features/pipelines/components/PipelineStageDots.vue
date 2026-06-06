@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { statusMeta } from '@/gitlab/pipelineParams'
-import { TONE_VISUALS } from '@/components/pipelineTone'
-import type { PipelineStage } from '@/composables/usePipelines'
+import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
+import type { PipelineStage } from '@/features/pipelines/composables/usePipelines'
 
 // The collapsed-row glance: each stage as a small status dot joined by hairline
 // connectors — the stepper distilled to one line, no labels. Stage name + status
