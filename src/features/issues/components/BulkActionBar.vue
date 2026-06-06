@@ -88,7 +88,7 @@ function pickStatus(status: WorkItemStatus) {
       v-if="count > 0"
       ref="barRoot"
       data-testid="bulk-action-bar"
-      class="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
+      class="fixed inset-x-0 bottom-5 z-40 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
     >
       <span
         class="px-1 font-mono text-xs font-medium tabular-nums text-foreground"
@@ -212,9 +212,10 @@ function pickStatus(status: WorkItemStatus) {
 </template>
 
 <style scoped>
-/* The bar is bottom-anchored (fixed bottom-5, centered via -translate-x-1/2), so
-   it enters like a sheet rising from the bottom edge. Enter uses a strong iOS-
-   drawer ease-out; exit is snappier (the system responding, not arriving). */
+/* The bar is bottom-anchored (fixed bottom-5, centered via mx-auto so the
+   animated transform stays purely vertical), so it enters like a sheet rising
+   straight up from the bottom-center. Enter uses a strong iOS-drawer ease-out;
+   exit is snappier (the system responding, not arriving). */
 .bulk-bar-enter-active {
   transition:
     opacity 260ms ease-out,
@@ -229,8 +230,9 @@ function pickStatus(status: WorkItemStatus) {
 .bulk-bar-leave-to {
   opacity: 0;
   /* Down by its own height + the bottom-5 gap → starts just below the viewport
-     edge and slides up into place. Keeps the -50% horizontal centering. */
-  transform: translate(-50%, calc(100% + 1.25rem));
+     edge and slides straight up into place. Purely vertical: horizontal
+     centering is handled by mx-auto, not by this transform. */
+  transform: translateY(calc(100% + 1.25rem));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -240,7 +242,7 @@ function pickStatus(status: WorkItemStatus) {
   }
   .bulk-bar-enter-from,
   .bulk-bar-leave-to {
-    transform: translate(-50%, 0);
+    transform: none;
   }
 }
 </style>
