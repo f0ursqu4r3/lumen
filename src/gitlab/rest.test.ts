@@ -29,8 +29,18 @@ describe('rest over RPC', () => {
     await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'auth' })
   })
 
+  it('maps 5xx to an unavailable error', async () => {
+    gitlabRest.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: 'Service Unavailable',
+      body: '',
+    })
+    await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'unavailable' })
+  })
+
   it('maps other non-ok statuses to a network error', async () => {
-    gitlabRest.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error', body: '' })
+    gitlabRest.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found', body: '' })
     await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'network' })
   })
 })
