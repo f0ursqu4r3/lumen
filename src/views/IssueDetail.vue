@@ -5,7 +5,6 @@ import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/features/issues/composables/useIssue'
 import { useIssueDraft } from '@/features/issues/composables/useIssueDraft'
 import { useIssueLinks } from '@/features/issues/composables/useIssueLinks'
-import { useAddNote } from '@/features/issues/composables/useIssueMutations'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useProjectContributors } from '@/features/projects/composables/useProjectContributors'
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
@@ -17,11 +16,11 @@ import AssigneeEditor from '@/features/assignees/components/AssigneeEditor.vue'
 import LabelPicker from '@/features/labels/components/LabelPicker.vue'
 import StatusPicker from '@/features/issues/components/StatusPicker.vue'
 import IssueMasthead from '@/features/issues/components/IssueMasthead.vue'
+import IssueDiscussion from '@/features/issues/components/IssueDiscussion.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Images } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
 import { Textarea } from '@/shared/ui/textarea'
-import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Skeleton } from '@/shared/ui/skeleton'
 import MarkdownText from '@/shared/components/MarkdownText.vue'
 import EditableField from '@/shared/components/EditableField.vue'
@@ -114,83 +113,12 @@ const { media, viewerOpen, viewerIndex, openViewer, onBodyMediaClick } = useIssu
 // links before our handler runs.
 const { linkCopied, onCopyClick, openInGitLab } = useIssueLinks(issue)
 
-// Only notes that arrive *after* the thread first renders should animate in;
-// the initial set lands with the section's own entrance. We prime `seen` on the
-// first resolve (nothing flagged fresh), then any later id is a new comment —
-// flag it so its <li> eases in, and drop the flag once the animation has played
-// so an unrelated re-render can't replay it.
-const seen = new Set<string>()
-const fresh = ref(new Set<string>())
-let primed = false
-
-watch(
-  () => notes.value.map((n) => n.id),
-  (ids) => {
-    if (!primed) {
-      // Wait for the first real resolve; priming on the pre-load empty set would
-      // make the whole initial thread count as "arrived" and animate at once.
-      if (!issue.value) return
-      ids.forEach((id) => seen.add(id))
-      primed = true
-      return
-    }
-    const arrived = ids.filter((id) => !seen.has(id))
-    if (!arrived.length) return
-    arrived.forEach((id) => {
-      seen.add(id)
-      fresh.value.add(id)
-    })
-    // Drop the flag after the animation completes (Vue tracks Set mutations).
-    setTimeout(() => arrived.forEach((id) => fresh.value.delete(id)), 1500)
-  },
-  { immediate: true },
-)
-
-// Replies post immediately (their own per-thread box), independent of the draft
-// buffer that batches field edits + the top-level comment behind Save. One box
-// open at a time keeps the state flat; the mutation invalidates the issue query
-// so the new reply lands on the next refetch.
-const reply = useAddNote(props.fullPath, props.iid)
-const replyingTo = ref<string | null>(null)
-const replyBody = ref('')
-const replyPending = computed(() => reply.isPending.value)
-const replyError = computed(() => reply.error.value)
-
-function openReply(threadId: string) {
-  replyingTo.value = threadId
-  replyBody.value = ''
-  reply.reset()
-}
-function cancelReply() {
-  replyingTo.value = null
-  replyBody.value = ''
-}
-async function submitReply(threadId: string) {
-  const body = replyBody.value.trim()
-  if (!body || !issue.value?.id || reply.isPending.value) return
-  try {
-    await reply.mutateAsync({ noteableId: issue.value.id, discussionId: threadId, body })
-    cancelReply()
-  } catch {
-    // Left open with the text intact; the error surfaces via reply.error below.
-  }
-}
-
 if (!props.embedded) {
   useTitle(
     computed(() => (issue.value ? `#${issue.value.iid} ${issue.value.title} · lumen` : 'lumen')),
   )
 }
 
-function nameOrUsername(user?: { name?: string | null; username: string } | null) {
-  return user?.name || `@${user?.username}` || '(deleted user)'
-}
-// Two-letter monogram for the discussion avatars (avatars are always initials here).
-function initials(user?: { name?: string | null; username: string } | null) {
-  const src = (user?.name || user?.username || '?').trim()
-  const parts = src.split(/\s+/)
-  return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? (parts.at(-1)?.[0] ?? '') : '')).toUpperCase()
-}
 function toggleState() {
   if (!draft.value) return
   draft.value.state = draft.value.state === 'opened' ? 'closed' : 'opened'
@@ -382,105 +310,14 @@ if (!props.embedded) {
         </div>
       </aside>
 
-      <!-- Discussion: flat thread, no boxed cards. -->
-      <section class="issue__talk min-w-0 animate-row-in" style="animation-delay: 140ms">
-        <div class="flex items-baseline gap-2">
-          <span class="field-label">Discussion</span>
-          <span v-if="notes.length" class="font-mono text-xs text-muted-foreground">
-            {{ notes.length }}
-          </span>
-        </div>
-
-        <ul v-if="threads.length" class="mt-3 divide-y divide-border/60">
-          <li v-for="t in threads" :key="t.id" class="py-4 first:pt-0">
-            <!-- First note is the comment; the rest are replies, indented to align
-                 under the comment's content (size-7 avatar + gap-3 = pl-10). -->
-            <div
-              v-for="(n, i) in t.notes"
-              :key="n.id"
-              data-testid="note"
-              class="flex gap-3"
-              :class="[i > 0 && 'mt-4 pl-10', fresh.has(n.id) && 'animate-note-in']"
-            >
-              <Avatar class="mt-0.5 size-7 shrink-0 text-2xs ring-1 ring-border/70">
-                <AvatarFallback>{{ initials(n.author) }}</AvatarFallback>
-              </Avatar>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-baseline gap-2">
-                  <span class="text-sm font-medium text-foreground">
-                    {{ nameOrUsername(n.author) }}
-                  </span>
-                  <span class="font-mono text-xs text-muted-foreground">
-                    {{ new Date(n.createdAt).toLocaleDateString() }}
-                  </span>
-                </div>
-                <MarkdownText
-                  :source="n.body"
-                  :project-path="fullPath"
-                  class="mt-1 max-w-[68ch] text-sm leading-relaxed"
-                />
-              </div>
-            </div>
-
-            <!-- Per-thread reply, aligned with the thread content past the avatar. -->
-            <div class="mt-2 pl-10">
-              <Button
-                v-if="replyingTo !== t.id"
-                type="button"
-                variant="ghost"
-                size="sm"
-                class="-ml-3 h-7 px-3 text-xs text-muted-foreground"
-                @click="openReply(t.id)"
-              >
-                Reply
-              </Button>
-              <div v-else class="space-y-2">
-                <Textarea
-                  v-model="replyBody"
-                  :rows="2"
-                  placeholder="Write a reply…"
-                  aria-label="Write a reply"
-                  @keydown.esc="cancelReply"
-                />
-                <ErrorNotice v-if="replyError" :error="replyError" />
-                <div class="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    :disabled="replyPending || !replyBody.trim()"
-                    @click="submitReply(t.id)"
-                  >
-                    {{ replyPending ? 'Replying…' : 'Reply' }}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    :disabled="replyPending"
-                    @click="cancelReply"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </li>
-        </ul>
-        <p v-else class="mt-3 text-sm text-muted-foreground">
-          No discussion yet — leave the first note below.
-        </p>
-
-        <div class="mt-4 space-y-1.5">
-          <label for="issue-comment" class="field-label">Add a comment</label>
-          <Textarea
-            id="issue-comment"
-            v-model="comment"
-            :rows="3"
-            placeholder="Add a comment…"
-            aria-label="Add a comment"
-          />
-        </div>
-      </section>
+      <IssueDiscussion
+        :threads="threads"
+        :notes="notes"
+        :iid="iid"
+        :issue="issue"
+        :full-path="fullPath"
+        v-model:comment="comment"
+      />
 
       <Scratchpad
         :full-path="fullPath"
