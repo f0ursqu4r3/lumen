@@ -53,7 +53,7 @@ vi.mock('@/composables/useProjectMembers', () => ({
 
 const openIssueWindow = vi.fn().mockResolvedValue({ ok: true })
 const openIssuesWindow = vi.fn().mockResolvedValue({ ok: true })
-vi.mock('@/lib/rpc', () => ({
+vi.mock('@/shared/lib/rpc', () => ({
   rpc: {
     openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a),
     openIssuesWindow: (a: { fullPath: string; iids: string[] }) => openIssuesWindow(a),

@@ -1,5 +1,5 @@
 import { ref, watchEffect, type Ref } from 'vue'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 const cache = new Map<string, Promise<string>>()
 

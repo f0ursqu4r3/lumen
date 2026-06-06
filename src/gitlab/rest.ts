@@ -1,4 +1,4 @@
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 import type { GitLabError } from './errors'
 
 // Callers pass a `/v4`-relative path (e.g. `/projects/7/star`); this helper

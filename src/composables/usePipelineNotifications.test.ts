@@ -4,7 +4,7 @@ import { ref, nextTick } from 'vue'
 const { showNotification } = vi.hoisted(() => ({
   showNotification: vi.fn(() => Promise.resolve({ ok: true as const })),
 }))
-vi.mock('@/lib/rpc', () => ({ rpc: { showNotification } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { showNotification } }))
 
 const { pushToast } = vi.hoisted(() => ({ pushToast: vi.fn() }))
 vi.mock('@/shared/composables/useToast', () => ({ pushToast }))
@@ -12,7 +12,7 @@ vi.mock('@/shared/composables/useToast', () => ({ pushToast }))
 // Default to "app not active" so the OS-notification path runs unless a test
 // overrides it.
 const { isAppActive } = vi.hoisted(() => ({ isAppActive: vi.fn(() => false) }))
-vi.mock('@/lib/appActive', () => ({ isAppActive }))
+vi.mock('@/shared/lib/appActive', () => ({ isAppActive }))
 
 import { usePipelineNotifications } from './usePipelineNotifications'
 import type { Pipeline } from './usePipelines'

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { gitlabRest } = vi.hoisted(() => ({ gitlabRest: vi.fn() }))
-vi.mock('@/lib/rpc', () => ({ rpc: { gitlabRest } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabRest } }))
 
 import { restGet, restPost } from './rest'
 

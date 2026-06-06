@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 export type ConnectStatus = 'idle' | 'testing' | 'error'
 

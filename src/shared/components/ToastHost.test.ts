@@ -4,7 +4,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 const { openExternal } = vi.hoisted(() => ({
   openExternal: vi.fn(() => Promise.resolve({ ok: true })),
 }))
-vi.mock('@/lib/rpc', () => ({ rpc: { openExternal } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { openExternal } }))
 
 import ToastHost from './ToastHost.vue'
 import { pushToast, clearToasts, toasts } from '@/shared/composables/useToast'

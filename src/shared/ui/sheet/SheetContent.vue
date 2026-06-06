@@ -11,7 +11,7 @@ import {
   useForwardPropsEmits,
 } from 'reka-ui'
 import { X } from '@lucide/vue'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 const props = withDefaults(
   defineProps<

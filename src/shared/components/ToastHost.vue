@@ -2,7 +2,7 @@
 import type { Component } from 'vue'
 import { X, CircleCheck, CircleX, Info } from '@lucide/vue'
 import { toasts, dismissToast, type Toast, type ToastTone } from '@/shared/composables/useToast'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 // One mounted instance (in App.vue, beside ConfirmDialog) renders the shared
 // toast queue. Stacks bottom-right; each toast is a focal card (shadow-pop),

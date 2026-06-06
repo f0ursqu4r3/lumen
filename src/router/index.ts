@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 import { nextRoute } from './guard'
 
 export const routes: RouteRecordRaw[] = [

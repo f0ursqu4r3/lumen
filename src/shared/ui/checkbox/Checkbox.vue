@@ -4,7 +4,7 @@ import type { HTMLAttributes } from 'vue'
 import { CheckboxRoot, CheckboxIndicator, useForwardPropsEmits } from 'reka-ui'
 import { reactiveOmit } from '@vueuse/core'
 import { Check } from '@lucide/vue'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 const props = defineProps<CheckboxRootProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<CheckboxRootEmits>()

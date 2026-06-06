@@ -3,7 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 import { withQuery } from '@/test/withQuery'
 
 const getConfig = vi.fn()
-vi.mock('@/lib/rpc', () => ({ rpc: { getConfig: () => getConfig() } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { getConfig: () => getConfig() } }))
 
 import { useGitlabUrl } from './useGitlabUrl'
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, reactive, watchEffect } from 'vue'
 import { resolveAsset } from '@/shared/composables/useGitlabAsset'
-import { needsAssetResolution } from '@/lib/media'
+import { needsAssetResolution } from '@/shared/lib/media'
 import {
   DialogRoot,
   DialogPortal,

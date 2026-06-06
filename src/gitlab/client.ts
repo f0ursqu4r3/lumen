@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 // The Bun main process is the runtime now: it holds the token and performs the
 // upstream GraphQL fetch. graphql-request still drives query construction and

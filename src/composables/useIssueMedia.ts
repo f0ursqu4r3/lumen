@@ -1,4 +1,4 @@
-import { extractMedia, type MediaItem } from '@/lib/markdown'
+import { extractMedia, type MediaItem } from '@/shared/lib/markdown'
 
 export interface ViewerItem extends MediaItem {
   source: 'description' | 'comment'

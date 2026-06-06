@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { gitlabGraphql } = vi.hoisted(() => ({ gitlabGraphql: vi.fn() }))
-vi.mock('@/lib/rpc', () => ({ rpc: { gitlabGraphql } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabGraphql } }))
 
 import { rpcGraphqlFetch } from './client'
 

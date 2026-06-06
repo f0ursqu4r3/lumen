@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const getConfig = vi.fn()
 const saveConfig = vi.fn()
 const gitlabGraphql = vi.fn()
-vi.mock('@/lib/rpc', () => ({
+vi.mock('@/shared/lib/rpc', () => ({
   rpc: {
     getConfig: () => getConfig(),
     saveConfig: (a: unknown) => saveConfig(a),

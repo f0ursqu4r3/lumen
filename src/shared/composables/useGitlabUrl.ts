@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 // The configured GitLab base URL (e.g. https://gitlab.example.com). GraphQL
 // pipeline nodes expose only a relative `path`, so links to the web UI need the

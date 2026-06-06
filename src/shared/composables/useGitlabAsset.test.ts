@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { gitlabAsset } = vi.hoisted(() => ({ gitlabAsset: vi.fn() }))
-vi.mock('@/lib/rpc', () => ({ rpc: { gitlabAsset } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabAsset } }))
 
 import { resolveAsset, __clearAssetCache } from './useGitlabAsset'
 

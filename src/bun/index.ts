@@ -1,7 +1,7 @@
 import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from 'electrobun/bun'
 import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
-import type { LumenRPC } from '@/lib/rpcContract'
+import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
 import { issueWindowUrl, issuesWindowUrl } from './issueWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'

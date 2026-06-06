@@ -23,10 +23,10 @@ import AssigneeAvatar from '@/components/AssigneeAvatar.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 import { nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { withViewTransition } from '@/lib/viewTransition'
+import { withViewTransition } from '@/shared/lib/viewTransition'
 
 const props = defineProps<{ fullPath: string }>()
 

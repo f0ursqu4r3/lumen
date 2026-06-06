@@ -5,7 +5,7 @@ import MarkdownText from './MarkdownText.vue'
 const { openExternal } = vi.hoisted(() => ({
   openExternal: vi.fn(() => Promise.resolve({ ok: true })),
 }))
-vi.mock('@/lib/rpc', () => ({ rpc: { openExternal } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { openExternal } }))
 
 describe('MarkdownText', () => {
   beforeEach(() => openExternal.mockClear())

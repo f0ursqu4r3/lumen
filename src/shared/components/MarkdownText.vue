@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue'
-import { renderMarkdown } from '@/lib/markdown'
-import { applyResolvedMedia } from '@/lib/media'
+import { renderMarkdown } from '@/shared/lib/markdown'
+import { applyResolvedMedia } from '@/shared/lib/media'
 import { resolveAsset } from '@/shared/composables/useGitlabAsset'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 
 const props = defineProps<{ source?: string | null; projectPath?: string }>()
 const html = computed(() => renderMarkdown(props.source, { projectPath: props.projectPath }))

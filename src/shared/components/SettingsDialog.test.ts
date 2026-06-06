@@ -6,7 +6,7 @@ const getConfig = vi.fn()
 const saveConfig = vi.fn()
 const clearConfig = vi.fn()
 const gitlabGraphql = vi.fn()
-vi.mock('@/lib/rpc', () => ({
+vi.mock('@/shared/lib/rpc', () => ({
   rpc: {
     getConfig: () => getConfig(),
     saveConfig: (a: unknown) => saveConfig(a),
@@ -19,7 +19,7 @@ const replace = vi.fn()
 vi.mock('vue-router', () => ({ useRouter: () => ({ replace }) }))
 
 const clearPersistedCache = vi.fn()
-vi.mock('@/lib/persist', () => ({ clearPersistedCache: () => clearPersistedCache() }))
+vi.mock('@/shared/lib/persist', () => ({ clearPersistedCache: () => clearPersistedCache() }))
 
 const queryClientClear = vi.fn()
 vi.mock('@tanstack/vue-query', () => ({ useQueryClient: () => ({ clear: queryClientClear }) }))

@@ -6,7 +6,7 @@ import type {
   RestResult,
   AssetArgs,
   AssetResult,
-} from '@/lib/rpcContract'
+} from '@/shared/lib/rpcContract'
 
 interface Cfg {
   gitlabUrl: string

@@ -1,8 +1,8 @@
 import { watch, type Ref } from 'vue'
-import { rpc } from '@/lib/rpc'
+import { rpc } from '@/shared/lib/rpc'
 import { isTerminalPipeline, statusMeta } from '@/gitlab/pipelineParams'
 import { pushToast, type ToastTone } from '@/shared/composables/useToast'
-import { isAppActive } from '@/lib/appActive'
+import { isAppActive } from '@/shared/lib/appActive'
 import type { Pipeline } from '@/composables/usePipelines'
 import type { PipelineWatch } from '@/composables/usePipelineWatch'
 

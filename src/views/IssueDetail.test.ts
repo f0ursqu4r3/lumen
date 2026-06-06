@@ -79,7 +79,7 @@ const { openExternal, clipboardWriteText } = vi.hoisted(() => ({
   openExternal: vi.fn(() => Promise.resolve({ ok: true })),
   clipboardWriteText: vi.fn(() => Promise.resolve({ ok: true })),
 }))
-vi.mock('@/lib/rpc', () => ({ rpc: { openExternal, clipboardWriteText } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { openExternal, clipboardWriteText } }))
 
 import IssueDetail from './IssueDetail.vue'
 
