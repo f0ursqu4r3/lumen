@@ -17,6 +17,8 @@ const props = defineProps<{
   vtNameFor: (iid: string) => string | undefined
   isDropTarget: (g: IssueGroup) => boolean
   ghostIndex: (g: IssueGroup) => number
+  reorderDragKey: string | null
+  reorderOverKey: string | null
 }>()
 const emit = defineEmits<{
   filter: [f: Facet]
@@ -24,7 +26,14 @@ const emit = defineEmits<{
   'drag-end': []
   drop: [g: IssueGroup]
   'drag-over': [key: string]
+  'reorder-start': [key: string, e: DragEvent]
+  'reorder-over': [key: string]
+  'reorder-drop': [key: string]
+  'reorder-end': []
 }>()
+
+// Columns reorder only when there's more than one.
+const reorderable = () => props.boardGroups.length > 1
 
 // board sizing — owns the sentinel it measures (moved from the view)
 const boardTopEl = ref<HTMLElement | null>(null)
@@ -44,7 +53,7 @@ const boardStyle = computed(() => ({
     class="relative left-1/2 -mb-6 w-screen -translate-x-1/2 overflow-x-auto pb-4"
   >
     <span ref="boardTopEl" aria-hidden="true" class="absolute top-0 left-0 h-0 w-0" />
-    <div class="mx-auto flex h-full min-h-80 w-max gap-3 px-6">
+    <TransitionGroup tag="div" name="col" class="mx-auto flex h-full min-h-80 w-max gap-3 px-6">
       <section
         v-for="g in boardGroups"
         :key="g.key"
@@ -67,7 +76,28 @@ const boardStyle = computed(() => ({
           class="col-signal"
           :style="{ '--signal-color': g.color }"
         />
-        <header class="relative flex shrink-0 items-center gap-2 px-3 pt-3 pb-2.5">
+        <header
+          class="relative flex shrink-0 items-center gap-2 rounded-md px-3 pt-3 pb-2.5 transition-[box-shadow,opacity] duration-150"
+          :class="[
+            reorderDragKey === g.key ? 'opacity-50' : '',
+            reorderOverKey === g.key && reorderDragKey !== g.key
+              ? 'ring-1 ring-inset ring-primary/55'
+              : '',
+          ]"
+          @dragover.prevent="reorderable() && emit('reorder-over', g.key)"
+          @drop.prevent="reorderable() && emit('reorder-drop', g.key)"
+        >
+          <span
+            v-if="reorderable()"
+            data-testid="column-grip"
+            draggable="true"
+            aria-label="Reorder column"
+            class="-ml-1 cursor-grab text-muted-foreground/30 transition-opacity hover:text-muted-foreground/60 active:cursor-grabbing"
+            @dragstart="emit('reorder-start', g.key, $event)"
+            @dragend="emit('reorder-end')"
+          >
+            <GripVertical class="size-3.5" />
+          </span>
           <span
             v-if="g.color"
             class="size-2 shrink-0 rounded-full"
@@ -140,6 +170,13 @@ const boardStyle = computed(() => ({
           </div>
         </div>
       </section>
-    </div>
+    </TransitionGroup>
   </div>
 </template>
+
+<style scoped>
+/* FLIP the columns into place when their order changes. */
+.col-move {
+  transition: transform 200ms ease;
+}
+</style>
