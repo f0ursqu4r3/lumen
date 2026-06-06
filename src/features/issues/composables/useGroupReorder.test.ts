@@ -15,8 +15,6 @@ describe('useGroupReorder', () => {
     expect(e.dataTransfer!.setData).toHaveBeenCalledWith('application/x-lumen-group', 'a')
     r.onReorderOver('b')
     expect(r.overKey.value).toBe('b')
-    expect(r.isReorderTarget('b')).toBe(true)
-    expect(r.isReorderTarget('a')).toBe(false)
   })
 
   it('ignores dragover onto the dragged key itself', () => {

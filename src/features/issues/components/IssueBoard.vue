@@ -77,7 +77,7 @@ const boardStyle = computed(() => ({
           :style="{ '--signal-color': g.color }"
         />
         <header
-          class="relative flex shrink-0 items-center gap-2 rounded-md px-3 pt-3 pb-2.5"
+          class="relative flex shrink-0 items-center gap-2 rounded-md px-3 pt-3 pb-2.5 transition-[box-shadow,opacity] duration-150"
           :class="[
             reorderDragKey === g.key ? 'opacity-50' : '',
             reorderOverKey === g.key && reorderDragKey !== g.key

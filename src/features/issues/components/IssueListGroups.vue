@@ -32,7 +32,7 @@ const reorderable = () => props.groupKey !== 'none' && props.groups.length > 1
     <section v-for="g in groups" :key="g.key" class="space-y-2">
       <header
         v-if="groupKey !== 'none'"
-        class="flex items-center gap-2 rounded-md px-1 py-0.5"
+        class="flex items-center gap-2 rounded-md px-1 py-0.5 transition-[box-shadow,opacity] duration-150"
         :class="[
           reorderDragKey === g.key ? 'opacity-50' : '',
           reorderOverKey === g.key && reorderDragKey !== g.key

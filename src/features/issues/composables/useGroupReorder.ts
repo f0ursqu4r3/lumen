@@ -40,9 +40,6 @@ export function useGroupReorder(store: OrderStore) {
     dragKey.value = null
     overKey.value = null
   }
-  const isReorderTarget = (key: string): boolean =>
-    !!dragKey.value && overKey.value === key && key !== dragKey.value
-
   return {
     dragKey,
     overKey,
@@ -50,6 +47,5 @@ export function useGroupReorder(store: OrderStore) {
     onReorderOver,
     onReorderDrop,
     clearReorder,
-    isReorderTarget,
   }
 }
