@@ -13,6 +13,7 @@ import {
 } from '@lucide/vue'
 import { usePipelines, type Pipeline } from '@/features/pipelines/composables/usePipelines'
 import { useGitlabUrl } from '@/shared/composables/useGitlabUrl'
+import { useRepoPath } from '@/shared/composables/useRepoPath'
 import { usePipelineNotifications } from '@/features/pipelines/composables/usePipelineNotifications'
 import { usePipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
@@ -45,9 +46,7 @@ function onTabNav(e: MouseEvent, to: Parameters<typeof router.push>[0]) {
 }
 
 const fullPath = toRef(props, 'fullPath')
-const pathParts = computed(() => props.fullPath.split('/'))
-const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath)
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'))
+const { repoName, pathPrefix } = useRepoPath(fullPath)
 
 const { pipelines, isLoading, isFetching, error, refetch } = usePipelines(fullPath)
 const { toAbsolute } = useGitlabUrl()

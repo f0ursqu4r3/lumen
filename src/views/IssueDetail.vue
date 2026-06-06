@@ -10,6 +10,7 @@ import { useProjectContributors } from '@/features/projects/composables/useProje
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
 import { useWorkItemStatuses, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
 import { useConfirm } from '@/shared/composables/useConfirm'
+import { useRepoPath } from '@/shared/composables/useRepoPath'
 import { rpc } from '@/shared/lib/rpc'
 import QuickAssign from '@/features/assignees/components/QuickAssign.vue'
 import AssigneeEditor from '@/features/assignees/components/AssigneeEditor.vue'
@@ -81,7 +82,7 @@ const actionError = computed(() => saveError.value)
 
 // The repo (final path segment) anchors the masthead eyebrow, echoing the list
 // and picker headers so the detail view reads as part of the same instrument.
-const repoName = computed(() => props.fullPath.split('/').at(-1) ?? props.fullPath)
+const { repoName } = useRepoPath(toRef(props, 'fullPath'))
 
 // Each discussion is a thread: its first note is the comment, the rest are
 // replies. Drop system notes (GitLab models each as its own single-note

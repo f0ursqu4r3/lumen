@@ -28,6 +28,7 @@ import {
   type WorkItemStatus,
 } from '@/features/issues/composables/useWorkItemStatus'
 import { useSavedViews } from '@/shared/composables/useSavedViews'
+import { useRepoPath } from '@/shared/composables/useRepoPath'
 import IssueComposer from '@/features/issues/components/IssueComposer.vue'
 import IssueFilterPanel from '@/features/issues/components/IssueFilterPanel.vue'
 import SavedViews from '@/shared/components/SavedViews.vue'
@@ -178,9 +179,7 @@ const STATES: { value: StateValue; label: string }[] = [
 ]
 
 // Split the project path so the final segment (the repo) can be emphasized.
-const pathParts = computed(() => props.fullPath.split('/'))
-const repoName = computed(() => pathParts.value.at(-1) ?? props.fullPath)
-const pathPrefix = computed(() => pathParts.value.slice(0, -1).join('/'))
+const { repoName, pathPrefix } = useRepoPath(toRef(props, 'fullPath'))
 
 // Reflect the active repo in the tab title — quiet polish for a daily driver
 // that lives across many tabs.
