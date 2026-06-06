@@ -78,7 +78,7 @@ describe('SessionExpiredOverlay', () => {
     document.querySelector<HTMLElement>('[data-testid="session-reconnect"]')!.click()
     await flushPromises()
     expect(reload).not.toHaveBeenCalled()
-    expect(document.body.textContent).toContain('Unauthorized')
+    expect(document.body.textContent).toContain('Token rejected')
     w.unmount()
   })
 
