@@ -14,7 +14,7 @@ vi.mock('@/features/issues/composables/useIssueMutations', () => ({
     error: mutationError,
   }),
 }))
-vi.mock('@/composables/useProjectLabels', () => ({
+vi.mock('@/features/labels/composables/useProjectLabels', () => ({
   useProjectLabels: () => ({
     data: ref([{ id: 'l1', title: 'bug', color: '#f00' }]),
   }),

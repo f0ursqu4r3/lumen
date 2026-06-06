@@ -13,11 +13,11 @@ import {
   FlaskConical,
   Tag,
 } from '@lucide/vue'
-import LabelChip from '@/components/LabelChip.vue'
+import LabelChip from '@/features/labels/components/LabelChip.vue'
 import StateBadge from './StateBadge.vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Checkbox } from '@/shared/ui/checkbox'
-import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/lib/labels'
+import { priorityOf, typeOf, statusOf, remainingLabels, parseLabel, tint } from '@/features/labels/lib/labels'
 import type { Facet } from '@/features/issues/lib/issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'

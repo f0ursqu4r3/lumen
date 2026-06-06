@@ -15,7 +15,7 @@ import {
 } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Checkbox } from '@/shared/ui/checkbox'
-import { priorityOf, typeOf, parseLabel, tint } from '@/lib/labels'
+import { priorityOf, typeOf, parseLabel, tint } from '@/features/labels/lib/labels'
 import type { Facet } from '@/features/issues/lib/issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'

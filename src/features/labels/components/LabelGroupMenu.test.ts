@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import LabelGroupMenu from './LabelGroupMenu.vue'
-import { groupLabelsByScope } from '@/lib/labelGroups'
+import { groupLabelsByScope } from '@/features/labels/lib/labelGroups'
 
 const groups = groupLabelsByScope([
   { id: 'l1', title: 'bug', color: '#f00' },

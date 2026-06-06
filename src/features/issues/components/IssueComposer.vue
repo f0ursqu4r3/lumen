@@ -12,10 +12,10 @@ import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
 import { Button } from '@/shared/ui/button'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
-import LabelPicker from '@/components/LabelPicker.vue'
+import LabelPicker from '@/features/labels/components/LabelPicker.vue'
 import AssigneePicker from '@/components/AssigneePicker.vue'
 import { useCreateIssue } from '@/features/issues/composables/useIssueMutations'
-import { useProjectLabels } from '@/composables/useProjectLabels'
+import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 
 const props = defineProps<{ open: boolean; fullPath: string }>()

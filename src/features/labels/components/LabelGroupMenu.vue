@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Check, ChevronRight } from '@lucide/vue'
-import type { ScopeGroup } from '@/lib/labelGroups'
+import type { ScopeGroup } from '@/features/labels/lib/labelGroups'
 
 const props = withDefaults(
   defineProps<{

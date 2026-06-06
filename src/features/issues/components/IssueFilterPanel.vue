@@ -3,10 +3,10 @@ import { computed, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Check, SlidersHorizontal } from '@lucide/vue'
 import { UNASSIGNED } from '@/gitlab/issueParams'
-import type { ProjectLabel } from '@/composables/useProjectLabels'
+import type { ProjectLabel } from '@/features/labels/composables/useProjectLabels'
 import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
-import LabelGroupMenu from '@/components/LabelGroupMenu.vue'
-import { groupLabelsByScope } from '@/lib/labelGroups'
+import LabelGroupMenu from '@/features/labels/components/LabelGroupMenu.vue'
+import { groupLabelsByScope } from '@/features/labels/lib/labelGroups'
 
 const props = defineProps<{
   labels: string[]

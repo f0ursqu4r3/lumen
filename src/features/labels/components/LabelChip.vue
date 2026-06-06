@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { X } from '@lucide/vue'
-import { labelVisual } from '@/lib/labels'
+import { labelVisual } from '@/features/labels/lib/labels'
 
 const props = defineProps<{
   title: string

@@ -4,8 +4,8 @@ import { onClickOutside } from '@vueuse/core'
 import { Tags } from '@lucide/vue'
 import LabelChip from './LabelChip.vue'
 import LabelGroupMenu from './LabelGroupMenu.vue'
-import { groupLabelsByScope, toggleScoped } from '@/lib/labelGroups'
-import type { ProjectLabel } from '@/composables/useProjectLabels'
+import { groupLabelsByScope, toggleScoped } from '@/features/labels/lib/labelGroups'
+import type { ProjectLabel } from '@/features/labels/composables/useProjectLabels'
 
 const props = withDefaults(
   defineProps<{ catalog: ProjectLabel[]; modelValue: string[]; label?: string }>(),

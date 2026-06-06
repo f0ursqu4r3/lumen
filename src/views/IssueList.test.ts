@@ -44,7 +44,7 @@ vi.mock('@/features/issues/composables/useWorkItemStatus', () => ({
   useWorkItemStatuses: () => ({ data: ref([]) }),
   useSetIssueStatus: () => ({ mutate: vi.fn() }),
 }))
-vi.mock('@/composables/useProjectLabels', () => ({
+vi.mock('@/features/labels/composables/useProjectLabels', () => ({
   useProjectLabels: () => ({ data: ref([]) }),
 }))
 vi.mock('@/features/projects/composables/useProjectMembers', () => ({

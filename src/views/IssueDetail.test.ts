@@ -22,7 +22,7 @@ vi.mock('@/features/projects/composables/useProjectContributors', async () => {
   const { ref } = await import('vue')
   return { useProjectContributors: () => ({ data: ref([]) }) }
 })
-vi.mock('@/composables/useProjectLabels', async () => {
+vi.mock('@/features/labels/composables/useProjectLabels', async () => {
   const { ref } = await import('vue')
   return { useProjectLabels: () => ({ data: ref([]) }) }
 })
