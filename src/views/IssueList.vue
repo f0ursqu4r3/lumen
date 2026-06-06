@@ -7,7 +7,6 @@ import {
   LoaderCircle,
   List,
   Columns3,
-  X,
   GripVertical,
   ArrowLeft,
   Workflow,
@@ -44,7 +43,7 @@ import { useIssueDrawerRoute } from '@/features/issues/composables/useIssueDrawe
 import IssueRow from '@/features/issues/components/IssueRow.vue'
 import IssueCard from '@/features/issues/components/IssueCard.vue'
 import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
-import LabelChip from '@/features/labels/components/LabelChip.vue'
+import IssueActiveFilters from '@/features/issues/components/IssueActiveFilters.vue'
 import Odometer from '@/shared/components/Odometer.vue'
 import { withViewTransition } from '@/shared/lib/viewTransition'
 import { rpc } from '@/shared/lib/rpc'
@@ -617,61 +616,16 @@ onKeyStroke('Escape', (e) => {
     </div>
 
     <!-- Active filter tokens -->
-    <div v-if="activeCount" class="relative flex flex-wrap items-center gap-2">
-      <span class="text-2xs tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
-      <!-- Tokens animate as a group: each springs in on add, recoils out on
-           remove, and the survivors slide to close the gap (see .facet-* in
-           styles.css). `contents` keeps the group transparent to the flex row. -->
-      <TransitionGroup name="facet" tag="div" class="contents">
-        <LabelChip
-          v-for="l in labelChips"
-          :key="`label:${l.title}`"
-          :title="l.title"
-          :color="l.color"
-          closeable
-          @remove="removeLabel(l.title)"
-        />
-        <span
-          v-if="assignee"
-          key="facet:assignee"
-          class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
-        >
-          <span class="font-mono">{{
-            assignee === '__none__' ? 'Unassigned' : '@' + assignee
-          }}</span>
-          <button
-            type="button"
-            aria-label="Remove assignee filter"
-            class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-            @click="assignee = ''"
-          >
-            <X class="size-3" />
-          </button>
-        </span>
-        <span
-          v-if="author"
-          key="facet:author"
-          class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
-        >
-          <span class="font-mono">author:@{{ author }}</span>
-          <button
-            type="button"
-            aria-label="Remove author filter"
-            class="grid size-4 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-            @click="author = ''"
-          >
-            <X class="size-3" />
-          </button>
-        </span>
-      </TransitionGroup>
-      <button
-        type="button"
-        class="text-2xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
-        @click="clearFilters"
-      >
-        Clear all
-      </button>
-    </div>
+    <IssueActiveFilters
+      v-if="activeCount"
+      :label-chips="labelChips"
+      :assignee="assignee"
+      :author="author"
+      @remove-label="removeLabel"
+      @clear-assignee="assignee = ''"
+      @clear-author="author = ''"
+      @clear-all="clearFilters"
+    />
 
     <ErrorNotice v-if="error" :error="error" />
 
