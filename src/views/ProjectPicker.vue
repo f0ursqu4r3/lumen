@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitle, useIntersectionObserver } from '@vueuse/core'
-import { Search, CornerDownLeft, FolderGit2, LoaderCircle, Star } from '@lucide/vue'
+import { Search, FolderGit2, LoaderCircle, Star } from '@lucide/vue'
 import {
   useProjectBrowser,
   type BrowserRow,
@@ -10,6 +10,7 @@ import {
 } from '@/features/projects/composables/useProjectBrowser'
 import { useToggleStar } from '@/features/projects/composables/useToggleStar'
 import { useSpringCursor } from '@/shared/composables/useSpringCursor'
+import ProjectRow from '@/features/projects/components/ProjectRow.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import Odometer from '@/shared/components/Odometer.vue'
 import { Input } from '@/shared/ui/input'
@@ -39,18 +40,6 @@ const sectionCount = (key: BrowserSectionKey) =>
   flatRows.value.filter((r) => r.section === key).length
 const startsSection = (i: number) =>
   i === 0 || flatRows.value[i - 1]?.section !== flatRows.value[i].section
-
-// Split each path so the repo (final segment) reads as the name and the rest
-// trails as muted mono context — same emphasis the issues header uses.
-const namespace = (fullPath: string) => {
-  const parts = fullPath.split('/')
-  return parts.slice(0, -1).join('/')
-}
-
-// One-letter monogram for the launcher rows — a derived initial, consistent with
-// the initials-only avatars elsewhere (no fetched icons). It lights amber on the
-// active row, so the glyph doubles as the "this one launches" selection signal.
-const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 
 // --- selection cursor -------------------------------------------------------
 // The picker is a launcher first, a list second: a selection glides on the
@@ -288,94 +277,15 @@ useIntersectionObserver(sentinel, ([entry]) => {
               </span>
             </div>
 
-            <RouterLink
-              data-row
-              role="option"
-              :aria-selected="i === active"
-              :to="{ name: 'issues', params: { fullPath: row.fullPath } }"
-              class="group relative z-10 flex animate-row-in items-center gap-3 rounded-lg py-2.5 pr-2.5 pl-3 outline-none"
-              :style="{ animationDelay: `${Math.min(i, 14) * 26}ms` }"
-              @mouseenter="active = i"
-              @click="onRowClick($event, row, i)"
-              @focus="active = i"
-            >
-              <!-- Monogram: a derived initial that lights amber on the active row, so
-                 the glyph is also the "this one launches" signal. -->
-              <span
-                class="grid size-7 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold ring-1 ring-inset transition-colors"
-                :class="
-                  i === active
-                    ? 'bg-primary/15 text-primary ring-primary/30'
-                    : 'bg-muted/60 text-muted-foreground ring-border/60'
-                "
-              >
-                {{ monogram(row.name) }}
-              </span>
-
-              <span class="flex min-w-0 flex-1 items-baseline gap-2">
-                <span
-                  class="shrink-0 text-base font-medium tracking-tight transition-colors"
-                  :class="i === active ? 'text-foreground' : 'text-foreground/90'"
-                  :style="nameStyle(row)"
-                >
-                  {{ row.name }}
-                </span>
-                <span
-                  v-if="namespace(row.fullPath)"
-                  class="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground/55"
-                >
-                  {{ namespace(row.fullPath) }}/
-                </span>
-              </span>
-
-              <!-- Right cluster: assigned count, the star toggle, then the Enter
-                 affordance + quick-jump keycap for the first nine rows. -->
-              <span class="flex shrink-0 items-center gap-1.5">
-                <span
-                  v-if="row.assignedOpen"
-                  class="mr-0.5 font-mono text-2xs tabular-nums text-muted-foreground/65"
-                >
-                  {{ row.assignedOpen }} open
-                </span>
-
-                <button
-                  type="button"
-                  :aria-label="row.starred ? `Unstar ${row.name}` : `Star ${row.name}`"
-                  :aria-pressed="row.starred"
-                  class="relative z-10 grid size-7 place-items-center rounded-md outline-none transition-colors focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/60"
-                  :class="
-                    row.starred
-                      ? 'text-primary'
-                      : i === active
-                        ? 'text-muted-foreground/50 hover:text-foreground'
-                        : 'text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-foreground'
-                  "
-                  @click.stop.prevent="onToggleStar(row)"
-                >
-                  <Star
-                    class="size-4"
-                    :fill="row.starred ? 'currentColor' : 'none'"
-                    :stroke-width="2"
-                  />
-                </button>
-
-                <CornerDownLeft
-                  class="size-3.5 text-primary transition-opacity duration-150"
-                  :class="i === active ? 'opacity-100' : 'opacity-0'"
-                />
-                <kbd
-                  v-if="i < 9"
-                  class="grid h-5 min-w-5 place-items-center rounded border px-1 font-mono text-micro tabular-nums transition-colors"
-                  :class="
-                    i === active
-                      ? 'border-border bg-muted/60 text-muted-foreground'
-                      : 'border-border/50 text-muted-foreground/40'
-                  "
-                >
-                  {{ i + 1 }}
-                </kbd>
-              </span>
-            </RouterLink>
+            <ProjectRow
+              :row="row"
+              :index="i"
+              :active="i === active"
+              :name-style="nameStyle(row)"
+              @row-click="onRowClick($event, row, i)"
+              @toggle-star="onToggleStar(row)"
+              @activate="active = i"
+            />
           </template>
         </div>
 
