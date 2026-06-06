@@ -1,32 +1,19 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useTitle } from '@vueuse/core'
-import {
-  ArrowLeft,
-  GitBranch,
-  ExternalLink,
-  RefreshCw,
-  LoaderCircle,
-  Bell,
-  BellRing,
-  ChevronRight,
-} from '@lucide/vue'
+import { ArrowLeft, RefreshCw, LoaderCircle, BellRing } from '@lucide/vue'
 import { usePipelines, type Pipeline } from '@/features/pipelines/composables/usePipelines'
 import { useGitlabUrl } from '@/shared/composables/useGitlabUrl'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
 import { usePipelineNotifications } from '@/features/pipelines/composables/usePipelineNotifications'
 import { usePipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
-import { shortSha, timing } from '@/features/pipelines/lib/pipelineFormat'
-import PipelineStatusBadge from '@/features/pipelines/components/PipelineStatusBadge.vue'
-import PipelineStages from '@/features/pipelines/components/PipelineStages.vue'
-import PipelineStageDots from '@/features/pipelines/components/PipelineStageDots.vue'
-import AssigneeAvatar from '@/features/assignees/components/AssigneeAvatar.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { rpc } from '@/shared/lib/rpc'
 import { useTabNav } from '@/shared/composables/useTabNav'
+import PipelineRow from '@/features/pipelines/components/PipelineRow.vue'
 
 const props = defineProps<{ fullPath: string }>()
 
@@ -50,11 +37,6 @@ useTitle(computed(() => `Pipelines · ${repoName.value} · lumen`))
 // Everything still in flight (running, but also pending/manual/scheduled), so the
 // label reads "active" rather than the narrower "running".
 const activeCount = computed(() => pipelines.value.filter((p) => isActivePipeline(p.status)).length)
-
-// Staggered list entrance, same cadence as the issue rows (capped so a long list
-// doesn't crawl in). New rows arriving on a later poll animate in on their own;
-// reordered ones don't replay (keyed nodes move, not remount).
-const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
 
 // Rows are compact by default; the full labeled stage stepper drops down on
 // demand. Multi-expand (a Set, not a single id) so you can pin several open.
@@ -160,126 +142,19 @@ function openPipeline(p: Pipeline) {
          A watched run wears a faint primary ring — a quiet "eye on this" signal,
          no stripe. -->
     <ul v-else class="space-y-1.5">
-      <li
+      <PipelineRow
         v-for="(p, i) in pipelines"
         :key="p.id"
-        class="animate-row-in overflow-hidden rounded-xl border border-border bg-card transition-shadow"
-        :class="watchStore.isWatched(p.id) ? 'ring-1 ring-primary/20' : ''"
-        :style="{ animationDelay: rowDelay(i) }"
-      >
-        <div class="flex items-center gap-2 pr-2">
-          <!-- The row header doubles as the expand toggle — a real <button> when
-               there are stages to reveal, inert text otherwise. -->
-          <component
-            :is="p.stages.length ? 'button' : 'div'"
-            :type="p.stages.length ? 'button' : undefined"
-            :data-testid="`pipeline-row-${p.iid}`"
-            class="flex min-w-0 flex-1 items-center gap-3 rounded-l-xl py-2.5 pr-2 pl-3 text-left outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
-            :class="p.stages.length ? 'cursor-pointer' : 'cursor-default'"
-            :aria-expanded="p.stages.length ? isOpen(p.id) : undefined"
-            @click="p.stages.length && toggleOpen(p.id)"
-          >
-            <ChevronRight
-              class="size-4 shrink-0 text-muted-foreground/70 transition-transform"
-              :class="[isOpen(p.id) ? 'rotate-90' : '', p.stages.length ? '' : 'invisible']"
-            />
-            <!-- Keyed on status so a run advancing (running → passed) replays the
-                 settle; unchanged polls leave it still. -->
-            <PipelineStatusBadge
-              :key="p.status"
-              :status="p.status"
-              class="animate-status shrink-0"
-            />
-            <span class="inline-flex min-w-0 items-center gap-1.5 text-sm">
-              <GitBranch class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="truncate font-medium text-foreground">{{ p.ref }}</span>
-            </span>
-            <code
-              v-if="p.sha"
-              :title="p.sha"
-              class="hidden shrink-0 font-mono text-xs text-muted-foreground sm:inline"
-              >{{ shortSha(p.sha) }}</code
-            >
-            <PipelineStageDots
-              v-if="p.stages.length"
-              :stages="p.stages"
-              class="hidden shrink-0 md:flex"
-            />
-            <span
-              class="ml-auto shrink-0 pl-2 text-xs whitespace-nowrap text-muted-foreground/80"
-              >{{ timing(p) }}</span
-            >
-          </component>
-
-          <!-- Actions live outside the toggle so they never trip the expand. -->
-          <div class="flex shrink-0 items-center gap-1">
-            <AssigneeAvatar
-              v-if="p.user"
-              compact
-              class="hidden sm:inline-flex"
-              :name="p.user.name"
-              :username="p.user.username"
-              :avatar-url="p.user.avatarUrl"
-            />
-            <span class="font-mono text-xs text-muted-foreground/80">#{{ p.iid }}</span>
-            <!-- Per-run alert toggle. Only in-flight runs can be armed; once
-                 finished there's nothing to wait for. -->
-            <Button
-              v-if="isActivePipeline(p.status)"
-              variant="ghost"
-              size="icon-sm"
-              :data-testid="`watch-${p.iid}`"
-              :aria-pressed="watchStore.isWatched(p.id)"
-              :class="
-                watchStore.isWatched(p.id)
-                  ? 'text-primary hover:text-primary'
-                  : 'text-muted-foreground'
-              "
-              :title="
-                watchStore.isWatched(p.id)
-                  ? 'Stop alerting when this finishes'
-                  : 'Alert me when this finishes'
-              "
-              :aria-label="
-                watchStore.isWatched(p.id)
-                  ? `Stop alerting for pipeline #${p.iid}`
-                  : `Alert me when pipeline #${p.iid} finishes`
-              "
-              @click="watchStore.toggle(p.id)"
-            >
-              <!-- Armed: the bell breathes amber while the run is in flight — the
-                   liveness-lamp idiom, meaning "listening for this one." The breath
-                   starting on arm is the confirmation. -->
-              <BellRing v-if="watchStore.isWatched(p.id)" class="bell-listening" />
-              <Bell v-else />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              :disabled="!toAbsolute(p.path)"
-              :title="`Open pipeline #${p.iid} in GitLab`"
-              :aria-label="`Open pipeline #${p.iid} in GitLab`"
-              @click="openPipeline(p)"
-            >
-              <ExternalLink />
-            </Button>
-          </div>
-        </div>
-
-        <!-- Expandable stepper. grid-rows 0fr↔1fr animates height without
-             measuring; reduced-motion snaps it open. -->
-        <div
-          v-if="p.stages.length"
-          class="grid ease-out motion-safe:transition-[grid-template-rows] motion-safe:duration-200"
-          :class="isOpen(p.id) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-        >
-          <div class="overflow-hidden">
-            <div class="border-t border-border/60 px-3 pt-3 pb-3">
-              <PipelineStages :stages="p.stages" />
-            </div>
-          </div>
-        </div>
-      </li>
+        :pipeline="p"
+        :index="i"
+        :open="isOpen(p.id)"
+        :watched="watchStore.isWatched(p.id)"
+        :can-watch="isActivePipeline(p.status)"
+        :href="toAbsolute(p.path)"
+        @toggle-open="toggleOpen(p.id)"
+        @toggle-watch="watchStore.toggle(p.id)"
+        @open="openPipeline(p)"
+      />
     </ul>
   </section>
 </template>
