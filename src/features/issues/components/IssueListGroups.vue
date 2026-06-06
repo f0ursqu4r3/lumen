@@ -40,7 +40,7 @@ const reorderable = () => props.groupKey !== 'none' && props.groups.length > 1
             : '',
         ]"
         @dragover.prevent="reorderable() && $emit('reorder-over', g.key)"
-        @drop.prevent="$emit('reorder-drop', g.key)"
+        @drop.prevent="reorderable() && $emit('reorder-drop', g.key)"
       >
         <span
           v-if="reorderable()"
