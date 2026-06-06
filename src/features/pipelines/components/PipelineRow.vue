@@ -8,7 +8,7 @@ import AssigneeAvatar from '@/features/assignees/components/AssigneeAvatar.vue'
 import { shortSha, timing } from '@/features/pipelines/lib/pipelineFormat'
 import type { Pipeline } from '@/features/pipelines/composables/usePipelines'
 
-const props = defineProps<{
+defineProps<{
   pipeline: Pipeline
   index: number
   open: boolean

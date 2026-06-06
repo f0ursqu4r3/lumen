@@ -1,12 +1,13 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useSavedViews } from '@/shared/composables/useSavedViews'
+import type { ViewSlice } from '@/features/issues/composables/useIssueFilters'
 
 // Orchestrates the saved-views store for the issue list: which named view is
 // active for the current filter slice, whether the slice is worth saving, and
 // the load/save/update/remove flow (tracking the loaded view so the toolbar can
 // offer "update" once its filters drift). Resets the loaded view when the
 // project changes (the view list re-keys).
-export function useIssueSavedViews<Slice extends Record<string, unknown>>(
+export function useIssueSavedViews<Slice extends ViewSlice>(
   fullPath: Ref<string>,
   viewSlice: Ref<Slice>,
   applyView: (query: Slice) => void,

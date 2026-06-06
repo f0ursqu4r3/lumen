@@ -8,6 +8,7 @@ import {
 import {
   boardDropIndex,
   planBoardMove,
+  type GroupKey,
   type IssueGroup,
   type SortKey,
 } from '@/features/issues/lib/issueView'
@@ -90,7 +91,7 @@ export function useIssueBoardDnd(opts: {
     const issue = dragging.value
     clearDrag()
     if (!issue) return
-    const move = planBoardMove(issue, opts.boardScope.value, group)
+    const move = planBoardMove(issue, opts.boardScope.value as GroupKey, group)
     if (!move) return
     // Mark the moved card so it settles into its new lane (cleared after the anim).
     justDropped.value = issue.iid
@@ -127,7 +128,7 @@ export function useIssueBoardDnd(opts: {
   // ghost marks exactly where a real move lands.
   function isDropTarget(group: IssueGroup): boolean {
     if (!dragging.value || dragOverKey.value !== group.key) return false
-    return planBoardMove(dragging.value, opts.boardScope.value, group) != null
+    return planBoardMove(dragging.value, opts.boardScope.value as GroupKey, group) != null
   }
 
   // Where the ghost sits in a target lane: the position the card will sort into

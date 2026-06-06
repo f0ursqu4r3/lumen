@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, type Component } from 'vue'
+import { ref, type Component } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { Circle, CircleDotDashed, CircleCheck, CircleSlash, Check, ChevronDown } from '@lucide/vue'
 import type { WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
