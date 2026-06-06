@@ -199,7 +199,7 @@ const {
 } = useIssueBoardDnd({ fullPath: props.fullPath, boardScope, sortKey, statusCatalog, members })
 
 // --- drag to reorder groups / columns (pointer-driven) ----------------------
-const { activeKey, insertIndex, pointer, barOffset, justReordered, start } = useGroupReorder({
+const { activeKey, pointer, barOffset, justReordered, start } = useGroupReorder({
   setOrder,
 })
 
@@ -330,7 +330,6 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           :vt-name-for="vtNameFor"
           @filter="applyFacet"
           :active-key="activeKey"
-          :insert-index="insertIndex"
           :bar-offset="barOffset"
           :pointer="pointer"
           :just-reordered="justReordered"
@@ -356,7 +355,6 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
           @drop="onDrop"
           @drag-over="dragOverKey = $event"
           :active-key="activeKey"
-          :insert-index="insertIndex"
           :bar-offset="barOffset"
           :pointer="pointer"
           :just-reordered="justReordered"

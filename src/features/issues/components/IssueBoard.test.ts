@@ -21,7 +21,6 @@ function makeProps(over: Record<string, unknown> = {}) {
     isDropTarget: () => false,
     ghostIndex: () => 0,
     activeKey: null,
-    insertIndex: null,
     barOffset: null,
     pointer: null,
     justReordered: null,
@@ -69,7 +68,6 @@ describe('IssueBoard reorder', () => {
     const wrapper = mount(IssueBoard, {
       props: makeProps({
         activeKey: 'doing',
-        insertIndex: 0,
         barOffset: 120,
         pointer: { x: 50, y: 60 },
       }),

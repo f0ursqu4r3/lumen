@@ -16,7 +16,6 @@ function makeProps(over: Record<string, unknown> = {}) {
     highlightIid: null,
     vtNameFor: () => undefined,
     activeKey: null,
-    insertIndex: null,
     barOffset: null,
     pointer: null,
     justReordered: null,
@@ -72,7 +71,6 @@ describe('IssueListGroups reorder', () => {
     const wrapper = mount(IssueListGroups, {
       props: makeProps({
         activeKey: 'b',
-        insertIndex: 0,
         barOffset: 40,
         pointer: { x: 20, y: 30 },
       }),

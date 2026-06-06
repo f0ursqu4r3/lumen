@@ -15,7 +15,6 @@ const props = defineProps<{
   vtNameFor: (iid: string) => string | undefined
   // reorder (pointer-driven)
   activeKey: string | null
-  insertIndex: number | null
   barOffset: number | null
   pointer: { x: number; y: number } | null
   justReordered: string | null
