@@ -9,8 +9,8 @@ import {
   type BrowserSectionKey,
 } from '@/composables/useProjectBrowser'
 import { useToggleStar } from '@/composables/useToggleStar'
-import ErrorNotice from '@/components/ErrorNotice.vue'
-import Odometer from '@/components/Odometer.vue'
+import ErrorNotice from '@/shared/components/ErrorNotice.vue'
+import Odometer from '@/shared/components/Odometer.vue'
 import { Input } from '@/shared/ui/input'
 import { Card } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
