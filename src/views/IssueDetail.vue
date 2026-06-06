@@ -27,7 +27,7 @@ import MarkdownText from '@/shared/components/MarkdownText.vue'
 import EditableField from '@/shared/components/EditableField.vue'
 import Scratchpad from '@/shared/components/Scratchpad.vue'
 import MediaViewer from '@/shared/components/MediaViewer.vue'
-import { buildIssueMedia } from '@/features/issues/composables/useIssueMedia'
+import { useIssueMediaViewer } from '@/features/issues/composables/useIssueMediaViewer'
 
 const props = defineProps<{
   fullPath: string
@@ -101,14 +101,11 @@ const threads = computed(() =>
 // index mapping and the fresh-animation tracker both key off this.
 const notes = computed(() => threads.value.flatMap((t) => t.notes))
 
-const media = computed(() => buildIssueMedia(draft.value?.description, notes.value, props.fullPath))
-const viewerOpen = ref(false)
-const viewerIndex = ref(0)
-
-function openViewer(i: number) {
-  viewerIndex.value = i
-  viewerOpen.value = true
-}
+const { media, viewerOpen, viewerIndex, openViewer, onBodyMediaClick } = useIssueMediaViewer({
+  description: computed(() => draft.value?.description),
+  notes,
+  fullPath: props.fullPath,
+})
 
 // Two GitLab affordances next to the issue id: open in the browser, and copy a
 // link. Opening routes through the host (the native webview can't open external
@@ -116,21 +113,6 @@ function openViewer(i: number) {
 // We deliberately avoid ⌘/Ctrl chords — Electrobun's preload intercepts those on
 // links before our handler runs.
 const { linkCopied, onCopyClick, openInGitLab } = useIssueLinks(issue)
-
-// Inline media is rendered via v-html, so intercept clicks by delegation. The
-// clicked trigger's ordinal among all [data-media-trigger] elements in the body
-// is its index in `media`: both follow document order (description then
-// comments) and only images/videos carry the trigger — exactly the collection.
-function onBodyMediaClick(e: MouseEvent) {
-  const el = (e.target as HTMLElement | null)?.closest('[data-media-trigger]')
-  if (!el) return
-  e.preventDefault()
-  const triggers = Array.from(
-    (e.currentTarget as HTMLElement).querySelectorAll('[data-media-trigger]'),
-  )
-  const i = triggers.indexOf(el)
-  if (i >= 0) openViewer(i)
-}
 
 // Only notes that arrive *after* the thread first renders should animate in;
 // the initial set lands with the section's own entrance. We prime `seen` on the
