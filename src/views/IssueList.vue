@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, provide, ref, toRef, watch } from 'vue'
-import { useIntersectionObserver, useTitle, onKeyStroke } from '@vueuse/core'
-import {
-  Plus,
-  Search,
-  LoaderCircle,
-  ArrowLeft,
-  Workflow,
-} from '@lucide/vue'
+import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
+import { useIntersectionObserver, useTitle } from '@vueuse/core'
+import { Plus, Search, LoaderCircle } from '@lucide/vue'
 import { useIssues } from '@/features/issues/composables/useIssues'
 import { usePipelines } from '@/features/pipelines/composables/usePipelines'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
@@ -15,13 +9,14 @@ import { TONE_VISUALS } from '@/features/pipelines/lib/pipelineTone'
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useIssueFilters } from '@/features/issues/composables/useIssueFilters'
-import { useWorkItemStatuses, type WorkItemStatus } from '@/features/issues/composables/useWorkItemStatus'
+import { useWorkItemStatuses } from '@/features/issues/composables/useWorkItemStatus'
 import { useIssueBoardDnd } from '@/features/issues/composables/useIssueBoardDnd'
-import { useSavedViews } from '@/shared/composables/useSavedViews'
+import { useIssueSavedViews } from '@/features/issues/composables/useIssueSavedViews'
+import { useIssueBulkHandlers } from '@/features/issues/composables/useIssueBulkHandlers'
+import { useIssueComposer } from '@/features/issues/composables/useIssueComposer'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
-import IssueComposer from '@/features/issues/components/IssueComposer.vue'
-import SavedViews from '@/shared/components/SavedViews.vue'
-import IssueListToolbar from '@/features/issues/components/IssueListToolbar.vue'
+import { useIssueDrawerRoute } from '@/features/issues/composables/useIssueDrawerRoute'
+import { IssueSelectionKey } from '@/features/issues/composables/useIssueSelection'
 import {
   sortIssues,
   groupIssues,
@@ -29,21 +24,18 @@ import {
   labelScopes,
   type Facet,
 } from '@/features/issues/lib/issueView'
-import { useTabNav } from '@/shared/composables/useTabNav'
-import { useIssueDrawerRoute } from '@/features/issues/composables/useIssueDrawerRoute'
-import IssueRow from '@/features/issues/components/IssueRow.vue'
-import IssueBoard from '@/features/issues/components/IssueBoard.vue'
-import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
-import IssueActiveFilters from '@/features/issues/components/IssueActiveFilters.vue'
-import Odometer from '@/shared/components/Odometer.vue'
 import { withViewTransition } from '@/shared/lib/viewTransition'
-import { rpc } from '@/shared/lib/rpc'
+import IssueListHeader from '@/features/issues/components/IssueListHeader.vue'
+import IssueListToolbar from '@/features/issues/components/IssueListToolbar.vue'
+import IssueListGroups from '@/features/issues/components/IssueListGroups.vue'
+import IssueBoard from '@/features/issues/components/IssueBoard.vue'
+import IssueActiveFilters from '@/features/issues/components/IssueActiveFilters.vue'
+import IssueComposer from '@/features/issues/components/IssueComposer.vue'
+import IssueDrawer from '@/features/issues/components/IssueDrawer.vue'
 import BulkActionBar from '@/features/issues/components/BulkActionBar.vue'
-import { useIssueSelection, IssueSelectionKey } from '@/features/issues/composables/useIssueSelection'
-import { useBulkIssueActions } from '@/features/issues/composables/useBulkIssueActions'
+import SavedViews from '@/shared/components/SavedViews.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Button } from '@/shared/ui/button'
-import { Card } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
 
 const props = defineProps<{ fullPath: string }>()
@@ -71,31 +63,16 @@ const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
 
 // Named snapshots of the whole view (filters + sort + group + view + scope +
 // state + search), saved per project.
-const savedViews = useSavedViews(toRef(props, 'fullPath'))
-const activeViewId = computed(() => savedViews.activeId(viewSlice.value))
-const canSaveView = computed(() => Object.keys(viewSlice.value).length > 0)
-// Remember which view was loaded so we can offer "update" once its filters
-// drift. Reset when switching projects (the view list re-keys).
-const loadedViewId = ref<string | null>(null)
-watch(
-  () => props.fullPath,
-  () => (loadedViewId.value = null),
-)
-
-function loadView(view: { id: string; query: typeof viewSlice.value }) {
-  applyView(view.query)
-  loadedViewId.value = view.id
-}
-function saveCurrentView(name: string) {
-  loadedViewId.value = savedViews.add(name, viewSlice.value)?.id ?? null
-}
-function updateView(id: string) {
-  savedViews.update(id, viewSlice.value)
-}
-function removeView(id: string) {
-  savedViews.remove(id)
-  if (loadedViewId.value === id) loadedViewId.value = null
-}
+const {
+  savedViews,
+  activeViewId,
+  canSaveView,
+  loadedViewId,
+  loadView,
+  saveCurrentView,
+  updateView,
+  removeView,
+} = useIssueSavedViews(toRef(props, 'fullPath'), viewSlice, applyView)
 
 // Split the project path so the final segment (the repo) can be emphasized.
 const { repoName, pathPrefix } = useRepoPath(toRef(props, 'fullPath'))
@@ -161,55 +138,26 @@ function setView(next: 'list' | 'board') {
   })
 }
 
-const { onTabNav } = useTabNav()
-
 const { data: projectLabels } = useProjectLabels(toRef(props, 'fullPath'))
 const { data: statusCatalog } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const labelCatalog = computed(() => projectLabels.value ?? [])
 const scopeOptions = computed(() => labelScopes(labelCatalog.value))
 
-// Multi-select state, shared with rows/cards via inject (see useIssueSelection).
-const selection = useIssueSelection(toRef(props, 'fullPath'))
+// Multi-select state + bulk-action handlers, shared with rows/cards via inject.
+const {
+  selection,
+  toggleSelectMode,
+  onAddLabels,
+  onRemoveLabels,
+  onSetAssignee,
+  onSetStatus,
+  onOpenCombined,
+} = useIssueBulkHandlers(toRef(props, 'fullPath'), members)
 provide(IssueSelectionKey, selection)
-const bulk = useBulkIssueActions(props.fullPath)
 
 // The iids currently loaded (across pages) — what "Select all" selects.
 const loadedIids = computed(() => issues.value.map((i) => i.iid))
 
-function toggleSelectMode() {
-  selection.setMode(!selection.mode.value)
-}
-
-function selectedIids() {
-  return [...selection.selected.value]
-}
-function onAddLabels(labelIds: string[]) {
-  bulk.addLabels(selectedIids(), labelIds)
-}
-function onRemoveLabels(labelIds: string[]) {
-  bulk.removeLabels(selectedIids(), labelIds)
-}
-function onSetAssignee({ username }: { username: string | null }) {
-  const member = members.value?.find((m) => m.username === username)
-  const nextAssignees = member
-    ? [
-        {
-          id: member.id,
-          name: member.name,
-          username: member.username,
-          avatarUrl: member.avatarUrl ?? null,
-        },
-      ]
-    : []
-  bulk.setAssignees(selectedIids(), username ? [username] : [], nextAssignees)
-}
-function onSetStatus(status: WorkItemStatus) {
-  bulk.setStatus(selectedIids(), status.id, status)
-}
-function onOpenCombined() {
-  const iids = selectedIids()
-  if (iids.length) rpc.openIssuesWindow({ fullPath: props.fullPath, iids })
-}
 const boardGroups = computed(() =>
   boardColumns(sorted.value, boardScope.value, {
     labelCatalog: labelCatalog.value,
@@ -258,122 +206,23 @@ useIntersectionObserver(sentinel, ([entry]) => {
   if (entry?.isIntersecting) loadMore()
 })
 
-// --- composer + new-issue highlight -----------------------------------------
-const composerOpen = ref(false)
-const highlightIid = ref<string | null>(null)
-let highlightTimer: ReturnType<typeof setTimeout> | undefined
-
-function onCreated(iid: string) {
-  highlightIid.value = iid
-  clearTimeout(highlightTimer)
-  // Matches the 1.6s flash-in animation; clear so re-renders don't replay it.
-  highlightTimer = setTimeout(() => (highlightIid.value = null), 1600)
-}
-
-onUnmounted(() => {
-  clearTimeout(highlightTimer)
-})
-
-// `C` opens the composer — but never while typing or with another surface open.
-// Accept both cases so Caps Lock / Shift don't swallow the shortcut.
-onKeyStroke(['c', 'C'], (e) => {
-  const t = e.target as HTMLElement | null
-  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return
-  if (composerOpen.value || openIid.value) return
-  e.preventDefault()
-  composerOpen.value = true
-})
-
-// Esc leaves select mode (and clears the selection) — but only when nothing else
-// (composer, drawer) owns Escape, and never while typing.
-onKeyStroke('Escape', (e) => {
-  if (!selection.mode.value) return
-  const t = e.target as HTMLElement | null
-  if (t && (/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return
-  if (composerOpen.value || openIid.value) return
-  e.preventDefault()
-  selection.exit()
-})
+// --- composer + new-issue highlight + keyboard ------------------------------
+const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, selection })
 </script>
 
 <template>
   <section class="space-y-5">
-    <!-- Header -->
-    <div class="flex items-end justify-between gap-4">
-      <div class="min-w-0">
-        <p
-          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
-        >
-          Issues
-        </p>
-        <!-- The title doubles as the way back. With the app masthead gone this is
-             the only route up to the project picker, so the project name itself is
-             the link — the arrow takes the lead position and slides on hover, the
-             same affordance the detail view uses to step back to this list. The
-             view-transition name stays on the <h1> so the picker→issues morph
-             still lands on the title text. -->
-        <RouterLink
-          :to="{ name: 'projects' }"
-          data-testid="back-to-projects"
-          class="group/back -ml-1 mt-2 flex max-w-full items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
-        >
-          <ArrowLeft
-            class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
-          />
-          <h1
-            class="vt-project-title min-w-0 truncate text-title leading-none font-semibold text-foreground"
-          >
-            {{ repoName }}
-          </h1>
-        </RouterLink>
-        <p v-if="pathPrefix" class="mt-1.5 truncate font-mono text-xs text-muted-foreground/75">
-          {{ pathPrefix }}/
-        </p>
-      </div>
-      <div class="flex shrink-0 items-center gap-3">
-        <Button variant="outline" data-testid="view-pipelines" as-child>
-          <RouterLink
-            :to="{ name: 'pipelines', params: { fullPath } }"
-            @click="onTabNav($event, { name: 'pipelines', params: { fullPath } })"
-          >
-            <Workflow />
-            Pipelines
-            <!-- Live CI tell: a pulsing sky dot + count when pipelines are
-                 running right now, so the button reads as "something's cooking"
-                 before you click through. Hidden entirely when nothing runs. -->
-            <span
-              v-if="runningPipelines > 0"
-              data-testid="pipelines-running"
-              class="-mr-0.5 inline-flex items-center gap-1.5 font-mono text-xs font-medium tabular-nums text-sky-300"
-              :title="`${runningPipelines} active`"
-            >
-              <span class="size-2 shrink-0 rounded-full animate-pulse" :class="runningDotClass" />
-              {{ runningPipelines }}
-            </span>
-          </RouterLink>
-        </Button>
-        <Button data-testid="new-issue" @click="composerOpen = true">
-          <Plus />
-          New issue
-        </Button>
-        <div
-          class="hidden shrink-0 flex-col items-end transition-opacity sm:flex"
-          :class="isLoading ? 'opacity-0' : 'opacity-100'"
-        >
-          <span
-            class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
-          >
-            <Odometer :value="count" />
-            <span class="text-primary" v-if="hasMore">+</span>
-          </span>
-          <span
-            class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
-          >
-            {{ count === 1 ? 'issue' : 'issues' }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <IssueListHeader
+      :full-path="fullPath"
+      :repo-name="repoName"
+      :path-prefix="pathPrefix"
+      :running-pipelines="runningPipelines"
+      :running-dot-class="runningDotClass"
+      :count="count"
+      :has-more="hasMore"
+      :is-loading="isLoading"
+      @new-issue="composerOpen = true"
+    />
 
     <IssueListToolbar
       v-model:state="state"
@@ -439,34 +288,15 @@ onKeyStroke('Escape', (e) => {
 
     <template v-else>
       <template v-if="count">
-        <!-- List view -->
-        <div v-if="view === 'list'" class="space-y-5">
-          <section v-for="g in listGroups" :key="g.key" class="space-y-2">
-            <header v-if="groupKey !== 'none'" class="flex items-center gap-2 px-1">
-              <span
-                v-if="g.color"
-                class="size-2 rounded-full"
-                :style="{ backgroundColor: g.color }"
-              />
-              <h2 class="text-sm font-medium text-foreground">{{ g.label }}</h2>
-              <span class="font-mono text-xs tabular-nums text-muted-foreground/60">
-                {{ g.issues.length }}
-              </span>
-            </header>
-            <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0 shadow-pop">
-              <IssueRow
-                v-for="(issue, i) in g.issues"
-                :key="issue.iid"
-                :issue="issue"
-                :full-path="fullPath"
-                :index="i"
-                :highlight="issue.iid === highlightIid"
-                :vt-name="vtNameFor(issue.iid)"
-                @filter="applyFacet"
-              />
-            </Card>
-          </section>
-        </div>
+        <IssueListGroups
+          v-if="view === 'list'"
+          :groups="listGroups"
+          :group-key="groupKey"
+          :full-path="fullPath"
+          :highlight-iid="highlightIid"
+          :vt-name-for="vtNameFor"
+          @filter="applyFacet"
+        />
 
         <IssueBoard
           v-else
