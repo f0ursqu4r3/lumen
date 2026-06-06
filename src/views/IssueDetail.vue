@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from 'vue'
-import { useTitle } from '@vueuse/core'
+import { useTitle, onKeyStroke } from '@vueuse/core'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/features/issues/composables/useIssue'
 import { useIssueDraft } from '@/features/issues/composables/useIssueDraft'
@@ -111,6 +111,20 @@ async function onSave() {
     editingDescription.value = false
   }
 }
+// ⌘/Ctrl+S saves buffered edits. Deliberately not guarded against INPUT/TEXTAREA:
+// the title and description are edited in fields, and saving from there without a
+// blur first is the whole point. preventDefault suppresses the browser/webview's
+// native save-page dialog; dedupe stops a held key from re-firing the mutation.
+onKeyStroke(
+  's',
+  (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return
+    e.preventDefault()
+    if (dirty.value && !saving.value) onSave()
+  },
+  { dedupe: true },
+)
+
 // Cancel discards the buffer and returns both fields to rendered.
 function onCancel() {
   reset()
