@@ -56,6 +56,9 @@ export function useGroupReorder(store: OrderStore) {
     scrollDir = c < lo ? -1 : c > hi ? 1 : 0
   }
 
+  // The rAF loop intentionally re-requests every frame during a drag (even when
+  // scrollDir === 0) so it is always ready to respond to direction changes
+  // without needing to restart. The overhead is negligible for a short-lived drag.
   function tick() {
     if (ctx && scrollDir !== 0) {
       if (ctx.axis === 'x') ctx.container.scrollLeft += scrollDir * MAX_STEP
@@ -74,7 +77,6 @@ export function useGroupReorder(store: OrderStore) {
     if (!c || !key || idx == null || noop) return
     store.setOrder(c.dimension, reorderToIndex(c.keys, key, idx))
     justReordered.value = key
-    clearTimeout(settleTimer)
     settleTimer = setTimeout(() => (justReordered.value = null), 400)
   }
 
@@ -96,10 +98,12 @@ export function useGroupReorder(store: OrderStore) {
     insertIndex.value = null
     pointer.value = null
     barOffset.value = null
+    clearTimeout(settleTimer)
+    settleTimer = undefined
   }
 
   function start(key: string, e: PointerEvent, context: ReorderContext) {
-    if (activeKey.value) return
+    if (ctx !== null) return
     ctx = context
     activeKey.value = key
     pointer.value = { x: e.clientX, y: e.clientY }
@@ -115,7 +119,6 @@ export function useGroupReorder(store: OrderStore) {
 
   onUnmounted(() => {
     cleanup()
-    clearTimeout(settleTimer)
   })
 
   return { activeKey, insertIndex, pointer, barOffset, justReordered, start }

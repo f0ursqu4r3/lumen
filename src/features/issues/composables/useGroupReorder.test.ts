@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { defineComponent, h } from 'vue'
+import { mount } from '@vue/test-utils'
 import { useGroupReorder } from './useGroupReorder'
 import { computeInsertion } from '@/features/issues/lib/reorderGeometry'
 
@@ -27,7 +29,8 @@ const ctx = (keys: string[]) => ({ container, axis: 'x' as const, dimension: 'st
 const move = (x = 50, y = 50) =>
   window.dispatchEvent(Object.assign(new Event('pointermove'), { clientX: x, clientY: y }))
 const up = () => window.dispatchEvent(new Event('pointerup'))
-const down = () => Object.assign(new Event('pointerdown'), { clientX: 10, clientY: 10 }) as unknown as PointerEvent
+const down = () =>
+  Object.assign(new Event('pointerdown'), { clientX: 10, clientY: 10 }) as unknown as PointerEvent
 
 describe('useGroupReorder', () => {
   it('sets activeKey on start and clears it after drop', () => {
@@ -94,4 +97,32 @@ describe('useGroupReorder', () => {
     expect(r.insertIndex.value).toBe(2)
     up()
   })
+
+  it('tears down listeners and the rAF loop on unmount', () => {
+    const removeSpy = vi.spyOn(window, 'removeEventListener')
+    const cancelSpy = vi.fn()
+    vi.stubGlobal('cancelAnimationFrame', cancelSpy)
+    const store = { setOrder: vi.fn() }
+    const { api, wrapper } = withReorder(store)
+    api.start('a', down(), ctx(['a', 'b', 'c']))
+    move()
+    wrapper.unmount()
+    expect(cancelSpy).toHaveBeenCalled()
+    expect(removeSpy).toHaveBeenCalledWith('pointermove', expect.any(Function))
+    expect(removeSpy).toHaveBeenCalledWith('pointerup', expect.any(Function))
+    removeSpy.mockRestore()
+  })
 })
+
+function withReorder(store: { setOrder: ReturnType<typeof vi.fn> }) {
+  let api!: ReturnType<typeof useGroupReorder>
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        api = useGroupReorder(store)
+        return () => h('div')
+      },
+    }),
+  )
+  return { api, wrapper }
+}
