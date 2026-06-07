@@ -216,6 +216,28 @@ describe('IssueDetail (buffered)', () => {
     vi.unstubAllGlobals()
   })
 
+  it('insets the title detector by stickyTop so it triggers behind a host header', async () => {
+    let lastOpts: IntersectionObserverInit | undefined
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(_cb: unknown, opts?: IntersectionObserverInit) {
+          lastOpts = opts
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+        takeRecords() {
+          return []
+        }
+      },
+    )
+    mountDetail({ windowed: true, stickyTop: 44 })
+    await flushPromises()
+    expect(lastOpts?.rootMargin).toBe('-44px 0px 0px 0px')
+    vi.unstubAllGlobals()
+  })
+
   it('does not render the condensed title outside a window', async () => {
     const w = mountDetail({ embedded: true })
     await flushPromises()

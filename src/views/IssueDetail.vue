@@ -61,14 +61,20 @@ const titleEnd = ref<HTMLElement | null>(null)
 const titleVisible = ref(true)
 if (props.windowed) {
   let observer: IntersectionObserver | null = null
-  onMounted(() => {
+  // Fire when the sentinel just past the title crosses the top inset: behind the
+  // host's sticky header in the combined window (stickyTop), or the window top in
+  // a single window (0). rootMargin is fixed at construction, so rebuild whenever
+  // the inset or the sentinel changes — the combined window measures its pager
+  // after we mount, so stickyTop arrives a tick late.
+  const attach = () => {
+    observer?.disconnect()
     observer = new IntersectionObserver(([entry]) => (titleVisible.value = entry.isIntersecting), {
       rootMargin: `-${props.stickyTop ?? 0}px 0px 0px 0px`,
     })
     if (titleEnd.value) observer.observe(titleEnd.value)
-  })
-  // The sentinel only exists once the issue resolves (the article branch).
-  watch(titleEnd, (el) => el && observer?.observe(el))
+  }
+  onMounted(attach)
+  watch(() => [props.stickyTop, titleEnd.value], attach)
   onBeforeUnmount(() => observer?.disconnect())
 }
 
