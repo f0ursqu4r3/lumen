@@ -35,6 +35,13 @@ are grouped by milestone, newest first.
 
 #### Fixed
 
+- **False "session expired" overlay.** A single auth error — a transient 401 or
+  a forbidden (403) sub-resource — no longer logs the user out. `installAuthWatch`
+  now confirms with one authoritative probe before latching the blocking overlay:
+  only a probe that also fails auth latches; a clean probe proves the token is
+  valid (the error stays local), and an unreachable probe shows the banner
+  instead. `probeServer` moved to `useSession` and is shared with the recovery
+  poll.
 - Resolved pre-existing `vue-tsc` errors that blocked `bun run build`: dropped
   unused imports/bindings (`StatusPicker`, `PipelineRow`), narrowed `boardScope`
   to `GroupKey` at the `planBoardMove` call sites, constrained the saved-views

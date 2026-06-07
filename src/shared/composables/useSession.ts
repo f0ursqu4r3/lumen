@@ -1,5 +1,7 @@
 import { reactive } from 'vue'
 import type { QueryClient } from '@tanstack/vue-query'
+import { rpc } from '@/shared/lib/rpc'
+import { PROBE_QUERY } from './useGitlabConnect'
 
 // Shared singleton flags. `expired` blocks the screen with the re-connect
 // overlay (token invalid). `unavailable` shows the non-blocking ConnectionBanner
@@ -41,16 +43,66 @@ export function clearServerUnavailable(): void {
   sessionState.unavailable = false
 }
 
+export type ProbeOutcome = 'ok' | 'auth' | 'down'
+
 /**
- * Watch the query + mutation caches and flip session state on failures: auth
- * errors raise the expired overlay; unavailable errors raise the banner.
- * Recovery probes run directly through `rpc` (not vue-query), so they never
- * reach these caches — no re-trigger loop. Returns a single unsubscribe that
- * detaches both subscriptions.
+ * The authoritative session health check: the cheapest authenticated query, run
+ * directly through `rpc` — bypassing vue-query so it never re-triggers
+ * installAuthWatch (no feedback loop). A clean 200 means the token is valid and
+ * the server is reachable; 401/403 means the token is genuinely the problem;
+ * anything else (5xx / transport throw → 503 sentinel) means the server is down.
+ * Shared by installAuthWatch (confirm before latching) and useServerRecovery.
+ */
+export async function probeServer(): Promise<ProbeOutcome> {
+  try {
+    const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
+    if (res.status === 401 || res.status === 403) return 'auth'
+    // Any 200 proves the token works and the server is reachable. A real token
+    // problem comes back as 401/403 (above), not a 200 with body errors.
+    if (res.status === 200) return 'ok'
+    return 'down'
+  } catch {
+    return 'down'
+  }
+}
+
+// After a confirm-probe decides not to latch, don't re-probe for this long — a
+// single failing request often retries, and we don't want a probe per retry.
+const VERIFY_COOLDOWN_MS = 2000
+
+/**
+ * Watch the query + mutation caches and react to failures. An `unavailable`
+ * error raises the (self-healing) banner directly. An `auth` error does NOT
+ * immediately latch the blocking overlay: a single 401 can be a transient
+ * gateway blip and a 403 is a forbidden sub-resource — neither means the session
+ * is dead. We first confirm with one authoritative probe; only a probe that also
+ * fails auth latches the overlay. A clean probe proves the token is fine, so the
+ * error stays local (surfaced per-query) and the user is never wrongly logged
+ * out. The probe runs through `rpc` (not vue-query) so it can't re-enter these
+ * caches. Returns a single unsubscribe that detaches both subscriptions.
  */
 export function installAuthWatch(queryClient: QueryClient): () => void {
+  let verifying = false
+  let lastVerify = 0
+
+  async function confirmThenLatch(): Promise<void> {
+    if (sessionState.expired || verifying) return
+    if (Date.now() - lastVerify < VERIFY_COOLDOWN_MS) return
+    verifying = true
+    try {
+      const outcome = await probeServer()
+      if (outcome === 'auth') markSessionExpired()
+      else if (outcome === 'down') markServerUnavailable()
+      // 'ok' → token is valid; the auth error was transient or a forbidden
+      // sub-resource. Do not latch the overlay.
+    } finally {
+      verifying = false
+      lastVerify = Date.now()
+    }
+  }
+
   const route = (err: unknown) => {
-    if (isAuthError(err)) markSessionExpired()
+    if (isAuthError(err)) void confirmThenLatch()
     else if (isUnavailableError(err)) markServerUnavailable()
   }
   const offQuery = queryClient.getQueryCache().subscribe((event) => {

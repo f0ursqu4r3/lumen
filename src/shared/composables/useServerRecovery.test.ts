@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 const { gitlabGraphql } = vi.hoisted(() => ({ gitlabGraphql: vi.fn() }))
 vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabGraphql } }))
 
-import { backoffMs, probeServer, useServerRecovery } from './useServerRecovery'
-import { sessionState } from './useSession'
+import { backoffMs, useServerRecovery } from './useServerRecovery'
+import { sessionState, probeServer } from './useSession'
 
 beforeEach(() => {
   gitlabGraphql.mockReset()

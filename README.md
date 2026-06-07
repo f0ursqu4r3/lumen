@@ -29,7 +29,7 @@ GitLab's web UI is heavy for the day-to-day loop of triaging, editing, and assig
 
 Lumen runs as two processes that talk over a typed RPC bridge:
 
-```
+```text
 ┌─────────────────────────────┐        ┌──────────────────────────────┐
 │  Webview (Vue 3 SPA)         │        │  Host (Bun, src/bun)         │
 │  src/mainview, src/views,    │  RPC   │  • holds the token + URL     │
@@ -48,16 +48,16 @@ Lumen runs as two processes that talk over a typed RPC bridge:
 
 ### Source layout
 
-| Path | What's there |
-|---|---|
-| `src/bun/` | Host process: config, GitLab fetch handlers, native menu/windows/notifications |
-| `src/mainview/` | Webview entry that boots the SPA |
-| `src/gitlab/` | API client, error normalization, REST helpers, codegen output (`generated/`, gitignored) |
-| `src/views/` | Route components (Connect, ProjectPicker, IssueList, IssueDetail, PipelineList, MultiIssueWindow) |
-| `src/features/` | Feature modules (`issues`, `assignees`, `labels`, `pipelines`, `projects`) — each with `components/`, `composables/`, `lib/` |
-| `src/shared/` | Cross-cutting `components`, `composables`, `lib`, `ui` (shadcn-vue / reka-ui primitives), RPC contract |
-| `src/router/` | Hash router + config guard |
-| `docs/superpowers/` | Design specs and implementation plans |
+| Path                | What's there                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `src/bun/`          | Host process: config, GitLab fetch handlers, native menu/windows/notifications                                               |
+| `src/mainview/`     | Webview entry that boots the SPA                                                                                             |
+| `src/gitlab/`       | API client, error normalization, REST helpers, codegen output (`generated/`, gitignored)                                     |
+| `src/views/`        | Route components (Connect, ProjectPicker, IssueList, IssueDetail, PipelineList, MultiIssueWindow)                            |
+| `src/features/`     | Feature modules (`issues`, `assignees`, `labels`, `pipelines`, `projects`) — each with `components/`, `composables/`, `lib/` |
+| `src/shared/`       | Cross-cutting `components`, `composables`, `lib`, `ui` (shadcn-vue / reka-ui primitives), RPC contract                       |
+| `src/router/`       | Hash router + config guard                                                                                                   |
+| `docs/superpowers/` | Design specs and implementation plans                                                                                        |
 
 ## Getting started
 
@@ -83,11 +83,11 @@ export GITLAB_TOKEN="glpat-…"   # api scope
 
 The values are persisted to the OS app-support directory after the first successful connect:
 
-| OS | Path |
-|---|---|
-| macOS | `~/Library/Application Support/Lumen/config.json` |
-| Linux | `~/.config/Lumen/config.json` |
-| Windows | `%APPDATA%\Lumen\config.json` |
+| OS      | Path                                              |
+| ------- | ------------------------------------------------- |
+| macOS   | `~/Library/Application Support/Lumen/config.json` |
+| Linux   | `~/.config/Lumen/config.json`                     |
+| Windows | `%APPDATA%\Lumen\config.json`                     |
 
 > **Internal CAs:** the host fetches with TLS verification relaxed so instances behind a corporate/internal certificate authority work out of the box.
 
@@ -110,12 +110,12 @@ bun run build     # typecheck + Vite build + package the desktop app
 
 ## Development
 
-| Command | Purpose |
-|---|---|
-| `bunx vitest run` | Run the test suite once (**use this**, not `bun test` or `bun run test`) |
-| `bun run typecheck` | `vue-tsc --noEmit` |
-| `bun run format` | Prettier over `src/` (single quotes, no semicolons, width 100) |
-| `bun run codegen` | Regenerate GraphQL types from the live instance |
+| Command             | Purpose                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| `bunx vitest run`   | Run the test suite once (**use this**, not `bun test` or `bun run test`) |
+| `bun run typecheck` | `vue-tsc --noEmit`                                                       |
+| `bun run format`    | Prettier over `src/` (single quotes, no semicolons, width 100)           |
+| `bun run codegen`   | Regenerate GraphQL types from the live instance                          |
 
 Tests use Vitest + `@vue/test-utils` + jsdom; the suite covers error classification, the session/recovery state machine, composables, and components.
 

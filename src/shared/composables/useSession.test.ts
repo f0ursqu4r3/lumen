@@ -1,4 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
+
+const { gitlabGraphql } = vi.hoisted(() => ({ gitlabGraphql: vi.fn() }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabGraphql } }))
+
 import {
   sessionState,
   isAuthError,
@@ -11,9 +16,14 @@ import {
 import { QueryClient, MutationObserver } from '@tanstack/vue-query'
 
 beforeEach(() => {
+  gitlabGraphql.mockReset()
+  gitlabGraphql.mockResolvedValue({ status: 200, errors: [] })
   sessionState.expired = false
   sessionState.unavailable = false
 })
+
+const rejectingQuery = (qc: QueryClient, error: unknown) =>
+  qc.fetchQuery({ queryKey: ['probe'], queryFn: () => Promise.reject(error) }).catch(() => {})
 
 describe('isAuthError', () => {
   it('is true for a GitLabError with kind "auth"', () => {
@@ -44,56 +54,72 @@ describe('markSessionExpired', () => {
   })
 })
 
-describe('installAuthWatch', () => {
-  it('flips expired when a query fails with an auth error', async () => {
+describe('installAuthWatch — auth (probe-confirmed)', () => {
+  it('latches expired when a query auth error is confirmed by the probe', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 401 })
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const stop = installAuthWatch(qc)
-    await qc
-      .fetchQuery({
-        queryKey: ['probe'],
-        queryFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
-      })
-      .catch(() => {})
+    await rejectingQuery(qc, { kind: 'auth', message: 'Unauthorized' })
+    await flushPromises()
     expect(sessionState.expired).toBe(true)
     stop()
   })
 
-  it('does NOT flip on a non-auth query error', async () => {
+  it('does NOT latch when the confirm probe says the token is still valid', async () => {
+    // The exact bug: a transient 401 or a forbidden (403) sub-resource must not
+    // log the user out when the token actually works.
+    gitlabGraphql.mockResolvedValue({ status: 200, errors: [] })
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const stop = installAuthWatch(qc)
-    await qc
-      .fetchQuery({
-        queryKey: ['probe'],
-        queryFn: () => Promise.reject({ kind: 'network', message: 'down' }),
-      })
-      .catch(() => {})
+    await rejectingQuery(qc, { kind: 'auth', message: 'Unauthorized' })
+    await flushPromises()
     expect(sessionState.expired).toBe(false)
     stop()
   })
 
-  it('flips expired when a mutation fails with an auth error', async () => {
+  it('raises the banner (not the overlay) when the confirm probe is unreachable', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 503 })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    await rejectingQuery(qc, { kind: 'auth', message: 'Unauthorized' })
+    await flushPromises()
+    expect(sessionState.expired).toBe(false)
+    expect(sessionState.unavailable).toBe(true)
+    stop()
+  })
+
+  it('latches expired when a mutation auth error is confirmed by the probe', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 401 })
     const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
     const stop = installAuthWatch(qc)
     const observer = new MutationObserver(qc, {
       mutationFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
     })
     await observer.mutate().catch(() => {})
+    await flushPromises()
     expect(sessionState.expired).toBe(true)
     stop()
   })
 
-  it('stops flipping after the returned cleanup runs', async () => {
+  it('does NOT probe or flip on a non-auth query error', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const stop = installAuthWatch(qc)
+    await rejectingQuery(qc, { kind: 'network', message: 'down' })
+    await flushPromises()
+    expect(sessionState.expired).toBe(false)
+    expect(gitlabGraphql).not.toHaveBeenCalled()
+    stop()
+  })
+
+  it('stops reacting after the returned cleanup runs', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 401 })
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const stop = installAuthWatch(qc)
     stop()
-    await qc
-      .fetchQuery({
-        queryKey: ['probe'],
-        queryFn: () => Promise.reject({ kind: 'auth', message: 'Unauthorized' }),
-      })
-      .catch(() => {})
+    await rejectingQuery(qc, { kind: 'auth', message: 'Unauthorized' })
+    await flushPromises()
     expect(sessionState.expired).toBe(false)
-    stop()
+    expect(gitlabGraphql).not.toHaveBeenCalled()
   })
 })
 
@@ -138,12 +164,7 @@ describe('installAuthWatch — unavailable', () => {
   it('flips unavailable when a query fails with an unavailable error', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const stop = installAuthWatch(qc)
-    await qc
-      .fetchQuery({
-        queryKey: ['probe'],
-        queryFn: () => Promise.reject({ kind: 'unavailable', message: 'down' }),
-      })
-      .catch(() => {})
+    await rejectingQuery(qc, { kind: 'unavailable', message: 'down' })
     expect(sessionState.unavailable).toBe(true)
     expect(sessionState.expired).toBe(false)
     stop()
