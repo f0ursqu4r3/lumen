@@ -244,6 +244,18 @@ describe('IssueDetail (buffered)', () => {
     expect(w.find('[data-testid="condensed-title"]').exists()).toBe(false)
   })
 
+  it('offsets the sticky details rail below the window chrome when windowed', async () => {
+    const w = mountDetail({ windowed: true, stickyTop: 44 })
+    await flushPromises()
+    expect(w.get('article.issue').attributes('style')).toContain('--rail-top: calc(44px + 3.5rem)')
+  })
+
+  it('leaves the details rail at its default inset outside a window', async () => {
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.get('article.issue').attributes('style') ?? '').not.toContain('--rail-top')
+  })
+
   it('reveals the title input when its Edit toggle is clicked', async () => {
     const w = mountDetail()
     await flushPromises()

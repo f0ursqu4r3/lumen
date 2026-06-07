@@ -35,6 +35,11 @@ are grouped by milestone, newest first.
 
 #### Fixed
 
+- **Window layout polish.** The sticky details rail (Status / Labels / Assignees
+  / Milestone) no longer hides its top under the window chrome — its sticky inset
+  now clears the pager and condensed-title bar in both windows. The combined
+  window's pager header is now a true viewport full-bleed, so its rule reaches the
+  edges even when the window is wider than the content max-width.
 - **Blank popout windows in the bundled app.** Per-issue and combined native
   windows came up blank under the `views://` scheme (they worked over `http://`
   in dev) because the route was carried in the initial URL fragment, which the

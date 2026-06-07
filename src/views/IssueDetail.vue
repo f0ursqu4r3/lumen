@@ -78,6 +78,13 @@ if (props.windowed) {
   onBeforeUnmount(() => observer?.disconnect())
 }
 
+// In a window the sticky details rail must clear the window chrome (a host pager,
+// stickyTop, plus the condensed title bar ~2rem) or its top is hidden under it.
+// Elsewhere (full page / drawer) the rail keeps its default 1.5rem inset.
+const railStyle = computed(() =>
+  props.windowed ? { '--rail-top': `calc(${props.stickyTop ?? 0}px + 3.5rem)` } : undefined,
+)
+
 const actionError = computed(() => saveError.value)
 
 // The repo (final path segment) anchors the masthead eyebrow, echoing the list
@@ -177,7 +184,7 @@ if (!props.embedded) {
   <!-- Skeleton mirrors the real masthead + rail composition (same container/grid)
        so resolved content lands in place instead of reflowing. -->
   <IssueDetailSkeleton v-else-if="isLoading" />
-  <article v-else-if="issue && draft" class="issue pb-20">
+  <article v-else-if="issue && draft" class="issue pb-20" :style="railStyle">
     <!-- Condensed title: appears in a window once the main title scrolls out of
          view. `fixed` (not sticky) so toggling it never shifts the document; the
          inner wrapper re-creates the app shell's centered, padded column so it
@@ -411,7 +418,7 @@ if (!props.embedded) {
     box-shadow: none;
     padding: 0;
     position: sticky;
-    top: 1.5rem;
+    top: var(--rail-top, 1.5rem);
   }
   .issue__talk {
     grid-area: talk;
