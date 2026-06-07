@@ -3,7 +3,7 @@ import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
-import { issueWindowUrl, issuesWindowUrl } from './issueWindow'
+import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
@@ -28,9 +28,12 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
   const offset = issueWindows.size * 24
   const issueWin = new BrowserWindow({
     title: `#${iid} · ${repo}`,
-    url: issueWindowUrl(url, fullPath, iid),
+    // Load the bare app; the route is applied client-side (issueWindowRoute,
+    // handed over via getInitialRoute) — see issueWindow.ts for why it can't ride
+    // in this URL's fragment under views://.
+    url,
     frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
-    rpc: buildRpc(),
+    rpc: buildRpc(issueWindowRoute(fullPath, iid)),
   })
   // Per-window close event (scoped by window id) keeps the registry accurate.
   // Register before inserting so a synchronous close can't strand a stale entry.
@@ -49,18 +52,20 @@ function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[]
   const offset = issueWindows.size * 24
   const issuesWin = new BrowserWindow({
     title: `${iids.length} issues · ${repo}`,
-    url: issuesWindowUrl(url, fullPath, iids),
+    // See openIssueWindow: bare base + client-side route via getInitialRoute.
+    url,
     frame: { width: 760, height: 920, x: 140 + offset, y: 140 + offset },
-    rpc: buildRpc(),
+    rpc: buildRpc(issuesWindowRoute(fullPath, iids)),
   })
   void issuesWin
   return { ok: true }
 }
 
 // Each native window needs its own RPC bridge; build a fresh config per window.
-// The handler bodies are identical to the original single-window definition,
-// plus openIssueWindow.
-function buildRpc() {
+// `initialRoute` is the hash route the window opens at — null for the main
+// window (default route), set for popouts (which can't carry the route in their
+// views:// URL fragment). The webview reads it via getInitialRoute at boot.
+function buildRpc(initialRoute: string | null = null) {
   return BrowserView.defineRPC<any>({
     maxRequestTime: 30000,
     handlers: {
@@ -72,6 +77,7 @@ function buildRpc() {
           const { gitlabUrl } = loadConfig()
           return { url: gitlabUrl, configured: Boolean(gitlabUrl) }
         },
+        getInitialRoute: async () => ({ route: initialRoute }),
         saveConfig: async ({ url, token }) => {
           saveConfig({ url, token })
           return { ok: true }

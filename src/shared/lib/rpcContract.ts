@@ -44,6 +44,11 @@ export interface LumenRequests {
   gitlabRest: (a: RestArgs) => Promise<RestResult>
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
   getConfig: () => Promise<ConfigStatus>
+  // The hash route this window should open at, applied client-side before mount.
+  // The bundled views:// scheme can't load an initial URL with the route in its
+  // fragment, so popouts load the bare app and ask the host where to go. The main
+  // window gets `{ route: null }` and stays on the default route.
+  getInitialRoute: () => Promise<{ route: string | null }>
   saveConfig: (a: SaveConfigArgs) => Promise<{ ok: true }>
   clearConfig: () => Promise<{ ok: true }>
   // Open a URL in the OS default browser. The native webview ignores

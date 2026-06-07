@@ -22,7 +22,7 @@ export const routes: RouteRecordRaw[] = [
     props: (route) => ({
       fullPath: route.params.fullPath,
       iid: route.params.iid,
-      // Only '1' is canonical — issueWindowUrl always emits ?window=1.
+      // Only '1' is canonical — issueWindowRoute always emits ?window=1.
       windowed: route.query.window === '1',
     }),
   },
@@ -32,7 +32,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/MultiIssueWindow.vue'),
     props: (route) => ({
       fullPath: String(route.params.fullPath),
-      // Comma-joined in issuesWindowUrl; split back to the pager's iid list.
+      // Comma-joined in issuesWindowRoute; split back to the pager's iid list.
       iids:
         typeof route.query.iids === 'string' && route.query.iids ? route.query.iids.split(',') : [],
       windowed: route.query.window === '1',

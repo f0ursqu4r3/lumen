@@ -1,16 +1,18 @@
-// Build the hash-routed URL a native issue window loads. `base` is whatever
-// resolveStartUrl produced (the HMR dev server or the bundled views:// app);
-// the issue route lives in the hash (the app uses createWebHashHistory), and
-// ?window=1 tells IssueDetail to render as a focused single-issue window with no
-// back-to-list arrow. `fullPath` may contain slashes — the :fullPath(.*) route
-// matches them inside the hash, so it is interpolated verbatim.
-export function issueWindowUrl(base: string, fullPath: string, iid: string): string {
-  return `${base}#/projects/${fullPath}/issues/${iid}?window=1`
+// The hash routes a native popout navigates to. These are NOT baked into the
+// window's initial URL: the views:// scheme used by the bundled app fails to
+// load an initial URL whose route rides in the fragment (#…) — the window comes
+// up blank. So every popout loads the bare app base and the route is applied
+// client-side at boot (the host hands it over via rpc.getInitialRoute; see
+// src/bun/index.ts and src/main.ts). `fullPath` may contain slashes — the
+// :fullPath(.*) route matches them inside the hash, so it is interpolated
+// verbatim. ?window=1 tells the view it is a focused native window (no
+// back-to-list arrow).
+export function issueWindowRoute(fullPath: string, iid: string): string {
+  return `/projects/${fullPath}/issues/${iid}?window=1`
 }
 
-// Build the hash-routed URL a combined multi-issue window loads. Same base rules
-// as issueWindowUrl; the iids ride as a comma-joined query (order preserved =
-// pager order) and ?window=1 marks it a native window.
-export function issuesWindowUrl(base: string, fullPath: string, iids: string[]): string {
-  return `${base}#/projects/${fullPath}/issues-window?iids=${iids.join(',')}&window=1`
+// Combined multi-issue window route. The iids ride as a comma-joined query
+// (order preserved = pager order); ?window=1 marks it a native window.
+export function issuesWindowRoute(fullPath: string, iids: string[]): string {
+  return `/projects/${fullPath}/issues-window?iids=${iids.join(',')}&window=1`
 }

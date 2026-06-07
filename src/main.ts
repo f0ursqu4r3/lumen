@@ -17,7 +17,12 @@ console.log(
 )
 
 async function boot() {
-  const { url } = await rpc.getConfig()
+  const [{ url }, { route }] = await Promise.all([rpc.getConfig(), rpc.getInitialRoute()])
+  // Popout windows load the bare app (the views:// scheme can't carry the route
+  // in the initial URL fragment); the host hands us the route and we apply it
+  // before the router installs, so vue-router's first navigation lands on it with
+  // no flash of the default route. The main window gets route === null.
+  if (route) window.location.hash = route
   const queryClient = createPersistedQueryClient(url)
   // App-lifetime watch: any auth failure from a data query/mutation flips
   // sessionState.expired, which the mounted overlay turns into a re-connect

@@ -35,6 +35,13 @@ are grouped by milestone, newest first.
 
 #### Fixed
 
+- **Blank popout windows in the bundled app.** Per-issue and combined native
+  windows came up blank under the `views://` scheme (they worked over `http://`
+  in dev) because the route was carried in the initial URL fragment, which the
+  scheme can't load. Popouts now load the bare app and receive their route from
+  the host via a new `getInitialRoute` RPC, applied client-side before the router
+  mounts — no fragment, no flash. URL builders became route builders
+  (`issueWindowRoute` / `issuesWindowRoute`).
 - **False "session expired" overlay.** A single auth error — a transient 401 or
   a forbidden (403) sub-resource — no longer logs the user out. `installAuthWatch`
   now confirms with one authoritative probe before latching the blocking overlay:
