@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useTitle, onKeyStroke } from '@vueuse/core'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/features/issues/composables/useIssue'
@@ -32,7 +32,13 @@ const props = defineProps<{
   embedded?: boolean
   windowed?: boolean
 }>()
-const emit = defineEmits<{ 'update:dirty': [value: boolean] }>()
+const emit = defineEmits<{
+  'update:dirty': [value: boolean]
+  // True while the document title is in view; false once it scrolls under a host
+  // window's sticky header (the combined window uses this to surface a condensed
+  // title). Only wired up in embedded/windowed mode.
+  'update:title-visible': [value: boolean]
+}>()
 
 const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
@@ -49,6 +55,28 @@ const { confirm } = useConfirm()
 
 // Surface the dirty state to a host (the drawer) so it can guard closing.
 watch(dirty, (v) => emit('update:dirty', v), { immediate: true })
+
+// In a native popout the host owns a sticky header; observe a sentinel just
+// below the title and tell the host when the title has scrolled up under that
+// header, so it can swap in a condensed title. Only needed in window contexts.
+const titleEnd = ref<HTMLElement | null>(null)
+if (props.embedded || props.windowed) {
+  let observer: IntersectionObserver | null = null
+  onMounted(() => {
+    // rootMargin offsets ~the host header height so the swap fires as the title
+    // tucks under it, not only once it's fully gone.
+    observer = new IntersectionObserver(
+      ([entry]) => emit('update:title-visible', entry.isIntersecting),
+      {
+        rootMargin: '-56px 0px 0px 0px',
+      },
+    )
+    if (titleEnd.value) observer.observe(titleEnd.value)
+  })
+  // The sentinel only exists once the issue resolves (the article branch).
+  watch(titleEnd, (el) => el && observer?.observe(el))
+  onBeforeUnmount(() => observer?.disconnect())
+}
 
 const actionError = computed(() => saveError.value)
 
@@ -193,6 +221,9 @@ if (!props.embedded) {
             />
           </template>
         </EditableField>
+        <!-- Sentinel just past the title: when it scrolls under a host window's
+             sticky header, IssueDetail emits update:title-visible=false. -->
+        <div ref="titleEnd" aria-hidden="true" class="h-px"></div>
         <button
           v-if="media.length"
           type="button"

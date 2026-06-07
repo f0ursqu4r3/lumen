@@ -4,6 +4,24 @@
 // `populateGlobal` does not copy `localStorage`/`sessionStorage` because they
 // are not in its allow-list of keys. We patch the globals here so tests see
 // jsdom's fully-functional Storage objects instead of Node's stub.
+// jsdom has no IntersectionObserver; components that observe scroll position
+// (e.g. IssueDetail's condensed-title signal) need a no-op stand-in under tests.
+if (!('IntersectionObserver' in globalThis)) {
+  class IntersectionObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): [] {
+      return []
+    }
+  }
+  Object.defineProperty(globalThis, 'IntersectionObserver', {
+    value: IntersectionObserverStub,
+    writable: true,
+    configurable: true,
+  })
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const w = (globalThis as any).jsdom?.window ?? (global as any).window
 if (w?.localStorage && w?.sessionStorage) {
