@@ -119,6 +119,39 @@ bun run build     # typecheck + Vite build + package the desktop app
 
 Tests use Vitest + `@vue/test-utils` + jsdom; the suite covers error classification, the session/recovery state machine, composables, and components.
 
+## Code signing & distribution
+
+`bun run build` is a **dev build and is never signed** (it prints `skipping codesign`; Electrobun can't codesign the dev launcher). It runs fine where it's built, but a copy that's *downloaded* (e.g. shared over Teams/email) gets quarantined and macOS shows **"… is damaged and can't be opened."**
+
+Signing happens on **release builds** — `bun run dist` (`electrobun build --env=canary`, produces `build/canary-macos-arm64/Lumen-canary.app`) — and is opt-in via env vars read by `electrobun.config.ts`.
+
+**Self-signed (local / quick).** Produces a valid signature, which turns the hard "damaged" wall into the softer "unidentified developer" (open via right-click → Open). It does **not** fully satisfy Gatekeeper (`spctl` still reports `rejected`).
+
+```bash
+bun run sign-cert                                   # one-time: mints "Lumen Self-Signed" in your login keychain
+export ELECTROBUN_DEVELOPER_ID="Lumen Self-Signed"
+bun run dist                                        # release build, now signed
+```
+
+**Apple Developer ID + notarization (real fix).** The only path that lets a downloaded app open with no warning. Requires an Apple Developer account (a *Developer ID Application* certificate — note an "Apple Development" cert is not enough).
+
+```bash
+export ELECTROBUN_DEVELOPER_ID="Developer ID Application: Your Name (TEAMID)"
+# plus Apple ID creds (or an App Store Connect API key):
+export ELECTROBUN_APPLEID="you@example.com"
+export ELECTROBUN_APPLEIDPASS="app-specific-password"
+export ELECTROBUN_TEAMID="TEAMID"
+bun run dist                                        # signs, notarizes, and staples
+```
+
+Notarization turns on automatically only when both the identity and Apple creds are present. (`bun run dist` defaults to the `canary` channel; use `electrobun build --env=stable` for a `Lumen.app`-named release.)
+
+**Recipient workaround (any unsigned/quarantined copy).** De-quarantine the app:
+
+```bash
+xattr -dr com.apple.quarantine /path/to/Lumen.app
+```
+
 ## Design
 
 The visual language is documented in [`.impeccable.md`](.impeccable.md): a refined-dark, Linear-class aesthetic with an amber accent, **Hanken Grotesk** for UI text and **Geist Mono** for code and labels. UI primitives are shadcn-vue / [reka-ui](https://reka-ui.com/); styling is Tailwind CSS v4.

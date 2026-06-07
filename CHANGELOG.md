@@ -11,6 +11,20 @@ Initial development of **Lumen**, a desktop GitLab issue tracker for self-hosted
 instances (Electrobun host + Vue 3 webview). Not yet tagged/released. Highlights
 are grouped by milestone, newest first.
 
+### Build & distribution
+
+#### Added
+
+- `bun run dist` — a signed **release** build (`electrobun build --env=canary`),
+  separate from the dev `bun run build` (which Electrobun can't codesign).
+- Opt-in macOS code signing (and notarization) wired into `electrobun.config.ts`,
+  driven by env vars so the default build stays unsigned. `bun run sign-cert`
+  mints a self-signed identity for local builds (`ELECTROBUN_DEVELOPER_ID`);
+  Apple Developer ID + notarization turn on when Apple creds are also present. See
+  README → Code signing & distribution. Addresses the "… is damaged" Gatekeeper
+  error on downloaded copies (self-signed downgrades it to "unidentified
+  developer"; notarization removes it entirely).
+
 ### Session resilience — server-unavailable vs token-invalid
 
 #### Added

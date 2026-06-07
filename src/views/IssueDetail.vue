@@ -199,11 +199,11 @@ if (!props.embedded) {
       <div
         v-if="windowed && !titleVisible"
         data-testid="condensed-title"
-        class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur"
+        class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm"
         :style="{ top: `${stickyTop ?? 0}px` }"
       >
         <p class="mx-auto max-w-5xl truncate px-4 py-2 text-sm font-medium text-foreground/90">
-          {{ draft.title }}
+          #{{ iid }} · {{ draft.title }}
         </p>
       </div>
     </Transition>
