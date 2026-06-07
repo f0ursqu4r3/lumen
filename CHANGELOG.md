@@ -49,6 +49,11 @@ are grouped by milestone, newest first.
 
 #### Fixed
 
+- **Pipeline view (and other routes) failed to open in the bundled app**
+  ("Importing a module script failed") — dynamically-imported route chunks are
+  flaky to fetch over the `views://` scheme. Route components are now imported
+  eagerly (no per-route code-splitting), which a local desktop app pays nothing
+  for and which removes the whole class of `views://` chunk-load failures.
 - **Window layout polish.** The sticky details rail (Status / Labels / Assignees
   / Milestone) no longer hides its top under the window chrome — its sticky inset
   now clears the pager and condensed-title bar in both windows. The combined
