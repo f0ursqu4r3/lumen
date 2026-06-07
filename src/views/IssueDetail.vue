@@ -225,7 +225,6 @@ if (!props.embedded) {
           v-model:editing="editingTitle"
           label="Title"
           toggle-testid="edit-title-toggle"
-          class="mb-6"
         >
           <template #label>
             <span class="field-label">Title</span>
@@ -246,7 +245,7 @@ if (!props.embedded) {
         </EditableField>
         <!-- Sentinel just past the title: when it scrolls under a host window's
              sticky header, IssueDetail emits update:title-visible=false. -->
-        <div ref="titleEnd" aria-hidden="true" class="h-px"></div>
+        <div ref="titleEnd" aria-hidden="true" class="h-px mb-6"></div>
         <button
           v-if="media.length"
           type="button"
