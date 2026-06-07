@@ -65,14 +65,19 @@ const navBtn =
     No issues.
   </div>
   <div v-else>
-    <header class="relative mb-5 flex items-center justify-end gap-3 border-b border-border pb-3">
-      <span
-        data-testid="pager-position"
-        class="absolute left-1/2 -translate-x-1/2 min-w-20 text-center font-mono text-sm font-medium tabular-nums text-foreground"
-      >
-        {{ index + 1 }} of {{ total }}
-      </span>
-      <div class="flex gap-2">
+    <!-- Full-bleed bar: -mx-4 cancels the app shell's px-4 so the rule spans the
+         whole window; -mt-6 pulls it up under the title bar. Controls re-pad with
+         px-4 to stay aligned with the issue content below. -->
+    <header
+      class="sticky top-0 z-10 -mx-4 -mt-6 mb-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-sm"
+    >
+      <div class="relative flex min-h-7 items-center justify-end gap-2">
+        <span
+          data-testid="pager-position"
+          class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-sm font-medium tabular-nums text-foreground"
+        >
+          {{ index + 1 }} of {{ total }}
+        </span>
         <button
           type="button"
           data-testid="pager-prev"
