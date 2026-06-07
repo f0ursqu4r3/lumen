@@ -31,14 +31,11 @@ const props = defineProps<{
   iid: string
   embedded?: boolean
   windowed?: boolean
+  // px from the top to pin the windowed condensed-title bar — the height of a
+  // host's own sticky header (the combined window's pager). 0 in a single window.
+  stickyTop?: number
 }>()
-const emit = defineEmits<{
-  'update:dirty': [value: boolean]
-  // True while the document title is in view; false once it scrolls under a host
-  // window's sticky header (the combined window uses this to surface a condensed
-  // title). Only wired up in embedded/windowed mode.
-  'update:title-visible': [value: boolean]
-}>()
+const emit = defineEmits<{ 'update:dirty': [value: boolean] }>()
 
 const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
@@ -56,21 +53,18 @@ const { confirm } = useConfirm()
 // Surface the dirty state to a host (the drawer) so it can guard closing.
 watch(dirty, (v) => emit('update:dirty', v), { immediate: true })
 
-// In a native popout the host owns a sticky header; observe a sentinel just
-// below the title and tell the host when the title has scrolled up under that
-// header, so it can swap in a condensed title. Only needed in window contexts.
+// In a native window, surface a condensed sticky title once the document title
+// scrolls out of view (shared by the single and combined windows). Observe a
+// sentinel just past the title; rootMargin offsets any host sticky header
+// (stickyTop) so the swap fires as the title tucks under it.
 const titleEnd = ref<HTMLElement | null>(null)
-if (props.embedded || props.windowed) {
+const titleVisible = ref(true)
+if (props.windowed) {
   let observer: IntersectionObserver | null = null
   onMounted(() => {
-    // rootMargin offsets ~the host header height so the swap fires as the title
-    // tucks under it, not only once it's fully gone.
-    observer = new IntersectionObserver(
-      ([entry]) => emit('update:title-visible', entry.isIntersecting),
-      {
-        rootMargin: '-56px 0px 0px 0px',
-      },
-    )
+    observer = new IntersectionObserver(([entry]) => (titleVisible.value = entry.isIntersecting), {
+      rootMargin: `-${props.stickyTop ?? 0}px 0px 0px 0px`,
+    })
     if (titleEnd.value) observer.observe(titleEnd.value)
   })
   // The sentinel only exists once the issue resolves (the article branch).
@@ -178,6 +172,29 @@ if (!props.embedded) {
        so resolved content lands in place instead of reflowing. -->
   <IssueDetailSkeleton v-else-if="isLoading" />
   <article v-else-if="issue && draft" class="issue pb-20">
+    <!-- Condensed title: appears in a window once the main title scrolls out of
+         view. `fixed` (not sticky) so toggling it never shifts the document; the
+         inner wrapper re-creates the app shell's centered, padded column so it
+         lines up with the content. stickyTop pins it below a host's own sticky
+         header (the combined window's pager); 0 in a single window. -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="-translate-y-1.5 opacity-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-to-class="-translate-y-1.5 opacity-0"
+    >
+      <div
+        v-if="windowed && !titleVisible"
+        data-testid="condensed-title"
+        class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur"
+        :style="{ top: `${stickyTop ?? 0}px` }"
+      >
+        <p class="mx-auto max-w-5xl truncate px-4 py-2 text-sm font-medium text-foreground/90">
+          {{ draft.title }}
+        </p>
+      </div>
+    </Transition>
+
     <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
     <IssueMasthead
       :issue="issue"

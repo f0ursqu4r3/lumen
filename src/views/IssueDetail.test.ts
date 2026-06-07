@@ -187,6 +187,41 @@ describe('IssueDetail (buffered)', () => {
     expect(w.find('[data-testid="back-to-issues"]').exists()).toBe(false)
   })
 
+  it('reveals a condensed sticky title once the title scrolls out of view (windowed)', async () => {
+    // Capture the observer callback so we can simulate the title leaving view.
+    let fire: (entries: { isIntersecting: boolean }[]) => void = () => {}
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(cb: (entries: { isIntersecting: boolean }[]) => void) {
+          fire = cb
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+        takeRecords() {
+          return []
+        }
+      },
+    )
+    const w = mountDetail({ windowed: true })
+    await flushPromises()
+    // Hidden while the title is in view.
+    expect(w.find('[data-testid="condensed-title"]').exists()).toBe(false)
+    fire([{ isIntersecting: false }])
+    await flushPromises()
+    const bar = w.find('[data-testid="condensed-title"]')
+    expect(bar.exists()).toBe(true)
+    expect(bar.text()).toContain('Bug')
+    vi.unstubAllGlobals()
+  })
+
+  it('does not render the condensed title outside a window', async () => {
+    const w = mountDetail({ embedded: true })
+    await flushPromises()
+    expect(w.find('[data-testid="condensed-title"]').exists()).toBe(false)
+  })
+
   it('reveals the title input when its Edit toggle is clicked', async () => {
     const w = mountDetail()
     await flushPromises()

@@ -60,10 +60,10 @@ are grouped by milestone, newest first.
 
 #### Added
 
-- Combined multi-issue window: condensed current-issue title that fades into the
-  sticky pager header once the main title scrolls out of view (IssueDetail
-  reports title visibility via an IntersectionObserver; the window sources the
-  title from the shared query cache). Pager header is also full-bleed.
+- Native windows: a condensed sticky issue title appears once the main title
+  scrolls out of view, in both the single-issue and combined windows (IssueDetail
+  owns it via an IntersectionObserver; the combined window pins it just below its
+  pager header). The combined-window pager header is also full-bleed.
 - Drag-to-reorder for issue-list groups and board columns, on pointer events,
   with a cursor ghost, insertion bar, lift, settle animation, and auto-scroll;
   reset-order control in the toolbar.

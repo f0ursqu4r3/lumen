@@ -1,24 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref } from 'vue'
 import { mount, flushPromises } from '@vue/test-utils'
 
 const confirmMock = vi.fn()
 vi.mock('@/shared/composables/useConfirm', () => ({ useConfirm: () => ({ confirm: confirmMock }) }))
 
-// The condensed-title header reads the issue via useIssue; stub it so the window
-// mounts without a QueryClient (the real query is shared with the embedded detail).
-vi.mock('@/features/issues/composables/useIssue', () => ({
-  useIssue: () => ({ data: ref({ title: 'Stub title' }) }),
-}))
-
-// IssueDetail fetches data; stub it to a marker that shows the iid and can emit dirty.
+// IssueDetail fetches data (and owns the condensed sticky title); stub it to a
+// marker that shows the iid and can emit dirty.
 const IssueDetailStub = {
   name: 'IssueDetail',
-  props: ['fullPath', 'iid', 'embedded'],
-  emits: ['update:dirty', 'update:title-visible'],
+  props: ['fullPath', 'iid', 'embedded', 'windowed', 'stickyTop'],
+  emits: ['update:dirty'],
   template: `<div class="detail-stub" :data-iid="iid">
     <button data-testid="make-dirty" @click="$emit('update:dirty', true)" />
-    <button data-testid="hide-title" @click="$emit('update:title-visible', false)" />
   </div>`,
 }
 
@@ -75,20 +68,6 @@ describe('MultiIssueWindow', () => {
     await flushPromises()
     expect(confirmMock).not.toHaveBeenCalled()
     expect(w.get('[data-testid="pager-position"]').text()).toBe('1 of 2')
-  })
-
-  it('reveals the condensed title only after the main title scrolls out of view', async () => {
-    const w = mountWindow(['42', '7'])
-    const title = w.get('[data-testid="condensed-title"]')
-    expect(title.text()).toBe('Stub title')
-    // Hidden while the main title is in view.
-    expect(title.classes()).toContain('opacity-0')
-    // IssueDetail reports the title scrolled under the header → reveal it.
-    await w.get('[data-testid="hide-title"]').trigger('click')
-    expect(w.get('[data-testid="condensed-title"]').classes()).toContain('opacity-100')
-    // Paging resets to the top, so the condensed title hides again.
-    await w.get('[data-testid="pager-next"]').trigger('click')
-    expect(w.get('[data-testid="condensed-title"]').classes()).toContain('opacity-0')
   })
 
   it('shows "No issues." when iids is empty', () => {
