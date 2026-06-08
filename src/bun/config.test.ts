@@ -34,6 +34,12 @@ describe('config', () => {
     expect(loadConfig()).toEqual({ gitlabUrl: 'https://saved.example.com', token: 'glpat-saved' })
   })
 
+  it('preserves the saved token when only the URL is changed', () => {
+    saveConfig({ url: 'https://old.example.com', token: 'glpat-saved' })
+    saveConfig({ url: 'https://new.example.com' })
+    expect(loadConfig()).toEqual({ gitlabUrl: 'https://new.example.com', token: 'glpat-saved' })
+  })
+
   it('clearConfig removes the saved file', () => {
     saveConfig({ url: 'https://x.example.com', token: 't' })
     clearConfig()

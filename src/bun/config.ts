@@ -41,10 +41,13 @@ export function loadConfig(): AppConfig {
   return { gitlabUrl: null, token: null }
 }
 
-export function saveConfig(input: { url: string; token: string }): void {
+export function saveConfig(input: { url: string; token?: string }): void {
   const dir = configDir()
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
-  const data: AppConfig = { gitlabUrl: trimSlash(input.url), token: input.token }
+  const current = loadConfig()
+  const token = input.token ?? current.token
+  if (!token) throw new Error('GitLab token is required')
+  const data: AppConfig = { gitlabUrl: trimSlash(input.url), token }
   writeFileSync(configPath(), JSON.stringify(data, null, 2), { mode: 0o600 })
 }
 

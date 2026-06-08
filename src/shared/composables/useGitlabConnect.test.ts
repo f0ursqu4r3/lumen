@@ -17,7 +17,7 @@ beforeEach(() => {
   getConfig.mockReset()
   saveConfig.mockReset()
   gitlabGraphql.mockReset()
-  getConfig.mockResolvedValue({ url: '', configured: false })
+  getConfig.mockResolvedValue({ url: '', configured: false, tokenSuffix: null })
 })
 
 describe('useGitlabConnect', () => {
@@ -52,6 +52,22 @@ describe('useGitlabConnect', () => {
     c.token.value = 'glpat-x'
     await expect(c.save()).resolves.toBe(false)
     expect(saveConfig).not.toHaveBeenCalled()
+  })
+
+  it('can save with the existing token when explicitly allowed', async () => {
+    getConfig.mockResolvedValue({
+      url: 'https://gitlab.example.com',
+      configured: true,
+      tokenSuffix: 'abc123',
+    })
+    saveConfig.mockResolvedValue({ ok: true })
+    gitlabGraphql.mockResolvedValue({ status: 200, errors: [] })
+    const c = useGitlabConnect({ allowExistingToken: true })
+    await c.loadUrl()
+    c.url.value = 'https://new.example.com'
+    await expect(c.save()).resolves.toBe(true)
+    expect(saveConfig).toHaveBeenCalledWith({ url: 'https://new.example.com' })
+    expect(c.tokenPlaceholder.value).toBe('Current token ends …abc123')
   })
 
   it('shows a token-rejected message on 401', async () => {

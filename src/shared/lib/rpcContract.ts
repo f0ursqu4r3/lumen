@@ -1,6 +1,7 @@
 export interface ConfigStatus {
   url: string | null
   configured: boolean
+  tokenSuffix: string | null
 }
 export interface GraphqlArgs {
   query: string
@@ -30,7 +31,7 @@ export interface AssetResult {
 }
 export interface SaveConfigArgs {
   url: string
-  token: string
+  token?: string
 }
 export interface NotifyArgs {
   title: string

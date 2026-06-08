@@ -23,7 +23,11 @@ beforeEach(() => {
   vi.clearAllMocks()
   sessionState.expired = false
   Object.defineProperty(window, 'location', { configurable: true, value: { reload } })
-  getConfig.mockResolvedValue({ url: 'https://gitlab.example.com', configured: true })
+  getConfig.mockResolvedValue({
+    url: 'https://gitlab.example.com',
+    configured: true,
+    tokenSuffix: 'abc123',
+  })
 })
 
 describe('SessionExpiredOverlay', () => {

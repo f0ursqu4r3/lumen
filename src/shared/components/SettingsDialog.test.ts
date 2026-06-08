@@ -38,7 +38,11 @@ import { settingsState, closeSettings } from '@/shared/composables/useSettings'
 beforeEach(() => {
   vi.clearAllMocks()
   vi.stubGlobal('__APP_VERSION__', '9.9.9')
-  getConfig.mockResolvedValue({ url: 'https://gitlab.example.com', configured: true })
+  getConfig.mockResolvedValue({
+    url: 'https://gitlab.example.com',
+    configured: true,
+    tokenSuffix: 'abc123',
+  })
   gitlabGraphql.mockResolvedValue({
     status: 200,
     data: { currentUser: { username: 'kyle' } },
@@ -53,7 +57,9 @@ describe('SettingsDialog', () => {
     settingsState.open = true
     await flushPromises()
     await nextTick()
-    expect(document.body.textContent).toContain('gitlab.example.com')
+    expect(document.querySelector<HTMLInputElement>('#settings-url')?.value).toBe(
+      'https://gitlab.example.com',
+    )
     expect(document.body.textContent).toContain('9.9.9')
     expect(document.body.textContent).toContain('kyle')
     w.unmount()
@@ -71,7 +77,34 @@ describe('SettingsDialog', () => {
     w.unmount()
   })
 
-  it('swaps token: saves, toasts success, and clears the input', async () => {
+  it('shows the saved token suffix as the token placeholder', async () => {
+    const w = mount(SettingsDialog, { attachTo: document.body })
+    settingsState.open = true
+    await flushPromises()
+    const input = document.querySelector<HTMLInputElement>('#settings-token')!
+    expect(input.placeholder).toBe('Current token ends …abc123')
+    w.unmount()
+  })
+
+  it('saves URL edits while preserving the existing token', async () => {
+    saveConfig.mockResolvedValue({ ok: true })
+    const w = mount(SettingsDialog, { attachTo: document.body })
+    settingsState.open = true
+    await flushPromises()
+    const input = document.querySelector<HTMLInputElement>('#settings-url')!
+    input.value = 'https://new.example.com'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await flushPromises()
+    document.querySelector<HTMLElement>('[data-testid="settings-save-connection"]')!.click()
+    await flushPromises()
+    expect(saveConfig).toHaveBeenCalledWith({ url: 'https://new.example.com' })
+    expect(queryClientClear).toHaveBeenCalled()
+    expect(clearPersistedCache).toHaveBeenCalled()
+    expect(pushToast).toHaveBeenCalledWith(expect.objectContaining({ tone: 'success' }))
+    w.unmount()
+  })
+
+  it('updates token: saves, toasts success, and clears the input', async () => {
     saveConfig.mockResolvedValue({ ok: true })
     const w = mount(SettingsDialog, { attachTo: document.body })
     settingsState.open = true
@@ -80,7 +113,7 @@ describe('SettingsDialog', () => {
     input.value = 'glpat-new'
     input.dispatchEvent(new Event('input', { bubbles: true }))
     await flushPromises()
-    document.querySelector<HTMLElement>('[data-testid="settings-swap-token"]')!.click()
+    document.querySelector<HTMLElement>('[data-testid="settings-save-connection"]')!.click()
     await flushPromises()
     expect(saveConfig).toHaveBeenCalledWith(
       expect.objectContaining({ url: 'https://gitlab.example.com', token: 'glpat-new' }),

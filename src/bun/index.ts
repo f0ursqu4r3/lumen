@@ -74,8 +74,12 @@ function buildRpc(initialRoute: string | null = null) {
         gitlabRest,
         gitlabAsset,
         getConfig: async () => {
-          const { gitlabUrl } = loadConfig()
-          return { url: gitlabUrl, configured: Boolean(gitlabUrl) }
+          const { gitlabUrl, token } = loadConfig()
+          return {
+            url: gitlabUrl,
+            configured: Boolean(gitlabUrl && token),
+            tokenSuffix: token ? token.slice(-6) : null,
+          }
         },
         getInitialRoute: async () => ({ route: initialRoute }),
         saveConfig: async ({ url, token }) => {

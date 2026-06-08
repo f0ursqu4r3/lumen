@@ -27,32 +27,45 @@ function connectErrorMessage(
  * true only on a clean 200 with no GraphQL errors. Callers own the success
  * side-effect (onboarding navigates; the settings dialog toasts).
  */
-export function useGitlabConnect() {
+export function useGitlabConnect(opts: { allowExistingToken?: boolean } = {}) {
   const url = ref('')
   const token = ref('')
+  const tokenSuffix = ref<string | null>(null)
   const status = ref<ConnectStatus>('idle')
   const message = ref('')
 
   const testing = computed(() => status.value === 'testing')
   const canSubmit = computed(
-    () => !testing.value && url.value.trim().length > 0 && token.value.trim().length > 0,
+    () =>
+      !testing.value &&
+      url.value.trim().length > 0 &&
+      (token.value.trim().length > 0 || (opts.allowExistingToken && !!tokenSuffix.value)),
+  )
+  const tokenPlaceholder = computed(() =>
+    tokenSuffix.value ? `Current token ends …${tokenSuffix.value}` : 'glpat-…',
   )
 
   /** Prefill the URL from persisted config so re-running connect doesn't retype it. */
   async function loadUrl() {
     const cfg = await rpc.getConfig()
     if (cfg.url) url.value = cfg.url
+    tokenSuffix.value = cfg.tokenSuffix
   }
 
   async function save(): Promise<boolean> {
     if (!canSubmit.value) return false
     status.value = 'testing'
     message.value = ''
+    const trimmedToken = token.value.trim()
     try {
-      await rpc.saveConfig({ url: url.value.trim(), token: token.value.trim() })
+      await rpc.saveConfig({
+        url: url.value.trim(),
+        ...(trimmedToken ? { token: trimmedToken } : {}),
+      })
       const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
       if (res.status === 200 && !res.errors?.length) {
         status.value = 'idle'
+        if (trimmedToken) tokenSuffix.value = trimmedToken.slice(-6)
         return true
       }
       status.value = 'error'
@@ -67,5 +80,5 @@ export function useGitlabConnect() {
     }
   }
 
-  return { url, token, status, message, testing, canSubmit, loadUrl, save }
+  return { url, token, tokenSuffix, tokenPlaceholder, status, message, testing, canSubmit, loadUrl, save }
 }

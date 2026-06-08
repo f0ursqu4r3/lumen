@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQueryClient } from '@tanstack/vue-query'
-import { KeyRound, LoaderCircle, Trash2, Unplug, TriangleAlert } from '@lucide/vue'
+import { KeyRound, LoaderCircle, Server, Trash2, Unplug, TriangleAlert } from '@lucide/vue'
 import {
   Dialog,
   DialogContent,
@@ -27,15 +27,18 @@ const { confirm } = useConfirm()
 const version = __APP_VERSION__
 const username = ref<string | null>(null)
 
-// Reuse onboarding's connect state. `url` holds the saved instance (read-only in
-// this surface); `token` is the swap input; `save()` re-probes and returns ok.
-const { url, token, status, message, testing, save } = useGitlabConnect()
+// Reuse onboarding's connect state, but settings can keep the existing token
+// when only the URL changes. The host never returns the token itself, just a
+// short suffix for the input placeholder.
+const { url, token, tokenSuffix, tokenPlaceholder, status, message, testing, canSubmit, save } =
+  useGitlabConnect({ allowExistingToken: true })
 
 // Refresh the read-only fields whenever the dialog opens, in case the instance
 // or identity changed since last time.
 async function hydrate() {
   const cfg = await rpc.getConfig()
   url.value = cfg.url ?? ''
+  tokenSuffix.value = cfg.tokenSuffix
   token.value = ''
   status.value = 'idle'
   message.value = ''
@@ -65,10 +68,12 @@ function onOpenChange(open: boolean) {
   if (!open) closeSettings()
 }
 
-async function swapToken() {
+async function saveConnection() {
   if (await save()) {
     token.value = ''
-    pushToast({ title: 'Token updated', tone: 'success' })
+    queryClient.clear()
+    clearPersistedCache()
+    pushToast({ title: 'Connection updated', tone: 'success' })
   }
 }
 
@@ -120,7 +125,28 @@ async function disconnect() {
           >
             Connection
           </p>
-          <p class="font-mono text-sm text-foreground/90">{{ url || '—' }}</p>
+
+          <div class="space-y-2">
+            <Label
+              for="settings-url"
+              class="font-mono text-2xs font-medium tracking-[0.06em] text-muted-foreground uppercase"
+            >
+              <Server class="size-3.5 text-muted-foreground/70" />
+              GitLab URL
+            </Label>
+            <Input
+              id="settings-url"
+              v-model="url"
+              type="url"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="https://gitlab.example.com"
+              :disabled="testing"
+              class="h-9 font-mono text-sm"
+              @keydown.enter.prevent="saveConnection"
+            />
+          </div>
 
           <div class="space-y-2">
             <Label
@@ -128,29 +154,19 @@ async function disconnect() {
               class="font-mono text-2xs font-medium tracking-[0.06em] text-muted-foreground uppercase"
             >
               <KeyRound class="size-3.5 text-muted-foreground/70" />
-              Swap token
+              Token
             </Label>
-            <div class="flex gap-2">
-              <Input
-                id="settings-token"
-                v-model="token"
-                type="password"
-                autocomplete="off"
-                spellcheck="false"
-                placeholder="glpat-…"
-                :disabled="testing"
-                class="h-9 font-mono text-sm"
-                @keydown.enter.prevent="swapToken"
-              />
-              <Button
-                data-testid="settings-swap-token"
-                :disabled="testing || token.trim().length === 0"
-                @click="swapToken"
-              >
-                <LoaderCircle v-if="testing" class="size-4 animate-spin" />
-                <span v-else>Save</span>
-              </Button>
-            </div>
+            <Input
+              id="settings-token"
+              v-model="token"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              :placeholder="tokenPlaceholder"
+              :disabled="testing"
+              class="h-9 font-mono text-sm"
+              @keydown.enter.prevent="saveConnection"
+            />
             <div
               v-if="status === 'error'"
               class="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2"
@@ -160,6 +176,15 @@ async function disconnect() {
               <p class="text-sm leading-relaxed text-foreground/90">{{ message }}</p>
             </div>
           </div>
+
+          <Button
+            data-testid="settings-save-connection"
+            :disabled="!canSubmit"
+            @click="saveConnection"
+          >
+            <LoaderCircle v-if="testing" class="size-4 animate-spin" />
+            <span v-else>Save connection</span>
+          </Button>
 
           <Button
             data-testid="settings-disconnect"
