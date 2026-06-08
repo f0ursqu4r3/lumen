@@ -6,6 +6,11 @@ export interface IssueDraft {
   state: 'opened' | 'closed'
   labelIds: string[]
   assigneeUsernames: string[]
+  milestoneId: string | null
+  dueDate: string
+  weight: number | null
+  confidential: boolean
+  timeEstimate: string
   // GitLab's native work-item Status (a status GlobalID), or null when unset.
   // Seeded from a separate work-item query, so it is passed into draftFromIssue
   // rather than read off the issue.
@@ -17,6 +22,11 @@ export function draftFromIssue(
     title: string
     description?: string | null
     state: string
+    dueDate?: string | null
+    weight?: number | null
+    confidential?: boolean | null
+    humanTimeEstimate?: string | null
+    milestone?: { id: string } | null
     labels?: { nodes?: ({ id: string } | null)[] | null } | null
     assignees?: { nodes?: ({ username: string } | null)[] | null } | null
   },
@@ -30,6 +40,11 @@ export function draftFromIssue(
     assigneeUsernames: (issue.assignees?.nodes ?? [])
       .filter((a): a is { username: string } => !!a)
       .map((a) => a.username),
+    milestoneId: issue.milestone?.id ?? null,
+    dueDate: issue.dueDate ? issue.dueDate.slice(0, 10) : '',
+    weight: issue.weight ?? null,
+    confidential: issue.confidential ?? false,
+    timeEstimate: issue.humanTimeEstimate ?? '',
     statusId,
   }
 }
@@ -46,6 +61,11 @@ export function isDirty(o: IssueDraft, d: IssueDraft): boolean {
     o.description !== d.description ||
     o.state !== d.state ||
     o.statusId !== d.statusId ||
+    o.milestoneId !== d.milestoneId ||
+    o.dueDate !== d.dueDate ||
+    o.weight !== d.weight ||
+    o.confidential !== d.confidential ||
+    o.timeEstimate !== d.timeEstimate ||
     !sameSet(o.labelIds, d.labelIds) ||
     !sameSet(o.assigneeUsernames, d.assigneeUsernames)
   )
@@ -58,6 +78,11 @@ export interface IssueEditDiff {
     stateEvent?: 'CLOSE' | 'REOPEN'
     addLabelIds?: string[]
     removeLabelIds?: string[]
+    milestoneId?: string | null
+    dueDate?: string | null
+    weight?: number | null
+    confidential?: boolean
+    timeEstimate?: string | null
   }
   assignees?: string[]
   // The work-item status to apply (a status GlobalID). Set only when it changed
@@ -70,6 +95,11 @@ export function diffIssueEdit(o: IssueDraft, d: IssueDraft): IssueEditDiff {
   if (o.title !== d.title) update.title = d.title
   if (o.description !== d.description) update.description = d.description
   if (o.state !== d.state) update.stateEvent = d.state === 'closed' ? 'CLOSE' : 'REOPEN'
+  if (o.milestoneId !== d.milestoneId) update.milestoneId = d.milestoneId
+  if (o.dueDate !== d.dueDate) update.dueDate = d.dueDate || null
+  if (o.weight !== d.weight) update.weight = d.weight
+  if (o.confidential !== d.confidential) update.confidential = d.confidential
+  if (o.timeEstimate !== d.timeEstimate) update.timeEstimate = d.timeEstimate.trim() || null
   const addLabelIds = d.labelIds.filter((id) => !o.labelIds.includes(id))
   const removeLabelIds = o.labelIds.filter((id) => !d.labelIds.includes(id))
   if (addLabelIds.length) update.addLabelIds = addLabelIds

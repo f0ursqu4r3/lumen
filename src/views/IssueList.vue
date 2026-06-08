@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle } from '@vueuse/core'
+import { useRoute, useRouter } from 'vue-router'
 import { Plus, Search, LoaderCircle } from '@lucide/vue'
 import { useIssues } from '@/features/issues/composables/useIssues'
 import { usePipelines } from '@/features/pipelines/composables/usePipelines'
@@ -42,6 +43,8 @@ import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 
 const props = defineProps<{ fullPath: string }>()
+const route = useRoute()
+const router = useRouter()
 
 const { drawerDirty, openIid, setDrawerOpen, expandIssue } = useIssueDrawerRoute(
   toRef(props, 'fullPath'),
@@ -239,6 +242,21 @@ useIntersectionObserver(sentinel, ([entry]) => {
 
 // --- composer + new-issue highlight + keyboard ------------------------------
 const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, selection })
+
+watch(
+  () => route.query.compose,
+  (value) => {
+    if (value === '1') composerOpen.value = true
+  },
+  { immediate: true },
+)
+
+function setComposerOpen(value: boolean) {
+  composerOpen.value = value
+  if (value || route.query.compose !== '1') return
+  const { compose: _compose, ...query } = route.query
+  void router.replace({ query })
+}
 </script>
 
 <template>
@@ -407,7 +425,7 @@ const { composerOpen, highlightIid, onCreated } = useIssueComposer({ openIid, se
     <IssueComposer
       :open="composerOpen"
       :full-path="fullPath"
-      @update:open="composerOpen = $event"
+      @update:open="setComposerOpen"
       @created="onCreated"
     />
 

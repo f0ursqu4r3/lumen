@@ -42,6 +42,11 @@ const issue = {
   title: 'Bug',
   description: 'desc',
   state: 'opened',
+  dueDate: null,
+  weight: null,
+  confidential: false,
+  humanTimeEstimate: null,
+  milestone: null,
   labels: { nodes: [{ id: 'l1' }] },
   assignees: { nodes: [{ username: 'ada' }] },
 }

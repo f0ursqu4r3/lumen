@@ -5,6 +5,11 @@ const issue = {
   title: 'Bug',
   description: 'desc',
   state: 'opened',
+  dueDate: '2026-06-12',
+  weight: 3,
+  confidential: false,
+  humanTimeEstimate: '2h',
+  milestone: { id: 'm1' },
   labels: { nodes: [{ id: 'l1' }, { id: 'l2' }] },
   assignees: { nodes: [{ username: 'ada' }] },
 }
@@ -19,6 +24,11 @@ describe('issueEdit', () => {
       state: 'opened',
       labelIds: ['l1', 'l2'],
       assigneeUsernames: ['ada'],
+      milestoneId: 'm1',
+      dueDate: '2026-06-12',
+      weight: 3,
+      confidential: false,
+      timeEstimate: '2h',
       statusId: null,
     })
     expect(draftFromIssue({ ...issue, description: null }).description).toBe('')
@@ -34,6 +44,11 @@ describe('issueEdit', () => {
     expect(isDirty(base(), { ...base(), labelIds: ['l1'] })).toBe(true)
     expect(isDirty(base(), { ...base(), assigneeUsernames: [] })).toBe(true)
     expect(isDirty(base(), { ...base(), statusId: 'gid://s/3' })).toBe(true)
+    expect(isDirty(base(), { ...base(), milestoneId: null })).toBe(true)
+    expect(isDirty(base(), { ...base(), dueDate: '' })).toBe(true)
+    expect(isDirty(base(), { ...base(), weight: null })).toBe(true)
+    expect(isDirty(base(), { ...base(), confidential: true })).toBe(true)
+    expect(isDirty(base(), { ...base(), timeEstimate: '1d' })).toBe(true)
   })
 
   it('isDirty ignores label/assignee ordering', () => {
@@ -63,6 +78,27 @@ describe('issueEdit', () => {
   it('diff computes label add/remove deltas', () => {
     expect(diffIssueEdit(base(), { ...base(), labelIds: ['l2', 'l3'] })).toEqual({
       update: { addLabelIds: ['l3'], removeLabelIds: ['l1'] },
+    })
+  })
+
+  it('diff emits planning field changes through updateIssue', () => {
+    expect(
+      diffIssueEdit(base(), {
+        ...base(),
+        milestoneId: null,
+        dueDate: '',
+        weight: null,
+        confidential: true,
+        timeEstimate: '',
+      }),
+    ).toEqual({
+      update: {
+        milestoneId: null,
+        dueDate: null,
+        weight: null,
+        confidential: true,
+        timeEstimate: null,
+      },
     })
   })
 

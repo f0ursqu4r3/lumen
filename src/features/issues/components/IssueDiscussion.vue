@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Button } from '@/shared/ui/button'
-import { Textarea } from '@/shared/ui/textarea'
 import MarkdownText from '@/shared/components/MarkdownText.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { useIssueDiscussion } from '@/features/issues/composables/useIssueDiscussion'
+import MentionTextarea from '@/features/issues/components/MentionTextarea.vue'
+import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 
 type NoteAuthor = { name?: string | null; username: string } | null | undefined
 type Note = { id: string; body: string; author?: NoteAuthor; createdAt: string }
@@ -17,8 +18,10 @@ const props = defineProps<{
   iid: string
   issue: { id: string } | null | undefined
   fullPath: string
+  members: ProjectMember[]
 }>()
 const comment = defineModel<string>('comment', { required: true })
+const mentionOpen = ref(false)
 
 const {
   fresh,
@@ -49,7 +52,11 @@ function initials(user?: NoteAuthor) {
 
 <template>
   <!-- Discussion: flat thread, no boxed cards. -->
-  <section class="issue__talk min-w-0 animate-row-in" style="animation-delay: 140ms">
+  <section
+    class="issue__talk min-w-0 animate-row-in"
+    :class="mentionOpen && 'issue__talk--mentions-open'"
+    style="animation-delay: 140ms"
+  >
     <div class="flex items-baseline gap-2">
       <span class="field-label">Discussion</span>
       <span v-if="notes.length" class="font-mono text-xs text-muted-foreground">
@@ -101,12 +108,14 @@ function initials(user?: NoteAuthor) {
             Reply
           </Button>
           <div v-else class="space-y-2">
-            <Textarea
+            <MentionTextarea
               v-model="replyBody"
+              :members="members"
               :rows="2"
               placeholder="Write a reply…"
               aria-label="Write a reply"
               @keydown.esc="cancelReply"
+              @open-change="mentionOpen = $event"
             />
             <ErrorNotice v-if="replyError" :error="replyError" />
             <div class="flex items-center gap-2">
@@ -138,12 +147,14 @@ function initials(user?: NoteAuthor) {
 
     <div class="mt-4 space-y-1.5">
       <label for="issue-comment" class="field-label">Add a comment</label>
-      <Textarea
+      <MentionTextarea
         id="issue-comment"
         v-model="comment"
+        :members="members"
         :rows="3"
         placeholder="Add a comment…"
         aria-label="Add a comment"
+        @open-change="mentionOpen = $event"
       />
     </div>
   </section>

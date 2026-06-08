@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
-import { graphql } from '@/gitlab/generated'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
 import { ISSUE_POLL_MS, issueKey } from '@/gitlab/issueParams'
 
-const IssueDocument = graphql(`
+const IssueDocument = `
   query Issue($fullPath: ID!, $iid: String!) {
     project(fullPath: $fullPath) {
       issue(iid: $iid) {
@@ -16,12 +15,17 @@ const IssueDocument = graphql(`
         state
         webUrl
         createdAt
+        dueDate
+        weight
+        confidential
+        humanTimeEstimate
         author {
           name
           username
           avatarUrl
         }
         milestone {
+          id
           title
         }
         labels {
@@ -64,11 +68,55 @@ const IssueDocument = graphql(`
       }
     }
   }
-`)
+`
+
+type UserCore = {
+  name: string
+  username: string
+  avatarUrl?: string | null
+}
+
+type LabelNode = { id: string; title: string; color: string }
+type AssigneeNode = UserCore & { id: string }
+type Note = {
+  id: string
+  body: string
+  system: boolean
+  createdAt: string
+  author?: UserCore | null
+}
+
+type IssueResult = {
+  project?: {
+    issue?: {
+      id: string
+      iid: string
+      title: string
+      description?: string | null
+      state: string
+      webUrl: string
+      createdAt: string
+      dueDate?: string | null
+      weight?: number | null
+      confidential: boolean
+      humanTimeEstimate?: string | null
+      author: UserCore
+      milestone?: { id: string; title: string } | null
+      labels?: { nodes?: (LabelNode | null)[] | null } | null
+      assignees?: { nodes?: (AssigneeNode | null)[] | null } | null
+      discussions: {
+        nodes?: ({ id: string; notes: { nodes?: (Note | null)[] | null } } | null)[] | null
+      }
+    } | null
+  } | null
+}
 
 async function fetchIssue(fullPath: string, iid: string) {
   try {
-    const data = await gqlClient.request(IssueDocument, { fullPath, iid })
+    const data = await gqlClient.request<IssueResult, { fullPath: string; iid: string }>(
+      IssueDocument,
+      { fullPath, iid },
+    )
     return data.project?.issue ?? null
   } catch (e) {
     throw normalizeError(e)

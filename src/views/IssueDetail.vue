@@ -9,6 +9,7 @@ import { useProjectMembers } from '@/features/projects/composables/useProjectMem
 import { useProjectContributors } from '@/features/projects/composables/useProjectContributors'
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
 import { useWorkItemStatuses } from '@/features/issues/composables/useWorkItemStatus'
+import { useProjectMilestones } from '@/features/issues/composables/useProjectMilestones'
 import { useConfirm } from '@/shared/composables/useConfirm'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
 import IssueDetailsRail from '@/features/issues/components/IssueDetailsRail.vue'
@@ -41,6 +42,7 @@ const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toR
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
 const { data: contributors } = useProjectContributors(toRef(props, 'fullPath'))
 const { data: labelCatalog } = useProjectLabels(toRef(props, 'fullPath'))
+const { data: milestones } = useProjectMilestones(toRef(props, 'fullPath'))
 // Work-item Status (To do / In progress / Done / …) — a native GitLab field,
 // separate from labels and from open/closed state. The list of options is read
 // here; the current value and its persistence live in the issue draft, so a
@@ -299,9 +301,15 @@ if (!props.embedded) {
         :contributors="contributors ?? []"
         :catalog="labelCatalog ?? []"
         :status-options="statusOptions ?? []"
+        :milestones="milestones ?? []"
         v-model:label-ids="draft.labelIds"
         v-model:status-id="draft.statusId"
         v-model:assignee-usernames="draft.assigneeUsernames"
+        v-model:milestone-id="draft.milestoneId"
+        v-model:due-date="draft.dueDate"
+        v-model:weight="draft.weight"
+        v-model:confidential="draft.confidential"
+        v-model:time-estimate="draft.timeEstimate"
       />
 
       <IssueDiscussion
@@ -310,6 +318,7 @@ if (!props.embedded) {
         :iid="iid"
         :issue="issue"
         :full-path="fullPath"
+        :members="members ?? []"
         v-model:comment="comment"
       />
 
@@ -388,6 +397,11 @@ if (!props.embedded) {
 .issue__meta {
   position: relative;
   z-index: 1;
+}
+
+.issue__talk--mentions-open {
+  position: relative;
+  z-index: 2;
 }
 
 /* Past ~768px (full page, never the ~608px drawer) the attributes lift out of

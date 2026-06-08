@@ -32,6 +32,10 @@ vi.mock('@/features/issues/composables/useWorkItemStatus', async () => {
   // the (mocked) issue draft, so the other exports aren't exercised here.
   return { useWorkItemStatuses: () => ({ data: ref([]) }) }
 })
+vi.mock('@/features/issues/composables/useProjectMilestones', async () => {
+  const { ref } = await import('vue')
+  return { useProjectMilestones: () => ({ data: ref([]) }) }
+})
 vi.mock('@/features/issues/composables/useIssueDraft', async () => {
   const { ref, computed } = await import('vue')
   return {
@@ -42,6 +46,12 @@ vi.mock('@/features/issues/composables/useIssueDraft', async () => {
         state: 'opened',
         labelIds: [] as string[],
         assigneeUsernames: ['a'],
+        milestoneId: null,
+        dueDate: '',
+        weight: null,
+        confidential: false,
+        timeEstimate: '',
+        statusId: null,
       })
       // Reuse the existing refs so external mutations (draftState.dirty!.value = true)
       // made before mount are visible to the component.
@@ -92,7 +102,7 @@ const fullIssue = {
   webUrl: '#',
   createdAt: '2026-01-01T00:00:00Z',
   author: { username: 'reporter', avatarUrl: null },
-  milestone: { title: 'v1' },
+  milestone: { id: 'm1', title: 'v1' },
   labels: { nodes: [] },
   assignees: {
     nodes: [{ id: 'u1', name: 'Ada Lovelace', username: 'a', avatarUrl: null }],

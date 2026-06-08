@@ -191,6 +191,11 @@ export function useUpdateIssue(fullPath: string, iid: string) {
       stateEvent?: 'CLOSE' | 'REOPEN'
       addLabelIds?: string[]
       removeLabelIds?: string[]
+      milestoneId?: string | null
+      dueDate?: string | null
+      weight?: number | null
+      confidential?: boolean
+      timeEstimate?: string | null
     }
   >({
     mutationFn: (changes) =>
