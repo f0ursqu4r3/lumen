@@ -44,3 +44,6 @@ yarn-error.log*
 
 # Subagent persistent memory — not project source
 .claude/agent-memory/
+
+# Lumen Canary macOS arm64 build artifacts
+/artifacts
