@@ -6,8 +6,9 @@ import { usePaletteCommands } from '@/features/palette/composables/usePaletteCom
 import type { Command } from '@/features/palette/lib/types'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui/dialog'
 import { Input } from '@/shared/ui/input'
+import { useCommandPalette } from '@/shared/composables/useCommandPalette'
 
-const open = ref(false)
+const { isOpen: open } = useCommandPalette()
 const query = ref('')
 const active = ref(0)
 const input = ref<{ $el: HTMLInputElement } | null>(null)
