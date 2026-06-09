@@ -36,7 +36,7 @@ describe('usePaletteIssueSearch', () => {
       project: { issues: { nodes: [{ iid: '3', title: 'Fix login', state: 'opened' }] } },
     })
     const { result } = withQuery(() => usePaletteIssueSearch(ref('login'), ref('grp/proj')))
-    await new Promise((r) => setTimeout(r, 250))
+    await new Promise((r) => setTimeout(r, 350))
     await flushPromises()
     expect(result().hits.value).toEqual([{ iid: '3', title: 'Fix login', state: 'opened' }])
   })
@@ -44,7 +44,7 @@ describe('usePaletteIssueSearch', () => {
   it('exposes [] (never throws) when the search request fails', async () => {
     request.mockRejectedValue(new Error('boom'))
     const { result } = withQuery(() => usePaletteIssueSearch(ref('login'), ref('grp/proj')))
-    await new Promise((r) => setTimeout(r, 250))
+    await new Promise((r) => setTimeout(r, 350))
     await flushPromises()
     expect(result().hits.value).toEqual([])
   })

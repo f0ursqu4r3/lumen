@@ -51,9 +51,18 @@ export function usePaletteIssueSearch(query: Ref<string>, currentProject: Ref<st
 
   const result = useQuery<PaletteIssueHit[], GitLabError>({
     queryKey: computed(() => ['palette-issue-search', currentProject.value, search.value]),
-    queryFn: () => fetchHits(currentProject.value as string, search.value),
+    queryFn: () => {
+      const project = currentProject.value
+      // `enabled` already gates on a non-null project; guard explicitly so a
+      // future regression can't fire a request with fullPath "null".
+      if (!project) return Promise.resolve<PaletteIssueHit[]>([])
+      return fetchHits(project, search.value)
+    },
     enabled,
     staleTime: 10_000,
+    // Ephemeral typeahead results: keep them out of the persisted query cache
+    // so stale searches from a prior session never flash into the palette.
+    gcTime: 0,
   })
 
   // A failed search must never break the palette: collapse error/loading to [].
