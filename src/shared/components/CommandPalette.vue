@@ -28,6 +28,14 @@ const activeId = computed(() => {
   return command ? optionId(command) : undefined
 })
 
+// Keep the highlighted option in view as keyboard nav moves it past the fold.
+// The Dialog teleports to <body>, so resolve the option by id off the document.
+watch(activeId, async (id) => {
+  if (!id) return
+  await nextTick()
+  document.getElementById(id)?.scrollIntoView({ block: 'nearest' })
+})
+
 watch(open, async (value) => {
   if (!value) return
   query.value = ''
