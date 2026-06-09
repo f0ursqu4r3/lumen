@@ -199,6 +199,18 @@ export function renderMarkdown(src: string | null | undefined, opts: RenderOptio
   })
 }
 
+// Server-rendered HTML (e.g. GitLab's `descriptionHtml`) arrives pre-rendered, so
+// it skips the Markdown pipeline — but it is still attacker-authored and must not
+// reach `v-html` unsanitized. Run it through the same DOMPurify config as rendered
+// Markdown so both paths share one allow-list (no second sanitization approach).
+export function sanitizeHtml(src: string | null | undefined): string {
+  if (!src) return ''
+  return DOMPurify.sanitize(src, {
+    ADD_TAGS: ['video', 'audio'],
+    ADD_ATTR: ['controls', 'preload', 'download'],
+  })
+}
+
 // Collect slideshow-eligible media (images + videos) in document order, reusing
 // the same tokenizer as rendering so code spans/fences are skipped identically.
 export function extractMedia(
