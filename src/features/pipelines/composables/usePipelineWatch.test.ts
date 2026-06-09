@@ -5,7 +5,7 @@ import { usePipelineWatch } from './usePipelineWatch'
 beforeEach(() => localStorage.clear())
 
 describe('usePipelineWatch', () => {
-  it('subscribes, reports membership, and counts', () => {
+  it('subscribes and reports membership', () => {
     const w = usePipelineWatch(ref('grp/proj'))
     expect(w.isWatched('p1')).toBe(false)
     w.subscribe('p1')
