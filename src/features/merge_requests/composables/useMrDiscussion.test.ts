@@ -37,4 +37,21 @@ describe('useMrAddNote', () => {
       result().mutateAsync({ noteableId: 'x', discussionId: 'd', body: 'b' }),
     ).rejects.toMatchObject({ kind: 'unknown', message: 'boom' })
   })
+
+  it('rejects on a mutation-level errors[] payload', async () => {
+    request.mockResolvedValue({ createNote: { note: null, errors: ['permission denied'] } })
+    const { result } = withQuery(() => useMrAddNote('grp/proj', '5'))
+    await expect(
+      result().mutateAsync({ noteableId: 'x', discussionId: 'd', body: 'b' }),
+    ).rejects.toMatchObject({ kind: 'graphql', message: 'permission denied' })
+  })
+
+  it('invalidates the MR detail query on success', async () => {
+    request.mockResolvedValue({ createNote: { note: { id: 'n2' }, errors: [] } })
+    const { result, queryClient } = withQuery(() => useMrAddNote('grp/proj', '5'))
+    const spy = vi.spyOn(queryClient, 'invalidateQueries')
+    await result().mutateAsync({ noteableId: 'gid://MR/1', discussionId: 'd1', body: 'ok' })
+    await flushPromises()
+    expect(spy).toHaveBeenCalledWith({ queryKey: ['merge-request', 'grp/proj', '5'] })
+  })
 })

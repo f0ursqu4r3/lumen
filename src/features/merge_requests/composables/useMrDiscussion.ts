@@ -19,15 +19,19 @@ type CreateNoteResult = {
 type NoteInput = { noteableId: string; discussionId: string; body: string }
 
 async function sendCreateNote(input: NoteInput): Promise<CreateNoteResult['createNote']> {
+  let data: CreateNoteResult
   try {
-    const data = await gqlClient.request<CreateNoteResult, { input: NoteInput }>(
-      CreateNoteDocument,
-      { input },
-    )
-    return data.createNote ?? null
+    data = await gqlClient.request<CreateNoteResult, { input: NoteInput }>(CreateNoteDocument, {
+      input,
+    })
   } catch (e) {
     throw normalizeError(e)
   }
+  // GitLab returns mutation-level failures (e.g. permission denied) in `errors`
+  // with a 200, so surface them rather than resolving with a null note.
+  const errors = data.createNote?.errors
+  if (errors?.length) throw { kind: 'graphql', message: errors[0] } satisfies GitLabError
+  return data.createNote ?? null
 }
 
 /**
