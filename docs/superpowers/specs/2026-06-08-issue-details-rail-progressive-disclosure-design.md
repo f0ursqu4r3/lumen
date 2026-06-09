@@ -169,33 +169,43 @@ Ride the same model: `isPopulated = (d) => d.<flag> === true`,
 | Status, Labels, Assignees | pinned | existing | none |
 | Milestone, Due date, Weight, Estimate | value | existing `updateIssue` | descriptor only |
 | Confidential | boolean | existing `updateIssue` | move into model as addable |
-| **Health status** (`onTrack` / `needsAttention` / `atRisk`) | value (enum → Select) | `updateIssue.healthStatus` | draft + diff + query + codegen |
-| **Locked** | boolean | `updateIssue.locked` | draft + diff + query + codegen |
-| **Iteration** | value | work-item widget (like Status) | own query + mutation + codegen |
-| **Parent (Epic)** | value | work-item widget (like Status) | own query + mutation + codegen |
+| **Health status** (`onTrack` / `needsAttention` / `atRisk`) | value (enum → Select) | `updateIssue.healthStatus` | draft + diff + raw `useIssue` read; **no codegen** |
+| **Locked** | boolean | `updateIssue.locked` | draft + diff + raw read (`discussionLocked`); **no codegen** |
+| **Parent (Epic)** | value | `updateIssue.epicId` | draft + diff + raw read (`epic{…}`); **no codegen** |
+| **Iteration** | value | work-item widget (like Status) — `workItemUpdate.iterationWidget.iterationId` | own query + mutation, raw strings; **no codegen** |
+
+> **Schema confirmed (2026-06-08, live instance).** Health/Locked/Parent are all
+> fields on `UpdateIssueInput` (`healthStatus`, `locked`, `epicId`) and on the
+> `Issue` read type, so they ride the existing `updateIssue` mutation + the raw
+> `useIssue` query with **no codegen**. Only Iteration lacks an `updateIssue`
+> field and needs the work-item widget mutation (raw strings, like Status — also
+> no codegen). See `docs/reference/gitlab-issue-field-shapes.md`. This supersedes
+> the earlier "codegen gate" — nothing here changes a typed `graphql()` document.
 
 ### Changes
 
 - `IssueDraft` (`src/features/issues/lib/issueEdit.ts`) gains `healthStatus`,
-  `locked`, `iterationId`, `parentId`. `draftFromIssue`, `isDirty`,
+  `locked`, `iterationId`, `parentEpicId`. `draftFromIssue`, `isDirty`,
   `diffIssueEdit` extended in lockstep.
-- `useIssue` query gains `healthStatus`, `discussionLocked`, and iteration /
-  parent via their work-item widgets.
-- `updateIssue` mutation input gains `healthStatus`, `locked`.
-- Iteration and Parent buffer into the draft and apply in `save()` through their
-  own work-item queries + mutations — the exact precedent the work-item **Status**
-  field already set (`useWorkItemStatus` / `useSetWorkItemStatus`, buffered via
-  `useIssueDraft.save()`).
+- `useIssue` query (a raw string) gains `healthStatus`, `discussionLocked`,
+  `epic { id title }`, `iteration { id title }`. No codegen.
+- `useUpdateIssue`'s hand-written input type gains `healthStatus`, `locked`,
+  `epicId` (all already on `UpdateIssueInput` in the generated types). No codegen.
+- Iteration buffers into the draft and applies in `save()` through its own
+  work-item query + mutation (`workItemUpdate.iterationWidget.iterationId`),
+  raw strings — the exact precedent the work-item **Status** field set
+  (`useWorkItemStatus` / `useSetWorkItemStatus`, buffered via `useIssueDraft.save()`).
 
 ### Gates
 
-- **Codegen (project convention):** `src/gitlab/generated` is gitignored; these
-  query/mutation changes need a user-run `bun codegen` against the live
-  instance. Typecheck stays red until that runs.
-- **Schema availability:** Iteration and Parent depend on the live EE schema
-  exposing those work-item widgets. Both are *included pending codegen
-  confirmation*; if a widget is not exposed by this instance, that field drops to
-  the Phase-2 follow-on rather than blocking the rest of the work.
+- **No codegen required.** Confirmed against the live schema (2026-06-08): the
+  read query is a raw string and the `updateIssue` input fields already exist in
+  the generated types, so `src/gitlab/generated` is untouched. See
+  `docs/reference/gitlab-issue-field-shapes.md`.
+- **Schema availability:** confirmed present on this instance — `healthStatus`,
+  `locked`, `epicId` on `UpdateIssueInput`; `epic`/`iteration` on `Issue`;
+  `WorkItemWidgetIterationInput { iterationId }`. No field is deferred for
+  availability.
 
 ## Out of scope (follow-on specs)
 
@@ -223,9 +233,11 @@ own design:
 
 ## Phasing
 
-1. **This spec** — registry + visibility composable + progressive-disclosure UI
-   over the existing fields **plus** the EE value fields that fit the draft model
-   (Health status, Locked, and Iteration/Parent pending codegen).
-2. **Phase 2** — any EE value field deferred because the live schema did not
-   expose it at codegen time.
+1. **Plan 1** (`docs/superpowers/plans/2026-06-08-details-rail-progressive-disclosure.md`)
+   — registry + visibility composable + progressive-disclosure UI over the
+   existing fields (Status/Labels/Assignees pinned; Milestone, Due date, Weight,
+   Estimate, Confidential addable). No GraphQL changes.
+2. **Plan 2** — the EE value fields (Health status, Locked, Parent/Epic via
+   `updateIssue`; Iteration via the work-item widget). All shapes confirmed; no
+   codegen. Layers onto the Plan 1 mechanism.
 3. **Phase 3 (separate spec)** — the non-draft subsystems listed in Out of scope.
