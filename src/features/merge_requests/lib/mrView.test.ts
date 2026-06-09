@@ -64,6 +64,9 @@ describe('toMrVars', () => {
       sort: 'merged_at_desc',
     })
   })
+  it('maps the created sort key', () => {
+    expect(toMrVars({ ...base, sort: 'created' }).sort).toBe('created_desc')
+  })
 })
 
 describe('mrStateLabel', () => {
@@ -76,10 +79,15 @@ describe('mrStateLabel', () => {
     expect(mrStateLabel({ state: 'closed', draft: false })).toBe('closed')
     expect(mrStateLabel({ state: 'locked', draft: false })).toBe('closed')
   })
+  it('does not let a stale draft flag override merged/closed', () => {
+    expect(mrStateLabel({ state: 'merged', draft: true })).toBe('merged')
+    expect(mrStateLabel({ state: 'closed', draft: true })).toBe('closed')
+  })
 })
 
 describe('MR_SORT_OPTIONS', () => {
   it('exposes the three sort keys with labels', () => {
     expect(MR_SORT_OPTIONS.map((o) => o.key)).toEqual(['updated', 'created', 'merged'])
+    expect(MR_SORT_OPTIONS.map((o) => o.label)).toEqual(['Last updated', 'Created', 'Merged'])
   })
 })
