@@ -17,10 +17,14 @@ const TABS = [
   { name: 'pipelines', label: 'Pipelines', icon: Workflow },
 ] as const
 
+// A bottom border on the link itself (rather than an absolutely-positioned
+// span) gives a stable underline under the label, independent of the bar height.
 const tabClass = (name: string) =>
   [
-    'relative flex items-center gap-1.5 rounded-md px-2 py-1 text-sm outline-none transition-colors',
-    name === props.active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+    'flex items-center gap-1.5 rounded-t-md border-b-2 px-2 py-1 text-sm outline-none transition-colors',
+    name === props.active
+      ? 'border-primary text-foreground'
+      : 'border-transparent text-muted-foreground hover:text-foreground',
   ].join(' ')
 </script>
 
@@ -45,11 +49,6 @@ const tabClass = (name: string) =>
         <span class="size-1.5 animate-pulse rounded-full bg-sky-400" />
         {{ running }}
       </span>
-      <span
-        v-if="tab.name === active"
-        class="absolute -bottom-px left-0 h-0.5 w-full bg-primary"
-        aria-hidden="true"
-      />
     </RouterLink>
   </nav>
 </template>

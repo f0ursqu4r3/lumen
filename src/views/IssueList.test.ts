@@ -21,11 +21,6 @@ const router = createRouter({
 const useIssues = vi.fn()
 vi.mock('@/features/issues/composables/useIssues', () => ({ useIssues: () => useIssues() }))
 
-const pipelinesRef = ref<Array<{ status: string }>>([])
-vi.mock('@/features/pipelines/composables/usePipelines', () => ({
-  usePipelines: () => ({ pipelines: pipelinesRef }),
-}))
-
 const { createMutate } = vi.hoisted(() => ({ createMutate: vi.fn() }))
 const { confirmMock } = vi.hoisted(() => ({ confirmMock: vi.fn() }))
 vi.mock('@/shared/composables/useConfirm', () => ({
@@ -98,7 +93,6 @@ beforeEach(() => {
   useIssues.mockReset()
   createMutate.mockReset()
   confirmMock.mockReset()
-  pipelinesRef.value = []
   openIssueWindow.mockClear()
   openIssuesWindow.mockClear()
 })

@@ -1,15 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { ref } from 'vue'
 import AppTopBar from './AppTopBar.vue'
 import ProjectTabNav from './ProjectTabNav.vue'
 
 // Stub usePipelines (pulled in transitively by ProjectTabNav) so mounting the
 // project branch doesn't need a query client.
-vi.mock('@/features/pipelines/composables/usePipelines', () => {
-  const { ref } = require('vue')
-  return { usePipelines: () => ({ pipelines: ref([]) }) }
-})
+vi.mock('@/features/pipelines/composables/usePipelines', () => ({
+  usePipelines: () => ({ pipelines: ref([]) }),
+}))
 
 const router = createRouter({
   history: createMemoryHistory(),
