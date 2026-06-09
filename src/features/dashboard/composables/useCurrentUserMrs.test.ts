@@ -33,6 +33,15 @@ describe('useAssignedMergeRequests', () => {
     expect(result().mrs.value[0].iid).toBe('5')
     expect(request.mock.calls[0][0]).toContain('assignedMergeRequests')
   })
+
+  it('normalizes errors to an empty list with an error', async () => {
+    request.mockReset()
+    request.mockRejectedValue(new Error('boom'))
+    const { result } = withQuery(() => useAssignedMergeRequests())
+    await flushPromises()
+    expect(result().mrs.value).toEqual([])
+    expect(result().error.value).toMatchObject({ kind: 'unknown', message: 'boom' })
+  })
 })
 
 describe('useReviewRequestedMergeRequests', () => {
