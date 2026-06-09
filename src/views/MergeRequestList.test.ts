@@ -79,4 +79,14 @@ describe('MergeRequestList', () => {
     expect(w.text()).toContain('Add API')
     expect(w.text()).toContain('feat')
   })
+
+  it('no longer renders the in-view MR list header', async () => {
+    const w = mount(MergeRequestList, {
+      props: { fullPath: 'grp/proj' },
+      global: { stubs: { RouterLink: RouterLinkStub } },
+    })
+    await flushPromises()
+    // The MergeRequestListHeader rendered an <h1> with the repo name; it should be gone.
+    expect(w.find('h1').exists()).toBe(false)
+  })
 })

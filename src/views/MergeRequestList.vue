@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { toRef } from 'vue'
 import { useMrFilters } from '@/features/merge_requests/composables/useMrFilters'
 import { useMergeRequests } from '@/features/merge_requests/composables/useMergeRequests'
 import { useMrSavedViews } from '@/features/merge_requests/composables/useMrSavedViews'
-import MergeRequestListHeader from '@/features/merge_requests/components/MergeRequestListHeader.vue'
 import MergeRequestListToolbar from '@/features/merge_requests/components/MergeRequestListToolbar.vue'
 import MrFilterPanel from '@/features/merge_requests/components/MrFilterPanel.vue'
 import MergeRequestRow from '@/features/merge_requests/components/MergeRequestRow.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 
 const props = defineProps<{ fullPath: string }>()
 const fullPath = toRef(props, 'fullPath')
@@ -16,20 +16,12 @@ const f = useMrFilters()
 const { mergeRequests, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
   useMergeRequests(fullPath, f.filters)
 
-const repoName = computed(() => props.fullPath.split('/').pop() ?? props.fullPath)
-
 const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-4xl px-6 py-8">
-    <MergeRequestListHeader
-      :full-path="fullPath"
-      :repo-name="repoName"
-      :count="mergeRequests.length"
-    />
-
-    <div class="mt-6 space-y-3">
+  <ViewContainer>
+    <div class="space-y-3">
       <MergeRequestListToolbar
         v-model:search="f.search.value"
         v-model:sort="f.sort.value"
@@ -77,5 +69,5 @@ const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
         {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
       </button>
     </div>
-  </div>
+  </ViewContainer>
 </template>
