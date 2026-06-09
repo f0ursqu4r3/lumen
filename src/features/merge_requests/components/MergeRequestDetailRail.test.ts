@@ -26,6 +26,8 @@ describe('MergeRequestDetailRail', () => {
     expect(w.text()).toContain('main')
     expect(w.text()).toContain('v1')
     expect(w.text()).toContain('Ray')
+    expect(w.text()).toContain('Not approved')
+    expect(w.text()).toContain('2 required')
     expect(w.text().toLowerCase()).toContain('conflict')
   })
 })
