@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useTitle } from '@vueuse/core'
-import { ArrowLeft, RefreshCw, LoaderCircle, BellRing } from '@lucide/vue'
+import { RefreshCw } from '@lucide/vue'
 import { usePipelines, type Pipeline } from '@/features/pipelines/composables/usePipelines'
 import { useGitlabUrl } from '@/shared/composables/useGitlabUrl'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
@@ -9,18 +9,16 @@ import { usePipelineNotifications } from '@/features/pipelines/composables/usePi
 import { usePipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { rpc } from '@/shared/lib/rpc'
-import { useTabNav } from '@/shared/composables/useTabNav'
 import PipelineRow from '@/features/pipelines/components/PipelineRow.vue'
 
 const props = defineProps<{ fullPath: string }>()
 
-const { onTabNav } = useTabNav()
-
 const fullPath = toRef(props, 'fullPath')
-const { repoName, pathPrefix } = useRepoPath(fullPath)
+const { repoName } = useRepoPath(fullPath)
 
 const { pipelines, isLoading, isFetching, error, refetch } = usePipelines(fullPath)
 const { toAbsolute } = useGitlabUrl()
@@ -33,10 +31,6 @@ const watchStore = usePipelineWatch(fullPath)
 usePipelineNotifications(pipelines, repoName, watchStore, (p) => toAbsolute(p.path))
 
 useTitle(computed(() => `Pipelines · ${repoName.value} · lumen`))
-
-// Everything still in flight (running, but also pending/manual/scheduled), so the
-// label reads "active" rather than the narrower "running".
-const activeCount = computed(() => pipelines.value.filter((p) => isActivePipeline(p.status)).length)
 
 // Rows are compact by default; the full labeled stage stepper drops down on
 // demand. Multi-expand (a Set, not a single id) so you can pin several open.
@@ -55,59 +49,17 @@ function openPipeline(p: Pipeline) {
 </script>
 
 <template>
-  <section class="space-y-5">
-    <!-- Header: title doubles as the way back to this project's issues. -->
-    <div class="flex items-end justify-between gap-4">
-      <div class="min-w-0">
-        <p
-          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
-        >
-          Pipelines
-        </p>
-        <RouterLink
-          :to="{ name: 'issues', params: { fullPath } }"
-          data-testid="back-to-issues"
-          class="group/back -ml-1 mt-2 flex max-w-full items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
-          @click="onTabNav($event, { name: 'issues', params: { fullPath } })"
-        >
-          <ArrowLeft
-            class="size-5 shrink-0 text-primary transition-transform group-hover/back:-translate-x-0.5"
-          />
-          <h1
-            class="vt-project-title min-w-0 truncate text-title leading-none font-semibold text-foreground"
-          >
-            {{ repoName }}
-          </h1>
-        </RouterLink>
-        <p v-if="pathPrefix" class="mt-1.5 truncate font-mono text-xs text-muted-foreground/75">
-          {{ pathPrefix }}/
-        </p>
-      </div>
-      <div class="flex shrink-0 items-center gap-3">
-        <span
-          v-if="activeCount"
-          class="inline-flex items-center gap-1.5 rounded-full border border-sky-500/25 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300"
-        >
-          <LoaderCircle class="size-3.5 animate-spin" />
-          {{ activeCount }} active
-        </span>
-        <span
-          v-if="watchStore.watchedCount.value"
-          class="animate-status inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-        >
-          <BellRing class="size-3.5" />
-          {{ watchStore.watchedCount.value }} watching
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          data-testid="refresh-pipelines"
-          :disabled="isFetching"
-          @click="() => refetch()"
-        >
-          <RefreshCw :class="isFetching ? 'animate-spin' : ''" />
-        </Button>
-      </div>
+  <ViewContainer>
+    <div class="mb-5 flex justify-end">
+      <Button
+        variant="outline"
+        size="sm"
+        data-testid="refresh-pipelines"
+        :disabled="isFetching"
+        @click="() => refetch()"
+      >
+        <RefreshCw :class="isFetching ? 'animate-spin' : ''" />
+      </Button>
     </div>
 
     <ErrorNotice v-if="error" :error="error" />
@@ -156,5 +108,5 @@ function openPipeline(p: Pipeline) {
         @open="openPipeline(p)"
       />
     </ul>
-  </section>
+  </ViewContainer>
 </template>
