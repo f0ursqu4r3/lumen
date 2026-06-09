@@ -45,6 +45,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'issues',
     component: IssueList,
     props: true,
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/issues/:iid',
@@ -74,12 +75,14 @@ export const routes: RouteRecordRaw[] = [
     name: 'pipelines',
     component: PipelineList,
     props: true,
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/merge-requests',
     name: 'merge-requests',
     component: MergeRequestList,
     props: true,
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/merge-requests/:iid',
