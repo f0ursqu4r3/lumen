@@ -58,6 +58,16 @@ describe('useRailFields', () => {
     expect(visibleKeys.value.has('weight')).toBe(false)
   })
 
+  it('reveal() after remove() re-shows the field', () => {
+    const draft = ref(makeDraft({ weight: 5 }))
+    const original = ref(makeDraft({ weight: 5 }))
+    const { visibleKeys, remove, reveal } = useRailFields(draft, original)
+    remove('weight')
+    expect(visibleKeys.value.has('weight')).toBe(false)
+    reveal('weight')
+    expect(visibleKeys.value.has('weight')).toBe(true)
+  })
+
   it('tolerates a null draft (renders only pinned)', () => {
     const draft = ref<IssueDraft | null>(null)
     const original = ref<IssueDraft | null>(null)

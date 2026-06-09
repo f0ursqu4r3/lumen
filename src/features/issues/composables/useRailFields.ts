@@ -15,6 +15,11 @@ const PINNED_KEYS = new Set(RAIL_FIELDS.filter((f) => f.pinned).map((f) => f.key
  * Owns the transient per-session reveal/removal intent for the Details Rail and
  * derives which fields are visible vs. available in the Add menu. `revealed` and
  * `removed` never persist — they are cleared by `resetReveal()` on save/cancel.
+ *
+ * @param draft - Must be a deep reactive `Ref<IssueDraft | null>` (as produced by
+ *   `useIssueDraft`), not a `shallowRef`. `remove()` clears a field by mutating the
+ *   draft object in place, relying on deep reactivity to propagate the change.
+ * @param original - The unmodified baseline draft for deriving default visibility.
  */
 export function useRailFields(draft: Ref<IssueDraft | null>, original: Ref<IssueDraft | null>) {
   const revealed = ref(new Set<RailFieldKey>())
@@ -35,9 +40,11 @@ export function useRailFields(draft: Ref<IssueDraft | null>, original: Ref<Issue
   })
 
   function reveal(key: RailFieldKey) {
-    const r = new Set(removed.value)
-    r.delete(key)
-    removed.value = r
+    if (removed.value.has(key)) {
+      const r = new Set(removed.value)
+      r.delete(key)
+      removed.value = r
+    }
     const v = new Set(revealed.value)
     v.add(key)
     revealed.value = v
