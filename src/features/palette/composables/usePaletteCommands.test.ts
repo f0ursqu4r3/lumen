@@ -1,0 +1,68 @@
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { defineComponent, h, ref } from 'vue'
+
+// Stub the data sources so we test merge/order, not data fetching.
+vi.mock('@/features/projects/composables/useProjectBrowser', () => ({
+  useProjectBrowser: () => ({
+    flatRows: ref([{ name: 'Proj', fullPath: 'grp/proj' }]),
+  }),
+}))
+vi.mock('@/shared/composables/useSavedViews', () => ({
+  useSavedViews: () => ({ views: ref([{ id: 'v1', name: 'My bugs', query: { label: 'bug' } }]) }),
+}))
+vi.mock('./usePaletteIssueSearch', () => ({
+  usePaletteIssueSearch: () => ({
+    hits: ref([{ iid: '3', title: 'Fix login', state: 'opened' }]),
+    isFetching: ref(false),
+  }),
+}))
+
+const route = { params: { fullPath: 'grp/proj' }, query: {} }
+vi.mock('vue-router', () => ({
+  useRoute: () => route,
+  useRouter: () => ({ push: vi.fn() }),
+}))
+
+import { usePaletteCommands } from './usePaletteCommands'
+
+// Mount inside a component so composable lifecycle hooks run.
+function run(query = ref('')) {
+  let api!: ReturnType<typeof usePaletteCommands>
+  const Comp = defineComponent({
+    setup() {
+      api = usePaletteCommands(query)
+      return () => h('div')
+    },
+  })
+  mount(Comp)
+  return api
+}
+
+describe('usePaletteCommands', () => {
+  it('orders non-empty groups Actions, Projects, Issues, Views', () => {
+    const { groups } = run(ref('login'))
+    expect(groups.value.map((g) => g.group)).toEqual(['Actions', 'Projects', 'Issues', 'Views'])
+  })
+
+  it('flat list concatenates group items in group order', () => {
+    const { groups, flat } = run(ref('login'))
+    const expected = groups.value.flatMap((g) => g.items.map((i) => i.id))
+    expect(flat.value.map((c) => c.id)).toEqual(expected)
+  })
+
+  it('filters Actions and Views by the query', () => {
+    const { groups } = run(ref('settings'))
+    const actions = groups.value.find((g) => g.group === 'Actions')!
+    expect(actions.items.map((c) => c.id)).toEqual(['settings'])
+    // "settings" matches no saved-view name, so the Views group drops out.
+    expect(groups.value.some((g) => g.group === 'Views')).toBe(false)
+  })
+
+  it('drops empty groups entirely', () => {
+    const { groups } = run(ref('zzz-no-match'))
+    expect(groups.value.some((g) => g.group === 'Issues')).toBe(true) // hits stub still returns one
+    // Actions filtered to none for this query -> group omitted.
+    expect(groups.value.some((g) => g.group === 'Actions')).toBe(false)
+  })
+})
