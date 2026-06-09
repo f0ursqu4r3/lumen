@@ -39,9 +39,24 @@ describe('shell opt-in meta', () => {
     expect(router.resolve('/').meta.shell).toBe(true)
     expect(router.resolve('/projects').meta.shell).toBe(true)
   })
-  it('leaves project + window routes out of the shell (phase 1)', () => {
+  it('leaves detail + window routes out of the shell (phase 1)', () => {
     const router = createRouter({ history: createMemoryHistory(), routes })
-    expect(router.resolve('/projects/grp/proj/issues').meta.shell).toBeFalsy()
+    expect(router.resolve('/projects/grp/proj/issues/42').meta.shell).toBeFalsy()
+    expect(router.resolve('/projects/grp/proj/issues-window').meta.shell).toBeFalsy()
+  })
+})
+
+describe('shell opt-in for project list routes', () => {
+  it('opts issues, merge-requests, and pipelines into the shell', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/projects/grp/proj/issues').meta.shell).toBe(true)
+    expect(router.resolve('/projects/grp/proj/merge-requests').meta.shell).toBe(true)
+    expect(router.resolve('/projects/grp/proj/pipelines').meta.shell).toBe(true)
+  })
+  it('keeps detail + window routes out of the shell (phase 2)', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/projects/grp/proj/issues/42').meta.shell).toBeFalsy()
+    expect(router.resolve('/projects/grp/proj/merge-requests/5').meta.shell).toBeFalsy()
     expect(router.resolve('/projects/grp/proj/issues-window').meta.shell).toBeFalsy()
   })
 })
