@@ -17,6 +17,7 @@ const { onTabNav } = useTabNav()
       </p>
       <RouterLink
         :to="{ name: 'projects' }"
+        data-testid="back-to-projects"
         class="group/back -ml-1 mt-2 flex max-w-full items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
       >
         <ArrowLeft
@@ -25,6 +26,13 @@ const { onTabNav } = useTabNav()
         <h1 class="min-w-0 truncate text-title leading-none font-semibold text-foreground">
           {{ repoName }}
         </h1>
+        <span
+          v-if="count"
+          class="shrink-0 font-mono text-sm tabular-nums text-muted-foreground/70"
+          :aria-label="`${count} merge requests`"
+        >
+          {{ count }}
+        </span>
       </RouterLink>
     </div>
     <div class="flex shrink-0 items-center gap-3">

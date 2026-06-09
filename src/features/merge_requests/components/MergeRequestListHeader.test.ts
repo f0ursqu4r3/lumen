@@ -10,11 +10,13 @@ function mountHeader() {
 }
 
 describe('MergeRequestListHeader', () => {
-  it('renders the repo name and a link back to issues', () => {
+  it('renders the repo name, count, and nav links to projects/issues/pipelines', () => {
     const w = mountHeader()
     expect(w.text()).toContain('proj')
+    expect(w.text()).toContain('3')
     const links = w.findAllComponents(RouterLinkStub).map((l) => l.props('to'))
-    expect(links).toContainEqual({ name: 'issues', params: { fullPath: 'grp/proj' } })
     expect(links).toContainEqual({ name: 'projects' })
+    expect(links).toContainEqual({ name: 'issues', params: { fullPath: 'grp/proj' } })
+    expect(links).toContainEqual({ name: 'pipelines', params: { fullPath: 'grp/proj' } })
   })
 })
