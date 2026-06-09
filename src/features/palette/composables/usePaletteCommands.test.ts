@@ -9,7 +9,9 @@ vi.mock('@/features/projects/composables/useProjectBrowser', () => ({
   }),
 }))
 vi.mock('@/shared/composables/useSavedViews', () => ({
-  useSavedViews: () => ({ views: ref([{ id: 'v1', name: 'My bugs', query: { label: 'bug' } }]) }),
+  useSavedViews: () => ({
+    views: ref([{ id: 'v1', name: 'My open bugs', query: { label: 'bug' } }]),
+  }),
 }))
 vi.mock('./usePaletteIssueSearch', () => ({
   usePaletteIssueSearch: () => ({
@@ -40,13 +42,16 @@ function run(query = ref('')) {
 }
 
 describe('usePaletteCommands', () => {
+  // "open" matches several Actions ("Open …") and the "My open bugs" view, so
+  // every group is non-empty: Actions + Views by name filter, Projects from the
+  // (mocked) browser, Issues from the (mocked) search hits.
   it('orders non-empty groups Actions, Projects, Issues, Views', () => {
-    const { groups } = run(ref('login'))
+    const { groups } = run(ref('open'))
     expect(groups.value.map((g) => g.group)).toEqual(['Actions', 'Projects', 'Issues', 'Views'])
   })
 
   it('flat list concatenates group items in group order', () => {
-    const { groups, flat } = run(ref('login'))
+    const { groups, flat } = run(ref('open'))
     const expected = groups.value.flatMap((g) => g.items.map((i) => i.id))
     expect(flat.value.map((c) => c.id)).toEqual(expected)
   })

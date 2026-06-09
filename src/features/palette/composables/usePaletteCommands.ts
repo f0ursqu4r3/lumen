@@ -13,11 +13,6 @@ import {
 } from '../lib/sources'
 import { GROUP_ORDER, type Command, type CommandGroup, type PaletteContext } from '../lib/types'
 
-// Short queries (< threshold chars) are exploratory — show all actions/views.
-// Longer queries are targeting a specific command, so filter them.
-const COMMAND_FILTER_MIN_LEN = 6
-const commandFilterQuery = (q: string) => (q.length >= COMMAND_FILTER_MIN_LEN ? q : '')
-
 export function usePaletteCommands(query: Ref<string>) {
   const router = useRouter()
   const route = useRoute()
@@ -42,14 +37,16 @@ export function usePaletteCommands(query: Ref<string>) {
 
   const groups = computed(() => {
     const c = ctx.value
-    const cmdQuery = commandFilterQuery(c.query)
     const byGroup: Record<CommandGroup, Command[]> = {
-      Actions: filterByQuery(routeCommands(c), cmdQuery),
+      // Actions and Views are name-filtered by the query (like the prior
+      // palette); Projects arrive pre-filtered from useProjectBrowser and
+      // Issues come from the search/jump sources.
+      Actions: filterByQuery(routeCommands(c), c.query),
       Projects: projectCommands(flatRows.value, c),
       Issues: [issueJumpCommand(c), ...issueCommands(hits.value, c)].filter(
         (x): x is Command => x !== null,
       ),
-      Views: filterByQuery(savedViewCommands(views.value, c), cmdQuery),
+      Views: filterByQuery(savedViewCommands(views.value, c), c.query),
     }
     return GROUP_ORDER.map((group) => ({ group, items: byGroup[group] })).filter(
       (g) => g.items.length > 0,
