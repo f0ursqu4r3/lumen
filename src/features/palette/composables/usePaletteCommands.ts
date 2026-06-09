@@ -55,5 +55,6 @@ export function usePaletteCommands(query: Ref<string>) {
 
   const flat = computed<Command[]>(() => groups.value.flatMap((g) => g.items))
 
+  // Palette consumers think in terms of "searching", not query "fetching".
   return { groups, flat, isSearching: isFetching }
 }

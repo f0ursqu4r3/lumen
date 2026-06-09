@@ -66,7 +66,9 @@ describe('usePaletteCommands', () => {
 
   it('drops empty groups entirely', () => {
     const { groups } = run(ref('zzz-no-match'))
-    expect(groups.value.some((g) => g.group === 'Issues')).toBe(true) // hits stub still returns one
+    // Issues survive a no-match query (search hits are not name-filtered here).
+    const issues = groups.value.find((g) => g.group === 'Issues')
+    expect(issues?.items.map((c) => c.id)).toEqual(['issue-3'])
     // Actions filtered to none for this query -> group omitted.
     expect(groups.value.some((g) => g.group === 'Actions')).toBe(false)
   })
