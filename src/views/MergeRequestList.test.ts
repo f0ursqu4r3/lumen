@@ -56,7 +56,7 @@ vi.mock('@/features/merge_requests/composables/useMergeRequests', () => ({
 }))
 vi.mock('@/features/merge_requests/composables/useMrSavedViews', () => ({
   useMrSavedViews: () => ({
-    savedViews: { views: ref([]) },
+    savedViews: { views: ref([]), rename: () => {} },
     activeViewId: ref(null),
     canSaveView: ref(false),
     loadedViewId: ref(null),
