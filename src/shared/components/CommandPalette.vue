@@ -2,15 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { onKeyStroke } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  FileText,
-  FolderGit2,
-  GitBranch,
-  Hash,
-  Plus,
-  Search,
-  Settings,
-} from '@lucide/vue'
+import { FileText, FolderGit2, GitBranch, Hash, Plus, Search, Settings, X } from '@lucide/vue'
 import { useProjectBrowser } from '@/features/projects/composables/useProjectBrowser'
 import { openSettings } from '@/shared/composables/useSettings'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui/dialog'
@@ -171,7 +163,7 @@ function onKeydown(event: KeyboardEvent) {
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent class="top-[18%] max-w-2xl translate-y-0 gap-0 overflow-hidden p-0">
+    <DialogContent hide-close class="top-[18%] max-w-2xl translate-y-0 gap-0 overflow-hidden p-0">
       <DialogTitle class="sr-only">Command palette</DialogTitle>
       <DialogDescription class="sr-only">
         Search projects and run common Lumen commands.
@@ -188,9 +180,17 @@ function onKeydown(event: KeyboardEvent) {
           class="h-9 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           @keydown="onKeydown"
         />
+        <button
+          type="button"
+          aria-label="Close"
+          class="shrink-0 rounded-sm text-muted-foreground opacity-70 outline-none transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50"
+          @click="open = false"
+        >
+          <X class="size-4" />
+        </button>
       </div>
 
-      <div class="max-h-[28rem] overflow-y-auto p-1.5">
+      <div class="max-h-112 overflow-y-auto p-1.5">
         <button
           v-for="(command, index) in commands"
           :key="command.id"
