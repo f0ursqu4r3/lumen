@@ -9,6 +9,11 @@ vi.mock('@/features/pipelines/composables/usePipelines', () => ({
 }))
 // isActivePipeline lives in gitlab/pipelineParams; keep the real one.
 
+// Spy on the tab-nav handler so we can assert clicks route through it (it
+// preserves modified-click "open in new window" behavior).
+const { onTabNav } = vi.hoisted(() => ({ onTabNav: vi.fn() }))
+vi.mock('@/shared/composables/useTabNav', () => ({ useTabNav: () => ({ onTabNav }) }))
+
 import ProjectTabNav from './ProjectTabNav.vue'
 
 function mountNav(props: { fullPath: string; active: string }) {
@@ -38,5 +43,18 @@ describe('ProjectTabNav', () => {
     const w = mountNav({ fullPath: 'grp/proj', active: 'issues' })
     expect(w.get('[data-testid="tab-pipelines-running"]').text()).toContain('2')
     pipelines.value = []
+  })
+
+  it('routes tab clicks through onTabNav', async () => {
+    onTabNav.mockClear()
+    const w = mountNav({ fullPath: 'grp/proj', active: 'issues' })
+    const mrTab = w
+      .findAllComponents(RouterLinkStub)
+      .find((l) => (l.props('to') as { name: string }).name === 'merge-requests')!
+    await mrTab.trigger('click')
+    expect(onTabNav).toHaveBeenCalledWith(expect.anything(), {
+      name: 'merge-requests',
+      params: { fullPath: 'grp/proj' },
+    })
   })
 })
