@@ -7,10 +7,17 @@ import DashboardLane from '@/features/dashboard/components/DashboardLane.vue'
 import DashboardIssueRow from '@/features/dashboard/components/DashboardIssueRow.vue'
 import DashboardMrRow from '@/features/dashboard/components/DashboardMrRow.vue'
 
-const { data: username } = useCurrentUser()
+import { computed } from 'vue'
+
+const { data: username, isPending: userPending } = useCurrentUser()
 const assignedIssues = useAssignedIssues(username)
 const assignedMrs = useAssignedMergeRequests()
 const reviewMrs = useReviewRequestedMergeRequests()
+
+// While the username is still resolving, the assigned-issues query is disabled
+// (so its own isLoading is false). Treat that as loading so the lane shows a
+// skeleton instead of flashing "nothing assigned" on cold start.
+const issuesLoading = computed(() => userPending.value || assignedIssues.isLoading.value)
 </script>
 
 <template>
@@ -29,7 +36,7 @@ const reviewMrs = useReviewRequestedMergeRequests()
       <DashboardLane
         title="Assigned Issues"
         :count="assignedIssues.issues.value.length"
-        :is-loading="assignedIssues.isLoading.value"
+        :is-loading="issuesLoading"
         :error="assignedIssues.error.value"
         :is-empty="!assignedIssues.issues.value.length"
         :has-more="assignedIssues.hasMore.value"
