@@ -5,6 +5,7 @@ import {
   GitBranch,
   GitMerge,
   Hash,
+  Home,
   Plus,
   Settings,
 } from '@lucide/vue'
@@ -68,6 +69,14 @@ export function routeCommands(ctx: PaletteContext): Command[] {
   }
 
   commands.push(
+    {
+      id: 'my-work',
+      group: 'Actions',
+      title: 'Go to My Work',
+      subtitle: 'Your assigned issues and reviews',
+      icon: Home,
+      action: () => router.push({ name: 'home' }),
+    },
     {
       id: 'projects',
       group: 'Actions',
