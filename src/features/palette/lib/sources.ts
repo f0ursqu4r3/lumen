@@ -1,7 +1,22 @@
-import { Bookmark, FileText, FolderGit2, GitBranch, Hash, Plus, Settings } from '@lucide/vue'
+import {
+  Bookmark,
+  FileText,
+  FolderGit2,
+  GitBranch,
+  GitMerge,
+  Hash,
+  Plus,
+  Settings,
+} from '@lucide/vue'
 import { openSettings } from '@/shared/composables/useSettings'
 import type { SavedView } from '@/shared/composables/useSavedViews'
-import type { Command, PaletteContext, PaletteIssueHit, PaletteProjectRow } from './types'
+import type {
+  Command,
+  PaletteContext,
+  PaletteIssueHit,
+  PaletteMrHit,
+  PaletteProjectRow,
+} from './types'
 
 const PROJECT_RENDER_CAP = 25
 
@@ -32,6 +47,14 @@ export function routeCommands(ctx: PaletteContext): Command[] {
         subtitle: currentProject,
         icon: FileText,
         action: () => router.push({ name: 'issues', params: { fullPath: currentProject } }),
+      },
+      {
+        id: 'project-merge-requests',
+        group: 'Actions',
+        title: 'Open Merge Requests',
+        subtitle: currentProject,
+        icon: GitMerge,
+        action: () => router.push({ name: 'merge-requests', params: { fullPath: currentProject } }),
       },
       {
         id: 'project-pipelines',
@@ -93,6 +116,37 @@ export function issueCommands(hits: PaletteIssueHit[], ctx: PaletteContext): Com
     subtitle: `#${h.iid} · ${h.state}`,
     icon: Hash,
     action: () => router.push({ name: 'issue', params: { fullPath: currentProject, iid: h.iid } }),
+  }))
+}
+
+/** Direct `!42` jump to a merge request in the current project. */
+export function mrJumpCommand(ctx: PaletteContext): Command | null {
+  const { currentProject, query, router } = ctx
+  if (!currentProject) return null
+  const iid = query.trim().match(/^!(\d+)$/)?.[1]
+  if (!iid) return null
+  return {
+    id: `mr-jump-${iid}`,
+    group: 'Merge Requests',
+    title: `Open Merge Request !${iid}`,
+    subtitle: currentProject,
+    icon: GitMerge,
+    action: () => router.push({ name: 'merge-request', params: { fullPath: currentProject, iid } }),
+  }
+}
+
+/** MR title-search hits → Merge Requests commands. */
+export function mrCommands(hits: PaletteMrHit[], ctx: PaletteContext): Command[] {
+  const { currentProject, router } = ctx
+  if (!currentProject) return []
+  return hits.map((h) => ({
+    id: `mr-${h.iid}`,
+    group: 'Merge Requests',
+    title: h.title,
+    subtitle: `!${h.iid} · ${h.state}`,
+    icon: GitMerge,
+    action: () =>
+      router.push({ name: 'merge-request', params: { fullPath: currentProject, iid: h.iid } }),
   }))
 }
 

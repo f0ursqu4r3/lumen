@@ -33,7 +33,9 @@ export function createPersistedQueryClient(url: string | null): QueryClient {
       // typeahead results — otherwise a prior session's search would rehydrate
       // and flash stale hits into the command palette on the next launch.
       shouldDehydrateQuery: (query) =>
-        query.state.status === 'success' && query.queryKey[0] !== 'palette-issue-search',
+        query.state.status === 'success' &&
+        query.queryKey[0] !== 'palette-issue-search' &&
+        query.queryKey[0] !== 'palette-mr-search',
     },
   })
   return queryClient

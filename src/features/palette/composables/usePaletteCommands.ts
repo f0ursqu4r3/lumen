@@ -4,10 +4,13 @@ import { useProjectBrowser } from '@/features/projects/composables/useProjectBro
 import { useSavedViews } from '@/shared/composables/useSavedViews'
 import { FILTER_KEYS } from '@/features/issues/composables/useIssueFilters'
 import { usePaletteIssueSearch } from './usePaletteIssueSearch'
+import { usePaletteMrSearch } from './usePaletteMrSearch'
 import {
   filterByQuery,
   issueCommands,
   issueJumpCommand,
+  mrCommands,
+  mrJumpCommand,
   projectCommands,
   routeCommands,
   savedViewCommands,
@@ -29,6 +32,7 @@ export function usePaletteCommands(query: Ref<string>) {
   const projectRef = computed(() => currentProject.value ?? '')
   const { views } = useSavedViews(projectRef, 'issue', FILTER_KEYS)
   const { hits, isFetching } = usePaletteIssueSearch(query, currentProject)
+  const { hits: mrHits } = usePaletteMrSearch(query, currentProject)
 
   const ctx = computed<PaletteContext>(() => ({
     currentProject: currentProject.value,
@@ -46,6 +50,9 @@ export function usePaletteCommands(query: Ref<string>) {
       Actions: filterByQuery(routeCommands(c), c.query),
       Projects: projectCommands(flatRows.value, c),
       Issues: [issueJumpCommand(c), ...issueCommands(hits.value, c)].filter(
+        (x): x is Command => x !== null,
+      ),
+      'Merge Requests': [mrJumpCommand(c), ...mrCommands(mrHits.value, c)].filter(
         (x): x is Command => x !== null,
       ),
       Views: filterByQuery(savedViewCommands(views.value, c), c.query),

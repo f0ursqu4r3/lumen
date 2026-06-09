@@ -4,6 +4,8 @@ import {
   routeCommands,
   issueJumpCommand,
   issueCommands,
+  mrJumpCommand,
+  mrCommands,
   projectCommands,
   savedViewCommands,
   filterByQuery,
@@ -24,6 +26,7 @@ describe('routeCommands', () => {
     const ids = routeCommands(ctx()).map((c) => c.id)
     expect(ids).toContain('new-issue')
     expect(ids).toContain('project-issues')
+    expect(ids).toContain('project-merge-requests')
     expect(ids).toContain('project-pipelines')
     expect(ids).toContain('projects')
     expect(ids).toContain('settings')
@@ -84,6 +87,43 @@ describe('issueCommands', () => {
 
   it('returns nothing when no project is open', () => {
     expect(issueCommands(hits, ctx({ currentProject: null }))).toEqual([])
+  })
+})
+
+describe('mrJumpCommand', () => {
+  it('jumps on the !iid convention', () => {
+    expect(mrJumpCommand(ctx({ query: '!42' }))?.id).toBe('mr-jump-42')
+  })
+  it('ignores #number and plain text and missing project', () => {
+    expect(mrJumpCommand(ctx({ query: '#42' }))).toBeNull()
+    expect(mrJumpCommand(ctx({ query: '42' }))).toBeNull()
+    expect(mrJumpCommand(ctx({ query: '!42', currentProject: null }))).toBeNull()
+  })
+  it('pushes the merge-request route', () => {
+    const c = ctx({ query: '!7' })
+    mrJumpCommand(c)!.action()
+    expect(c.router.push).toHaveBeenCalledWith({
+      name: 'merge-request',
+      params: { fullPath: 'grp/proj', iid: '7' },
+    })
+  })
+})
+
+describe('mrCommands', () => {
+  it('maps MR hits to Merge Requests commands', () => {
+    const [cmd] = mrCommands(
+      [{ iid: '9', title: 'Refactor', state: 'opened', draft: false }],
+      ctx(),
+    )
+    expect(cmd.group).toBe('Merge Requests')
+    expect(cmd.title).toBe('Refactor')
+    expect(cmd.subtitle).toBe('!9 · opened')
+  })
+})
+
+describe('routeCommands MR action', () => {
+  it('includes the Open Merge Requests action when a project is open', () => {
+    expect(routeCommands(ctx()).map((c) => c.id)).toContain('project-merge-requests')
   })
 })
 
