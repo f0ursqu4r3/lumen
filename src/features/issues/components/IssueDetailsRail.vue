@@ -205,7 +205,7 @@ const weightText = computed({
           aria-label="Confidential"
           @update:checked="draftConfidential = $event === true"
         />
-        <span>Confidential</span>
+        <span>Mark this issue confidential</span>
       </label>
     </RailField>
 
