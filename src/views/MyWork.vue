@@ -9,6 +9,9 @@ import DashboardMrRow from '@/features/dashboard/components/DashboardMrRow.vue'
 import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 
 import { computed } from 'vue'
+import { useTitle } from '@vueuse/core'
+
+useTitle('My Work · lumen')
 
 const { data: username, isPending: userPending } = useCurrentUser()
 const assignedIssues = useAssignedIssues(username)

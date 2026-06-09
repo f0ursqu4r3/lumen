@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/
 import { Input } from '@/shared/ui/input'
 import { useCommandPalette } from '@/shared/composables/useCommandPalette'
 
-const { isOpen: open } = useCommandPalette()
+const { isOpen: open, open: openPalette, close: closePalette } = useCommandPalette()
 const query = ref('')
 const active = ref(0)
 const input = ref<{ $el: HTMLInputElement } | null>(null)
@@ -52,11 +52,11 @@ watch(flat, () => {
 onKeyStroke('k', (event) => {
   if (!(event.metaKey || event.ctrlKey)) return
   event.preventDefault()
-  open.value = true
+  openPalette()
 })
 
 function close() {
-  open.value = false
+  closePalette()
 }
 
 function run(command: Command | undefined) {
