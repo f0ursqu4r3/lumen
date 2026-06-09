@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus, ArrowLeft, Workflow } from '@lucide/vue'
+import { Plus, ArrowLeft, Workflow, GitMerge } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
 import Odometer from '@/shared/components/Odometer.vue'
 import { useTabNav } from '@/shared/composables/useTabNav'
@@ -53,6 +53,15 @@ const { onTabNav } = useTabNav()
       </p>
     </div>
     <div class="flex shrink-0 items-center gap-3">
+      <Button variant="outline" data-testid="view-merge-requests" as-child>
+        <RouterLink
+          :to="{ name: 'merge-requests', params: { fullPath } }"
+          @click="onTabNav($event, { name: 'merge-requests', params: { fullPath } })"
+        >
+          <GitMerge />
+          Merge Requests
+        </RouterLink>
+      </Button>
       <Button variant="outline" data-testid="view-pipelines" as-child>
         <RouterLink
           :to="{ name: 'pipelines', params: { fullPath } }"
