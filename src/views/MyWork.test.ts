@@ -99,4 +99,9 @@ describe('MyWork', () => {
     expect(w.find('[data-testid="lane-skeleton"]').exists()).toBe(true)
     expect(w.text()).not.toContain('Nothing assigned to you.')
   })
+
+  it('does not render its own page header (the shell provides it)', () => {
+    const w = mount(MyWork, { global: { stubs: { RouterLink: RouterLinkStub } } })
+    expect(w.find('h1').exists()).toBe(false)
+  })
 })

@@ -2,6 +2,16 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { rpc } from '@/shared/lib/rpc'
 import { nextRoute } from './guard'
+
+// Typed route meta so `meta.shell` is checked at the route records and in
+// shouldShowChrome. Lives here (a module that imports vue-router) so it augments
+// RouteMeta rather than replacing the module's types.
+declare module 'vue-router' {
+  interface RouteMeta {
+    /** Opt a route into the persistent app shell. Default: bare (no chrome). */
+    shell?: boolean
+  }
+}
 // Views are imported eagerly, not lazily. This is a desktop app served from the
 // `views://` scheme with on-disk assets, so route-level code-splitting buys no
 // load-time win — and dynamically-imported chunks have proven flaky to fetch
@@ -22,11 +32,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: MyWork,
+    meta: { shell: true },
   },
   {
     path: '/projects',
     name: 'projects',
     component: ProjectPicker,
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/issues',

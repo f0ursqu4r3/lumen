@@ -59,9 +59,9 @@ const mockAssigned = (rows: { name: string; fullPath: string; assignedOpen: numb
 const mountPicker = () =>
   mount(ProjectPicker, { global: { stubs: { RouterLink: RouterLinkStub } } })
 
-// The header carries a "← My Work" RouterLink back to the dashboard; the project
-// rows are the meaningful links under test, so filter the back-link out by its
-// test id before asserting on project links.
+// The project rows are the meaningful links under test. (The header's old
+// "← My Work" back-link moved to the shell rail, so there's nothing to filter
+// out anymore — the filter is kept as a harmless no-op.)
 const projectLinks = (w: ReturnType<typeof mountPicker>) =>
   w
     .findAllComponents(RouterLinkStub)
@@ -134,11 +134,10 @@ describe('ProjectPicker', () => {
     expect(paths).toEqual(['g/a', 'g/b', 'g/c'])
   })
 
-  it('links back to My Work from the header', () => {
+  it('no longer renders an in-view My Work back-link (the rail provides it)', () => {
     mockProjects({ projects: [] })
-    const back = mountPicker().find('[data-testid="back-to-my-work"]')
-    expect(back.exists()).toBe(true)
-    expect(back.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'home' })
+    const w = mountPicker()
+    expect(w.find('[data-testid="back-to-my-work"]').exists()).toBe(false)
   })
 
   it('toggles a star when the star button is clicked', async () => {

@@ -6,8 +6,12 @@ import { useReviewRequestedMergeRequests } from '@/features/dashboard/composable
 import DashboardLane from '@/features/dashboard/components/DashboardLane.vue'
 import DashboardIssueRow from '@/features/dashboard/components/DashboardIssueRow.vue'
 import DashboardMrRow from '@/features/dashboard/components/DashboardMrRow.vue'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 
 import { computed } from 'vue'
+import { useTitle } from '@vueuse/core'
+
+useTitle('My Work · lumen')
 
 const { data: username, isPending: userPending } = useCurrentUser()
 const assignedIssues = useAssignedIssues(username)
@@ -21,17 +25,7 @@ const issuesLoading = computed(() => userPending.value || assignedIssues.isLoadi
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-3xl px-6 py-8">
-    <header class="mb-8 flex items-end justify-between">
-      <h1 class="text-title font-semibold text-foreground">My Work</h1>
-      <RouterLink
-        :to="{ name: 'projects' }"
-        class="text-sm text-muted-foreground hover:text-foreground"
-      >
-        Projects →
-      </RouterLink>
-    </header>
-
+  <ViewContainer width="narrow">
     <div class="space-y-8">
       <DashboardLane
         title="Assigned Issues"
@@ -75,5 +69,5 @@ const issuesLoading = computed(() => userPending.value || assignedIssues.isLoadi
         </li>
       </DashboardLane>
     </div>
-  </div>
+  </ViewContainer>
 </template>
