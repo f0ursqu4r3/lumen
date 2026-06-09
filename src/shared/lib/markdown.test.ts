@@ -1,5 +1,24 @@
 import { describe, it, expect } from 'vitest'
-import { renderMarkdown, classifyUpload, extractMedia } from './markdown'
+import { renderMarkdown, classifyUpload, extractMedia, sanitizeHtml } from './markdown'
+
+describe('sanitizeHtml', () => {
+  it('strips script/event-handler XSS vectors from server HTML', () => {
+    expect(sanitizeHtml('<img src=x onerror="alert(1)">')).not.toContain('onerror')
+    expect(sanitizeHtml('<a href="javascript:alert(1)">x</a>')).not.toContain('javascript:')
+    expect(sanitizeHtml('<script>alert(1)</script>')).not.toContain('<script')
+  })
+  it('keeps the same media allow-list as rendered markdown', () => {
+    const out = sanitizeHtml('<video controls preload="none"><p>safe</p>')
+    expect(out).toContain('<video')
+    expect(out).toContain('controls')
+    expect(out).toContain('safe')
+  })
+  it('returns an empty string for empty/null input', () => {
+    expect(sanitizeHtml('')).toBe('')
+    expect(sanitizeHtml(null)).toBe('')
+    expect(sanitizeHtml(undefined)).toBe('')
+  })
+})
 
 describe('renderMarkdown', () => {
   it('renders markdown to HTML', () => {

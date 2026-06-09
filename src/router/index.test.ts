@@ -24,3 +24,18 @@ describe('issues-window route', () => {
     expect(props).toEqual({ fullPath: 'grp/proj', iids: [], windowed: false })
   })
 })
+
+describe('merge request routes', () => {
+  it('resolves the MR list and detail routes', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    const list = router.resolve('/projects/grp/proj/merge-requests')
+    expect(list.name).toBe('merge-requests')
+    expect(list.params.fullPath).toBe('grp/proj')
+
+    const detail = router.resolve('/projects/grp/proj/merge-requests/5')
+    expect(detail.name).toBe('merge-request')
+    const record = detail.matched.at(-1)!
+    const props = (record.props.default as (r: typeof detail) => Record<string, unknown>)(detail)
+    expect(props).toEqual({ fullPath: 'grp/proj', iid: '5' })
+  })
+})

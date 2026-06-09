@@ -4,9 +4,14 @@ import { defineComponent, h, ref } from 'vue'
 
 // A mutable hits ref so individual tests can simulate a search returning
 // results or nothing (e.g. the error/empty path that collapses to []).
-const { hits } = vi.hoisted(() => ({
+const { hits, mrHits } = vi.hoisted(() => ({
   hits: {
     value: [{ iid: '3', title: 'Fix login', state: 'opened' }] as Array<Record<string, unknown>>,
+  },
+  mrHits: {
+    value: [{ iid: '9', title: 'Refactor', state: 'opened', draft: false }] as Array<
+      Record<string, unknown>
+    >,
   },
 }))
 
@@ -24,9 +29,13 @@ vi.mock('@/shared/composables/useSavedViews', () => ({
 vi.mock('./usePaletteIssueSearch', () => ({
   usePaletteIssueSearch: () => ({ hits: ref(hits.value), isFetching: ref(false) }),
 }))
+vi.mock('./usePaletteMrSearch', () => ({
+  usePaletteMrSearch: () => ({ hits: ref(mrHits.value), isFetching: ref(false) }),
+}))
 
 afterEach(() => {
   hits.value = [{ iid: '3', title: 'Fix login', state: 'opened' }]
+  mrHits.value = [{ iid: '9', title: 'Refactor', state: 'opened', draft: false }]
 })
 
 const route = { params: { fullPath: 'grp/proj' }, query: {} }
@@ -54,9 +63,15 @@ describe('usePaletteCommands', () => {
   // "open" matches several Actions ("Open …") and the "My open bugs" view, so
   // every group is non-empty: Actions + Views by name filter, Projects from the
   // (mocked) browser, Issues from the (mocked) search hits.
-  it('orders non-empty groups Actions, Projects, Issues, Views', () => {
+  it('orders non-empty groups Actions, Projects, Issues, Merge Requests, Views', () => {
     const { groups } = run(ref('open'))
-    expect(groups.value.map((g) => g.group)).toEqual(['Actions', 'Projects', 'Issues', 'Views'])
+    expect(groups.value.map((g) => g.group)).toEqual([
+      'Actions',
+      'Projects',
+      'Issues',
+      'Merge Requests',
+      'Views',
+    ])
   })
 
   it('flat list concatenates group items in group order', () => {
@@ -83,10 +98,12 @@ describe('usePaletteCommands', () => {
   })
 
   it('drops the Issues group but keeps the rest when search yields no hits', () => {
-    // Simulates the resilient path: a failed/empty issue search collapses to [].
+    // Simulates the resilient path: a failed/empty search collapses to [].
     hits.value = []
+    mrHits.value = []
     const { groups } = run(ref('open'))
     expect(groups.value.some((g) => g.group === 'Issues')).toBe(false)
+    expect(groups.value.some((g) => g.group === 'Merge Requests')).toBe(false)
     expect(groups.value.map((g) => g.group)).toEqual(['Actions', 'Projects', 'Views'])
   })
 })

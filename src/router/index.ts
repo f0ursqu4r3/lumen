@@ -13,6 +13,8 @@ import IssueDetail from '@/views/IssueDetail.vue'
 import MultiIssueWindow from '@/views/MultiIssueWindow.vue'
 import PipelineList from '@/views/PipelineList.vue'
 import ConnectView from '@/views/ConnectView.vue'
+import MergeRequestList from '@/views/MergeRequestList.vue'
+import MergeRequestDetail from '@/views/MergeRequestDetail.vue'
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -54,6 +56,21 @@ export const routes: RouteRecordRaw[] = [
     name: 'pipelines',
     component: PipelineList,
     props: true,
+  },
+  {
+    path: '/projects/:fullPath(.*)/merge-requests',
+    name: 'merge-requests',
+    component: MergeRequestList,
+    props: true,
+  },
+  {
+    path: '/projects/:fullPath(.*)/merge-requests/:iid',
+    name: 'merge-request',
+    component: MergeRequestDetail,
+    props: (route) => ({
+      fullPath: route.params.fullPath,
+      iid: route.params.iid,
+    }),
   },
   {
     path: '/connect',
