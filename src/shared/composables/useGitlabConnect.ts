@@ -80,5 +80,16 @@ export function useGitlabConnect(opts: { allowExistingToken?: boolean } = {}) {
     }
   }
 
-  return { url, token, tokenSuffix, tokenPlaceholder, status, message, testing, canSubmit, loadUrl, save }
+  return {
+    url,
+    token,
+    tokenSuffix,
+    tokenPlaceholder,
+    status,
+    message,
+    testing,
+    canSubmit,
+    loadUrl,
+    save,
+  }
 }
