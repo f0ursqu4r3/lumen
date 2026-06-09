@@ -70,6 +70,13 @@ useIntersectionObserver(sentinel, ([entry]) => {
     <!-- Header — mirrors the issues view so the entry feels of a piece. -->
     <div class="flex items-end justify-between gap-4">
       <div class="min-w-0">
+        <RouterLink
+          :to="{ name: 'home' }"
+          data-testid="back-to-my-work"
+          class="mb-2 inline-flex text-sm text-muted-foreground hover:text-foreground"
+        >
+          ← My Work
+        </RouterLink>
         <p
           class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
         >

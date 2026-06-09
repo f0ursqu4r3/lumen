@@ -34,7 +34,20 @@ describe('routeCommands', () => {
 
   it('omits project-scoped commands when no project is open', () => {
     const ids = routeCommands(ctx({ currentProject: null })).map((c) => c.id)
-    expect(ids).toEqual(['projects', 'settings'])
+    expect(ids).toEqual(['my-work', 'projects', 'settings'])
+  })
+
+  it('always includes the Go to My Work action', () => {
+    expect(routeCommands(ctx()).map((c) => c.id)).toContain('my-work')
+    expect(routeCommands(ctx({ currentProject: null })).map((c) => c.id)).toContain('my-work')
+  })
+
+  it('the My Work action navigates home', () => {
+    const c = ctx()
+    routeCommands(c)
+      .find((cmd) => cmd.id === 'my-work')!
+      .action()
+    expect(c.router.push).toHaveBeenCalledWith({ name: 'home' })
   })
 
   it('tags every command as an Actions group command', () => {

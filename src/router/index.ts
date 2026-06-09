@@ -7,6 +7,7 @@ import { nextRoute } from './guard'
 // load-time win — and dynamically-imported chunks have proven flaky to fetch
 // over `views://` at navigation time (blank popouts, failed pipeline view).
 // Bundling the views into the main script sidesteps that entire class of bug.
+import MyWork from '@/views/MyWork.vue'
 import ProjectPicker from '@/views/ProjectPicker.vue'
 import IssueList from '@/views/IssueList.vue'
 import IssueDetail from '@/views/IssueDetail.vue'
@@ -19,6 +20,11 @@ import MergeRequestDetail from '@/views/MergeRequestDetail.vue'
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'home',
+    component: MyWork,
+  },
+  {
+    path: '/projects',
     name: 'projects',
     component: ProjectPicker,
   },
