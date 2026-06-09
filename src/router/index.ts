@@ -57,6 +57,7 @@ export const routes: RouteRecordRaw[] = [
       // Only '1' is canonical — issueWindowRoute always emits ?window=1.
       windowed: route.query.window === '1',
     }),
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/issues-window',
@@ -92,6 +93,7 @@ export const routes: RouteRecordRaw[] = [
       fullPath: route.params.fullPath,
       iid: route.params.iid,
     }),
+    meta: { shell: true },
   },
   {
     path: '/connect',
