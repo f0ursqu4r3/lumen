@@ -3,6 +3,7 @@ import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
 import type { IssueFilters } from '@/gitlab/issueParams'
 import type { SortKey, GroupKey } from '@/features/issues/lib/issueView'
+import type { ViewSlice } from '@/shared/composables/useSavedViews'
 
 type State = NonNullable<IssueFilters['state']>
 type View = 'list' | 'board'
@@ -30,7 +31,7 @@ export const FILTER_KEYS = [
 ] as const
 
 /** A snapshot of the view-defining query keys (what a saved view stores). */
-export type ViewSlice = Record<string, string | string[]>
+export type { ViewSlice }
 
 const storageKey = (fullPath: string) => `lumen:issue-filters:${fullPath}`
 

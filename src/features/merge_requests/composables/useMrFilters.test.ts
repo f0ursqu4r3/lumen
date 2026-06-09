@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { defineComponent, h, nextTick } from 'vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { useMrFilters } from './useMrFilters'
@@ -57,5 +57,29 @@ describe('useMrFilters', () => {
   it('produces a viewSlice over the MR keys', async () => {
     const api = await mountWith('/projects/grp/proj/merge-requests?reviewer=ray&sort=created')
     expect(api.viewSlice.value).toMatchObject({ reviewer: 'ray', sort: 'created' })
+  })
+
+  it('clearAll drops the filter chips but keeps state/sort/draft', async () => {
+    const api = await mountWith(
+      '/projects/grp/proj/merge-requests?reviewer=ray&author=ada&state=merged&sort=created&draft=draft',
+    )
+    api.clearAll()
+    await flushPromises()
+    expect(api.reviewer.value).toBe('')
+    expect(api.author.value).toBe('')
+    expect(api.state.value).toBe('merged')
+    expect(api.sort.value).toBe('created')
+    expect(api.draft.value).toBe('draft')
+  })
+
+  it('seeds the URL from per-project storage on arrival when the URL is bare', async () => {
+    window.localStorage.setItem(
+      'lumen:mr-filters:grp/proj',
+      JSON.stringify({ reviewer: 'ray', state: 'merged' }),
+    )
+    const api = await mountWith('/projects/grp/proj/merge-requests')
+    await flushPromises()
+    expect(api.reviewer.value).toBe('ray')
+    expect(api.state.value).toBe('merged')
   })
 })
