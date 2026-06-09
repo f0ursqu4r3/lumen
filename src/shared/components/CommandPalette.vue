@@ -17,6 +17,14 @@ const { groups, flat, isSearching } = usePaletteCommands(query)
 // Map a flat index to keep arrow nav walking a single list across section headers.
 const indexOf = (command: Command) => flat.value.findIndex((c) => c.id === command.id)
 
+// Listbox option ids: the combobox input points aria-activedescendant at the
+// active option so screen readers announce the highlighted command on arrow nav.
+const optionId = (command: Command) => `palette-option-${command.id}`
+const activeId = computed(() => {
+  const command = flat.value[active.value]
+  return command ? optionId(command) : undefined
+})
+
 watch(open, async (value) => {
   if (!value) return
   query.value = ''
@@ -77,6 +85,10 @@ const hasResults = computed(() => flat.value.length > 0)
           type="search"
           placeholder="Search projects, issues, views, or #issue…"
           aria-label="Search commands"
+          role="combobox"
+          aria-controls="palette-listbox"
+          aria-expanded="true"
+          :aria-activedescendant="activeId"
           class="h-9 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           @keydown="onKeydown"
         />
@@ -90,7 +102,12 @@ const hasResults = computed(() => flat.value.length > 0)
         </button>
       </div>
 
-      <div class="max-h-112 overflow-y-auto p-1.5">
+      <div
+        id="palette-listbox"
+        role="listbox"
+        aria-label="Commands"
+        class="max-h-112 overflow-y-auto p-1.5"
+      >
         <div v-for="section in groups" :key="section.group" class="mb-1 last:mb-0">
           <div
             class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase"
@@ -100,8 +117,11 @@ const hasResults = computed(() => flat.value.length > 0)
           </div>
           <button
             v-for="command in section.items"
+            :id="optionId(command)"
             :key="command.id"
             type="button"
+            role="option"
+            :aria-selected="indexOf(command) === active"
             class="flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left outline-none"
             :class="
               indexOf(command) === active ? 'bg-accent text-foreground' : 'text-muted-foreground'
