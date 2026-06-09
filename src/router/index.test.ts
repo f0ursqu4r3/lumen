@@ -33,6 +33,19 @@ describe('home + projects routes', () => {
   })
 })
 
+describe('shell opt-in meta', () => {
+  it('opts the global views into the shell', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/').meta.shell).toBe(true)
+    expect(router.resolve('/projects').meta.shell).toBe(true)
+  })
+  it('leaves project + window routes out of the shell (phase 1)', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/projects/grp/proj/issues').meta.shell).toBeFalsy()
+    expect(router.resolve('/projects/grp/proj/issues-window').meta.shell).toBeFalsy()
+  })
+})
+
 describe('merge request routes', () => {
   it('resolves the MR list and detail routes', () => {
     const router = createRouter({ history: createMemoryHistory(), routes })

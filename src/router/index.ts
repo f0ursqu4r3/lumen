@@ -22,11 +22,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: MyWork,
+    meta: { shell: true },
   },
   {
     path: '/projects',
     name: 'projects',
     component: ProjectPicker,
+    meta: { shell: true },
   },
   {
     path: '/projects/:fullPath(.*)/issues',
