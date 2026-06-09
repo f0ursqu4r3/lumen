@@ -61,12 +61,30 @@ describe('MergeRequestDetail', () => {
         // MrDiscussion's reply mutation calls useQueryClient, so the real
         // component needs VueQueryPlugin in context.
         plugins: [[VueQueryPlugin, { queryClient: new QueryClient() }]],
-        stubs: { RouterLink: RouterLinkStub, PipelineStatusBadge: true },
+        stubs: { RouterLink: RouterLinkStub, PipelineStatusBadge: true, teleport: true },
       },
     })
     await flushPromises()
     expect(w.text()).toContain('Add API')
     expect(w.text()).toContain('Adds the API')
     expect(w.text()).toContain('nice')
+  })
+
+  it('renders inside the shell: no in-view back-link, action teleported', async () => {
+    const w = mount(MergeRequestDetail, {
+      props: { fullPath: 'grp/proj', iid: '5' },
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient: new QueryClient() }]],
+        stubs: { RouterLink: RouterLinkStub, PipelineStatusBadge: true, teleport: true },
+      },
+    })
+    await flushPromises()
+    // The old in-view "Merge requests" back RouterLink is gone (shell provides it).
+    const backLinks = w
+      .findAllComponents(RouterLinkStub)
+      .filter((l) => (l.props('to') as { name?: string }).name === 'merge-requests')
+    expect(backLinks).toHaveLength(0)
+    // "Open in GitLab" still rendered (teleport stubbed inline).
+    expect(w.text()).toContain('Open in GitLab')
   })
 })
