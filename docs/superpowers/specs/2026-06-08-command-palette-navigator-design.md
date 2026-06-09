@@ -70,7 +70,7 @@ type Command = {
 
 ## C. Issue search (data layer)
 
-New GraphQL query + a thin composable.
+New GraphQL query + a thin composable, following the **manual-type pattern** of `useIssue.ts` (inline template-literal document + hand-written result type + `gqlClient.request<Result, Vars>`). No codegen step required.
 
 ```graphql
 query PaletteIssueSearch($fullPath: ID!, $search: String!) {
@@ -84,10 +84,10 @@ query PaletteIssueSearch($fullPath: ID!, $search: String!) {
 
 - `usePaletteIssueSearch(query, currentProject)` — `@tanstack/vue-query`, key `['palette-issue-search', fullPath, search]`.
 - **Debounced ~200ms.** `enabled` only when: query non-empty, ≥2 chars, not a pure `#number`, and a project is open.
-- Reuses the existing GraphQL→RPC transport and error normalization.
+- Reuses the existing GraphQL→RPC transport (`gqlClient`) and `normalizeError`.
 - Search failure renders zero issue hits silently (palette stays usable); never blocks projects/views/actions.
 - Results → `Command`s: `title` = issue title, `subtitle` = `#iid · state`, `action` = push `issue` route (`{ fullPath, iid }`).
-- **Codegen gate:** the new query means generated types are red until `bun codegen` is run against the live instance (generated dir is gitignored). Flag this in the plan; typecheck will fail until it runs.
+- **No codegen gate:** the query is a hand-typed template literal like `useIssue.ts`, so typecheck stays green without running `bun codegen`.
 
 ## D. UI / result organization
 
@@ -115,7 +115,6 @@ Search failure path: assert zero issue hits render and other groups remain.
 
 ## File touch list
 
-- **New:** `src/features/palette/{composables,lib}/*` as above; new `.graphql` query for `PaletteIssueSearch`.
+- **New:** `src/features/palette/{composables,lib}/*` as above (inline-typed GraphQL document inside `usePaletteIssueSearch.ts`).
 - **Edit:** `src/shared/components/CommandPalette.vue` (slim down to shell + render).
-- **Codegen:** regenerate `src/gitlab/generated` (user-run `bun codegen`).
 - **Format:** `bun run format` after edits.
