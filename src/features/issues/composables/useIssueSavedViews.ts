@@ -1,6 +1,6 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useSavedViews } from '@/shared/composables/useSavedViews'
-import type { ViewSlice } from '@/features/issues/composables/useIssueFilters'
+import { FILTER_KEYS, type ViewSlice } from '@/features/issues/composables/useIssueFilters'
 
 // Orchestrates the saved-views store for the issue list: which named view is
 // active for the current filter slice, whether the slice is worth saving, and
@@ -12,7 +12,7 @@ export function useIssueSavedViews<Slice extends ViewSlice>(
   viewSlice: Ref<Slice>,
   applyView: (query: Slice) => void,
 ) {
-  const savedViews = useSavedViews(fullPath)
+  const savedViews = useSavedViews(fullPath, 'issue', FILTER_KEYS)
   const activeViewId = computed(() => savedViews.activeId(viewSlice.value))
   const canSaveView = computed(() => Object.keys(viewSlice.value).length > 0)
   const loadedViewId = ref<string | null>(null)
