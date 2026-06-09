@@ -29,7 +29,8 @@ const shellPresent = computed(() => !props.embedded && !props.windowed)
 
 // two-letter-free name helper (avatars elsewhere are initials; this is the byline)
 function nameOrUsername(user?: { name?: string | null; username: string } | null) {
-  return user?.name || `@${user?.username}` || '(deleted user)'
+  if (!user) return '(deleted user)'
+  return user.name || `@${user.username}`
 }
 </script>
 
