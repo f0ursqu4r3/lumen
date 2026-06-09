@@ -18,7 +18,6 @@ vi.mock('@/features/pipelines/composables/usePipelineWatch', () => ({
     subscribe: () => {},
     unwatch: () => {},
     toggle: () => {},
-    watchedCount: ref(0),
   }),
 }))
 vi.mock('@/features/pipelines/composables/usePipelineNotifications', () => ({

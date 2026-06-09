@@ -10,7 +10,6 @@ describe('usePipelineWatch', () => {
     expect(w.isWatched('p1')).toBe(false)
     w.subscribe('p1')
     expect(w.isWatched('p1')).toBe(true)
-    expect(w.watchedCount.value).toBe(1)
   })
 
   it('subscribing twice is idempotent', () => {
@@ -28,7 +27,7 @@ describe('usePipelineWatch', () => {
     expect(w.isWatched('p1')).toBe(false)
     w.subscribe('p2')
     w.unwatch('p2')
-    expect(w.watchedCount.value).toBe(0)
+    expect(w.isWatched('p2')).toBe(false)
   })
 
   it('persists to a project-scoped localStorage key', async () => {

@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
-import { computed, type Ref } from 'vue'
+import { type Ref } from 'vue'
 
 const storageKey = (fullPath: string) => `lumen:pipeline-watch:${fullPath}`
 
@@ -28,9 +28,7 @@ export function usePipelineWatch(fullPath: Ref<string>) {
     else subscribe(id)
   }
 
-  const watchedCount = computed(() => ids.value.length)
-
-  return { ids, isWatched, subscribe, unwatch, toggle, watchedCount }
+  return { ids, isWatched, subscribe, unwatch, toggle }
 }
 
 export type PipelineWatch = ReturnType<typeof usePipelineWatch>
