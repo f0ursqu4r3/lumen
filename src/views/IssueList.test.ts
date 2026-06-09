@@ -130,9 +130,10 @@ describe('IssueList', () => {
     const w = mountList()
     expect(w.text()).toContain('No issues')
     // No issue rows render in the empty state — the only links are the header
-    // affordances: back-to-projects on the title and the Pipelines nav link.
+    // affordances: back-to-projects on the title and the Merge Requests +
+    // Pipelines nav links.
     const testids = w.findAllComponents(RouterLinkStub).map((l) => l.attributes('data-testid'))
-    expect(testids).toEqual(['back-to-projects', 'view-pipelines'])
+    expect(testids).toEqual(['back-to-projects', 'view-merge-requests', 'view-pipelines'])
   })
 
   it('flags in-flight pipelines on the Pipelines button', async () => {
