@@ -8,6 +8,10 @@ vi.mock('@/gitlab/client', () => ({ gqlClient: { request: (...a: unknown[]) => r
 
 import { useMergeRequest } from './useMergeRequest'
 
+// NOTE: reset inline at the top of each test rather than in a `beforeEach`. With
+// a hook, the rejected mock in the error test surfaces as an unhandled rejection
+// (vitest fails the test on `Error: boom`) before Vue Query catches it; resetting
+// synchronously in-body avoids that microtask-boundary race. Assertions unchanged.
 describe('useMergeRequest', () => {
   it('returns the MR with its discussions', async () => {
     request.mockReset()
@@ -68,6 +72,6 @@ describe('useMergeRequest', () => {
     request.mockRejectedValue(new Error('boom'))
     const { result } = withQuery(() => useMergeRequest(ref('grp/proj'), ref('5')))
     await flushPromises()
-    expect(result().error.value).toBeTruthy()
+    expect(result().error.value).toMatchObject({ kind: 'unknown', message: 'boom' })
   })
 })
