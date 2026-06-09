@@ -59,6 +59,14 @@ const mockAssigned = (rows: { name: string; fullPath: string; assignedOpen: numb
 const mountPicker = () =>
   mount(ProjectPicker, { global: { stubs: { RouterLink: RouterLinkStub } } })
 
+// The header carries a "← My Work" RouterLink back to the dashboard; the project
+// rows are the meaningful links under test, so filter the back-link out by its
+// test id before asserting on project links.
+const projectLinks = (w: ReturnType<typeof mountPicker>) =>
+  w
+    .findAllComponents(RouterLinkStub)
+    .filter((l) => l.attributes('data-testid') !== 'back-to-my-work')
+
 beforeEach(() => {
   useProjects.mockReset()
   useStarredProjects.mockReset()
@@ -74,7 +82,7 @@ describe('ProjectPicker', () => {
       projects: [{ id: 'gid://1', fullPath: 'grp/proj', name: 'Proj' }],
     })
     const w = mountPicker()
-    const link = w.findComponent(RouterLinkStub)
+    const link = projectLinks(w)[0]!
     expect(link.text()).toContain('Proj')
     expect(link.props('to')).toEqual({
       name: 'issues',
@@ -96,7 +104,7 @@ describe('ProjectPicker', () => {
     mockProjects({ projects: [] })
     const w = mountPicker()
     expect(w.text()).toContain('No projects')
-    expect(w.findComponent(RouterLinkStub).exists()).toBe(false)
+    expect(projectLinks(w)).toHaveLength(0)
   })
 
   it('groups starred and assigned into sections and de-duplicates rows', () => {
@@ -118,12 +126,19 @@ describe('ProjectPicker', () => {
 
     // A (starred) and B (assigned) are lifted out of the main list — three rows,
     // no duplicates.
-    const links = w.findAllComponents(RouterLinkStub)
+    const links = projectLinks(w)
     expect(links).toHaveLength(3)
     const paths = links.map(
       (l) => (l.props('to') as { params: { fullPath: string } }).params.fullPath,
     )
     expect(paths).toEqual(['g/a', 'g/b', 'g/c'])
+  })
+
+  it('links back to My Work from the header', () => {
+    mockProjects({ projects: [] })
+    const back = mountPicker().find('[data-testid="back-to-my-work"]')
+    expect(back.exists()).toBe(true)
+    expect(back.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'home' })
   })
 
   it('toggles a star when the star button is clicked', async () => {

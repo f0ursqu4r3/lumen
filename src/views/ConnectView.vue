@@ -21,7 +21,7 @@ onMounted(loadUrl)
 // A clean probe earns the handoff to the workspace; anything else stays put as
 // an inline, recoverable error (surfaced by the composable's status/message).
 async function onSubmit() {
-  if (await save()) router.replace({ name: 'projects' })
+  if (await save()) router.replace({ name: 'home' })
 }
 </script>
 

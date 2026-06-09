@@ -25,6 +25,14 @@ describe('issues-window route', () => {
   })
 })
 
+describe('home + projects routes', () => {
+  it('resolves My Work at / and the picker at /projects', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    expect(router.resolve('/').name).toBe('home')
+    expect(router.resolve('/projects').name).toBe('projects')
+  })
+})
+
 describe('merge request routes', () => {
   it('resolves the MR list and detail routes', () => {
     const router = createRouter({ history: createMemoryHistory(), routes })
