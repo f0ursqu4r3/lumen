@@ -28,6 +28,13 @@ export function createPersistedQueryClient(url: string | null): QueryClient {
     persister,
     buster: makeBuster(url),
     maxAge: 1000 * 60 * 60 * 24, // 24h
+    dehydrateOptions: {
+      // Persist successful queries (the default), except ephemeral palette
+      // typeahead results — otherwise a prior session's search would rehydrate
+      // and flash stale hits into the command palette on the next launch.
+      shouldDehydrateQuery: (query) =>
+        query.state.status === 'success' && query.queryKey[0] !== 'palette-issue-search',
+    },
   })
   return queryClient
 }
