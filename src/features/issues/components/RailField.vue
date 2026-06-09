@@ -1,4 +1,3 @@
-<!-- src/features/issues/components/RailField.vue -->
 <script setup lang="ts">
 import { X } from '@lucide/vue'
 
@@ -7,6 +6,7 @@ defineEmits<{ remove: [] }>()
 </script>
 
 <template>
+  <!-- Fallthrough attrs (e.g. data-field) land here on the single root; the rail uses data-field to focus this field after reveal. -->
   <div class="group flex flex-col gap-1.5">
     <div class="flex items-center justify-between gap-2">
       <span class="field-label">{{ label }}</span>

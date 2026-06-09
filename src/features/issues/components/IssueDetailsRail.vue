@@ -1,4 +1,3 @@
-<!-- src/features/issues/components/IssueDetailsRail.vue -->
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import StatusPicker from '@/features/issues/components/StatusPicker.vue'
@@ -46,8 +45,11 @@ const root = ref<HTMLElement | null>(null)
 function onAdd(key: RailFieldKey) {
   emit('add', key)
   nextTick(() => {
+    // The control to focus is in RailField's slot, but RailField also renders its
+    // × button (in the header, earlier in DOM order). querySelector returns the
+    // first match in document order, so exclude the × and match the checkbox role.
     const el = root.value?.querySelector<HTMLElement>(
-      `[data-field="${key}"] input, [data-field="${key}"] [role="combobox"], [data-field="${key}"] button`,
+      `[data-field="${key}"] input, [data-field="${key}"] [role="combobox"], [data-field="${key}"] [role="checkbox"], [data-field="${key}"] button:not([data-testid="rail-field-remove"])`,
     )
     el?.focus()
     el?.scrollIntoView({ block: 'nearest' })
