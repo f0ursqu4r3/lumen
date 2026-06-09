@@ -114,5 +114,7 @@ export function useIssueDraft(fullPath: string, iid: string, issue: Ref<IssueLik
     comment.value = ''
   }
 
-  return { draft, comment, dirty, saving, error, save, reset }
+  // `original` (the last-synced clean snapshot) is exposed so the rail can keep a
+  // field visible while its value is cleared but not yet saved.
+  return { draft, original, comment, dirty, saving, error, save, reset }
 }

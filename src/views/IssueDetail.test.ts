@@ -59,6 +59,7 @@ vi.mock('@/features/issues/composables/useIssueDraft', async () => {
       if (!draftState.comment) draftState.comment = ref('')
       return {
         draft,
+        original: ref(null),
         comment: draftState.comment,
         dirty: draftState.dirty,
         saving: computed(() => false),

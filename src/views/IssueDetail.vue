@@ -4,6 +4,7 @@ import { useTitle, onKeyStroke } from '@vueuse/core'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useIssue } from '@/features/issues/composables/useIssue'
 import { useIssueDraft } from '@/features/issues/composables/useIssueDraft'
+import { useRailFields } from '@/features/issues/composables/useRailFields'
 import { useIssueLinks } from '@/features/issues/composables/useIssueLinks'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
 import { useProjectContributors } from '@/features/projects/composables/useProjectContributors'
@@ -49,7 +50,17 @@ const { data: milestones } = useProjectMilestones(toRef(props, 'fullPath'))
 // status change buffers and saves exactly like every other field (nothing hot).
 const { data: statusOptions } = useWorkItemStatuses(toRef(props, 'fullPath'))
 const draftApi = useIssueDraft(props.fullPath, props.iid, issue)
-const { draft, comment, dirty, saving, save, reset, error: saveError } = draftApi
+const { draft, original, comment, dirty, saving, save, reset, error: saveError } = draftApi
+
+// Progressive-disclosure state for the Details Rail: which attribute fields are
+// shown vs. available in the Add menu. Lives here because the draft does.
+const {
+  visibleKeys: railVisibleKeys,
+  hiddenFields: railHiddenFields,
+  reveal: revealRailField,
+  remove: removeRailField,
+  resetReveal: resetRailFields,
+} = useRailFields(draft, original)
 const { confirm } = useConfirm()
 
 // Surface the dirty state to a host (the drawer) so it can guard closing.
@@ -146,6 +157,7 @@ async function onSave() {
   if (!dirty.value) {
     editingTitle.value = false
     editingDescription.value = false
+    resetRailFields()
   }
 }
 // ⌘/Ctrl+S saves buffered edits. Deliberately not guarded against INPUT/TEXTAREA:
@@ -167,6 +179,7 @@ function onCancel() {
   reset()
   editingTitle.value = false
   editingDescription.value = false
+  resetRailFields()
 }
 
 // Dirty guard on full-page navigation (the drawer handles its own close).
@@ -302,6 +315,8 @@ if (!props.embedded) {
         :catalog="labelCatalog ?? []"
         :status-options="statusOptions ?? []"
         :milestones="milestones ?? []"
+        :visible-keys="railVisibleKeys"
+        :hidden-fields="railHiddenFields"
         v-model:label-ids="draft.labelIds"
         v-model:status-id="draft.statusId"
         v-model:assignee-usernames="draft.assigneeUsernames"
@@ -310,6 +325,8 @@ if (!props.embedded) {
         v-model:weight="draft.weight"
         v-model:confidential="draft.confidential"
         v-model:time-estimate="draft.timeEstimate"
+        @add="revealRailField"
+        @remove="removeRailField"
       />
 
       <IssueDiscussion

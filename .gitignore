@@ -47,3 +47,6 @@ yarn-error.log*
 
 # Lumen Canary macOS arm64 build artifacts
 /artifacts
+
+# Cached SDL introspected from the live instance (reference; regenerate as needed)
+src/gitlab/schema.graphql
