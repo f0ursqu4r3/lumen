@@ -145,7 +145,9 @@ const fullIssue = {
 const mountDetail = (props: Record<string, unknown> = {}) =>
   mount(IssueDetail, {
     props: { fullPath: 'grp/proj', iid: '9', ...props },
-    global: { stubs: { RouterLink: RouterLinkStub } },
+    // teleport: true renders the (full-page) masthead action cluster inline so the
+    // copy / open / toggle assertions still find it without a real shell mounted.
+    global: { stubs: { RouterLink: RouterLinkStub, teleport: true } },
   })
 
 beforeEach(() => {
@@ -175,15 +177,13 @@ describe('IssueDetail (buffered)', () => {
     expect(w.find('textarea[aria-label="Issue description"]').exists()).toBe(false)
   })
 
-  it('links the eyebrow back to this repo issue list when full-page', async () => {
+  it('drops the in-view back link when full-page (the shell top bar provides it)', async () => {
     const w = mountDetail()
     await flushPromises()
-    const back = w.find('[data-testid="back-to-issues"]')
-    expect(back.exists()).toBe(true)
-    expect(back.findComponent(RouterLinkStub).props('to')).toEqual({
-      name: 'issues',
-      params: { fullPath: 'grp/proj' },
-    })
+    // Full-page renders inside the app shell, which owns back + breadcrumb; the
+    // masthead no longer renders its own back-link, and teleports its actions.
+    expect(w.find('[data-testid="back-to-issues"]').exists()).toBe(false)
+    expect(w.find('[data-testid="toggle-state"]').exists()).toBe(true)
   })
 
   it('omits the back link when embedded in the drawer', async () => {
@@ -429,8 +429,10 @@ describe('IssueDetail (buffered)', () => {
       await flushPromises()
       expect(clipboardWriteText).toHaveBeenCalledWith({ text: '#' })
       expect(openExternal).not.toHaveBeenCalled()
-      // Confirmation is the icon swapping to a check, not a text label.
-      expect(copy.findComponent(Check).exists()).toBe(true)
+      // Confirmation is the icon swapping to a check, not a text label. Re-query
+      // after the click: under the teleport stub the action cluster re-renders, so
+      // the wrapper captured before the click points at the now-detached node.
+      expect(w.get('[data-testid="copy-link"]').findComponent(Check).exists()).toBe(true)
     })
 
     it('copies a markdown link on Shift+Click of Copy', async () => {
