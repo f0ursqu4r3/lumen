@@ -23,6 +23,9 @@ export interface RailFieldDescriptor {
 }
 
 // Canonical order — drives both the rendered sequence and the Add menu.
+// Pinned fields (status / labels / assignees) carry `clear` and `isPopulated` to satisfy the
+// RailFieldDescriptor interface uniformly, but their `clear` is never invoked at runtime:
+// pinned fields are always rendered and are never given a remove (×) affordance.
 export const RAIL_FIELDS: RailFieldDescriptor[] = [
   { key: 'status', label: 'Status', pinned: true, isPopulated: () => true, clear: () => {} },
   {
@@ -54,6 +57,8 @@ export const RAIL_FIELDS: RailFieldDescriptor[] = [
   {
     key: 'dueDate',
     label: 'Due date',
+    // dueDate is always an ISO YYYY-MM-DD string (from <input type="date"> / slice(0,10)),
+    // so it needs no .trim() — unlike `estimate` which is a free-text human string.
     isPopulated: (d) => d.dueDate !== '',
     clear: (d) => {
       d.dueDate = ''
@@ -111,6 +116,7 @@ export function isFieldVisible(
   return revealed.has(desc.key) || desc.isPopulated(draft) || desc.isPopulated(original)
 }
 
+/** Returns visible keys in canonical RAIL_FIELDS order (Set preserves insertion order); consumers use `.has()` for O(1) membership. */
 export function visibleFieldKeys(
   draft: IssueDraft,
   original: IssueDraft,
