@@ -37,6 +37,18 @@ describe('routeCommands', () => {
   it('tags every command as an Actions group command', () => {
     expect(routeCommands(ctx()).every((c) => c.group === 'Actions')).toBe(true)
   })
+
+  it('preserves existing route query when opening the compose panel', () => {
+    const c = ctx({ route: { query: { label: 'bug' } } as unknown as PaletteContext['route'] })
+    routeCommands(c)
+      .find((cmd) => cmd.id === 'new-issue')!
+      .action()
+    expect(c.router.push).toHaveBeenCalledWith({
+      name: 'issues',
+      params: { fullPath: 'grp/proj' },
+      query: { label: 'bug', compose: '1' },
+    })
+  })
 })
 
 describe('issueJumpCommand', () => {
@@ -120,6 +132,11 @@ describe('filterByQuery', () => {
 
   it('matches on title or subtitle, case-insensitively', () => {
     const ids = filterByQuery(cmds, 'settings').map((c) => c.id)
+    expect(ids).toEqual(['settings'])
+  })
+
+  it('matches on the subtitle text, not just the title', () => {
+    const ids = filterByQuery(cmds, 'Connection and local').map((c) => c.id)
     expect(ids).toEqual(['settings'])
   })
 })
