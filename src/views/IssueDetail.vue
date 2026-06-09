@@ -26,6 +26,7 @@ import MarkdownText from '@/shared/components/MarkdownText.vue'
 import EditableField from '@/shared/components/EditableField.vue'
 import Scratchpad from '@/shared/components/Scratchpad.vue'
 import MediaViewer from '@/shared/components/MediaViewer.vue'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 import { useIssueMediaViewer } from '@/features/issues/composables/useIssueMediaViewer'
 
 const props = defineProps<{
@@ -199,177 +200,182 @@ if (!props.embedded) {
   <!-- Skeleton mirrors the real masthead + rail composition (same container/grid)
        so resolved content lands in place instead of reflowing. -->
   <IssueDetailSkeleton v-else-if="isLoading" />
-  <article v-else-if="issue && draft" class="issue pb-20" :style="railStyle">
-    <!-- Condensed title: appears in a window once the main title scrolls out of
+  <!-- Mode-aware container: 'bare' is a passthrough so the drawer / popped-out
+       window keep today's layout (their own <main> sizes the article); the
+       full-page main window gets the wide centered, padded column. -->
+  <ViewContainer v-else-if="issue && draft" :width="embedded || windowed ? 'bare' : 'wide'">
+    <article class="issue pb-20" :style="railStyle">
+      <!-- Condensed title: appears in a window once the main title scrolls out of
          view. `fixed` (not sticky) so toggling it never shifts the document; the
          inner wrapper re-creates the app shell's centered, padded column so it
          lines up with the content. stickyTop pins it below a host's own sticky
          header (the combined window's pager); 0 in a single window. -->
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="-translate-y-1.5 opacity-0"
-      leave-active-class="transition duration-150 ease-in"
-      leave-to-class="-translate-y-1.5 opacity-0"
-    >
-      <div
-        v-if="windowed && !titleVisible"
-        data-testid="condensed-title"
-        class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm"
-        :style="{ top: `${stickyTop ?? 0}px` }"
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="-translate-y-1.5 opacity-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-to-class="-translate-y-1.5 opacity-0"
       >
-        <p class="mx-auto max-w-5xl truncate px-4 py-2 text-sm font-medium text-foreground/90">
-          #{{ iid }} · {{ draft.title }}
-        </p>
-      </div>
-    </Transition>
+        <div
+          v-if="windowed && !titleVisible"
+          data-testid="condensed-title"
+          class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm"
+          :style="{ top: `${stickyTop ?? 0}px` }"
+        >
+          <p class="mx-auto max-w-5xl truncate px-4 py-2 text-sm font-medium text-foreground/90">
+            #{{ iid }} · {{ draft.title }}
+          </p>
+        </div>
+      </Transition>
 
-    <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
-    <IssueMasthead
-      :issue="issue"
-      :repo-name="repoName"
-      :state="draft.state"
-      :embedded="embedded"
-      :windowed="windowed"
-      :link-copied="linkCopied"
-      :full-path="fullPath"
-      @copy="onCopyClick"
-      @open-external="openInGitLab"
-      @toggle-state="toggleState"
-    />
+      <!-- Masthead: state · id · title · byline read as one tight identity unit. -->
+      <IssueMasthead
+        :issue="issue"
+        :repo-name="repoName"
+        :state="draft.state"
+        :embedded="embedded"
+        :windowed="windowed"
+        :link-copied="linkCopied"
+        :full-path="fullPath"
+        @copy="onCopyClick"
+        @open-external="openInGitLab"
+        @toggle-state="toggleState"
+      />
 
-    <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
+      <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
 
-    <div class="issue__body my-8" @click="onBodyMediaClick">
-      <!-- Main column: the document. The title leads it — the issue's identity
+      <div class="issue__body my-8" @click="onBodyMediaClick">
+        <!-- Main column: the document. The title leads it — the issue's identity
            sits with its body, not up in the masthead's instrument cluster. -->
-      <section class="issue__desc min-w-0 animate-row-in" style="animation-delay: 60ms">
-        <EditableField
-          v-model:editing="editingTitle"
-          label="Title"
-          toggle-testid="edit-title-toggle"
-        >
-          <template #label>
-            <span class="field-label">Title</span>
-          </template>
-          <template #view>
-            <h1 class="text-balance text-title leading-[1.08] font-semibold">
-              {{ draft.title }}
-            </h1>
-          </template>
-          <template #edit>
-            <Input
-              v-model="draft.title"
-              data-testid="edit-title"
-              aria-label="Issue title"
-              class="h-auto py-1.5 text-title font-semibold"
-            />
-          </template>
-        </EditableField>
-        <!-- Sentinel just past the title: when it scrolls under a host window's
+        <section class="issue__desc min-w-0 animate-row-in" style="animation-delay: 60ms">
+          <EditableField
+            v-model:editing="editingTitle"
+            label="Title"
+            toggle-testid="edit-title-toggle"
+          >
+            <template #label>
+              <span class="field-label">Title</span>
+            </template>
+            <template #view>
+              <h1 class="text-balance text-title leading-[1.08] font-semibold">
+                {{ draft.title }}
+              </h1>
+            </template>
+            <template #edit>
+              <Input
+                v-model="draft.title"
+                data-testid="edit-title"
+                aria-label="Issue title"
+                class="h-auto py-1.5 text-title font-semibold"
+              />
+            </template>
+          </EditableField>
+          <!-- Sentinel just past the title: when it scrolls under a host window's
              sticky header, IssueDetail emits update:title-visible=false. -->
-        <div ref="titleEnd" aria-hidden="true" class="h-px mb-6"></div>
-        <button
-          v-if="media.length"
-          type="button"
-          data-testid="view-all-media"
-          class="mb-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          @click.stop="openViewer(0)"
-        >
-          <Images class="size-3.5" />
-          View all media ({{ media.length }})
-        </button>
-        <EditableField
-          v-model:editing="editingDescription"
-          label="Description"
-          toggle-testid="edit-description-toggle"
-        >
-          <template #label>
-            <span class="field-label">Description</span>
-          </template>
-          <template #view>
-            <MarkdownText
-              v-if="draft.description.trim()"
-              :source="draft.description"
-              :project-path="fullPath"
-              class="mt-1 text-sm leading-relaxed"
-            />
-            <p v-else class="text-sm italic text-muted-foreground">No description yet.</p>
-          </template>
-          <template #edit>
-            <Textarea
-              v-model="draft.description"
-              :rows="8"
-              aria-label="Issue description"
-              placeholder="Add a description…"
-            />
-          </template>
-        </EditableField>
-      </section>
+          <div ref="titleEnd" aria-hidden="true" class="h-px mb-6"></div>
+          <button
+            v-if="media.length"
+            type="button"
+            data-testid="view-all-media"
+            class="mb-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            @click.stop="openViewer(0)"
+          >
+            <Images class="size-3.5" />
+            View all media ({{ media.length }})
+          </button>
+          <EditableField
+            v-model:editing="editingDescription"
+            label="Description"
+            toggle-testid="edit-description-toggle"
+          >
+            <template #label>
+              <span class="field-label">Description</span>
+            </template>
+            <template #view>
+              <MarkdownText
+                v-if="draft.description.trim()"
+                :source="draft.description"
+                :project-path="fullPath"
+                class="mt-1 text-sm leading-relaxed"
+              />
+              <p v-else class="text-sm italic text-muted-foreground">No description yet.</p>
+            </template>
+            <template #edit>
+              <Textarea
+                v-model="draft.description"
+                :rows="8"
+                aria-label="Issue description"
+                placeholder="Add a description…"
+              />
+            </template>
+          </EditableField>
+        </section>
 
-      <!-- Details rail: the issue's attributes, grouped into a sculpted panel so
+        <!-- Details rail: the issue's attributes, grouped into a sculpted panel so
            they read as one scannable instrument cluster rather than loose fields. -->
-      <IssueDetailsRail
-        :issue="issue"
-        :members="members ?? []"
-        :contributors="contributors ?? []"
-        :catalog="labelCatalog ?? []"
-        :status-options="statusOptions ?? []"
-        :milestones="milestones ?? []"
-        :visible-keys="railVisibleKeys"
-        :hidden-fields="railHiddenFields"
-        v-model:label-ids="draft.labelIds"
-        v-model:status-id="draft.statusId"
-        v-model:assignee-usernames="draft.assigneeUsernames"
-        v-model:milestone-id="draft.milestoneId"
-        v-model:due-date="draft.dueDate"
-        v-model:weight="draft.weight"
-        v-model:confidential="draft.confidential"
-        v-model:time-estimate="draft.timeEstimate"
-        @add="revealRailField"
-        @remove="removeRailField"
-      />
+        <IssueDetailsRail
+          :issue="issue"
+          :members="members ?? []"
+          :contributors="contributors ?? []"
+          :catalog="labelCatalog ?? []"
+          :status-options="statusOptions ?? []"
+          :milestones="milestones ?? []"
+          :visible-keys="railVisibleKeys"
+          :hidden-fields="railHiddenFields"
+          v-model:label-ids="draft.labelIds"
+          v-model:status-id="draft.statusId"
+          v-model:assignee-usernames="draft.assigneeUsernames"
+          v-model:milestone-id="draft.milestoneId"
+          v-model:due-date="draft.dueDate"
+          v-model:weight="draft.weight"
+          v-model:confidential="draft.confidential"
+          v-model:time-estimate="draft.timeEstimate"
+          @add="revealRailField"
+          @remove="removeRailField"
+        />
 
-      <IssueDiscussion
-        :threads="threads"
-        :notes="notes"
-        :iid="iid"
-        :issue="issue"
-        :full-path="fullPath"
-        :members="members ?? []"
-        v-model:comment="comment"
-      />
+        <IssueDiscussion
+          :threads="threads"
+          :notes="notes"
+          :iid="iid"
+          :issue="issue"
+          :full-path="fullPath"
+          :members="members ?? []"
+          v-model:comment="comment"
+        />
 
-      <Scratchpad
-        :full-path="fullPath"
-        :iid="iid"
-        class="issue__pad animate-row-in"
-        style="animation-delay: 180ms"
-      />
-    </div>
-
-    <!-- Sticky Save/Cancel — slides up the moment edits make the buffer dirty. -->
-    <Transition name="savebar">
-      <div
-        v-if="dirty"
-        class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
-      >
-        <Button
-          type="button"
-          data-testid="cancel-issue"
-          variant="ghost"
-          :disabled="saving"
-          @click="onCancel"
-        >
-          Revert Changes
-        </Button>
-        <Button type="button" data-testid="save-issue" :disabled="saving" @click="onSave">
-          {{ saving ? 'Saving…' : 'Save changes' }}
-        </Button>
+        <Scratchpad
+          :full-path="fullPath"
+          :iid="iid"
+          class="issue__pad animate-row-in"
+          style="animation-delay: 180ms"
+        />
       </div>
-    </Transition>
 
-    <MediaViewer v-model:open="viewerOpen" :items="media" :start-index="viewerIndex" />
-  </article>
+      <!-- Sticky Save/Cancel — slides up the moment edits make the buffer dirty. -->
+      <Transition name="savebar">
+        <div
+          v-if="dirty"
+          class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
+        >
+          <Button
+            type="button"
+            data-testid="cancel-issue"
+            variant="ghost"
+            :disabled="saving"
+            @click="onCancel"
+          >
+            Revert Changes
+          </Button>
+          <Button type="button" data-testid="save-issue" :disabled="saving" @click="onSave">
+            {{ saving ? 'Saving…' : 'Save changes' }}
+          </Button>
+        </div>
+      </Transition>
+
+      <MediaViewer v-model:open="viewerOpen" :items="media" :start-index="viewerIndex" />
+    </article>
+  </ViewContainer>
   <p v-else class="text-sm text-muted-foreground">Issue not found.</p>
 </template>
 

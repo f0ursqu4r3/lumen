@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { ArrowLeft, ExternalLink } from '@lucide/vue'
+import { ExternalLink } from '@lucide/vue'
 import { useMergeRequest } from '@/features/merge_requests/composables/useMergeRequest'
 import { sanitizeHtml } from '@/shared/lib/markdown'
 import MrStateBadge from '@/features/merge_requests/components/MrStateBadge.vue'
 import MergeRequestDetailRail from '@/features/merge_requests/components/MergeRequestDetailRail.vue'
 import MrDiscussion from '@/features/merge_requests/components/MrDiscussion.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 
 const props = defineProps<{ fullPath: string; iid: string }>()
 const fullPath = toRef(props, 'fullPath')
@@ -37,27 +38,12 @@ const descriptionHtml = computed(() => sanitizeHtml(mr.value?.descriptionHtml))
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-5xl px-6 py-8">
+  <ViewContainer width="wide">
     <ErrorNotice v-if="error" :error="error" />
     <div v-else-if="isLoading" class="text-sm text-muted-foreground">Loading…</div>
 
     <template v-else-if="mr">
-      <RouterLink
-        :to="{ name: 'merge-requests', params: { fullPath } }"
-        class="group/back -ml-1 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft class="size-4 transition-transform group-hover/back:-translate-x-0.5" />
-        Merge requests
-      </RouterLink>
-
-      <div class="mt-3 flex items-start justify-between gap-4">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <h1 class="text-title font-semibold text-foreground">{{ mr.title }}</h1>
-            <MrStateBadge :state="mr.state" :draft="mr.draft" />
-          </div>
-          <p class="mt-1 font-mono text-xs text-muted-foreground">!{{ mr.iid }}</p>
-        </div>
+      <Teleport defer to="#app-topbar-slot">
         <a
           :href="mr.webUrl"
           target="_blank"
@@ -66,6 +52,14 @@ const descriptionHtml = computed(() => sanitizeHtml(mr.value?.descriptionHtml))
         >
           <ExternalLink class="size-3.5" /> Open in GitLab
         </a>
+      </Teleport>
+
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1 class="text-title font-semibold text-foreground">{{ mr.title }}</h1>
+          <MrStateBadge :state="mr.state" :draft="mr.draft" />
+        </div>
+        <p class="mt-1 font-mono text-xs text-muted-foreground">!{{ mr.iid }}</p>
       </div>
 
       <div class="mt-6 grid gap-8 md:grid-cols-[1fr_16rem]">
@@ -81,5 +75,5 @@ const descriptionHtml = computed(() => sanitizeHtml(mr.value?.descriptionHtml))
         <MergeRequestDetailRail :mr="mr" />
       </div>
     </template>
-  </div>
+  </ViewContainer>
 </template>

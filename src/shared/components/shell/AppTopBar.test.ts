@@ -58,3 +58,49 @@ describe('AppTopBar project branch', () => {
     expect(w.findComponent(ProjectTabNav).props('active')).toBe('issues')
   })
 })
+
+const detailRouter = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    {
+      path: '/projects/:fullPath(.*)/issues/:iid',
+      name: 'issue',
+      component: { template: '<div/>' },
+    },
+    {
+      path: '/projects/:fullPath(.*)/merge-requests/:iid',
+      name: 'merge-request',
+      component: { template: '<div/>' },
+    },
+  ],
+})
+
+describe('AppTopBar detail branch', () => {
+  it('shows a back-link to the issue list + the issue ref on an issue detail route', async () => {
+    await detailRouter.push('/projects/grp/proj/issues/42')
+    await detailRouter.isReady()
+    const w = mount(AppTopBar, {
+      global: { plugins: [detailRouter], stubs: { RouterLink: RouterLinkStub } },
+    })
+    expect(w.text()).toContain('#42')
+    expect(w.text()).toContain('proj')
+    const back = w
+      .findAllComponents(RouterLinkStub)
+      .find((l) => (l.props('to') as { name?: string }).name === 'issues')
+    expect(back).toBeTruthy()
+    expect(back!.props('to')).toEqual({ name: 'issues', params: { fullPath: 'grp/proj' } })
+  })
+
+  it('shows the !iid + a back-link to the MR list on a merge-request detail route', async () => {
+    await detailRouter.push('/projects/grp/proj/merge-requests/5')
+    await detailRouter.isReady()
+    const w = mount(AppTopBar, {
+      global: { plugins: [detailRouter], stubs: { RouterLink: RouterLinkStub } },
+    })
+    expect(w.text()).toContain('!5')
+    const back = w
+      .findAllComponents(RouterLinkStub)
+      .find((l) => (l.props('to') as { name?: string }).name === 'merge-requests')
+    expect(back!.props('to')).toEqual({ name: 'merge-requests', params: { fullPath: 'grp/proj' } })
+  })
+})
