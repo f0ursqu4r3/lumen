@@ -1,7 +1,7 @@
 import { Bookmark, FileText, FolderGit2, GitBranch, Hash, Plus, Settings } from '@lucide/vue'
 import { openSettings } from '@/shared/composables/useSettings'
 import type { SavedView } from '@/shared/composables/useSavedViews'
-import type { BrowserRow, Command, PaletteContext, PaletteIssueHit } from './types'
+import type { Command, PaletteContext, PaletteIssueHit, PaletteProjectRow } from './types'
 
 const PROJECT_RENDER_CAP = 25
 
@@ -97,7 +97,7 @@ export function issueCommands(hits: PaletteIssueHit[], ctx: PaletteContext): Com
 }
 
 /** Project rows (already query-filtered by useProjectBrowser) → Projects commands. */
-export function projectCommands(rows: BrowserRow[], ctx: PaletteContext): Command[] {
+export function projectCommands(rows: PaletteProjectRow[], ctx: PaletteContext): Command[] {
   const { router } = ctx
   return rows.slice(0, PROJECT_RENDER_CAP).map((p) => ({
     id: `project-${p.fullPath}`,

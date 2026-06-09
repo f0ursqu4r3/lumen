@@ -1,6 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, ref } from 'vue'
+
+// A mutable hits ref so individual tests can simulate a search returning
+// results or nothing (e.g. the error/empty path that collapses to []).
+const { hits } = vi.hoisted(() => ({
+  hits: {
+    value: [{ iid: '3', title: 'Fix login', state: 'opened' }] as Array<Record<string, unknown>>,
+  },
+}))
 
 // Stub the data sources so we test merge/order, not data fetching.
 vi.mock('@/features/projects/composables/useProjectBrowser', () => ({
@@ -14,11 +22,12 @@ vi.mock('@/shared/composables/useSavedViews', () => ({
   }),
 }))
 vi.mock('./usePaletteIssueSearch', () => ({
-  usePaletteIssueSearch: () => ({
-    hits: ref([{ iid: '3', title: 'Fix login', state: 'opened' }]),
-    isFetching: ref(false),
-  }),
+  usePaletteIssueSearch: () => ({ hits: ref(hits.value), isFetching: ref(false) }),
 }))
+
+afterEach(() => {
+  hits.value = [{ iid: '3', title: 'Fix login', state: 'opened' }]
+})
 
 const route = { params: { fullPath: 'grp/proj' }, query: {} }
 vi.mock('vue-router', () => ({
@@ -71,5 +80,13 @@ describe('usePaletteCommands', () => {
     expect(issues?.items.map((c) => c.id)).toEqual(['issue-3'])
     // Actions filtered to none for this query -> group omitted.
     expect(groups.value.some((g) => g.group === 'Actions')).toBe(false)
+  })
+
+  it('drops the Issues group but keeps the rest when search yields no hits', () => {
+    // Simulates the resilient path: a failed/empty issue search collapses to [].
+    hits.value = []
+    const { groups } = run(ref('open'))
+    expect(groups.value.some((g) => g.group === 'Issues')).toBe(false)
+    expect(groups.value.map((g) => g.group)).toEqual(['Actions', 'Projects', 'Views'])
   })
 })

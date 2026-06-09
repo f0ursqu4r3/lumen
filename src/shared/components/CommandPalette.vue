@@ -14,8 +14,11 @@ const input = ref<{ $el: HTMLInputElement } | null>(null)
 
 const { groups, flat, isSearching } = usePaletteCommands(query)
 
-// Map a flat index to keep arrow nav walking a single list across section headers.
-const indexOf = (command: Command) => flat.value.findIndex((c) => c.id === command.id)
+// Map a command to its position in the single flat list so arrow nav walks
+// across section headers. Precomputed so the per-item lookups in the render
+// (highlight + aria-selected) stay O(1).
+const indexById = computed(() => new Map(flat.value.map((c, i) => [c.id, i])))
+const indexOf = (command: Command) => indexById.value.get(command.id) ?? -1
 
 // Listbox option ids: the combobox input points aria-activedescendant at the
 // active option so screen readers announce the highlighted command on arrow nav.
@@ -141,7 +144,10 @@ const hasResults = computed(() => flat.value.length > 0)
           </button>
         </div>
 
-        <p v-if="!hasResults" class="px-3 py-8 text-center text-sm text-muted-foreground">
+        <p
+          v-if="!hasResults && !isSearching"
+          class="px-3 py-8 text-center text-sm text-muted-foreground"
+        >
           No commands found.
         </p>
       </div>

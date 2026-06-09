@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { PaletteContext, PaletteIssueHit, BrowserRow } from './types'
+import type { PaletteContext, PaletteIssueHit, PaletteProjectRow } from './types'
 import {
   routeCommands,
   issueJumpCommand,
@@ -88,7 +88,7 @@ describe('issueCommands', () => {
 })
 
 describe('projectCommands', () => {
-  const rows: BrowserRow[] = Array.from({ length: 30 }, (_, i) => ({
+  const rows: PaletteProjectRow[] = Array.from({ length: 30 }, (_, i) => ({
     name: `P${i}`,
     fullPath: `grp/p${i}`,
   }))

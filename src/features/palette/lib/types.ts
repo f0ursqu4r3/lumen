@@ -26,5 +26,6 @@ export type PaletteContext = {
 // Shape returned by the issue-search query (also re-used by tests).
 export type PaletteIssueHit = { iid: string; title: string; state: string }
 
-// Minimal row shape consumed from useProjectBrowser.flatRows.
-export type BrowserRow = { name: string; fullPath: string }
+// Minimal projection of useProjectBrowser's BrowserRow — only the fields the
+// palette needs. Named distinctly to avoid colliding with that fuller type.
+export type PaletteProjectRow = { name: string; fullPath: string }

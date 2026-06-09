@@ -60,8 +60,10 @@ export function usePaletteIssueSearch(query: Ref<string>, currentProject: Ref<st
     },
     enabled,
     staleTime: 10_000,
-    // Ephemeral typeahead results: keep them out of the persisted query cache
-    // so stale searches from a prior session never flash into the palette.
+    // Drop each typeahead result from memory as soon as it's unobserved instead
+    // of holding it for the global 24h gcTime. (Persistence is handled
+    // separately: persist.ts excludes the 'palette-issue-search' key from the
+    // localStorage cache so prior-session hits never rehydrate into the palette.)
     gcTime: 0,
   })
 
