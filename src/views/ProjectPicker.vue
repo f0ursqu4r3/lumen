@@ -15,6 +15,7 @@ import Odometer from '@/shared/components/Odometer.vue'
 import { Input } from '@/shared/ui/input'
 import { Card } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
+import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 
 useTitle('Projects · lumen')
 
@@ -66,163 +67,151 @@ useIntersectionObserver(sentinel, ([entry]) => {
 </script>
 
 <template>
-  <section class="space-y-5">
-    <!-- Header — mirrors the issues view so the entry feels of a piece. -->
-    <div class="flex items-end justify-between gap-4">
-      <div class="min-w-0">
-        <RouterLink
-          :to="{ name: 'home' }"
-          data-testid="back-to-my-work"
-          class="mb-2 inline-flex text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← My Work
-        </RouterLink>
-        <p
-          class="eyebrow-tick font-mono text-micro font-semibold tracking-[0.28em] text-muted-foreground/80 uppercase"
-        >
-          Workspace
-        </p>
-        <h1 class="mt-2 text-title leading-none font-semibold text-foreground">Projects</h1>
+  <ViewContainer width="wide">
+    <section class="space-y-5">
+      <!-- The shell top bar carries the "Projects" title and the rail provides My
+           Work, so the in-view header is just the prominent count display. -->
+      <div v-if="!isLoading && !error" class="flex justify-end">
+        <div class="hidden shrink-0 flex-col items-end sm:flex">
+          <span
+            class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
+          >
+            <Odometer :value="count" />
+            <span v-if="hasMore" class="text-primary">+</span>
+          </span>
+          <span
+            class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+          >
+            {{ count === 1 ? 'project' : 'projects' }}
+          </span>
+        </div>
       </div>
-      <div v-if="!isLoading && !error" class="hidden shrink-0 flex-col items-end sm:flex">
-        <span
-          class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
-        >
-          <Odometer :value="count" />
-          <span v-if="hasMore" class="text-primary">+</span>
-        </span>
-        <span
-          class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
-        >
-          {{ count === 1 ? 'project' : 'projects' }}
-        </span>
+
+      <div class="relative">
+        <Search
+          class="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input
+          ref="searchInput"
+          v-model="search"
+          type="search"
+          placeholder="Search projects…"
+          aria-label="Search projects"
+          class="h-11 rounded-lg pl-11 text-base shadow-card"
+        />
       </div>
-    </div>
 
-    <div class="relative">
-      <Search
-        class="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
-      />
-      <Input
-        ref="searchInput"
-        v-model="search"
-        type="search"
-        placeholder="Search projects…"
-        aria-label="Search projects"
-        class="h-11 rounded-lg pl-11 text-base shadow-card"
-      />
-    </div>
+      <ErrorNotice v-if="error" :error="error" />
 
-    <ErrorNotice v-if="error" :error="error" />
-
-    <div
-      v-else-if="isLoading"
-      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
-    >
-      <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-3">
-        <Skeleton class="size-7 rounded-md" />
-        <Skeleton class="h-3.5" :style="{ width: `${30 + ((i * 17) % 40)}%` }" />
-        <Skeleton class="h-3 w-24" />
-      </div>
-    </div>
-
-    <template v-else>
-      <Card
-        v-if="count"
-        class="relative gap-0 overflow-hidden p-0 shadow-pop"
-        role="listbox"
-        aria-label="Projects"
+      <div
+        v-else-if="isLoading"
+        class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
       >
-        <!-- The selection rail: one element that glides between rows on a spring.
+        <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-3">
+          <Skeleton class="size-7 rounded-md" />
+          <Skeleton class="h-3.5" :style="{ width: `${30 + ((i * 17) % 40)}%` }" />
+          <Skeleton class="h-3 w-24" />
+        </div>
+      </div>
+
+      <template v-else>
+        <Card
+          v-if="count"
+          class="relative gap-0 overflow-hidden p-0 shadow-pop"
+          role="listbox"
+          aria-label="Projects"
+        >
+          <!-- The selection rail: one element that glides between rows on a spring.
              The amber "you are here" signal lives in the active row's monogram,
              so the rail itself is a clean accent band. -->
-        <div
-          class="pointer-events-none absolute inset-x-1 top-0 z-0 rounded-lg bg-accent ring-1 ring-inset ring-border transition-[height,opacity] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          :style="{
-            transform: `translateY(${cursor.y}px)`,
-            height: `${cursor.h}px`,
-            opacity: cursor.visible ? 1 : 0,
-          }"
-        />
+          <div
+            class="pointer-events-none absolute inset-x-1 top-0 z-0 rounded-lg bg-accent ring-1 ring-inset ring-border transition-[height,opacity] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            :style="{
+              transform: `translateY(${cursor.y}px)`,
+              height: `${cursor.h}px`,
+              opacity: cursor.visible ? 1 : 0,
+            }"
+          />
 
-        <!-- Rows wrapper carries the [data-row] elements the spring rail measures;
+          <!-- Rows wrapper carries the [data-row] elements the spring rail measures;
              it stays unpositioned so rows still offset against the relative Card. -->
-        <div ref="listEl">
-          <template v-for="(row, i) in flatRows" :key="row.fullPath">
-            <!-- Section header — sits between rows, never carries [data-row], so the
+          <div ref="listEl">
+            <template v-for="(row, i) in flatRows" :key="row.fullPath">
+              <!-- Section header — sits between rows, never carries [data-row], so the
                rail's row indexing stays aligned to the flat list. -->
-            <div
-              v-if="showHeaders && startsSection(i)"
-              class="relative z-10 flex items-center gap-2 px-3 pt-4 pb-1.5 first:pt-2.5"
-            >
-              <Star
-                v-if="row.section === 'starred'"
-                class="size-3 text-primary"
-                fill="currentColor"
-              />
-              <span
-                class="font-mono text-micro font-semibold tracking-[0.22em] text-muted-foreground/70 uppercase"
+              <div
+                v-if="showHeaders && startsSection(i)"
+                class="relative z-10 flex items-center gap-2 px-3 pt-4 pb-1.5 first:pt-2.5"
               >
-                {{ SECTION_LABELS[row.section] }}
-              </span>
-              <span class="font-mono text-micro tabular-nums text-muted-foreground/40">
-                {{ sectionCount(row.section) }}
-              </span>
-            </div>
+                <Star
+                  v-if="row.section === 'starred'"
+                  class="size-3 text-primary"
+                  fill="currentColor"
+                />
+                <span
+                  class="font-mono text-micro font-semibold tracking-[0.22em] text-muted-foreground/70 uppercase"
+                >
+                  {{ SECTION_LABELS[row.section] }}
+                </span>
+                <span class="font-mono text-micro tabular-nums text-muted-foreground/40">
+                  {{ sectionCount(row.section) }}
+                </span>
+              </div>
 
-            <ProjectRow
-              :row="row"
-              :index="i"
-              :active="i === active"
-              :name-style="nameStyle(row)"
-              @row-click="onRowClick($event, row, i)"
-              @toggle-star="onToggleStar(row)"
-              @activate="active = i"
-            />
-          </template>
-        </div>
+              <ProjectRow
+                :row="row"
+                :index="i"
+                :active="i === active"
+                :name-style="nameStyle(row)"
+                @row-click="onRowClick($event, row, i)"
+                @toggle-star="onToggleStar(row)"
+                @activate="active = i"
+              />
+            </template>
+          </div>
 
-        <!-- Load more: the sentinel auto-fetches; the row also reports state. -->
+          <!-- Load more: the sentinel auto-fetches; the row also reports state. -->
+          <div
+            v-if="hasMore"
+            ref="sentinel"
+            class="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground"
+          >
+            <LoaderCircle v-if="isFetchingNextPage" class="size-3.5 animate-spin" />
+            <span>{{ isFetchingNextPage ? 'Loading…' : 'Scroll for more' }}</span>
+          </div>
+        </Card>
+
+        <!-- Teaching empty state — distinguishes "no match" from "nothing here yet". -->
         <div
-          v-if="hasMore"
-          ref="sentinel"
-          class="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground"
+          v-else
+          class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
         >
-          <LoaderCircle v-if="isFetchingNextPage" class="size-3.5 animate-spin" />
-          <span>{{ isFetchingNextPage ? 'Loading…' : 'Scroll for more' }}</span>
+          <div class="grid size-11 place-items-center rounded-full bg-muted">
+            <component :is="search ? Search : FolderGit2" class="size-5 text-muted-foreground" />
+          </div>
+          <p class="text-sm font-medium text-foreground">
+            {{ search ? 'No matches.' : 'No projects.' }}
+          </p>
+          <p class="max-w-xs text-xs text-muted-foreground">
+            {{
+              search
+                ? `Nothing matches “${search}”. Try a different term.`
+                : 'Projects from your GitLab instance will appear here as you gain access.'
+            }}
+          </p>
         </div>
-      </Card>
 
-      <!-- Teaching empty state — distinguishes "no match" from "nothing here yet". -->
-      <div
-        v-else
-        class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
-      >
-        <div class="grid size-11 place-items-center rounded-full bg-muted">
-          <component :is="search ? Search : FolderGit2" class="size-5 text-muted-foreground" />
+        <!-- Keyboard legend — the launcher tells you how to fly it. -->
+        <div
+          v-if="count"
+          class="hidden items-center gap-x-4 gap-y-1.5 px-1 font-mono text-2xs text-muted-foreground/55 select-none sm:flex sm:flex-wrap"
+        >
+          <span class="inline-flex items-center gap-1.5"><kbd class="kbd">type</kbd> filter</span>
+          <span class="inline-flex items-center gap-1.5"><kbd class="kbd">↑↓</kbd> move</span>
+          <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⏎</kbd> open</span>
+          <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⌘1–9</kbd> jump</span>
         </div>
-        <p class="text-sm font-medium text-foreground">
-          {{ search ? 'No matches.' : 'No projects.' }}
-        </p>
-        <p class="max-w-xs text-xs text-muted-foreground">
-          {{
-            search
-              ? `Nothing matches “${search}”. Try a different term.`
-              : 'Projects from your GitLab instance will appear here as you gain access.'
-          }}
-        </p>
-      </div>
-
-      <!-- Keyboard legend — the launcher tells you how to fly it. -->
-      <div
-        v-if="count"
-        class="hidden items-center gap-x-4 gap-y-1.5 px-1 font-mono text-2xs text-muted-foreground/55 select-none sm:flex sm:flex-wrap"
-      >
-        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">type</kbd> filter</span>
-        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">↑↓</kbd> move</span>
-        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⏎</kbd> open</span>
-        <span class="inline-flex items-center gap-1.5"><kbd class="kbd">⌘1–9</kbd> jump</span>
-      </div>
-    </template>
-  </section>
+      </template>
+    </section>
+  </ViewContainer>
 </template>
