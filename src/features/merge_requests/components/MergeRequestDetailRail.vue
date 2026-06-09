@@ -94,5 +94,11 @@ const nameOf = (u: UserCore) => u.name || u.username
     <p v-if="mr.conflicts" class="flex items-center gap-1.5 text-xs text-rose-300">
       <TriangleAlert class="size-3.5" /> Has conflicts
     </p>
+    <p
+      v-if="mr.mergeableDiscussionsState === false"
+      class="flex items-center gap-1.5 text-xs text-amber-300"
+    >
+      <TriangleAlert class="size-3.5" /> Unresolved discussions
+    </p>
   </aside>
 </template>

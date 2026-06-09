@@ -30,4 +30,16 @@ describe('MergeRequestDetailRail', () => {
     expect(w.text()).toContain('2 required')
     expect(w.text().toLowerCase()).toContain('conflict')
   })
+
+  it('flags unresolved discussions only when mergeableDiscussionsState is false', () => {
+    const stubs = { PipelineStatusBadge: true }
+    const resolved = mount(MergeRequestDetailRail, { props: { mr }, global: { stubs } })
+    expect(resolved.text()).not.toContain('Unresolved discussions')
+
+    const unresolved = mount(MergeRequestDetailRail, {
+      props: { mr: { ...mr, mergeableDiscussionsState: false } },
+      global: { stubs },
+    })
+    expect(unresolved.text()).toContain('Unresolved discussions')
+  })
 })

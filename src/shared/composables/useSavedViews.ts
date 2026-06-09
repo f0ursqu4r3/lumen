@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
-import { computed, type Ref } from 'vue'
+import { computed, watch, type Ref } from 'vue'
 
 /** A snapshot of view-defining query keys (string or string[] values). */
 export type ViewSlice = Record<string, string | string[]>
@@ -62,6 +62,29 @@ export function useSavedViews(
 ) {
   const stored = useLocalStorage<SavedView[]>(() => storageKey(namespace, fullPath.value), [])
   const views = computed(() => stored.value)
+
+  // One-time migration: the storage key gained a namespace segment. Issue saved
+  // views used to live at the un-namespaced `lumen:saved-views:<path>`; move them
+  // to the namespaced key on first encounter so they aren't silently lost.
+  if (namespace === 'issue') {
+    watch(
+      fullPath,
+      (path) => {
+        if (!path || stored.value.length) return
+        try {
+          const legacyKey = `lumen:saved-views:${path}`
+          const legacy = window.localStorage.getItem(legacyKey)
+          if (!legacy) return
+          const parsed = JSON.parse(legacy)
+          if (Array.isArray(parsed) && parsed.length) stored.value = parsed
+          window.localStorage.removeItem(legacyKey)
+        } catch {
+          // malformed legacy data — ignore
+        }
+      },
+      { immediate: true },
+    )
+  }
 
   function add(name: string, query: ViewSlice): SavedView | null {
     const trimmed = name.trim()

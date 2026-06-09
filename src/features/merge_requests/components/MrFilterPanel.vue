@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// Label filtering is fully wired in the data layer (useMrFilters.labels →
+// labelName) and round-trips through the URL + saved views, but has no UI
+// surface yet. TODO(v1.1): add a label flyout here, reusing the issues' labels
+// picker, mirroring how the issue filter panel grew.
 import type { MrDraft, MrState } from '@/features/merge_requests/lib/mrView'
 import { Input } from '@/shared/ui/input'
 

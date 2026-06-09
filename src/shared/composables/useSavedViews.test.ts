@@ -43,6 +43,27 @@ describe('useSavedViews namespacing', () => {
     expect(mrs.views.value).toHaveLength(0)
     expect(window.localStorage.getItem('lumen:saved-views:issue:grp/proj')).toContain('Bugs')
   })
+
+  it('migrates pre-namespace issue views to the namespaced key', () => {
+    window.localStorage.setItem(
+      'lumen:saved-views:grp/proj',
+      JSON.stringify([{ id: 'v1', name: 'Legacy', query: { label: 'bug' } }]),
+    )
+    const issues = useSavedViews(ref('grp/proj'), 'issue', KEYS)
+    expect(issues.views.value).toEqual([{ id: 'v1', name: 'Legacy', query: { label: 'bug' } }])
+    // Legacy key is consumed so the migration runs only once.
+    expect(window.localStorage.getItem('lumen:saved-views:grp/proj')).toBeNull()
+  })
+
+  it('does not migrate the legacy key into the mr namespace', () => {
+    window.localStorage.setItem(
+      'lumen:saved-views:grp/proj',
+      JSON.stringify([{ id: 'v1', name: 'Legacy', query: { label: 'bug' } }]),
+    )
+    const mrs = useSavedViews(ref('grp/proj'), 'mr', KEYS)
+    expect(mrs.views.value).toHaveLength(0)
+    expect(window.localStorage.getItem('lumen:saved-views:grp/proj')).not.toBeNull()
+  })
 })
 
 describe('useSavedViews', () => {
