@@ -43,7 +43,7 @@ const descriptionHtml = computed(() => sanitizeHtml(mr.value?.descriptionHtml))
     <div v-else-if="isLoading" class="text-sm text-muted-foreground">Loading…</div>
 
     <template v-else-if="mr">
-      <Teleport to="#app-topbar-slot">
+      <Teleport defer to="#app-topbar-slot">
         <a
           :href="mr.webUrl"
           target="_blank"

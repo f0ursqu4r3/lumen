@@ -51,7 +51,7 @@ function nameOrUsername(user?: { name?: string | null; username: string } | null
          window it teleports into the shell top bar; in the window/drawer it sits
          inline below the eyebrow. Markup is duplicated so each branch keeps its own
          spacing class, but the data-testids are identical across both. -->
-    <Teleport v-if="shellPresent" to="#app-topbar-slot">
+    <Teleport v-if="shellPresent" defer to="#app-topbar-slot">
       <div class="flex items-center gap-2.5">
         <!-- Keyed by state so toggling open/closed re-triggers the quiet status flash. -->
         <StateBadge :key="state" :state="state" class="animate-status" />

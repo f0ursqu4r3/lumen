@@ -247,14 +247,18 @@ function setComposerOpen(value: boolean) {
 
 <template>
   <ViewContainer :width="view === 'board' ? 'wide' : 'default'">
-    <!-- The primary action lives in the shell's top bar. -->
-    <Teleport to="#app-topbar-slot">
+    <!-- The primary action lives in the shell's top bar. `defer` so the target
+         (rendered by the sibling AppTopBar in the same pass) is resolved after
+         this render flush rather than synchronously on mount. -->
+    <Teleport defer to="#app-topbar-slot">
       <Button data-testid="new-issue" size="sm" @click="composerOpen = true">
         <Plus class="size-4" /> New issue
       </Button>
     </Teleport>
 
-    <section class="space-y-5">
+    <!-- When the bulk bar is up (it's a fixed bottom overlay), pad the bottom so
+         the last issue can scroll clear of it instead of hiding behind it. -->
+    <section class="space-y-5" :class="{ 'pb-24': selection.count.value > 0 }">
       <IssueListToolbar
         v-model:state="state"
         v-model:search="search"

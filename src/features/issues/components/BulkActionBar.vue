@@ -83,132 +83,143 @@ function pickStatus(status: WorkItemStatus) {
 </script>
 
 <template>
-  <Transition name="bulk-bar">
-    <div
-      v-if="count > 0"
-      ref="barRoot"
-      data-testid="bulk-action-bar"
-      class="fixed inset-x-0 bottom-5 z-40 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
-    >
-      <span
-        class="px-1 font-mono text-xs font-medium tabular-nums text-foreground"
-        aria-live="polite"
+  <!-- Rendered at <body> so the fixed bottom bar (and its upward menus) float at
+       the viewport level, clear of the app shell's overflow/stacking context. -->
+  <Teleport to="body">
+    <Transition name="bulk-bar">
+      <div
+        v-if="count > 0"
+        ref="barRoot"
+        data-testid="bulk-action-bar"
+        class="fixed inset-x-0 bottom-5 z-40 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
       >
-        {{ count }} selected
-      </span>
-      <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
-
-      <!-- Labels -->
-      <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="toggleMenu('labels')">
-          <Tag /> Labels
-        </Button>
-        <div
-          v-if="openMenu === 'labels'"
-          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
+        <span
+          class="px-1 font-mono text-xs font-medium tabular-nums text-foreground"
+          aria-live="polite"
         >
-          <div class="mb-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
-            <button
-              type="button"
-              class="rounded px-2 py-0.5"
-              :class="labelMode === 'add' ? 'bg-card text-foreground' : 'text-muted-foreground'"
-              @click="labelMode = 'add'"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              class="rounded px-2 py-0.5"
-              :class="labelMode === 'remove' ? 'bg-card text-foreground' : 'text-muted-foreground'"
-              @click="labelMode = 'remove'"
-            >
-              Remove
-            </button>
-          </div>
-          <LabelPicker v-model="pendingTitles" :catalog="catalog" label="Labels" />
-          <Button
-            class="mt-2 w-full"
-            size="sm"
-            data-testid="bulk-apply-labels"
-            :aria-label="`${labelMode === 'add' ? 'Add labels to' : 'Remove labels from'} ${count} issues`"
-            @click="applyLabels"
-          >
-            {{ labelMode === 'add' ? 'Add to' : 'Remove from' }} {{ count }}
+          {{ count }} selected
+        </span>
+        <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
+
+        <!-- Labels -->
+        <div class="relative">
+          <Button variant="ghost" size="sm" data-testid="bulk-labels" @click="toggleMenu('labels')">
+            <Tag /> Labels
           </Button>
-        </div>
-      </div>
-
-      <!-- Assign -->
-      <div class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-assign" @click="toggleMenu('assignee')">
-          <UserPlus /> Assign
-        </Button>
-        <div
-          v-if="openMenu === 'assignee'"
-          class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
-        >
-          <AssigneePicker v-model="pendingAssignee" :members="members" label="Assignee" />
-          <Button
-            class="mt-2 w-full"
-            size="sm"
-            data-testid="bulk-apply-assignee"
-            :aria-label="`Assign ${count} issues`"
-            @click="applyAssignee"
+          <div
+            v-if="openMenu === 'labels'"
+            class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
           >
-            Assign {{ count }}
-          </Button>
-        </div>
-      </div>
-
-      <!-- Status: a ghost trigger matching Labels/Assign, opening an upward popover
-           (the bar is bottom-anchored, so a downward menu would clip off-screen). -->
-      <div v-if="statuses.length" class="relative">
-        <Button variant="ghost" size="sm" data-testid="bulk-status" @click="toggleMenu('status')">
-          <CircleDot /> Status
-        </Button>
-        <div
-          v-if="openMenu === 'status'"
-          data-testid="bulk-status-panel"
-          class="absolute bottom-full left-0 mb-2 w-56 rounded-lg border border-border bg-popover p-1 shadow-pop"
-        >
-          <ul class="max-h-64 overflow-y-auto">
-            <li v-for="s in statuses" :key="s.id">
+            <div class="mb-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
               <button
                 type="button"
-                :data-testid="`bulk-status-opt-${s.name}`"
-                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
-                @click="pickStatus(s)"
+                class="rounded px-2 py-0.5"
+                :class="labelMode === 'add' ? 'bg-card text-foreground' : 'text-muted-foreground'"
+                @click="labelMode = 'add'"
               >
-                <span
-                  class="size-2.5 shrink-0 rounded-full"
-                  :style="{ backgroundColor: s.color }"
-                  aria-hidden="true"
-                />
-                <span class="min-w-0 flex-1 truncate">{{ s.name }}</span>
+                Add
               </button>
-            </li>
-          </ul>
+              <button
+                type="button"
+                class="rounded px-2 py-0.5"
+                :class="
+                  labelMode === 'remove' ? 'bg-card text-foreground' : 'text-muted-foreground'
+                "
+                @click="labelMode = 'remove'"
+              >
+                Remove
+              </button>
+            </div>
+            <LabelPicker v-model="pendingTitles" :catalog="catalog" label="Labels" />
+            <Button
+              class="mt-2 w-full"
+              size="sm"
+              data-testid="bulk-apply-labels"
+              :aria-label="`${labelMode === 'add' ? 'Add labels to' : 'Remove labels from'} ${count} issues`"
+              @click="applyLabels"
+            >
+              {{ labelMode === 'add' ? 'Add to' : 'Remove from' }} {{ count }}
+            </Button>
+          </div>
         </div>
+
+        <!-- Assign -->
+        <div class="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            data-testid="bulk-assign"
+            @click="toggleMenu('assignee')"
+          >
+            <UserPlus /> Assign
+          </Button>
+          <div
+            v-if="openMenu === 'assignee'"
+            class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
+          >
+            <AssigneePicker v-model="pendingAssignee" :members="members" label="Assignee" />
+            <Button
+              class="mt-2 w-full"
+              size="sm"
+              data-testid="bulk-apply-assignee"
+              :aria-label="`Assign ${count} issues`"
+              @click="applyAssignee"
+            >
+              Assign {{ count }}
+            </Button>
+          </div>
+        </div>
+
+        <!-- Status: a ghost trigger matching Labels/Assign, opening an upward popover
+           (the bar is bottom-anchored, so a downward menu would clip off-screen). -->
+        <div v-if="statuses.length" class="relative">
+          <Button variant="ghost" size="sm" data-testid="bulk-status" @click="toggleMenu('status')">
+            <CircleDot /> Status
+          </Button>
+          <div
+            v-if="openMenu === 'status'"
+            data-testid="bulk-status-panel"
+            class="absolute bottom-full left-0 mb-2 w-56 rounded-lg border border-border bg-popover p-1 shadow-pop"
+          >
+            <ul class="max-h-64 overflow-y-auto">
+              <li v-for="s in statuses" :key="s.id">
+                <button
+                  type="button"
+                  :data-testid="`bulk-status-opt-${s.name}`"
+                  class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
+                  @click="pickStatus(s)"
+                >
+                  <span
+                    class="size-2.5 shrink-0 rounded-full"
+                    :style="{ backgroundColor: s.color }"
+                    aria-hidden="true"
+                  />
+                  <span class="min-w-0 flex-1 truncate">{{ s.name }}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="bulk-open-combined"
+          @click="emit('open-combined')"
+        >
+          <ExternalLink /> Open combined
+        </Button>
+        <Button variant="ghost" size="sm" data-testid="bulk-select-all" @click="emit('select-all')">
+          <CheckCheck /> Select all
+        </Button>
+        <Button variant="ghost" size="sm" data-testid="bulk-clear" @click="emit('clear')">
+          <X /> Clear
+        </Button>
       </div>
-
-      <span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true" />
-
-      <Button
-        variant="ghost"
-        size="sm"
-        data-testid="bulk-open-combined"
-        @click="emit('open-combined')"
-      >
-        <ExternalLink /> Open combined
-      </Button>
-      <Button variant="ghost" size="sm" data-testid="bulk-select-all" @click="emit('select-all')">
-        <CheckCheck /> Select all
-      </Button>
-      <Button variant="ghost" size="sm" data-testid="bulk-clear" @click="emit('clear')">
-        <X /> Clear
-      </Button>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
