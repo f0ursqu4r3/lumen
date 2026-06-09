@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import IssueDetailsRail from './IssueDetailsRail.vue'
-import { hiddenFieldList, type RailFieldKey } from '@/features/issues/lib/railFields'
+import {
+  hiddenFieldList,
+  railField,
+  type RailFieldDescriptor,
+  type RailFieldKey,
+} from '@/features/issues/lib/railFields'
+import type { IssueDraft } from '@/features/issues/lib/issueEdit'
 
 const issue = { milestone: null } as never
 
-function makeDraft(over: Record<string, unknown> = {}) {
+function makeDraft(over: Partial<IssueDraft> = {}): IssueDraft {
   return {
     title: 'T',
     description: '',
@@ -24,8 +30,8 @@ function makeDraft(over: Record<string, unknown> = {}) {
 
 function mountRail(opts: {
   visible: RailFieldKey[]
-  hidden?: { key: RailFieldKey; label: string; addLabel?: string }[]
-  draft?: Record<string, unknown>
+  hidden?: RailFieldDescriptor[]
+  draft?: Partial<IssueDraft>
 }) {
   const draft = makeDraft(opts.draft)
   return mount(IssueDetailsRail, {
@@ -68,11 +74,7 @@ describe('IssueDetailsRail progressive disclosure', () => {
   })
 
   it('lists hidden fields in the Add menu and emits add on selection', async () => {
-    const hidden = hiddenFieldList(makeDraft(), makeDraft(), new Set(), new Set()).map((f) => ({
-      key: f.key,
-      label: f.label,
-      addLabel: f.addLabel,
-    }))
+    const hidden = hiddenFieldList(makeDraft(), makeDraft(), new Set(), new Set())
     const w = mountRail({ visible: ['status', 'labels', 'assignees'], hidden })
     await w.get('[data-testid="add-field-trigger"]').trigger('click')
     await w.get('[data-testid="add-field-weight"]').trigger('click')
@@ -80,9 +82,7 @@ describe('IssueDetailsRail progressive disclosure', () => {
   })
 
   it('shows the confidential add label, not the field label, in the menu', async () => {
-    const hidden = [
-      { key: 'confidential' as const, label: 'Confidential', addLabel: 'Mark confidential' },
-    ]
+    const hidden = [railField('confidential')]
     const w = mountRail({ visible: ['status', 'labels', 'assignees'], hidden })
     await w.get('[data-testid="add-field-trigger"]').trigger('click')
     expect(w.get('[data-testid="add-field-confidential"]').text()).toBe('Mark confidential')
