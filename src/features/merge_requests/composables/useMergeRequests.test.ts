@@ -44,4 +44,33 @@ describe('useMergeRequests', () => {
     await flushPromises()
     expect(result().mergeRequests.value).toEqual([])
   })
+
+  it('fetches the next page with the cursor and flattens both pages', async () => {
+    request
+      .mockResolvedValueOnce({
+        project: {
+          mergeRequests: {
+            nodes: [{ iid: '5', title: 'Page one', state: 'opened', draft: false }],
+            pageInfo: { hasNextPage: true, endCursor: 'cursor-1' },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        project: {
+          mergeRequests: {
+            nodes: [{ iid: '6', title: 'Page two', state: 'opened', draft: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      })
+    const { result } = withQuery(() => useMergeRequests(ref('grp/proj'), ref(filters)))
+    await flushPromises()
+    expect(result().hasNextPage.value).toBe(true)
+
+    await result().fetchNextPage()
+    await flushPromises()
+
+    expect(request.mock.calls[1][1]).toMatchObject({ after: 'cursor-1' })
+    expect(result().mergeRequests.value.map((m) => m.iid)).toEqual(['5', '6'])
+  })
 })
