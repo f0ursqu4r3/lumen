@@ -50,3 +50,6 @@ yarn-error.log*
 
 # Cached SDL introspected from the live instance (reference; regenerate as needed)
 src/gitlab/schema.graphql
+
+# Visual brainstorm companion mockups
+.superpowers/
