@@ -55,7 +55,11 @@ function newId(): string {
  * namespace (e.g. 'issue' / 'mr') so different resources don't collide. `keys`
  * defines which slice keys are recognized for storage and matching.
  */
-export function useSavedViews(fullPath: Ref<string>, namespace: string, keys: readonly string[]) {
+export function useSavedViews(
+  fullPath: Ref<string>,
+  namespace: 'issue' | 'mr',
+  keys: readonly string[],
+) {
   const stored = useLocalStorage<SavedView[]>(() => storageKey(namespace, fullPath.value), [])
   const views = computed(() => stored.value)
 

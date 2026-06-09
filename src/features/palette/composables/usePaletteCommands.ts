@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectBrowser } from '@/features/projects/composables/useProjectBrowser'
 import { useSavedViews } from '@/shared/composables/useSavedViews'
+import { FILTER_KEYS } from '@/features/issues/composables/useIssueFilters'
 import { usePaletteIssueSearch } from './usePaletteIssueSearch'
 import {
   filterByQuery,
@@ -24,8 +25,9 @@ export function usePaletteCommands(query: Ref<string>) {
 
   const { flatRows } = useProjectBrowser(query)
   // useSavedViews re-keys per project; pass a non-null ref (empty = no views).
+  // The palette surfaces the current project's issue saved views.
   const projectRef = computed(() => currentProject.value ?? '')
-  const { views } = useSavedViews(projectRef)
+  const { views } = useSavedViews(projectRef, 'issue', FILTER_KEYS)
   const { hits, isFetching } = usePaletteIssueSearch(query, currentProject)
 
   const ctx = computed<PaletteContext>(() => ({
