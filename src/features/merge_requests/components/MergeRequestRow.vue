@@ -14,7 +14,7 @@ const reviewers = computed(
 )
 const approvals = computed(() =>
   props.mr.approvalsRequired
-    ? `${props.mr.approved ? '✓' : ''}${props.mr.approvalsRequired} approvals`
+    ? `${props.mr.approved ? '✓ ' : ''}${props.mr.approvalsRequired} approvals`
     : null,
 )
 </script>
