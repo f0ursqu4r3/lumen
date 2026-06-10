@@ -14,6 +14,15 @@ import {
   regenerateMcpToken,
   revealMcpToken,
 } from './mcp/server'
+import {
+  startServerHealth,
+  retryNow,
+  getHealth,
+  resetForReconnect,
+  classifyStatus,
+  type Outcome,
+} from './serverHealth'
+import { PROBE_QUERY } from '@/shared/composables/useGitlabConnect'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
 // off it. app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
@@ -22,6 +31,20 @@ const url = await resolveStartUrl({ hmr: process.env.LUMEN_HMR === '1' })
 // One native window per issue, keyed by `${fullPath}#${iid}`, so re-expanding an
 // already-open issue focuses it instead of spawning a duplicate.
 const issueWindows = new Map<string, BrowserWindow>()
+
+// Every native window registers here so host-owned state (server health) can be
+// broadcast to all of them. Pruned on close.
+const windows = new Set<BrowserWindow>()
+
+function track(w: BrowserWindow): BrowserWindow {
+  windows.add(w)
+  w.on('close', () => windows.delete(w))
+  return w
+}
+
+function broadcast(js: string): void {
+  for (const w of windows) w.webview.executeJavascript(js)
+}
 
 let settingsWindow: BrowserWindow | null = null
 
@@ -37,15 +60,17 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
   const repo = fullPath.split('/').at(-1) ?? fullPath
   // Cascade each new window so stacked issue windows don't perfectly overlap.
   const offset = issueWindows.size * 24
-  const issueWin = new BrowserWindow({
-    title: `#${iid} · ${repo}`,
-    // Load the bare app; the route is applied client-side (issueWindowRoute,
-    // handed over via getInitialRoute) — see issueWindow.ts for why it can't ride
-    // in this URL's fragment under views://.
-    url,
-    frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
-    rpc: buildRpc(issueWindowRoute(fullPath, iid)),
-  })
+  const issueWin = track(
+    new BrowserWindow({
+      title: `#${iid} · ${repo}`,
+      // Load the bare app; the route is applied client-side (issueWindowRoute,
+      // handed over via getInitialRoute) — see issueWindow.ts for why it can't ride
+      // in this URL's fragment under views://.
+      url,
+      frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
+      rpc: buildRpc(issueWindowRoute(fullPath, iid)),
+    }),
+  )
   // Per-window close event (scoped by window id) keeps the registry accurate.
   // Register before inserting so a synchronous close can't strand a stale entry.
   issueWin.on('close', () => issueWindows.delete(key))
@@ -61,13 +86,15 @@ function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[]
   // land exactly on a single-issue one. No registry: combined windows are not
   // deduped or focused — each "Open combined" is a fresh window.
   const offset = issueWindows.size * 24
-  const issuesWin = new BrowserWindow({
-    title: `${iids.length} issues · ${repo}`,
-    // See openIssueWindow: bare base + client-side route via getInitialRoute.
-    url,
-    frame: { width: 760, height: 920, x: 140 + offset, y: 140 + offset },
-    rpc: buildRpc(issuesWindowRoute(fullPath, iids)),
-  })
+  const issuesWin = track(
+    new BrowserWindow({
+      title: `${iids.length} issues · ${repo}`,
+      // See openIssueWindow: bare base + client-side route via getInitialRoute.
+      url,
+      frame: { width: 760, height: 920, x: 140 + offset, y: 140 + offset },
+      rpc: buildRpc(issuesWindowRoute(fullPath, iids)),
+    }),
+  )
   void issuesWin
   return { ok: true }
 }
@@ -77,12 +104,14 @@ function openSettingsWindow(): { ok: boolean } {
     settingsWindow.activate()
     return { ok: true }
   }
-  const win = new BrowserWindow({
-    title: 'Settings',
-    url,
-    frame: { width: 820, height: 600, x: 160, y: 120 },
-    rpc: buildRpc(settingsWindowRoute()),
-  })
+  const win = track(
+    new BrowserWindow({
+      title: 'Settings',
+      url,
+      frame: { width: 820, height: 600, x: 160, y: 120 },
+      rpc: buildRpc(settingsWindowRoute()),
+    }),
+  )
   win.on('close', () => {
     settingsWindow = null
   })
@@ -113,6 +142,12 @@ function buildRpc(initialRoute: string | null = null) {
         getInitialRoute: async () => ({ route: initialRoute }),
         saveConfig: async ({ url, token }) => {
           saveConfig({ url, token })
+          resetForReconnect() // new token → clear any down/expired and re-probe on the next request
+          return { ok: true }
+        },
+        getServerHealth: async () => getHealth(),
+        retryServerNow: async () => {
+          retryNow()
           return { ok: true }
         },
         clearConfig: async () => {
@@ -154,16 +189,31 @@ function buildRpc(initialRoute: string | null = null) {
   } satisfies LumenRPC)
 }
 
-const win = new BrowserWindow({
-  title: 'Lumen',
-  url,
-  frame: { width: 1280, height: 860, x: 80, y: 80 },
-  rpc: buildRpc(),
-})
+const win = track(
+  new BrowserWindow({
+    title: 'Lumen',
+    url,
+    frame: { width: 1280, height: 860, x: 80, y: 80 },
+    rpc: buildRpc(),
+  }),
+)
 
 // Start the in-process MCP server iff the user enabled it in config. Off by
 // default; localhost-only + bearer-gated (see src/bun/mcp/server.ts).
 startMcpIfEnabled()
+
+// One host-owned recovery loop, broadcast to every window (see src/bun/serverHealth.ts).
+startServerHealth({
+  probe: async (): Promise<Outcome> => {
+    const res = await gitlabGraphql({ query: PROBE_QUERY })
+    return classifyStatus(res.status, Boolean(res.errors?.length))
+  },
+  broadcast: (health) => {
+    broadcast(
+      `window.dispatchEvent(new CustomEvent('lumen:server-health',{detail:${JSON.stringify(health)}}))`,
+    )
+  },
+})
 
 // Without an application menu, macOS has no Edit menu, so ⌘C/⌘V/⌘X/⌘A have
 // nothing to dispatch to and clipboard does not work in the webview. The Develop
