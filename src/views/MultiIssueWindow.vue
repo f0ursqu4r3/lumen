@@ -80,7 +80,7 @@ const navBtn =
          padding so it spans the column and tucks under the native title bar. -->
     <header
       ref="headerEl"
-      class="sticky top-1.5 z-10 -mx-4 -mt-6 mb-2 border-b border-border/60 bg-card/95 px-4 py-2 backdrop-blur-sm"
+      class="sticky top-0 z-10 -mx-4 -mt-6 mb-2 border-b border-border/60 bg-card px-4 py-2"
     >
       <div class="relative flex min-h-7 items-center justify-end gap-2">
         <span

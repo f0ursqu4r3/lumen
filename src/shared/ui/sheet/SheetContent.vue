@@ -18,13 +18,16 @@ const props = withDefaults(
     DialogContentProps & {
       class?: HTMLAttributes['class']
       side?: 'top' | 'right' | 'bottom' | 'left'
+      // Suppress the built-in corner close so a consumer can place its own (e.g.
+      // a framed panel that wants the X inside its card header, not the viewport).
+      hideClose?: boolean
     }
   >(),
   { side: 'right' },
 )
 const emits = defineEmits<DialogContentEmits>()
 
-const delegated = reactiveOmit(props, 'class', 'side')
+const delegated = reactiveOmit(props, 'class', 'side', 'hideClose')
 const forwarded = useForwardPropsEmits(delegated, emits)
 
 const SIDE: Record<'top' | 'right' | 'bottom' | 'left', string> = {
@@ -55,6 +58,7 @@ const SIDE: Record<'top' | 'right' | 'bottom' | 'left', string> = {
     >
       <slot />
       <DialogClose
+        v-if="!hideClose"
         data-slot="sheet-close"
         class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         aria-label="Close"

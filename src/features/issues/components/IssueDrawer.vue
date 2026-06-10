@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SquareArrowOutUpRight } from '@lucide/vue'
+import { SquareArrowOutUpRight, X } from '@lucide/vue'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/ui/sheet'
 import { Button } from '@/shared/ui/button'
 import IssueDetail from '@/views/IssueDetail.vue'
@@ -17,24 +17,38 @@ const emit = defineEmits<{
     <!-- The sheet rides in the same rounded card panel the shell uses: a thin
          background frame (p-1.5) around a bg-card panel, floating over the dimmed
          window rather than sitting flush to its edge. -->
-    <SheetContent side="right" class="w-full gap-0 border-0 bg-background p-1.5 sm:max-w-2xl">
+    <SheetContent
+      side="right"
+      hide-close
+      class="w-full gap-0 border-0 bg-background p-1.5 sm:max-w-2xl"
+    >
       <div
         class="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card"
       >
-        <SheetHeader class="flex-row items-center gap-2 border-b border-border/60 px-4 py-3">
+        <!-- hide-close suppresses the sheet's viewport-corner X so the close and
+             expand affordances live together inside the card header. -->
+        <SheetHeader class="flex-row items-center gap-1 border-b border-border/60 px-4 py-3">
           <SheetTitle class="font-mono text-sm font-medium tabular-nums text-foreground">
             #{{ iid ?? '' }}
           </SheetTitle>
           <SheetDescription class="sr-only">Issue details</SheetDescription>
-          <!-- mr-6 keeps the expand button clear of SheetContent's absolute close (X) -->
           <Button
             variant="ghost"
             size="icon-sm"
-            class="mr-6 ml-auto text-muted-foreground"
+            class="ml-auto text-muted-foreground"
             aria-label="Expand to full page"
             @click="emit('expand')"
           >
             <SquareArrowOutUpRight />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            class="text-muted-foreground"
+            aria-label="Close"
+            @click="emit('update:open', false)"
+          >
+            <X />
           </Button>
         </SheetHeader>
         <!-- No bottom padding: the save bar (sticky bottom-0 inside IssueDetail) must
