@@ -42,6 +42,7 @@ describe('AgentAccessPane', () => {
     await w.find('[data-testid="mcp-enable"]').trigger('click')
     await flushPromises()
     expect(setMcpEnabled).toHaveBeenCalledWith({ enabled: false, port: 7437 })
+    expect(getMcpStatus).toHaveBeenCalledTimes(2)
   })
 
   it('regenerate rotates the token and copies it', async () => {
@@ -60,6 +61,6 @@ describe('AgentAccessPane', () => {
     await flushPromises()
     await w.find('[data-testid="mcp-enable"]').trigger('click')
     await flushPromises()
-    expect(w.text().toLowerCase()).toContain('use')
+    expect(w.text()).toContain('already in use')
   })
 })

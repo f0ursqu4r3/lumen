@@ -46,21 +46,30 @@ onMounted(refresh)
 async function toggle() {
   busy.value = true
   error.value = ''
-  const res = await rpc.setMcpEnabled({ enabled: !status.value.enabled, port: port.value })
-  if (!res.ok)
-    error.value = res.error.includes('EADDRINUSE')
-      ? `Port ${port.value} is already in use.`
-      : res.error
-  await refresh()
-  busy.value = false
+  try {
+    const res = await rpc.setMcpEnabled({ enabled: !status.value.enabled, port: port.value })
+    if (!res.ok)
+      error.value = res.error.includes('EADDRINUSE')
+        ? `Port ${port.value} is already in use.`
+        : res.error
+    await refresh()
+  } finally {
+    busy.value = false
+  }
 }
 
 async function regenerate() {
-  const { token } = await rpc.regenerateMcpToken()
-  revealed.value = token
-  await rpc.clipboardWriteText({ text: token })
-  pushToast({ title: 'New token copied', tone: 'success' })
-  await refresh()
+  if (busy.value) return
+  busy.value = true
+  try {
+    const { token } = await rpc.regenerateMcpToken()
+    revealed.value = token
+    await rpc.clipboardWriteText({ text: token })
+    pushToast({ title: 'New token copied', tone: 'success' })
+    await refresh()
+  } finally {
+    busy.value = false
+  }
 }
 
 async function copyToken() {
@@ -105,6 +114,7 @@ async function copySnippet() {
         data-testid="mcp-enable"
         :variant="status.enabled ? 'default' : 'outline'"
         :disabled="busy"
+        :aria-pressed="status.enabled"
         @click="toggle"
       >
         {{ status.enabled ? 'Enabled' : 'Disabled' }}
@@ -125,7 +135,12 @@ async function copySnippet() {
         <Button variant="outline" size="sm" :disabled="!status.hasToken" @click="copyToken"
           ><Copy class="size-3.5" /> Copy</Button
         >
-        <Button data-testid="mcp-regenerate" variant="outline" size="sm" @click="regenerate"
+        <Button
+          data-testid="mcp-regenerate"
+          variant="outline"
+          size="sm"
+          :disabled="busy"
+          @click="regenerate"
           ><RefreshCw class="size-3.5" /> Regenerate</Button
         >
       </div>
