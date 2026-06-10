@@ -2,6 +2,7 @@
 import { Search } from '@lucide/vue'
 import { Input } from '@/shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
+import RefreshButton from '@/shared/components/RefreshButton.vue'
 import SavedViews from '@/shared/components/SavedViews.vue'
 import { MR_SORT_OPTIONS, type MrSortKey, type MrState } from '@/features/merge_requests/lib/mrView'
 import type { SavedView } from '@/shared/composables/useSavedViews'
@@ -16,12 +17,14 @@ const STATES: { value: MrState; label: string }[] = [
 defineProps<{
   count: number
   hasMore: boolean
+  isRefreshing: boolean
   views: SavedView[]
   activeId: string | null
   loadedId: string | null
   canSave: boolean
 }>()
 const emit = defineEmits<{
+  refresh: []
   apply: [view: SavedView]
   save: [name: string]
   update: [id: string]
@@ -76,6 +79,13 @@ const state = defineModel<MrState>('state', { required: true })
 
       <!-- Author / assignee / reviewer / milestone / draft live behind a popover. -->
       <slot name="filters" />
+
+      <RefreshButton
+        data-testid="refresh-mrs"
+        label="Refresh merge requests"
+        :refreshing="isRefreshing"
+        @refresh="emit('refresh')"
+      />
 
       <SavedViews
         :views="views"

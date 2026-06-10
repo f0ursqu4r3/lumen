@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Search, RefreshCw, CheckSquare, List, Columns3, RotateCcw } from '@lucide/vue'
+import { Search, CheckSquare, List, Columns3, RotateCcw } from '@lucide/vue'
 import { Input } from '@/shared/ui/input'
+import RefreshButton from '@/shared/components/RefreshButton.vue'
 import IssueFilterPanel from '@/features/issues/components/IssueFilterPanel.vue'
 import {
   Select,
@@ -108,17 +109,12 @@ defineEmits<{
 
       <!-- Manual refresh: re-fetches loaded pages on demand, on top of the
          background poll. Spins only while the user's own refresh is in flight. -->
-      <button
-        type="button"
+      <RefreshButton
         data-testid="refresh-issues"
-        aria-label="Refresh issues"
-        title="Refresh"
-        :disabled="isRefreshing"
-        class="grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-60"
-        @click="$emit('refresh')"
-      >
-        <RefreshCw class="size-4" :class="isRefreshing ? 'animate-spin' : ''" />
-      </button>
+        label="Refresh issues"
+        :refreshing="isRefreshing"
+        @refresh="$emit('refresh')"
+      />
 
       <!-- Select mode: flips rows/cards into checkbox selection for bulk actions. -->
       <button

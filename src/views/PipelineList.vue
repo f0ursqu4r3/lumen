@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useTitle } from '@vueuse/core'
-import { RefreshCw } from '@lucide/vue'
 import { usePipelines, type Pipeline } from '@/features/pipelines/composables/usePipelines'
 import { useGitlabUrl } from '@/shared/composables/useGitlabUrl'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
@@ -9,8 +8,8 @@ import { usePipelineNotifications } from '@/features/pipelines/composables/usePi
 import { usePipelineWatch } from '@/features/pipelines/composables/usePipelineWatch'
 import { isActivePipeline } from '@/gitlab/pipelineParams'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
+import RefreshButton from '@/shared/components/RefreshButton.vue'
 import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
-import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { rpc } from '@/shared/lib/rpc'
 import PipelineRow from '@/features/pipelines/components/PipelineRow.vue'
@@ -20,8 +19,22 @@ const props = defineProps<{ fullPath: string }>()
 const fullPath = toRef(props, 'fullPath')
 const { repoName } = useRepoPath(fullPath)
 
-const { pipelines, isLoading, isFetching, error, refetch } = usePipelines(fullPath)
+const { pipelines, isLoading, error, refetch } = usePipelines(fullPath)
 const { toAbsolute } = useGitlabUrl()
+
+// Manual refresh: force a refetch on demand. A dedicated flag (not the query's
+// `isFetching`) drives the spinner so it reflects only the user's click, not the
+// background poll.
+const isRefreshing = ref(false)
+async function refresh() {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await refetch()
+  } finally {
+    isRefreshing.value = false
+  }
+}
 
 // Opt-in alerts: the user arms a per-run bell; that subscription persists until
 // the run completes, when usePipelineNotifications raises a toast (+ an OS
@@ -50,16 +63,26 @@ function openPipeline(p: Pipeline) {
 
 <template>
   <ViewContainer>
-    <div class="mb-5 flex justify-end">
-      <Button
-        variant="outline"
-        size="sm"
+    <!-- Toolbar: a quiet run tally on the left, the manual refresh on the right —
+         the pared-down sibling of the issue and MR toolbars. -->
+    <div class="mb-6 flex items-center gap-2">
+      <div v-if="!isLoading && pipelines.length" class="flex items-baseline gap-1.5">
+        <span class="font-mono text-sm font-medium tabular-nums text-foreground">
+          {{ pipelines.length }}
+        </span>
+        <span
+          class="font-mono text-micro font-medium tracking-[0.18em] text-muted-foreground/55 uppercase"
+        >
+          {{ pipelines.length === 1 ? 'run' : 'runs' }}
+        </span>
+      </div>
+      <RefreshButton
+        class="ml-auto"
         data-testid="refresh-pipelines"
-        :disabled="isFetching"
-        @click="() => refetch()"
-      >
-        <RefreshCw :class="isFetching ? 'animate-spin' : ''" />
-      </Button>
+        label="Refresh pipelines"
+        :refreshing="isRefreshing"
+        @refresh="refresh"
+      />
     </div>
 
     <ErrorNotice v-if="error" :error="error" />

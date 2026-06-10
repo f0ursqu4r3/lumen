@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { ref, toRef } from 'vue'
 import { useMrFilters } from '@/features/merge_requests/composables/useMrFilters'
 import { useMergeRequests } from '@/features/merge_requests/composables/useMergeRequests'
 import { useMrSavedViews } from '@/features/merge_requests/composables/useMrSavedViews'
@@ -13,10 +13,24 @@ const props = defineProps<{ fullPath: string }>()
 const fullPath = toRef(props, 'fullPath')
 
 const f = useMrFilters()
-const { mergeRequests, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
+const { mergeRequests, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } =
   useMergeRequests(fullPath, f.filters)
 
 const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
+
+// Manual refresh: force a refetch on demand. A dedicated flag (not the query's
+// `isFetching`) drives the spinner so it reflects only the user's click, not the
+// background poll or pagination fetches.
+const isRefreshing = ref(false)
+async function refresh() {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await refetch()
+  } finally {
+    isRefreshing.value = false
+  }
+}
 </script>
 
 <template>
@@ -27,7 +41,9 @@ const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
       v-model:sort="f.sort.value"
       :count="mergeRequests.length"
       :has-more="hasNextPage ?? false"
+      :is-refreshing="isRefreshing"
       :views="saved.savedViews.views.value"
+      @refresh="refresh"
       :active-id="saved.activeViewId.value"
       :loaded-id="saved.loadedViewId.value"
       :can-save="saved.canSaveView.value"
