@@ -32,6 +32,10 @@ describe('gql', () => {
     gitlabGraphql.mockResolvedValue({ status: 200, errors: [{ message: 'Field x missing' }] })
     await expect(gql('query{x}')).rejects.toThrow('Field x missing')
   })
+  it('throws auth on a 403 that carries a GraphQL error body', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 403, errors: [{ message: 'insufficient_scope' }] })
+    await expect(gql('query{x}')).rejects.toThrow(/authentication/i)
+  })
 })
 
 describe('rest', () => {
@@ -72,5 +76,19 @@ describe('resolvers', () => {
       },
     })
     expect(await resolveMilestoneId('g/p', 'v1')).toBe('gid://gitlab/Milestone/3')
+  })
+  it('resolveLabelIds throws on an unknown label title', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 200, data: { project: { labels: { nodes: [] } } } })
+    await expect(resolveLabelIds('g/p', ['nope'])).rejects.toThrow('Unknown label: "nope"')
+  })
+
+  it('resolveUserIds throws on an unknown member', async () => {
+    gitlabGraphql.mockResolvedValue({
+      status: 200,
+      data: { project: { projectMembers: { nodes: [] } } },
+    })
+    await expect(resolveUserIds('g/p', ['ghost'])).rejects.toThrow(
+      'Unknown project member: "ghost"',
+    )
   })
 })

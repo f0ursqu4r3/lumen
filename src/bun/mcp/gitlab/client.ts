@@ -23,8 +23,11 @@ export async function rest(method: 'GET' | 'POST', path: string): Promise<void> 
     throw new Error(`GitLab request failed (${res.status} ${res.statusText || 'error'}).`)
 }
 
-const LABELS_Q = `query($p:ID!,$s:String){project(fullPath:$p){labels(searchTerm:$s,first:50,includeAncestorGroups:true){nodes{id title}}}}`
-const MEMBERS_Q = `query($p:ID!,$s:String){project(fullPath:$p){projectMembers(search:$s,first:50){nodes{user{id username}}}}}`
+// Resolvers fetch a window and match client-side (they take arrays, so a single
+// search term can't narrow them). first:100 covers realistic project sizes;
+// beyond that, unknown titles/usernames surface as a clear "Unknown ..." error.
+const LABELS_Q = `query($p:ID!,$s:String){project(fullPath:$p){labels(searchTerm:$s,first:100,includeAncestorGroups:true){nodes{id title}}}}`
+const MEMBERS_Q = `query($p:ID!,$s:String){project(fullPath:$p){projectMembers(search:$s,first:100){nodes{user{id username}}}}}`
 const MILESTONES_Q = `query($p:ID!,$s:String){project(fullPath:$p){milestones(searchTitle:$s,first:50){nodes{id title}}}}`
 
 /** Resolve label titles → label GlobalIDs for the given project. Throws if any title is unknown. */
