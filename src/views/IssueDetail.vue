@@ -366,7 +366,7 @@ if (!props.embedded) {
         <Transition name="savebar">
           <div
             v-if="dirty"
-            class="savebar mt-1.5 flex shrink-0 items-center justify-end gap-2 px-2"
+            class="savebar mt-1.5 flex shrink-0 items-center justify-end gap-2 px-4 py-2.5"
           >
             <Button
               type="button"

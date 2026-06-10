@@ -42,7 +42,10 @@ const multiWindow = computed(() => route.name === 'issues-window')
        panel the shell uses, floating on a thin background frame. The panel is a
        fixed-height column that scrolls internally so the window itself never
        scrolls. -->
-  <div v-else-if="windowed" class="flex h-screen flex-col bg-background p-1.5 text-foreground">
+  <div
+    v-else-if="windowed"
+    class="flex h-screen flex-col overflow-hidden bg-background p-1.5 text-foreground"
+  >
     <div
       class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
     >
