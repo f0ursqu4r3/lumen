@@ -23,7 +23,7 @@ const emit = defineEmits<{
       class="w-full gap-0 border-0 bg-background p-1.5 sm:max-w-2xl"
     >
       <div
-        class="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card"
+        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card"
       >
         <!-- hide-close suppresses the sheet's viewport-corner X so the close and
              expand affordances live together inside the card header. -->
@@ -65,6 +65,9 @@ const emit = defineEmits<{
           />
         </div>
       </div>
+      <!-- The save/revert dock teleports here, on the bare background below the
+           card, when there are unsaved edits. -->
+      <div id="issue-savebar-slot" />
     </SheetContent>
   </Sheet>
 </template>

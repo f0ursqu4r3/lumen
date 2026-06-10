@@ -92,6 +92,14 @@ if (props.windowed) {
   onBeforeUnmount(() => observer?.disconnect())
 }
 
+// The issue sheet and popped-out window frame a #issue-savebar-slot in their bare
+// background gutter (below the content panel) for the save/revert dock. If no host
+// frame exists (the full-page route), the dock renders in place instead.
+const hasSavebarHost = ref(false)
+onMounted(() => {
+  hasSavebarHost.value = !!document.getElementById('issue-savebar-slot')
+})
+
 // In a window the sticky details rail must clear the window chrome (a host pager,
 // stickyTop, plus the condensed title bar ~2rem) or its top is hidden under it.
 // Elsewhere (full page / drawer) the rail keeps its default 1.5rem inset.
@@ -353,33 +361,26 @@ if (!props.embedded) {
         />
       </div>
 
-      <!-- Floating Save/Revert — slides up from the bottom the moment edits make
-           the buffer dirty (kin to the bulk-action bar). Teleported to body so it
-           escapes the article's container-type containing block and floats over
-           the view rather than sitting in the document flow. -->
-      <Teleport to="body">
+      <!-- Save/Revert dock — when the buffer is dirty, a full-width bar slides up
+           on the bare background below the content panel (the issue sheet and the
+           popped-out window each frame a #issue-savebar-slot for it). Falls back to
+           rendering in place where no host frame exists (the full-page route). -->
+      <Teleport to="#issue-savebar-slot" :disabled="!hasSavebarHost">
         <Transition name="savebar">
           <div
             v-if="dirty"
-            class="savebar fixed inset-x-0 bottom-5 z-50 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-2 shadow-float"
+            class="savebar mt-1.5 flex shrink-0 items-center justify-end gap-2 px-2"
           >
             <Button
               type="button"
               data-testid="cancel-issue"
               variant="ghost"
-              size="sm"
               :disabled="saving"
               @click="onCancel"
             >
-              Revert
+              Revert Changes
             </Button>
-            <Button
-              type="button"
-              data-testid="save-issue"
-              size="sm"
-              :disabled="saving"
-              @click="onSave"
-            >
+            <Button type="button" data-testid="save-issue" :disabled="saving" @click="onSave">
               {{ saving ? 'Saving…' : 'Save changes' }}
             </Button>
           </div>
@@ -416,9 +417,9 @@ if (!props.embedded) {
   .savebar-enter-from,
   .savebar-leave-to {
     opacity: 0;
-    /* Down by its own height + the bottom-5 gap → starts just below the viewport
-       edge and slides straight up into place. */
-    transform: translateY(calc(100% + 1.25rem));
+    /* Down by its own height + the frame's bottom gutter → starts just below the
+       window edge and slides straight up into the dock. */
+    transform: translateY(calc(100% + 0.375rem));
   }
 }
 

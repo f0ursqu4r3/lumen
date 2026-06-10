@@ -53,6 +53,9 @@ const multiWindow = computed(() => route.name === 'issues-window')
         </main>
       </div>
     </div>
+    <!-- The issue save/revert dock lands here, on the bare background below the
+         panel, when there are unsaved edits. -->
+    <div id="issue-savebar-slot" />
   </div>
   <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
     <main class="mx-auto max-w-5xl px-4 py-6">
