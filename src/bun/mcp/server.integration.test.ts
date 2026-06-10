@@ -1,3 +1,10 @@
+import { vi } from 'vitest'
+const { gitlabGraphql, gitlabRest } = vi.hoisted(() => ({
+  gitlabGraphql: vi.fn(),
+  gitlabRest: vi.fn(),
+}))
+vi.mock('../gitlab', () => ({ gitlabGraphql, gitlabRest }))
+
 import { describe, it, expect } from 'vitest'
 import { createMcpFetch } from './server'
 
@@ -38,9 +45,27 @@ describe('mcp request handler (real transport)', () => {
     expect(json.result.serverInfo.name).toBe('lumen')
   })
 
-  it('answers tools/list (empty in Phase 1)', async () => {
+  it('answers tools/list', async () => {
     const res = await post({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} })
     const json = await res.json()
     expect(Array.isArray(json.result.tools)).toBe(true)
+  })
+
+  it('lists the gitlab tools and calls one end-to-end', async () => {
+    const list = await (
+      await post({ jsonrpc: '2.0', id: 3, method: 'tools/list', params: {} })
+    ).json()
+    expect(list.result.tools.map((t: { name: string }) => t.name)).toContain('lumen_me')
+
+    gitlabGraphql.mockResolvedValue({ status: 200, data: { currentUser: { username: 'ana' } } })
+    const call = await (
+      await post({
+        jsonrpc: '2.0',
+        id: 4,
+        method: 'tools/call',
+        params: { name: 'lumen_me', arguments: {} },
+      })
+    ).json()
+    expect(call.result.content[0].text).toContain('ana')
   })
 })
