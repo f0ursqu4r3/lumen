@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { McpTool } from '../types'
-import { text } from '../types'
+import { text, errorResult } from '../types'
 import { gql } from './client'
 
 const ME_Q = `query{currentUser{username name publicEmail id}}`
@@ -16,6 +16,8 @@ export const userTools: McpTool[] = [
     inputSchema: {},
     handler: async () => {
       const data = await gql<{ currentUser: unknown }>(ME_Q)
+      if (!data.currentUser)
+        return errorResult('Not authenticated — no current user for this token.')
       return text(data.currentUser)
     },
   },

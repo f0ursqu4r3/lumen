@@ -55,7 +55,7 @@ export const mrTools: McpTool[] = [
     name: 'lumen_mr_get',
     description:
       'Get full detail for one merge request (description, diff stats, approvals, comments).',
-    inputSchema: { project: z.string(), iid: z.string() },
+    inputSchema: { project: z.string(), iid: z.string().regex(/^\d+$/, 'iid must be numeric') },
     handler: async (a) => {
       const data = await gql<{ project: { mergeRequest: unknown } | null }>(GET_Q, {
         p: a.project,
@@ -68,7 +68,11 @@ export const mrTools: McpTool[] = [
   {
     name: 'lumen_mr_comment',
     description: 'Add a comment to a merge request.',
-    inputSchema: { project: z.string(), iid: z.string(), body: z.string() },
+    inputSchema: {
+      project: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      body: z.string(),
+    },
     handler: async (a) => {
       const idData = await gql<{
         project: { mergeRequest: { id: string } | null } | null
@@ -89,7 +93,7 @@ export const mrTools: McpTool[] = [
     description: 'Approve or unapprove a merge request. (Merge is not available in this version.)',
     inputSchema: {
       project: z.string(),
-      iid: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
       action: z.enum(['approve', 'unapprove']),
     },
     handler: async (a) => {

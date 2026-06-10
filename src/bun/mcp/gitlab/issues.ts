@@ -58,7 +58,7 @@ export const issueTools: McpTool[] = [
     name: 'lumen_issue_get',
     description:
       'Get full detail for one issue (description, labels, assignees, milestone, comments).',
-    inputSchema: { project: z.string(), iid: z.string() },
+    inputSchema: { project: z.string(), iid: z.string().regex(/^\d+$/, 'iid must be numeric') },
     handler: async (a) => {
       const data = await gql<{ project: { issue: unknown } | null }>(GET_Q, {
         p: a.project,
@@ -107,7 +107,7 @@ export const issueTools: McpTool[] = [
       'Update an issue: title, description, state (close/reopen), labels (replace), assignees, milestone.',
     inputSchema: {
       project: z.string(),
-      iid: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
       title: z.string().optional(),
       description: z.string().optional(),
       state: z.enum(['close', 'reopen']).optional(),
@@ -146,7 +146,11 @@ export const issueTools: McpTool[] = [
   {
     name: 'lumen_issue_comment',
     description: 'Add a comment to an issue.',
-    inputSchema: { project: z.string(), iid: z.string(), body: z.string() },
+    inputSchema: {
+      project: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      body: z.string(),
+    },
     handler: async (a) => {
       const idData = await gql<{ project: { issue: { id: string } | null } | null }>(ID_Q, {
         p: a.project,
