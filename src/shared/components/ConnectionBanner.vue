@@ -6,7 +6,7 @@ import { sessionState } from '@/shared/composables/useSession'
 import { useServerRecovery } from '@/shared/composables/useServerRecovery'
 
 // The poll lives with the banner: it runs exactly while the banner is shown.
-const { start, stop } = useServerRecovery(useQueryClient())
+const { start, stop, retryNow, secondsLeft, probing } = useServerRecovery(useQueryClient())
 
 watch(
   () => sessionState.unavailable,
@@ -27,13 +27,32 @@ onUnmounted(stop)
   >
     <div
       v-if="sessionState.unavailable"
-      class="fixed inset-x-0 bottom-5 z-50 mx-auto flex w-fit max-w-[calc(100vw-2rem)] items-center gap-2.5 rounded-full border border-border bg-card px-4 py-2.5 shadow-pop"
+      class="fixed inset-x-0 bottom-5 z-50 mx-auto flex w-fit max-w-[calc(100vw-2rem)] items-center gap-2.5 rounded-full border border-border bg-card py-2.5 pr-2 pl-4 shadow-pop"
       role="status"
       aria-live="polite"
       data-testid="connection-banner"
     >
-      <LoaderCircle class="size-4 shrink-0 animate-spin text-primary/80" :stroke-width="2" />
-      <span class="text-sm leading-none text-foreground/90"> Can't reach GitLab — retrying… </span>
+      <LoaderCircle
+        class="size-4 shrink-0 animate-spin text-primary/80"
+        :stroke-width="2"
+        aria-hidden="true"
+      />
+      <span class="text-sm leading-none text-foreground/90">
+        Can't reach GitLab —
+        <!-- The per-second number is visual-only; the sr-only label keeps the
+             live region from re-announcing on every tick. -->
+        <span aria-hidden="true">{{ probing ? 'retrying…' : `retrying in ${secondsLeft}s` }}</span>
+        <span class="sr-only">retrying</span>
+      </span>
+      <button
+        v-if="!probing"
+        type="button"
+        data-testid="connection-retry-now"
+        class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+        @click="retryNow"
+      >
+        Retry now
+      </button>
     </div>
   </Transition>
 </template>

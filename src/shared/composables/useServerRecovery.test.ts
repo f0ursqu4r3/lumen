@@ -113,6 +113,54 @@ describe('useServerRecovery', () => {
     expect(gitlabGraphql).not.toHaveBeenCalled()
   })
 
+  it('exposes a countdown of seconds until the next probe', async () => {
+    sessionState.unavailable = true
+    gitlabGraphql.mockResolvedValue({ status: 503 })
+    const recovery = useServerRecovery({ invalidateQueries: vi.fn() } as never)
+
+    recovery.start()
+    expect(recovery.secondsLeft.value).toBe(2) // backoffMs(0) = 2000ms
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(recovery.secondsLeft.value).toBe(1)
+
+    recovery.stop()
+  })
+
+  it('retryNow() probes immediately instead of waiting for the backoff', async () => {
+    sessionState.unavailable = true
+    gitlabGraphql.mockResolvedValue({ status: 503 })
+    const recovery = useServerRecovery({ invalidateQueries: vi.fn() } as never)
+
+    recovery.start()
+    expect(gitlabGraphql).not.toHaveBeenCalled() // the 2s timer hasn't fired
+    recovery.retryNow()
+    expect(gitlabGraphql).toHaveBeenCalledTimes(1) // probed at once
+    await vi.advanceTimersByTimeAsync(0)
+
+    recovery.stop()
+  })
+
+  it('flags probing while a probe is in flight, then clears it', async () => {
+    sessionState.unavailable = true
+    let resolve!: (v: { status: number }) => void
+    gitlabGraphql.mockReturnValue(
+      new Promise<{ status: number }>((r) => {
+        resolve = r
+      }),
+    )
+    const recovery = useServerRecovery({ invalidateQueries: vi.fn() } as never)
+
+    recovery.start()
+    recovery.retryNow()
+    expect(recovery.probing.value).toBe(true)
+    resolve({ status: 503 })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(recovery.probing.value).toBe(false)
+
+    recovery.stop()
+  })
+
   it('does not mutate state if stopped while a probe is in flight', async () => {
     sessionState.unavailable = true
     let resolve!: (v: { status: number }) => void
