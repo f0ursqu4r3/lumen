@@ -1,24 +1,14 @@
 <script setup lang="ts">
-import { watch, onUnmounted } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
 import { LoaderCircle } from '@lucide/vue'
 import { sessionState } from '@/shared/composables/useSession'
-import { useServerRecovery } from '@/shared/composables/useServerRecovery'
+import { rpc } from '@/shared/lib/rpc'
 
-// The poll lives with the banner: it runs exactly while the banner is shown.
-const { start, stop, retryNow, secondsLeft, probing } = useServerRecovery(useQueryClient())
-
-watch(
-  () => sessionState.unavailable,
-  (down) => (down ? start() : stop()),
-  { immediate: true },
-)
-onUnmounted(stop)
+// The banner is now a pure display of host-owned server health (mirrored into
+// sessionState by installServerHealth). Retry now pokes the single host loop.
+const retryNow = () => void rpc.retryServerNow()
 </script>
 
 <template>
-  <!-- Non-blocking: a quiet self-healing toast, not a modal. The screen stays
-       usable; it clears itself when the recovery poll reconnects. -->
   <Transition
     enter-active-class="transition duration-200 ease-out"
     enter-from-class="translate-y-3 opacity-0"
@@ -39,13 +29,13 @@ onUnmounted(stop)
       />
       <span class="text-sm leading-none text-foreground/90">
         Can't reach GitLab —
-        <!-- The per-second number is visual-only; the sr-only label keeps the
-             live region from re-announcing on every tick. -->
-        <span aria-hidden="true">{{ probing ? 'retrying…' : `retrying in ${secondsLeft}s` }}</span>
+        <span aria-hidden="true">{{
+          sessionState.probing ? 'retrying…' : `retrying in ${sessionState.secondsLeft}s`
+        }}</span>
         <span class="sr-only">retrying</span>
       </span>
       <button
-        v-if="!probing"
+        v-if="!sessionState.probing"
         type="button"
         data-testid="connection-retry-now"
         class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
