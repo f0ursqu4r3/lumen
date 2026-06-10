@@ -22,7 +22,7 @@ import {
   classifyStatus,
   type Outcome,
 } from './serverHealth'
-import { PROBE_QUERY } from '@/shared/composables/useGitlabConnect'
+import { PROBE_QUERY } from '@/shared/lib/gitlabQueries'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
 // off it. app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.

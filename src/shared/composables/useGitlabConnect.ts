@@ -1,10 +1,10 @@
 import { computed, ref } from 'vue'
 import { rpc } from '@/shared/lib/rpc'
+import { PROBE_QUERY } from '@/shared/lib/gitlabQueries'
 
 export type ConnectStatus = 'idle' | 'testing' | 'error'
 
-/** Cheapest authenticated probe — a clean 200 with no errors proves the token works. */
-export const PROBE_QUERY = '{ currentUser { username } }'
+export { PROBE_QUERY }
 
 /** Map a connect-probe result to a kind-specific, recoverable message. */
 function connectErrorMessage(
