@@ -5,6 +5,7 @@ import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
 import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
+import { startMcpIfEnabled } from './mcp/server'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
 // off it. app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
@@ -113,6 +114,10 @@ const win = new BrowserWindow({
   frame: { width: 1280, height: 860, x: 80, y: 80 },
   rpc: buildRpc(),
 })
+
+// Start the in-process MCP server iff the user enabled it in config. Off by
+// default; localhost-only + bearer-gated (see src/bun/mcp/server.ts).
+startMcpIfEnabled()
 
 // Without an application menu, macOS has no Edit menu, so ⌘C/⌘V/⌘X/⌘A have
 // nothing to dispatch to and clipboard does not work in the webview. The Develop
