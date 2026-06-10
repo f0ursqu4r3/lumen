@@ -9,7 +9,7 @@ const SERVER_VERSION = '0.1.0'
 export const DEFAULT_MCP_PORT = 7437
 
 // Bun's serve return type isn't available under Vitest (node); keep it loose.
-let httpServer: { stop: (closeActive?: boolean) => void } | null = null
+let httpServer: { stop: (closeActive?: boolean) => Promise<void> | void } | null = null
 
 function buildServer(): McpServer {
   const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION })
@@ -61,6 +61,7 @@ export function startMcp(port: number, token: string): { ok: true } | { ok: fals
 
 export function stopMcp(): void {
   if (httpServer) {
+    // Force-close in-flight requests; this is a desktop app, graceful drain is unnecessary.
     httpServer.stop(true)
     httpServer = null
   }

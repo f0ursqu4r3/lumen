@@ -13,9 +13,13 @@ export function registerTools(server: McpServer, tools: McpTool[] = allTools): v
       t.handler as never,
     )
   }
-  // Ensure tools/list + tools/call handlers are always registered, even with an
-  // empty tool list, so that the MCP protocol negotiation works correctly.
+  // Phase-1 only: with an empty catalog the SDK never wires the tools/list
+  // handler (it does so lazily on the first registerTool). Calling the internal
+  // initializer keeps tools/list responding with []. Guarded so a future SDK
+  // rename degrades to a no-op rather than crashing. Removed in Task 13 once the
+  // catalog is non-empty.
   if (tools.length === 0) {
-    ;(server as unknown as { setToolRequestHandlers: () => void }).setToolRequestHandlers()
+    const internal = server as unknown as { setToolRequestHandlers?: () => void }
+    if (typeof internal.setToolRequestHandlers === 'function') internal.setToolRequestHandlers()
   }
 }
