@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { House, FolderGit2, Search, Settings, Circle } from '@lucide/vue'
 import { useCommandPalette } from '@/shared/composables/useCommandPalette'
-import { openSettings } from '@/shared/composables/useSettings'
+import { rpc } from '@/shared/lib/rpc'
 import { sessionState } from '@/shared/composables/useSession'
 
 const route = useRoute()
@@ -61,7 +61,7 @@ const activeTile = 'bg-card text-foreground'
       :class="tile"
       title="Settings"
       aria-label="Settings"
-      @click="openSettings()"
+      @click="rpc.openSettingsWindow()"
     >
       <Settings class="size-5" />
     </button>

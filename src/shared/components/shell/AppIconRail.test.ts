@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 
-const { openSettings } = vi.hoisted(() => ({ openSettings: vi.fn() }))
-vi.mock('@/shared/composables/useSettings', () => ({ openSettings }))
+const { openSettingsWindow } = vi.hoisted(() => ({ openSettingsWindow: vi.fn() }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { openSettingsWindow } }))
 
 const { sessionState } = vi.hoisted(() => ({ sessionState: { unavailable: false } }))
 vi.mock('@/shared/composables/useSession', () => ({ sessionState }))
@@ -42,9 +42,9 @@ describe('AppIconRail', () => {
   })
 
   it('opens settings from the settings button', () => {
-    openSettings.mockClear()
+    openSettingsWindow.mockClear()
     mountRail().get('[data-testid="rail-settings"]').trigger('click')
-    expect(openSettings).toHaveBeenCalledOnce()
+    expect(openSettingsWindow).toHaveBeenCalledOnce()
   })
 
   it('reflects an unavailable session on the connection dot', async () => {

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
-import SettingsDialog from '@/shared/components/SettingsDialog.vue'
 import ToastHost from '@/shared/components/ToastHost.vue'
 import SessionExpiredOverlay from '@/shared/components/SessionExpiredOverlay.vue'
 import ConnectionBanner from '@/shared/components/ConnectionBanner.vue'
@@ -10,15 +9,6 @@ import CommandPalette from '@/shared/components/CommandPalette.vue'
 import AppShell from '@/shared/components/shell/AppShell.vue'
 import IssueSavebarSlot from '@/features/issues/components/IssueSavebarSlot.vue'
 import { shouldShowChrome } from '@/shared/lib/chrome'
-import { registerSettingsShortcut } from '@/shared/composables/useSettings'
-
-// The native app menu (⌘,) dispatches lumen:open-settings into the webview;
-// listen for it app-wide so the single mounted dialog opens from anywhere.
-let stop: (() => void) | null = null
-onMounted(() => {
-  stop = registerSettingsShortcut()
-})
-onUnmounted(() => stop?.())
 
 const route = useRoute()
 const chrome = computed(() => shouldShowChrome(route))
@@ -68,7 +58,6 @@ const multiWindow = computed(() => route.name === 'issues-window')
   </div>
   <!-- Single shared instances for the whole app -->
   <ConfirmDialog />
-  <SettingsDialog />
   <ToastHost />
   <SessionExpiredOverlay />
   <ConnectionBanner />

@@ -9,7 +9,7 @@ import {
   Plus,
   Settings,
 } from '@lucide/vue'
-import { openSettings } from '@/shared/composables/useSettings'
+import { rpc } from '@/shared/lib/rpc'
 import type { SavedView } from '@/shared/composables/useSavedViews'
 import type {
   Command,
@@ -91,7 +91,7 @@ export function routeCommands(ctx: PaletteContext): Command[] {
       title: 'Open Settings',
       subtitle: 'Connection and local preferences',
       icon: Settings,
-      action: openSettings,
+      action: () => rpc.openSettingsWindow(),
     },
   )
 

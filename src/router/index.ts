@@ -25,6 +25,7 @@ import MultiIssueWindow from '@/views/MultiIssueWindow.vue'
 import PipelineList from '@/views/PipelineList.vue'
 import ConnectView from '@/views/ConnectView.vue'
 import MergeRequestList from '@/views/MergeRequestList.vue'
+import SettingsWindow from '@/views/SettingsWindow.vue'
 import MergeRequestDetail from '@/views/MergeRequestDetail.vue'
 
 export const routes: RouteRecordRaw[] = [
@@ -100,6 +101,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'connect',
     component: ConnectView,
   },
+  { path: '/settings', name: 'settings', component: SettingsWindow },
 ]
 
 export const router = createRouter({
