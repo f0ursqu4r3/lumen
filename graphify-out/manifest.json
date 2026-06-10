@@ -1,0 +1,2477 @@
+{
+  "/Users/la.kyle.dougan/git/personal/lumen/codegen.ts": {
+    "mtime": 1780352307.3431883,
+    "ast_hash": "69af44f9f23162095a87f83160dc1e60",
+    "semantic_hash": "69af44f9f23162095a87f83160dc1e60"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/components.json": {
+    "mtime": 1780705028.6304765,
+    "ast_hash": "1986b18655557b5a23f1a3d0ca3177be",
+    "semantic_hash": "1986b18655557b5a23f1a3d0ca3177be"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/electrobun.config.ts": {
+    "mtime": 1780852548.668399,
+    "ast_hash": "d2d86cb707fc836d15139328721e48a9",
+    "semantic_hash": "d2d86cb707fc836d15139328721e48a9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/lib/utils.ts": {
+    "mtime": 1780352307.3438275,
+    "ast_hash": "41f6393a4fca51d9fe994cc3d11abbea",
+    "semantic_hash": "41f6393a4fca51d9fe994cc3d11abbea"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/package.json": {
+    "mtime": 1781122055.614547,
+    "ast_hash": "517384135f61e4a5ff2f1dd3c89b7ae8",
+    "semantic_hash": "517384135f61e4a5ff2f1dd3c89b7ae8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/scripts/make-signing-cert.sh": {
+    "mtime": 1780852528.9375436,
+    "ast_hash": "f268403d08b546245889fe50ccbce349",
+    "semantic_hash": "f268403d08b546245889fe50ccbce349"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/App.test.ts": {
+    "mtime": 1780472962.5345225,
+    "ast_hash": "51be50fd5a7f8019cdbfcf690a3d2181",
+    "semantic_hash": "51be50fd5a7f8019cdbfcf690a3d2181"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/App.vue": {
+    "mtime": 1781129381.1132786,
+    "ast_hash": "34192296f2cf506f0e76e4013785fd4f",
+    "semantic_hash": "34192296f2cf506f0e76e4013785fd4f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/config.test.ts": {
+    "mtime": 1781122055.6146328,
+    "ast_hash": "6d046a7d8f48bbe546b9202e4318d9e1",
+    "semantic_hash": "6d046a7d8f48bbe546b9202e4318d9e1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/config.ts": {
+    "mtime": 1781122055.6147149,
+    "ast_hash": "ba077c10513302c0dad9fc1b2eb0a09e",
+    "semantic_hash": "ba077c10513302c0dad9fc1b2eb0a09e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/gitlab.test.ts": {
+    "mtime": 1781133526.6986096,
+    "ast_hash": "e5f7a77f41802283b38bec6af126d28a",
+    "semantic_hash": "e5f7a77f41802283b38bec6af126d28a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/gitlab.ts": {
+    "mtime": 1781133526.6987886,
+    "ast_hash": "ee9c123b6431bb358f3bc87b1dc4c9cc",
+    "semantic_hash": "ee9c123b6431bb358f3bc87b1dc4c9cc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/index.ts": {
+    "mtime": 1781133526.6991334,
+    "ast_hash": "e1b67b8aa214eabaf9552164e0dec0f1",
+    "semantic_hash": "e1b67b8aa214eabaf9552164e0dec0f1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/issueWindow.test.ts": {
+    "mtime": 1780803856.966699,
+    "ast_hash": "ffdd94f940d15f73ad030a7c0a743609",
+    "semantic_hash": "ffdd94f940d15f73ad030a7c0a743609"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/issueWindow.ts": {
+    "mtime": 1780803848.752087,
+    "ast_hash": "b149754baa595401eb42a03bbd98eeae",
+    "semantic_hash": "b149754baa595401eb42a03bbd98eeae"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/auth.test.ts": {
+    "mtime": 1781122055.6148975,
+    "ast_hash": "c4e9689f40797bb01c3d92bf2b25717e",
+    "semantic_hash": "c4e9689f40797bb01c3d92bf2b25717e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/auth.ts": {
+    "mtime": 1781122055.614965,
+    "ast_hash": "19ccdad8f23cec202d7bda797adca4cc",
+    "semantic_hash": "19ccdad8f23cec202d7bda797adca4cc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/client.test.ts": {
+    "mtime": 1781122055.6150544,
+    "ast_hash": "75f41f0d7bd4e109d8f7243cb79df42f",
+    "semantic_hash": "75f41f0d7bd4e109d8f7243cb79df42f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/client.ts": {
+    "mtime": 1781122055.615131,
+    "ast_hash": "9ed9634d5f8ee6fa0cc8a075d4d72654",
+    "semantic_hash": "9ed9634d5f8ee6fa0cc8a075d4d72654"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/issues.test.ts": {
+    "mtime": 1781122055.6152265,
+    "ast_hash": "84766ea8f6f18fc1963d675b1a825cec",
+    "semantic_hash": "84766ea8f6f18fc1963d675b1a825cec"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/issues.ts": {
+    "mtime": 1781122055.6153061,
+    "ast_hash": "c4dcc960b5a7ce4f8e3242f1ebb321c9",
+    "semantic_hash": "c4dcc960b5a7ce4f8e3242f1ebb321c9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/labelsMilestones.test.ts": {
+    "mtime": 1781122055.6153712,
+    "ast_hash": "895d9e120e2d9ef046fc628da37e3d8e",
+    "semantic_hash": "895d9e120e2d9ef046fc628da37e3d8e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/labelsMilestones.ts": {
+    "mtime": 1781122055.6154518,
+    "ast_hash": "43d68c45faac9a10e5bf72ff99ebbd0c",
+    "semantic_hash": "43d68c45faac9a10e5bf72ff99ebbd0c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/mergeRequests.test.ts": {
+    "mtime": 1781122055.6155288,
+    "ast_hash": "57f51939cd9c40313b420f28dad6492c",
+    "semantic_hash": "57f51939cd9c40313b420f28dad6492c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/mergeRequests.ts": {
+    "mtime": 1781122055.6156025,
+    "ast_hash": "3dd550fa992d47d02b9abff032f6b15c",
+    "semantic_hash": "3dd550fa992d47d02b9abff032f6b15c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/usersSearch.test.ts": {
+    "mtime": 1781122055.6156662,
+    "ast_hash": "cc3eb4cf2bc7c85ae7c5a62f9e14eb48",
+    "semantic_hash": "cc3eb4cf2bc7c85ae7c5a62f9e14eb48"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/gitlab/usersSearch.ts": {
+    "mtime": 1781122055.6157289,
+    "ast_hash": "78371c8d1379d4b99eb226af3c612310",
+    "semantic_hash": "78371c8d1379d4b99eb226af3c612310"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/registry.test.ts": {
+    "mtime": 1781122055.6157992,
+    "ast_hash": "9b7674e2bbae35893573f610ac4dddaa",
+    "semantic_hash": "9b7674e2bbae35893573f610ac4dddaa"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/registry.ts": {
+    "mtime": 1781122055.6158662,
+    "ast_hash": "13bec1ea48f2ff6914a9eb302188f2a4",
+    "semantic_hash": "13bec1ea48f2ff6914a9eb302188f2a4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/server.integration.test.ts": {
+    "mtime": 1781122055.6159348,
+    "ast_hash": "e48ba44cfa4c6657bfe913729f2a1cbf",
+    "semantic_hash": "e48ba44cfa4c6657bfe913729f2a1cbf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/server.test.ts": {
+    "mtime": 1781129381.113501,
+    "ast_hash": "9c0d7bc60dab95732f6404c969993f0c",
+    "semantic_hash": "9c0d7bc60dab95732f6404c969993f0c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/server.ts": {
+    "mtime": 1781129381.1136017,
+    "ast_hash": "bbc1b436a74b48496f14c8aa42a09818",
+    "semantic_hash": "bbc1b436a74b48496f14c8aa42a09818"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/types.test.ts": {
+    "mtime": 1781122055.6161523,
+    "ast_hash": "e79d5ae17093bff9a2a5ab057a135b87",
+    "semantic_hash": "e79d5ae17093bff9a2a5ab057a135b87"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/mcp/types.ts": {
+    "mtime": 1781122055.616225,
+    "ast_hash": "67c2665bc59ba2c001639537c5645e96",
+    "semantic_hash": "67c2665bc59ba2c001639537c5645e96"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/menu.test.ts": {
+    "mtime": 1780619420.3252792,
+    "ast_hash": "d2e0a676d1d92521ccdd21ca1a2866bc",
+    "semantic_hash": "d2e0a676d1d92521ccdd21ca1a2866bc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/menu.ts": {
+    "mtime": 1780680431.6461265,
+    "ast_hash": "c1a0ffbbef1966dd9893a582a224754e",
+    "semantic_hash": "c1a0ffbbef1966dd9893a582a224754e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/serverHealth.test.ts": {
+    "mtime": 1781133526.6992936,
+    "ast_hash": "55285fef14e9bfd5434b9371491c92c2",
+    "semantic_hash": "55285fef14e9bfd5434b9371491c92c2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/serverHealth.ts": {
+    "mtime": 1781133526.699444,
+    "ast_hash": "1cda1e29f7be19bf5af1d01fdccc5588",
+    "semantic_hash": "1cda1e29f7be19bf5af1d01fdccc5588"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/settingsWindow.test.ts": {
+    "mtime": 1781129381.1136808,
+    "ast_hash": "b297d652bb6c96ec97ad61d2fd39fb82",
+    "semantic_hash": "b297d652bb6c96ec97ad61d2fd39fb82"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/settingsWindow.ts": {
+    "mtime": 1781129381.1137605,
+    "ast_hash": "a258d969569200c4af1662b4fa793207",
+    "semantic_hash": "a258d969569200c4af1662b4fa793207"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/startUrl.test.ts": {
+    "mtime": 1780619420.3253021,
+    "ast_hash": "1d98688b5981e79a4f885fcc580e7847",
+    "semantic_hash": "1d98688b5981e79a4f885fcc580e7847"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/bun/startUrl.ts": {
+    "mtime": 1780619420.3015778,
+    "ast_hash": "170c889ca47a81fd3eac7456d2224936",
+    "semantic_hash": "170c889ca47a81fd3eac7456d2224936"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/env.d.ts": {
+    "mtime": 1781034924.780508,
+    "ast_hash": "4b1a9e30bd791e47da08ab4f6e825187",
+    "semantic_hash": "4b1a9e30bd791e47da08ab4f6e825187"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneeAvatar.vue": {
+    "mtime": 1780705028.6319566,
+    "ast_hash": "a46e1488e1396ffff1a987e41915953f",
+    "semantic_hash": "a46e1488e1396ffff1a987e41915953f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneeEditor.test.ts": {
+    "mtime": 1780705028.6320624,
+    "ast_hash": "29d209e7f32cfd35e4912ebb3df60742",
+    "semantic_hash": "29d209e7f32cfd35e4912ebb3df60742"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneeEditor.vue": {
+    "mtime": 1780705028.6321692,
+    "ast_hash": "1a845339199920815b64f2e5af0732f6",
+    "semantic_hash": "1a845339199920815b64f2e5af0732f6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneeMenu.test.ts": {
+    "mtime": 1780705028.6322937,
+    "ast_hash": "364755c45bc1bdd3c3011392aa98bfe2",
+    "semantic_hash": "364755c45bc1bdd3c3011392aa98bfe2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneeMenu.vue": {
+    "mtime": 1780705028.63241,
+    "ast_hash": "cbd7e435deace5cb94ed4bbfe7e0e13a",
+    "semantic_hash": "cbd7e435deace5cb94ed4bbfe7e0e13a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneePicker.test.ts": {
+    "mtime": 1780705028.6324944,
+    "ast_hash": "eb79049867939ed9f5567797fb61e238",
+    "semantic_hash": "eb79049867939ed9f5567797fb61e238"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/AssigneePicker.vue": {
+    "mtime": 1780705028.6325912,
+    "ast_hash": "2aba31ff3c02d663144ac2822f7a307e",
+    "semantic_hash": "2aba31ff3c02d663144ac2822f7a307e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/QuickAssign.test.ts": {
+    "mtime": 1780705028.6326694,
+    "ast_hash": "fb893b230941ba566f2f32a886deca11",
+    "semantic_hash": "fb893b230941ba566f2f32a886deca11"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/components/QuickAssign.vue": {
+    "mtime": 1780705028.6327474,
+    "ast_hash": "f0dfd3392d3f3ae681329e54bec9daf3",
+    "semantic_hash": "f0dfd3392d3f3ae681329e54bec9daf3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/lib/assigneeOrder.test.ts": {
+    "mtime": 1780705028.6328607,
+    "ast_hash": "06228b087f0b56fb4db57b18c06bf463",
+    "semantic_hash": "06228b087f0b56fb4db57b18c06bf463"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/assignees/lib/assigneeOrder.ts": {
+    "mtime": 1780705028.6329346,
+    "ast_hash": "a039dd89455c026153ee13f60967e46c",
+    "semantic_hash": "a039dd89455c026153ee13f60967e46c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/components/DashboardIssueRow.vue": {
+    "mtime": 1781116457.4580088,
+    "ast_hash": "9efc367ce02552685a4eff90ebe60c08",
+    "semantic_hash": "9efc367ce02552685a4eff90ebe60c08"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/components/DashboardLane.test.ts": {
+    "mtime": 1781028587.618178,
+    "ast_hash": "aff8f426f4c9a8b5bc23fda06b47d948",
+    "semantic_hash": "aff8f426f4c9a8b5bc23fda06b47d948"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/components/DashboardLane.vue": {
+    "mtime": 1781116457.4583046,
+    "ast_hash": "3e025bdf7404f7f598b62da221baf270",
+    "semantic_hash": "3e025bdf7404f7f598b62da221baf270"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/components/DashboardMrRow.vue": {
+    "mtime": 1781116457.4584794,
+    "ast_hash": "f63d206ced367b8095477624bb01230b",
+    "semantic_hash": "f63d206ced367b8095477624bb01230b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/components/DashboardRows.test.ts": {
+    "mtime": 1781116457.4587514,
+    "ast_hash": "ccc1bde3bcc8afb45b949c6d662e89d8",
+    "semantic_hash": "ccc1bde3bcc8afb45b949c6d662e89d8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useAssignedIssues.test.ts": {
+    "mtime": 1781028587.6185212,
+    "ast_hash": "a227add92f9b7b890ddf8ec5ec17a4af",
+    "semantic_hash": "a227add92f9b7b890ddf8ec5ec17a4af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useAssignedIssues.ts": {
+    "mtime": 1781116457.4589589,
+    "ast_hash": "6d05eaf678b292c480a2fbe1f539ab5f",
+    "semantic_hash": "6d05eaf678b292c480a2fbe1f539ab5f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useAssignedMergeRequests.ts": {
+    "mtime": 1781028587.6186442,
+    "ast_hash": "b46eda93bfc2adbd677fcc23a8d2976f",
+    "semantic_hash": "b46eda93bfc2adbd677fcc23a8d2976f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useCurrentUser.test.ts": {
+    "mtime": 1781028587.61871,
+    "ast_hash": "a278695f6718658e42ca1e2907f38214",
+    "semantic_hash": "a278695f6718658e42ca1e2907f38214"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useCurrentUser.ts": {
+    "mtime": 1781028587.6187785,
+    "ast_hash": "e6a2fe9711ccf1d19c432580a4d4ca5f",
+    "semantic_hash": "e6a2fe9711ccf1d19c432580a4d4ca5f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useCurrentUserMrs.test.ts": {
+    "mtime": 1781028587.6188407,
+    "ast_hash": "40f122d2e0fa98cb59cb2866a717141a",
+    "semantic_hash": "40f122d2e0fa98cb59cb2866a717141a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/composables/useReviewRequestedMergeRequests.ts": {
+    "mtime": 1781028587.6189086,
+    "ast_hash": "fcc094173ed7c33de2d2865c9939e383",
+    "semantic_hash": "fcc094173ed7c33de2d2865c9939e383"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/lib/dashboard.test.ts": {
+    "mtime": 1781116457.4593074,
+    "ast_hash": "2265986c73e1f27b74dd6396ce3fd8ea",
+    "semantic_hash": "2265986c73e1f27b74dd6396ce3fd8ea"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/dashboard/lib/dashboard.ts": {
+    "mtime": 1781116457.45947,
+    "ast_hash": "ae722ddbb078bb186352304c0de127bd",
+    "semantic_hash": "ae722ddbb078bb186352304c0de127bd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/AddFieldMenu.vue": {
+    "mtime": 1780970870.070449,
+    "ast_hash": "87fbfe16e0241a6b92d8443b4879afbc",
+    "semantic_hash": "87fbfe16e0241a6b92d8443b4879afbc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/BulkActionBar.test.ts": {
+    "mtime": 1781047777.4719949,
+    "ast_hash": "ce3480d36ff96bbe26f73a8e13b3ea00",
+    "semantic_hash": "ce3480d36ff96bbe26f73a8e13b3ea00"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/BulkActionBar.vue": {
+    "mtime": 1781116457.4598093,
+    "ast_hash": "9855e9f395abe31150c4ec2d18b51315",
+    "semantic_hash": "9855e9f395abe31150c4ec2d18b51315"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueActiveFilters.vue": {
+    "mtime": 1781116457.4600194,
+    "ast_hash": "9534fb3bab329a213320803116d661d0",
+    "semantic_hash": "9534fb3bab329a213320803116d661d0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueBoard.test.ts": {
+    "mtime": 1780757739.3989367,
+    "ast_hash": "0700e268c49841eccbad7225e7a68a2d",
+    "semantic_hash": "0700e268c49841eccbad7225e7a68a2d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueBoard.vue": {
+    "mtime": 1780757739.3992455,
+    "ast_hash": "af828000f15a915e920ada9a250f25af",
+    "semantic_hash": "af828000f15a915e920ada9a250f25af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueCard.test.ts": {
+    "mtime": 1780727868.5166786,
+    "ast_hash": "3f07f3f43b1f6035ca157097477fdf6a",
+    "semantic_hash": "3f07f3f43b1f6035ca157097477fdf6a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueCard.vue": {
+    "mtime": 1780705028.6336014,
+    "ast_hash": "a03e2e1bf273f35d301605c50c910421",
+    "semantic_hash": "a03e2e1bf273f35d301605c50c910421"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueComposer.test.ts": {
+    "mtime": 1780705028.6338296,
+    "ast_hash": "ecde2677195cc02071aeca8e596be4bc",
+    "semantic_hash": "ecde2677195cc02071aeca8e596be4bc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueComposer.vue": {
+    "mtime": 1780727868.566904,
+    "ast_hash": "cc0f5cd81b0a836fbc3c3f981bac4bb1",
+    "semantic_hash": "cc0f5cd81b0a836fbc3c3f981bac4bb1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDetailSkeleton.vue": {
+    "mtime": 1780722605.9714067,
+    "ast_hash": "263da920f7c8d7e4f4e32024e7448dc0",
+    "semantic_hash": "263da920f7c8d7e4f4e32024e7448dc0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDetailsRail.test.ts": {
+    "mtime": 1780970870.070548,
+    "ast_hash": "5ac917f2b01fb909ef2e5cbb40061e51",
+    "semantic_hash": "5ac917f2b01fb909ef2e5cbb40061e51"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDetailsRail.vue": {
+    "mtime": 1780970870.070692,
+    "ast_hash": "9aa07678d248d021ce4c10f78c242750",
+    "semantic_hash": "9aa07678d248d021ce4c10f78c242750"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDiscussion.vue": {
+    "mtime": 1780947690.834068,
+    "ast_hash": "3a1ef18453b61b2e84b65c0312b0a553",
+    "semantic_hash": "3a1ef18453b61b2e84b65c0312b0a553"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDrawer.test.ts": {
+    "mtime": 1780705028.6340585,
+    "ast_hash": "d3083194bfc9ec7b879338492f802cd9",
+    "semantic_hash": "d3083194bfc9ec7b879338492f802cd9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueDrawer.vue": {
+    "mtime": 1781116457.4602084,
+    "ast_hash": "1710eb6e2f57524c90b186145c4fd092",
+    "semantic_hash": "1710eb6e2f57524c90b186145c4fd092"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueFilterPanel.test.ts": {
+    "mtime": 1780705028.6342359,
+    "ast_hash": "e9a71453ebe80ca644aca74fbb24a373",
+    "semantic_hash": "e9a71453ebe80ca644aca74fbb24a373"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueFilterPanel.vue": {
+    "mtime": 1780705028.6343248,
+    "ast_hash": "42cbb7f2032676950de5340c23575b1e",
+    "semantic_hash": "42cbb7f2032676950de5340c23575b1e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueListGroups.test.ts": {
+    "mtime": 1780757739.3994584,
+    "ast_hash": "37a24c68763f4ee1bc63cbcfcb01bee6",
+    "semantic_hash": "37a24c68763f4ee1bc63cbcfcb01bee6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueListGroups.vue": {
+    "mtime": 1781116457.4604003,
+    "ast_hash": "ba3d00dc55e75b7c7f24493e380e3ee1",
+    "semantic_hash": "ba3d00dc55e75b7c7f24493e380e3ee1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueListToolbar.vue": {
+    "mtime": 1781116457.4607337,
+    "ast_hash": "bc08bd8d10728fff661eca685212fbde",
+    "semantic_hash": "bc08bd8d10728fff661eca685212fbde"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueMasthead.test.ts": {
+    "mtime": 1781047777.4722855,
+    "ast_hash": "1952d77b5969933386a0b2ef26d6e694",
+    "semantic_hash": "1952d77b5969933386a0b2ef26d6e694"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueMasthead.vue": {
+    "mtime": 1781047777.472408,
+    "ast_hash": "eff22c325e074e87ec579b499c5d7484",
+    "semantic_hash": "eff22c325e074e87ec579b499c5d7484"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueRow.test.ts": {
+    "mtime": 1780727868.507196,
+    "ast_hash": "86684cdf8f8f76ff29bd803b04e2725d",
+    "semantic_hash": "86684cdf8f8f76ff29bd803b04e2725d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueRow.vue": {
+    "mtime": 1781116457.4609826,
+    "ast_hash": "0d25aaa199b8cc8a687a32e36fc342c6",
+    "semantic_hash": "0d25aaa199b8cc8a687a32e36fc342c6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/IssueSavebarSlot.vue": {
+    "mtime": 1781116457.4611163,
+    "ast_hash": "da776730b7f82966e78a24689c07b55b",
+    "semantic_hash": "da776730b7f82966e78a24689c07b55b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/MentionTextarea.vue": {
+    "mtime": 1780947706.5673094,
+    "ast_hash": "840d80fc0cc90d9f74f4e20e80af3ea4",
+    "semantic_hash": "840d80fc0cc90d9f74f4e20e80af3ea4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/RailField.vue": {
+    "mtime": 1780970870.070774,
+    "ast_hash": "284e871726b5c25c2b4c4a96de40789e",
+    "semantic_hash": "284e871726b5c25c2b4c4a96de40789e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/ReorderGhost.test.ts": {
+    "mtime": 1780757739.3998833,
+    "ast_hash": "e6db374dd1a9a30a0da1469d6ffea099",
+    "semantic_hash": "e6db374dd1a9a30a0da1469d6ffea099"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/ReorderGhost.vue": {
+    "mtime": 1780757739.400039,
+    "ast_hash": "08f62b6604cdc1498c0c69750dcfe644",
+    "semantic_hash": "08f62b6604cdc1498c0c69750dcfe644"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/StateBadge.vue": {
+    "mtime": 1780705028.6348639,
+    "ast_hash": "2b8d80a6cc2c3c141cc7aced16a62f05",
+    "semantic_hash": "2b8d80a6cc2c3c141cc7aced16a62f05"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/StatusPicker.test.ts": {
+    "mtime": 1780705028.6349819,
+    "ast_hash": "02a20fcd60ca4825bddcbdf2b2c23d1f",
+    "semantic_hash": "02a20fcd60ca4825bddcbdf2b2c23d1f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/components/StatusPicker.vue": {
+    "mtime": 1780778710.5343719,
+    "ast_hash": "88453d503ea2312bd123eb10f02720c7",
+    "semantic_hash": "88453d503ea2312bd123eb10f02720c7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useBulkIssueActions.test.ts": {
+    "mtime": 1780705028.6352208,
+    "ast_hash": "4ea46876341a0364a6bbb5fd7b2e725d",
+    "semantic_hash": "4ea46876341a0364a6bbb5fd7b2e725d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useBulkIssueActions.ts": {
+    "mtime": 1780727868.5550168,
+    "ast_hash": "c057c93c93934eb95e67457e19c5bad3",
+    "semantic_hash": "c057c93c93934eb95e67457e19c5bad3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useGroupOrder.test.ts": {
+    "mtime": 1780753880.9582286,
+    "ast_hash": "aece429559e103115fd31a5368daaa04",
+    "semantic_hash": "aece429559e103115fd31a5368daaa04"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useGroupOrder.ts": {
+    "mtime": 1780757739.4002275,
+    "ast_hash": "ae573a14731b0f3f1f19d73ddce9e1e0",
+    "semantic_hash": "ae573a14731b0f3f1f19d73ddce9e1e0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useGroupReorder.test.ts": {
+    "mtime": 1780757739.4004407,
+    "ast_hash": "f9ae30a6539fa563ecc52088c9c744ec",
+    "semantic_hash": "f9ae30a6539fa563ecc52088c9c744ec"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useGroupReorder.ts": {
+    "mtime": 1780757739.4006019,
+    "ast_hash": "b2cdbf80517b30a45257fea015b327ab",
+    "semantic_hash": "b2cdbf80517b30a45257fea015b327ab"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssue.test.ts": {
+    "mtime": 1780705028.635391,
+    "ast_hash": "1e3baf62639f7177370b36d749ae44b1",
+    "semantic_hash": "1e3baf62639f7177370b36d749ae44b1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssue.ts": {
+    "mtime": 1780947139.1953988,
+    "ast_hash": "22450f02f6535d6a1cfb83f8d1d8b297",
+    "semantic_hash": "22450f02f6535d6a1cfb83f8d1d8b297"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueBoardDnd.ts": {
+    "mtime": 1780778728.1948144,
+    "ast_hash": "e4a745a9dd5abc8126413ad5c8be2549",
+    "semantic_hash": "e4a745a9dd5abc8126413ad5c8be2549"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueBulkHandlers.ts": {
+    "mtime": 1780727868.5064387,
+    "ast_hash": "d1d44fe18f9ddb6384d6464445d6eb75",
+    "semantic_hash": "d1d44fe18f9ddb6384d6464445d6eb75"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueComposer.ts": {
+    "mtime": 1780721993.2696187,
+    "ast_hash": "71b32063dd3462802fb4a621e6cc436a",
+    "semantic_hash": "71b32063dd3462802fb4a621e6cc436a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueDiscussion.ts": {
+    "mtime": 1780727868.5238338,
+    "ast_hash": "4bfbf4eeb9d3535f0ea084d1e7ed9376",
+    "semantic_hash": "4bfbf4eeb9d3535f0ea084d1e7ed9376"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueDraft.test.ts": {
+    "mtime": 1780947282.3035483,
+    "ast_hash": "571df5409b1fba33168134f44d5eae0e",
+    "semantic_hash": "571df5409b1fba33168134f44d5eae0e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueDraft.ts": {
+    "mtime": 1780970870.0708818,
+    "ast_hash": "afa068822d867c8a06bbf5bd94cf14c9",
+    "semantic_hash": "afa068822d867c8a06bbf5bd94cf14c9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueDrawerRoute.ts": {
+    "mtime": 1780721993.2697604,
+    "ast_hash": "23623adacd91a6f9a04a8b3313988b1e",
+    "semantic_hash": "23623adacd91a6f9a04a8b3313988b1e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueFilters.test.ts": {
+    "mtime": 1780705028.6360319,
+    "ast_hash": "46738194c42ed2573456a49115b3393e",
+    "semantic_hash": "46738194c42ed2573456a49115b3393e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueFilters.ts": {
+    "mtime": 1780991727.4261954,
+    "ast_hash": "0ced00ca42f6945d159f4e8f5af4d5f3",
+    "semantic_hash": "0ced00ca42f6945d159f4e8f5af4d5f3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueLinks.ts": {
+    "mtime": 1780727868.5442688,
+    "ast_hash": "6fd45eb429431a70e04cbeee9a8bbd6f",
+    "semantic_hash": "6fd45eb429431a70e04cbeee9a8bbd6f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueMedia.test.ts": {
+    "mtime": 1780705028.636343,
+    "ast_hash": "de1aa71fbef3c4d8c6a139bc8120223f",
+    "semantic_hash": "de1aa71fbef3c4d8c6a139bc8120223f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueMedia.ts": {
+    "mtime": 1780705028.6365733,
+    "ast_hash": "2f94d330e3d4667d54cb22f8929a21e5",
+    "semantic_hash": "2f94d330e3d4667d54cb22f8929a21e5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueMediaViewer.ts": {
+    "mtime": 1780721993.2698915,
+    "ast_hash": "4a318c5b741ab642ab93e4704836b6c9",
+    "semantic_hash": "4a318c5b741ab642ab93e4704836b6c9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueMutations.test.ts": {
+    "mtime": 1780705028.6367366,
+    "ast_hash": "a6c06855b7dd6cc58f68b45a96bb87b7",
+    "semantic_hash": "a6c06855b7dd6cc58f68b45a96bb87b7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueMutations.ts": {
+    "mtime": 1780947139.3993473,
+    "ast_hash": "439144c089f58c6f189d670d9179ec79",
+    "semantic_hash": "439144c089f58c6f189d670d9179ec79"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueSavedViews.ts": {
+    "mtime": 1780991727.4263558,
+    "ast_hash": "d9c23fb339d3ca80f134a6b72d8e99c5",
+    "semantic_hash": "d9c23fb339d3ca80f134a6b72d8e99c5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueSelection.test.ts": {
+    "mtime": 1780705028.6369927,
+    "ast_hash": "afdb7447046e786ab0e259b7998f1619",
+    "semantic_hash": "afdb7447046e786ab0e259b7998f1619"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssueSelection.ts": {
+    "mtime": 1780705028.6370697,
+    "ast_hash": "d87072677886d69b17833620d7612445",
+    "semantic_hash": "d87072677886d69b17833620d7612445"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssues.test.ts": {
+    "mtime": 1780705028.6371455,
+    "ast_hash": "dba4e1c65234f26c419cd85c86319d9e",
+    "semantic_hash": "dba4e1c65234f26c419cd85c86319d9e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useIssues.ts": {
+    "mtime": 1780705028.6372206,
+    "ast_hash": "295687b4b39b93cac857bbdc10fdb6d7",
+    "semantic_hash": "295687b4b39b93cac857bbdc10fdb6d7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useProjectMilestones.ts": {
+    "mtime": 1780947139.596068,
+    "ast_hash": "f138c8d2b108c327403ef4a91b2d85ea",
+    "semantic_hash": "f138c8d2b108c327403ef4a91b2d85ea"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useRailFields.test.ts": {
+    "mtime": 1780970870.070955,
+    "ast_hash": "ed8b1b0ea0ce97139e3b0b8b1978e7da",
+    "semantic_hash": "ed8b1b0ea0ce97139e3b0b8b1978e7da"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useRailFields.ts": {
+    "mtime": 1780970870.0710423,
+    "ast_hash": "dd23505d150aaf59acf998770c6f6af0",
+    "semantic_hash": "dd23505d150aaf59acf998770c6f6af0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useSavebarHost.ts": {
+    "mtime": 1781116457.4612975,
+    "ast_hash": "aed3f52cd9f9544893bd2c61833f2953",
+    "semantic_hash": "aed3f52cd9f9544893bd2c61833f2953"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/composables/useWorkItemStatus.ts": {
+    "mtime": 1780705028.6374993,
+    "ast_hash": "7e14bf1955844641727d7752826bd038",
+    "semantic_hash": "7e14bf1955844641727d7752826bd038"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/issueEdit.test.ts": {
+    "mtime": 1780947282.2067385,
+    "ast_hash": "084f21c1abc6b602e2cf552d27c0755e",
+    "semantic_hash": "084f21c1abc6b602e2cf552d27c0755e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/issueEdit.ts": {
+    "mtime": 1780947139.297002,
+    "ast_hash": "903a38ce8bd640767a48ad390c639ee9",
+    "semantic_hash": "903a38ce8bd640767a48ad390c639ee9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/issueView.test.ts": {
+    "mtime": 1780757739.4008443,
+    "ast_hash": "022b7a98740a5b89629cdab862825fd0",
+    "semantic_hash": "022b7a98740a5b89629cdab862825fd0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/issueView.ts": {
+    "mtime": 1780757739.4011328,
+    "ast_hash": "39d7c38aa45a1eee289efaae916f56f6",
+    "semantic_hash": "39d7c38aa45a1eee289efaae916f56f6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/railFields.test.ts": {
+    "mtime": 1780970870.0711424,
+    "ast_hash": "60c0c0b2e62d7f096a11358a00549242",
+    "semantic_hash": "60c0c0b2e62d7f096a11358a00549242"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/railFields.ts": {
+    "mtime": 1780970870.0712101,
+    "ast_hash": "563a90d717ed613005131d26deda9e63",
+    "semantic_hash": "563a90d717ed613005131d26deda9e63"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/reorderGeometry.test.ts": {
+    "mtime": 1780757739.4013798,
+    "ast_hash": "84c9fc00ecde65c1f76d643d270ccf86",
+    "semantic_hash": "84c9fc00ecde65c1f76d643d270ccf86"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/issues/lib/reorderGeometry.ts": {
+    "mtime": 1780757739.401582,
+    "ast_hash": "6cea379df40c8f29249c19991d4d7c4f",
+    "semantic_hash": "6cea379df40c8f29249c19991d4d7c4f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/components/LabelChip.vue": {
+    "mtime": 1780705028.638243,
+    "ast_hash": "08adff006f6cc200c8497c942ef8249c",
+    "semantic_hash": "08adff006f6cc200c8497c942ef8249c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/components/LabelGroupMenu.test.ts": {
+    "mtime": 1780705028.63834,
+    "ast_hash": "201da3d1a61ac12fc4c0e1e5d7adc2e1",
+    "semantic_hash": "201da3d1a61ac12fc4c0e1e5d7adc2e1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/components/LabelGroupMenu.vue": {
+    "mtime": 1780705028.6384308,
+    "ast_hash": "c5153993b7c1acfd26a9062bfac479b7",
+    "semantic_hash": "c5153993b7c1acfd26a9062bfac479b7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/components/LabelPicker.test.ts": {
+    "mtime": 1780705028.6386018,
+    "ast_hash": "a0612eb295498734de21c0721524031e",
+    "semantic_hash": "a0612eb295498734de21c0721524031e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/components/LabelPicker.vue": {
+    "mtime": 1780705028.6387124,
+    "ast_hash": "94917d7cbc4926e68bdc67e1a5de5edb",
+    "semantic_hash": "94917d7cbc4926e68bdc67e1a5de5edb"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/composables/useProjectLabels.ts": {
+    "mtime": 1780705028.6388187,
+    "ast_hash": "a05aa71583b70ab84adb7b695606e28a",
+    "semantic_hash": "a05aa71583b70ab84adb7b695606e28a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/lib/labelGroups.test.ts": {
+    "mtime": 1780705028.6389253,
+    "ast_hash": "ba718b82d353a0b34f774219684da500",
+    "semantic_hash": "ba718b82d353a0b34f774219684da500"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/lib/labelGroups.ts": {
+    "mtime": 1780705028.6389992,
+    "ast_hash": "0491625e55714b459e761a277076e714",
+    "semantic_hash": "0491625e55714b459e761a277076e714"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/lib/labels.test.ts": {
+    "mtime": 1780705028.6390786,
+    "ast_hash": "864612610358978896e49c2b482cc118",
+    "semantic_hash": "864612610358978896e49c2b482cc118"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/labels/lib/labels.ts": {
+    "mtime": 1780705028.6392322,
+    "ast_hash": "12a1c0425f3e8bafce46bf847ff68345",
+    "semantic_hash": "12a1c0425f3e8bafce46bf847ff68345"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MergeRequestDetailRail.test.ts": {
+    "mtime": 1780991727.42656,
+    "ast_hash": "4eb602c2e4a6ab070e6e9527eb0853a4",
+    "semantic_hash": "4eb602c2e4a6ab070e6e9527eb0853a4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MergeRequestDetailRail.vue": {
+    "mtime": 1780991727.4266572,
+    "ast_hash": "eab87661f700e20c4e6fb9ecd45a6765",
+    "semantic_hash": "eab87661f700e20c4e6fb9ecd45a6765"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MergeRequestListToolbar.vue": {
+    "mtime": 1781116457.4616714,
+    "ast_hash": "550d6b2ef4a1cf5a3bcb602d2fdcb22f",
+    "semantic_hash": "550d6b2ef4a1cf5a3bcb602d2fdcb22f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MergeRequestRow.test.ts": {
+    "mtime": 1780991727.4275424,
+    "ast_hash": "6aad0baf224415d43277a960cf2c59bf",
+    "semantic_hash": "6aad0baf224415d43277a960cf2c59bf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MergeRequestRow.vue": {
+    "mtime": 1781116457.4620092,
+    "ast_hash": "cdbac82eba5a379176438abbac57624a",
+    "semantic_hash": "cdbac82eba5a379176438abbac57624a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MrDiscussion.test.ts": {
+    "mtime": 1780991727.4278543,
+    "ast_hash": "7c0ae1104d35421dc61a4fdc61e02a7c",
+    "semantic_hash": "7c0ae1104d35421dc61a4fdc61e02a7c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MrDiscussion.vue": {
+    "mtime": 1780991727.4280431,
+    "ast_hash": "0e650989ad859a86c856a0dff6f1d20b",
+    "semantic_hash": "0e650989ad859a86c856a0dff6f1d20b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MrFilterPanel.vue": {
+    "mtime": 1781116457.4622362,
+    "ast_hash": "55fb5561851330226d4ff2ac9c346891",
+    "semantic_hash": "55fb5561851330226d4ff2ac9c346891"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MrStateBadge.test.ts": {
+    "mtime": 1780991727.4284384,
+    "ast_hash": "e655409944f89f09c898b9f5c029b031",
+    "semantic_hash": "e655409944f89f09c898b9f5c029b031"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/components/MrStateBadge.vue": {
+    "mtime": 1780991727.4285955,
+    "ast_hash": "b07b61ababa537e18c98216c731e4d9e",
+    "semantic_hash": "b07b61ababa537e18c98216c731e4d9e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMergeRequest.test.ts": {
+    "mtime": 1780991727.4287877,
+    "ast_hash": "810347e03705a86c52622ef76305d37b",
+    "semantic_hash": "810347e03705a86c52622ef76305d37b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMergeRequest.ts": {
+    "mtime": 1780991727.4290712,
+    "ast_hash": "2a6565f2c9606f45baa919caec727535",
+    "semantic_hash": "2a6565f2c9606f45baa919caec727535"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMergeRequests.test.ts": {
+    "mtime": 1780991727.4292986,
+    "ast_hash": "b3d40ba7c85dc6d940cf76d17c799ceb",
+    "semantic_hash": "b3d40ba7c85dc6d940cf76d17c799ceb"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMergeRequests.ts": {
+    "mtime": 1780991727.4294431,
+    "ast_hash": "2ac7340dad40fe22ae7a4cefc8cb765a",
+    "semantic_hash": "2ac7340dad40fe22ae7a4cefc8cb765a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMrDiscussion.test.ts": {
+    "mtime": 1780991727.4295952,
+    "ast_hash": "375aeed8aab78e3cc4237f93e3478240",
+    "semantic_hash": "375aeed8aab78e3cc4237f93e3478240"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMrDiscussion.ts": {
+    "mtime": 1780991727.4297352,
+    "ast_hash": "17ea5675cfdd4bbcbe0d73638f639d90",
+    "semantic_hash": "17ea5675cfdd4bbcbe0d73638f639d90"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMrFilters.test.ts": {
+    "mtime": 1780991727.4302144,
+    "ast_hash": "dbcff56b073c259ee46a29f4093989cd",
+    "semantic_hash": "dbcff56b073c259ee46a29f4093989cd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMrFilters.ts": {
+    "mtime": 1780991727.4304225,
+    "ast_hash": "8db16f539b6036956cde4ed914000e82",
+    "semantic_hash": "8db16f539b6036956cde4ed914000e82"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/composables/useMrSavedViews.ts": {
+    "mtime": 1780991727.430621,
+    "ast_hash": "a261a3319de9800127907c7b0336064b",
+    "semantic_hash": "a261a3319de9800127907c7b0336064b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/lib/mrView.test.ts": {
+    "mtime": 1780991727.430908,
+    "ast_hash": "eaa00935f9810bb673640e34107307c7",
+    "semantic_hash": "eaa00935f9810bb673640e34107307c7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/merge_requests/lib/mrView.ts": {
+    "mtime": 1780991727.431066,
+    "ast_hash": "fad2d1f4b98c3792a7d9a6537515670e",
+    "semantic_hash": "fad2d1f4b98c3792a7d9a6537515670e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteCommands.test.ts": {
+    "mtime": 1780991727.4313855,
+    "ast_hash": "d6e552d60257b2fd8e341ac2afdf7084",
+    "semantic_hash": "d6e552d60257b2fd8e341ac2afdf7084"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteCommands.ts": {
+    "mtime": 1780991727.4315329,
+    "ast_hash": "e88de5fe51788bd9cfde990efb6be223",
+    "semantic_hash": "e88de5fe51788bd9cfde990efb6be223"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteIssueSearch.test.ts": {
+    "mtime": 1780976273.9523993,
+    "ast_hash": "5733d67d67335875c467d57608c8fda8",
+    "semantic_hash": "5733d67d67335875c467d57608c8fda8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteIssueSearch.ts": {
+    "mtime": 1780976273.9524713,
+    "ast_hash": "f3b1b9d03c42b7aa7afe104d8a1543ba",
+    "semantic_hash": "f3b1b9d03c42b7aa7afe104d8a1543ba"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteMrSearch.test.ts": {
+    "mtime": 1780991727.4317148,
+    "ast_hash": "79476958e8236b10f37cf6559fe6e122",
+    "semantic_hash": "79476958e8236b10f37cf6559fe6e122"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/composables/usePaletteMrSearch.ts": {
+    "mtime": 1780991727.4320483,
+    "ast_hash": "a281efc59e4cd471b0fdb5484cf02b21",
+    "semantic_hash": "a281efc59e4cd471b0fdb5484cf02b21"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/lib/sources.test.ts": {
+    "mtime": 1781028587.619297,
+    "ast_hash": "5f72c04dea26d8fcc6718d7a9f7c6291",
+    "semantic_hash": "5f72c04dea26d8fcc6718d7a9f7c6291"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/lib/sources.ts": {
+    "mtime": 1781129381.1138823,
+    "ast_hash": "6ef9ef2d5bc1e3329444e183d1c6ee37",
+    "semantic_hash": "6ef9ef2d5bc1e3329444e183d1c6ee37"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/palette/lib/types.ts": {
+    "mtime": 1780991727.4326096,
+    "ast_hash": "768d205f478873b2d46a0e19f9625bb2",
+    "semantic_hash": "768d205f478873b2d46a0e19f9625bb2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineRow.vue": {
+    "mtime": 1781116457.4626572,
+    "ast_hash": "e434523e60b5d1463934ff1ca1307d47",
+    "semantic_hash": "e434523e60b5d1463934ff1ca1307d47"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStageDots.test.ts": {
+    "mtime": 1780705028.6393769,
+    "ast_hash": "73ed4e947cba27e02c44bb23a88f73e4",
+    "semantic_hash": "73ed4e947cba27e02c44bb23a88f73e4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStageDots.vue": {
+    "mtime": 1780705028.6394756,
+    "ast_hash": "d2cf99b747188f00017cfe96f0d58c10",
+    "semantic_hash": "d2cf99b747188f00017cfe96f0d58c10"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStages.test.ts": {
+    "mtime": 1780705028.6395588,
+    "ast_hash": "d90bea8ce8b199f20d3a40c54073c39a",
+    "semantic_hash": "d90bea8ce8b199f20d3a40c54073c39a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStages.vue": {
+    "mtime": 1780705028.6396596,
+    "ast_hash": "8e1af190bd30a37e0618e7e103683534",
+    "semantic_hash": "8e1af190bd30a37e0618e7e103683534"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStatusBadge.test.ts": {
+    "mtime": 1780705028.6397371,
+    "ast_hash": "73bd353657a2b6e10e521622adb12f83",
+    "semantic_hash": "73bd353657a2b6e10e521622adb12f83"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/components/PipelineStatusBadge.vue": {
+    "mtime": 1780705028.639836,
+    "ast_hash": "25257e3f74245401c1d5344155b81551",
+    "semantic_hash": "25257e3f74245401c1d5344155b81551"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelineNotifications.test.ts": {
+    "mtime": 1780705028.6399658,
+    "ast_hash": "848f0e1df7ac612f08342b7c54f85d78",
+    "semantic_hash": "848f0e1df7ac612f08342b7c54f85d78"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelineNotifications.ts": {
+    "mtime": 1780705028.6400702,
+    "ast_hash": "6cd5425f12d7bc668facccd09c9014a7",
+    "semantic_hash": "6cd5425f12d7bc668facccd09c9014a7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelineWatch.test.ts": {
+    "mtime": 1781045028.7833683,
+    "ast_hash": "640bb0a3ae7c3713262658d57d3cc15b",
+    "semantic_hash": "640bb0a3ae7c3713262658d57d3cc15b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelineWatch.ts": {
+    "mtime": 1781045028.7835128,
+    "ast_hash": "375abb47fea1d11f9fd051cdd336b5a8",
+    "semantic_hash": "375abb47fea1d11f9fd051cdd336b5a8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelines.test.ts": {
+    "mtime": 1780705028.640378,
+    "ast_hash": "2b8a52e85f98231f01027fedf524f485",
+    "semantic_hash": "2b8a52e85f98231f01027fedf524f485"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/composables/usePipelines.ts": {
+    "mtime": 1780705028.6405334,
+    "ast_hash": "3c979049b6ca0c631a5dd8f69f537445",
+    "semantic_hash": "3c979049b6ca0c631a5dd8f69f537445"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/lib/pipelineFormat.test.ts": {
+    "mtime": 1780721993.2701027,
+    "ast_hash": "db0fb16b1bdede46f7608ba3727d5c73",
+    "semantic_hash": "db0fb16b1bdede46f7608ba3727d5c73"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/lib/pipelineFormat.ts": {
+    "mtime": 1781028587.6195273,
+    "ast_hash": "324f709ac81851b51275e8e4460da4a5",
+    "semantic_hash": "324f709ac81851b51275e8e4460da4a5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/pipelines/lib/pipelineTone.ts": {
+    "mtime": 1780705028.64069,
+    "ast_hash": "f9f751e340c5f7be0c74c919025be0ec",
+    "semantic_hash": "f9f751e340c5f7be0c74c919025be0ec"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/components/ProjectRow.vue": {
+    "mtime": 1780727868.581975,
+    "ast_hash": "1ced015d7173d25d55080695df03a041",
+    "semantic_hash": "1ced015d7173d25d55080695df03a041"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useAssignedProjects.ts": {
+    "mtime": 1780727868.539292,
+    "ast_hash": "2bf505ec21eca5cd5d25eb8dfd86bd06",
+    "semantic_hash": "2bf505ec21eca5cd5d25eb8dfd86bd06"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectBrowser.ts": {
+    "mtime": 1780705028.6410458,
+    "ast_hash": "924a15c5df7f3b43224b82813f81ab7b",
+    "semantic_hash": "924a15c5df7f3b43224b82813f81ab7b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectContributors.test.ts": {
+    "mtime": 1780705028.641124,
+    "ast_hash": "57521357464346bc9d16fbe3bbcbf46c",
+    "semantic_hash": "57521357464346bc9d16fbe3bbcbf46c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectContributors.ts": {
+    "mtime": 1780705028.6412058,
+    "ast_hash": "d827e8aca77d77058b9b005b2d22c448",
+    "semantic_hash": "d827e8aca77d77058b9b005b2d22c448"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectKeyboard.ts": {
+    "mtime": 1780721993.2703438,
+    "ast_hash": "5dee065043185632c8a6d454832b171f",
+    "semantic_hash": "5dee065043185632c8a6d454832b171f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectLauncher.ts": {
+    "mtime": 1780721993.270419,
+    "ast_hash": "f48072f359361eb390627f6ced0b562c",
+    "semantic_hash": "f48072f359361eb390627f6ced0b562c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectMembers.test.ts": {
+    "mtime": 1780705028.6412892,
+    "ast_hash": "540e501fb1af64cbedc83690bec2ac0b",
+    "semantic_hash": "540e501fb1af64cbedc83690bec2ac0b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjectMembers.ts": {
+    "mtime": 1780705028.6413727,
+    "ast_hash": "2fdbecade33fbcfbe6871160b3dbce01",
+    "semantic_hash": "2fdbecade33fbcfbe6871160b3dbce01"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjects.test.ts": {
+    "mtime": 1780705028.641452,
+    "ast_hash": "edffae93d0d37fde76f496c1164999b6",
+    "semantic_hash": "edffae93d0d37fde76f496c1164999b6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useProjects.ts": {
+    "mtime": 1780705028.6415286,
+    "ast_hash": "831d901b5d8222d580b58efd7942e87b",
+    "semantic_hash": "831d901b5d8222d580b58efd7942e87b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useStarredProjects.ts": {
+    "mtime": 1780705028.641607,
+    "ast_hash": "f4ea023793059e27f6fc35495337a08c",
+    "semantic_hash": "f4ea023793059e27f6fc35495337a08c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useToggleStar.test.ts": {
+    "mtime": 1780705028.641682,
+    "ast_hash": "89f888d2176db7bb9c8884f6b5765220",
+    "semantic_hash": "89f888d2176db7bb9c8884f6b5765220"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/composables/useToggleStar.ts": {
+    "mtime": 1780705028.641752,
+    "ast_hash": "53fa8f12c1d4ca2a25d6d1cc560456e9",
+    "semantic_hash": "53fa8f12c1d4ca2a25d6d1cc560456e9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/lib/assignedProjects.test.ts": {
+    "mtime": 1780705028.64186,
+    "ast_hash": "909d4d3f73f4786455fcd44f164099af",
+    "semantic_hash": "909d4d3f73f4786455fcd44f164099af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/projects/lib/assignedProjects.ts": {
+    "mtime": 1780705028.641965,
+    "ast_hash": "988e9f697fc8eac6de724f1115c8a652",
+    "semantic_hash": "988e9f697fc8eac6de724f1115c8a652"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/AboutPane.test.ts": {
+    "mtime": 1781133526.6996965,
+    "ast_hash": "22052924ecf99f5cdbb89eb705f25b04",
+    "semantic_hash": "22052924ecf99f5cdbb89eb705f25b04"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/AboutPane.vue": {
+    "mtime": 1781133526.6999948,
+    "ast_hash": "cc7ab31d86a942c233a660ff9bbba180",
+    "semantic_hash": "cc7ab31d86a942c233a660ff9bbba180"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/AgentAccessPane.test.ts": {
+    "mtime": 1781129381.1141655,
+    "ast_hash": "c247cfaffa52840e74fa5a56a0a04f04",
+    "semantic_hash": "c247cfaffa52840e74fa5a56a0a04f04"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/AgentAccessPane.vue": {
+    "mtime": 1781129381.1142433,
+    "ast_hash": "b30721159319b8446c2d20f0709713bc",
+    "semantic_hash": "b30721159319b8446c2d20f0709713bc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/ConnectionPane.test.ts": {
+    "mtime": 1781129381.1143143,
+    "ast_hash": "8728430aaa005294a1bad95f7fca4a2d",
+    "semantic_hash": "8728430aaa005294a1bad95f7fca4a2d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/ConnectionPane.vue": {
+    "mtime": 1781129381.1143882,
+    "ast_hash": "f7fa63e9f366031db0d59f01822f6ee0",
+    "semantic_hash": "f7fa63e9f366031db0d59f01822f6ee0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/DataCachePane.test.ts": {
+    "mtime": 1781129381.1144612,
+    "ast_hash": "46726d5a7c94067905e280f54a628692",
+    "semantic_hash": "46726d5a7c94067905e280f54a628692"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/DataCachePane.vue": {
+    "mtime": 1781129381.1145337,
+    "ast_hash": "e6c73d77ee435e7374994653aa70e099",
+    "semantic_hash": "e6c73d77ee435e7374994653aa70e099"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/panes/PaneHeader.vue": {
+    "mtime": 1781129381.1146142,
+    "ast_hash": "a3349eb3aae0fa62628a0f6abb70e54f",
+    "semantic_hash": "a3349eb3aae0fa62628a0f6abb70e54f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/useSettingsNav.test.ts": {
+    "mtime": 1781129381.1146927,
+    "ast_hash": "4fc974fa9eb34097a7f14dd116572385",
+    "semantic_hash": "4fc974fa9eb34097a7f14dd116572385"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/features/settings/useSettingsNav.ts": {
+    "mtime": 1781129381.1147866,
+    "ast_hash": "4d925f0a3d23f5e59cd6d82f649b109f",
+    "semantic_hash": "4d925f0a3d23f5e59cd6d82f649b109f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/client.test.ts": {
+    "mtime": 1780705028.6421597,
+    "ast_hash": "f53d36eddb4762aeaff347b90e25d093",
+    "semantic_hash": "f53d36eddb4762aeaff347b90e25d093"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/client.ts": {
+    "mtime": 1780705028.6423044,
+    "ast_hash": "d1ae119cb95faf6929ce9da00f7da9bc",
+    "semantic_hash": "d1ae119cb95faf6929ce9da00f7da9bc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/errors.test.ts": {
+    "mtime": 1781116457.4628408,
+    "ast_hash": "30668eb8f5d271e2f2d7bac379a3e680",
+    "semantic_hash": "30668eb8f5d271e2f2d7bac379a3e680"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/errors.ts": {
+    "mtime": 1781116457.4629571,
+    "ast_hash": "fe6afcb593e867fcd38e2c416e43b8bc",
+    "semantic_hash": "fe6afcb593e867fcd38e2c416e43b8bc"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/issueParams.test.ts": {
+    "mtime": 1780472962.5558467,
+    "ast_hash": "3a4be027bd6932058a51681b265c85de",
+    "semantic_hash": "3a4be027bd6932058a51681b265c85de"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/issueParams.ts": {
+    "mtime": 1780521457.2378843,
+    "ast_hash": "a95f00fc90b07af521052ca67b8e75cf",
+    "semantic_hash": "a95f00fc90b07af521052ca67b8e75cf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/pipelineParams.test.ts": {
+    "mtime": 1780629285.0522292,
+    "ast_hash": "f785e3630f53881726829185bce709f5",
+    "semantic_hash": "f785e3630f53881726829185bce709f5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/pipelineParams.ts": {
+    "mtime": 1780628630.0722978,
+    "ast_hash": "fce130f4a2407b8401a0537861c69dac",
+    "semantic_hash": "fce130f4a2407b8401a0537861c69dac"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/rest.test.ts": {
+    "mtime": 1781116457.4630644,
+    "ast_hash": "41a448a62c28be9a0cd166c8aca6ee24",
+    "semantic_hash": "41a448a62c28be9a0cd166c8aca6ee24"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/gitlab/rest.ts": {
+    "mtime": 1781116457.463165,
+    "ast_hash": "3c6f2e2623d10dace0789f7a99400eb5",
+    "semantic_hash": "3c6f2e2623d10dace0789f7a99400eb5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/main.ts": {
+    "mtime": 1781133526.7002885,
+    "ast_hash": "23d19c112d8dbd1b1570fbf454a03029",
+    "semantic_hash": "23d19c112d8dbd1b1570fbf454a03029"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/mainview/index.ts": {
+    "mtime": 1780601292.2753127,
+    "ast_hash": "d135f6eb0c2dd26aec74342a2044764a",
+    "semantic_hash": "d135f6eb0c2dd26aec74342a2044764a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/router/guard.test.ts": {
+    "mtime": 1781129381.1149185,
+    "ast_hash": "ad5e1f981fb51f2efa50168241952857",
+    "semantic_hash": "ad5e1f981fb51f2efa50168241952857"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/router/guard.ts": {
+    "mtime": 1781129381.1150267,
+    "ast_hash": "b5f49c45716aeb110060048ca499e2b0",
+    "semantic_hash": "b5f49c45716aeb110060048ca499e2b0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/router/index.test.ts": {
+    "mtime": 1781047777.4725997,
+    "ast_hash": "df7900505938b0b79785aa307149feda",
+    "semantic_hash": "df7900505938b0b79785aa307149feda"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/router/index.ts": {
+    "mtime": 1781129381.1151397,
+    "ast_hash": "20144a9877c2af39c71fb7c59c598bce",
+    "semantic_hash": "20144a9877c2af39c71fb7c59c598bce"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/CommandPalette.test.ts": {
+    "mtime": 1780976273.9528873,
+    "ast_hash": "5146fd49fcc00d306512d270ebb0ea56",
+    "semantic_hash": "5146fd49fcc00d306512d270ebb0ea56"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/CommandPalette.vue": {
+    "mtime": 1781035123.423568,
+    "ast_hash": "bed6f9a190f6ea8279931fa735b6741a",
+    "semantic_hash": "bed6f9a190f6ea8279931fa735b6741a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ConfirmDialog.test.ts": {
+    "mtime": 1780705028.6430821,
+    "ast_hash": "424d5fd795c2865459550889404e37f2",
+    "semantic_hash": "424d5fd795c2865459550889404e37f2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ConfirmDialog.vue": {
+    "mtime": 1780705028.6431882,
+    "ast_hash": "198e1d9f04dd345415780effc5b69392",
+    "semantic_hash": "198e1d9f04dd345415780effc5b69392"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ConnectionBanner.test.ts": {
+    "mtime": 1781133526.7005696,
+    "ast_hash": "a6499a35725454c2a124e84df6cb2b05",
+    "semantic_hash": "a6499a35725454c2a124e84df6cb2b05"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ConnectionBanner.vue": {
+    "mtime": 1781133526.7006965,
+    "ast_hash": "53a35bac1eeb858eafb5a4375e458e11",
+    "semantic_hash": "53a35bac1eeb858eafb5a4375e458e11"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/EditableField.test.ts": {
+    "mtime": 1780705028.643291,
+    "ast_hash": "3456d44a4de03e1112ac348791422504",
+    "semantic_hash": "3456d44a4de03e1112ac348791422504"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/EditableField.vue": {
+    "mtime": 1780705028.6433866,
+    "ast_hash": "1fed0bf15fbce20d94fb3fac54ce6ce0",
+    "semantic_hash": "1fed0bf15fbce20d94fb3fac54ce6ce0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ErrorNotice.vue": {
+    "mtime": 1780705028.643495,
+    "ast_hash": "3a8a83b340511d7bd1926225268ae6b6",
+    "semantic_hash": "3a8a83b340511d7bd1926225268ae6b6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/MarkdownText.test.ts": {
+    "mtime": 1780705028.643751,
+    "ast_hash": "f41c5df98a65f53cfab86c00240bea78",
+    "semantic_hash": "f41c5df98a65f53cfab86c00240bea78"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/MarkdownText.vue": {
+    "mtime": 1780705028.6439095,
+    "ast_hash": "62d62369fe75d5a4b8ef03db3dc3a31b",
+    "semantic_hash": "62d62369fe75d5a4b8ef03db3dc3a31b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/MediaViewer.test.ts": {
+    "mtime": 1780727868.4980896,
+    "ast_hash": "85b12d39998b6e1a23653949dc243ed3",
+    "semantic_hash": "85b12d39998b6e1a23653949dc243ed3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/MediaViewer.vue": {
+    "mtime": 1780705028.6441352,
+    "ast_hash": "b81d8721a38739877fca60ed257163bd",
+    "semantic_hash": "b81d8721a38739877fca60ed257163bd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/Odometer.test.ts": {
+    "mtime": 1780705028.6442187,
+    "ast_hash": "52768302c5d5f44a30ffe4cea8931a0b",
+    "semantic_hash": "52768302c5d5f44a30ffe4cea8931a0b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/Odometer.vue": {
+    "mtime": 1780705028.6443064,
+    "ast_hash": "3c0ebd83bc8804d7cc923e53c131ab30",
+    "semantic_hash": "3c0ebd83bc8804d7cc923e53c131ab30"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/RefreshButton.vue": {
+    "mtime": 1781116457.463385,
+    "ast_hash": "fea8144803f7ea2efd0969c34b617ee1",
+    "semantic_hash": "fea8144803f7ea2efd0969c34b617ee1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/SavedViews.test.ts": {
+    "mtime": 1780705028.6444023,
+    "ast_hash": "145463751d4193a81de66d5ad223aaa0",
+    "semantic_hash": "145463751d4193a81de66d5ad223aaa0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/SavedViews.vue": {
+    "mtime": 1780705028.644584,
+    "ast_hash": "2ba61d9c80d7c8faf8d0f6e82ca605a2",
+    "semantic_hash": "2ba61d9c80d7c8faf8d0f6e82ca605a2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/Scratchpad.test.ts": {
+    "mtime": 1780705028.6446667,
+    "ast_hash": "c49bb7f1829f0aed6b6da5fb096db155",
+    "semantic_hash": "c49bb7f1829f0aed6b6da5fb096db155"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/Scratchpad.vue": {
+    "mtime": 1780705028.6447573,
+    "ast_hash": "c612cd53ca7616096848702d4d78ba74",
+    "semantic_hash": "c612cd53ca7616096848702d4d78ba74"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/SessionExpiredOverlay.test.ts": {
+    "mtime": 1781133526.7008796,
+    "ast_hash": "6945ff28deaced6f7f3a91e3a44265a2",
+    "semantic_hash": "6945ff28deaced6f7f3a91e3a44265a2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/SessionExpiredOverlay.vue": {
+    "mtime": 1780727420.4371827,
+    "ast_hash": "03b182bb940a4208edaec6d53a0f9d6a",
+    "semantic_hash": "03b182bb940a4208edaec6d53a0f9d6a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ToastHost.test.ts": {
+    "mtime": 1780705028.6451046,
+    "ast_hash": "1bbd0210231960a7fbdb33fe505f3a2a",
+    "semantic_hash": "1bbd0210231960a7fbdb33fe505f3a2a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/ToastHost.vue": {
+    "mtime": 1780705028.645203,
+    "ast_hash": "3bc4cbbe78182bf563842fa0963882f6",
+    "semantic_hash": "3bc4cbbe78182bf563842fa0963882f6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppIconRail.test.ts": {
+    "mtime": 1781129381.1152616,
+    "ast_hash": "0962306bdc6fd3e0e74c38b4d0097e55",
+    "semantic_hash": "0962306bdc6fd3e0e74c38b4d0097e55"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppIconRail.vue": {
+    "mtime": 1781129381.1153617,
+    "ast_hash": "ade0db8771441deb78f081edab07cf3a",
+    "semantic_hash": "ade0db8771441deb78f081edab07cf3a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppShell.test.ts": {
+    "mtime": 1781035123.423874,
+    "ast_hash": "3f125fe3938c3f9ea1c60bad069ecac7",
+    "semantic_hash": "3f125fe3938c3f9ea1c60bad069ecac7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppShell.vue": {
+    "mtime": 1781116457.4645157,
+    "ast_hash": "58f5fa70fc639206aaddfc94488bab1f",
+    "semantic_hash": "58f5fa70fc639206aaddfc94488bab1f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppTopBar.test.ts": {
+    "mtime": 1781047777.4729316,
+    "ast_hash": "c1ba86faa1128329c27241acce6349f3",
+    "semantic_hash": "c1ba86faa1128329c27241acce6349f3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/AppTopBar.vue": {
+    "mtime": 1781116457.4647005,
+    "ast_hash": "2527b95cf7291cff12047445cfd8351f",
+    "semantic_hash": "2527b95cf7291cff12047445cfd8351f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/ProjectTabNav.test.ts": {
+    "mtime": 1781045028.7839775,
+    "ast_hash": "c5394670edd3cbd66d50f51432181a44",
+    "semantic_hash": "c5394670edd3cbd66d50f51432181a44"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/ProjectTabNav.vue": {
+    "mtime": 1781045028.7840507,
+    "ast_hash": "526f485e075b5ac8ed34098f24993955",
+    "semantic_hash": "526f485e075b5ac8ed34098f24993955"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/ViewContainer.test.ts": {
+    "mtime": 1781047777.473254,
+    "ast_hash": "ce321b7a6a0864698adb922130554861",
+    "semantic_hash": "ce321b7a6a0864698adb922130554861"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/components/shell/ViewContainer.vue": {
+    "mtime": 1781059094.4767733,
+    "ast_hash": "4a39ed7d5aec0ff7763aadd30360c25d",
+    "semantic_hash": "4a39ed7d5aec0ff7763aadd30360c25d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useCommandPalette.test.ts": {
+    "mtime": 1781035123.4247,
+    "ast_hash": "4d00fcb01ad275221b19f2852d384c7b",
+    "semantic_hash": "4d00fcb01ad275221b19f2852d384c7b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useCommandPalette.ts": {
+    "mtime": 1781035123.4247825,
+    "ast_hash": "2f0051d266380c72d75ed79f2522c772",
+    "semantic_hash": "2f0051d266380c72d75ed79f2522c772"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useConfirm.test.ts": {
+    "mtime": 1780705028.6453152,
+    "ast_hash": "1a51d3148fe92ae52c3b5b5bc528c6a4",
+    "semantic_hash": "1a51d3148fe92ae52c3b5b5bc528c6a4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useConfirm.ts": {
+    "mtime": 1780705028.6453893,
+    "ast_hash": "6303a95477bcbb276e4f41e55069fe09",
+    "semantic_hash": "6303a95477bcbb276e4f41e55069fe09"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabAsset.test.ts": {
+    "mtime": 1780705028.6454704,
+    "ast_hash": "1dcb46650a043f091ee9fb08c9b32a98",
+    "semantic_hash": "1dcb46650a043f091ee9fb08c9b32a98"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabAsset.ts": {
+    "mtime": 1780705028.645559,
+    "ast_hash": "e4bc8a0822bca0f7cec67dfaad06d1e2",
+    "semantic_hash": "e4bc8a0822bca0f7cec67dfaad06d1e2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabConnect.test.ts": {
+    "mtime": 1781133526.7012389,
+    "ast_hash": "39e871590d0037f1123ab80fccf7fcb5",
+    "semantic_hash": "39e871590d0037f1123ab80fccf7fcb5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabConnect.ts": {
+    "mtime": 1781133526.701435,
+    "ast_hash": "ac5fe4d78af96ae1fe288472a2f75ec9",
+    "semantic_hash": "ac5fe4d78af96ae1fe288472a2f75ec9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabUrl.test.ts": {
+    "mtime": 1780705028.6458094,
+    "ast_hash": "bb242af1830862280714d7278dc0d11b",
+    "semantic_hash": "bb242af1830862280714d7278dc0d11b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useGitlabUrl.ts": {
+    "mtime": 1780705028.645894,
+    "ast_hash": "5aab74b9acc8fc283ee3a0c22ed16b43",
+    "semantic_hash": "5aab74b9acc8fc283ee3a0c22ed16b43"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useRepoPath.ts": {
+    "mtime": 1780721993.2705255,
+    "ast_hash": "758e62dc3500b382faa3f78205987cc5",
+    "semantic_hash": "758e62dc3500b382faa3f78205987cc5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useSavedViews.test.ts": {
+    "mtime": 1780991727.4334433,
+    "ast_hash": "005f94a27c5a111c790bc30243dc8045",
+    "semantic_hash": "005f94a27c5a111c790bc30243dc8045"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useSavedViews.ts": {
+    "mtime": 1780991727.4335873,
+    "ast_hash": "1cd5c05f6e79a71e3eaa761a19b6fec6",
+    "semantic_hash": "1cd5c05f6e79a71e3eaa761a19b6fec6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useScratchpad.test.ts": {
+    "mtime": 1780705028.6461384,
+    "ast_hash": "d6645dffd5651288887e2258914d5814",
+    "semantic_hash": "d6645dffd5651288887e2258914d5814"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useScratchpad.ts": {
+    "mtime": 1780705028.646208,
+    "ast_hash": "6658f38d9b6741198fbc99bf7d7bc476",
+    "semantic_hash": "6658f38d9b6741198fbc99bf7d7bc476"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useSession.test.ts": {
+    "mtime": 1781133526.7018285,
+    "ast_hash": "9c5aae12ada959559779dc476ee08f9d",
+    "semantic_hash": "9c5aae12ada959559779dc476ee08f9d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useSession.ts": {
+    "mtime": 1781133526.7020257,
+    "ast_hash": "05ef0defd0523f6f22ac129cfc3d436a",
+    "semantic_hash": "05ef0defd0523f6f22ac129cfc3d436a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useSpringCursor.ts": {
+    "mtime": 1780721993.2706034,
+    "ast_hash": "d90c04f34060c59fb5086873b3f4ad7a",
+    "semantic_hash": "d90c04f34060c59fb5086873b3f4ad7a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useTabNav.ts": {
+    "mtime": 1780721993.2706878,
+    "ast_hash": "1ecbc79c3dc37c6801444ce3491b2384",
+    "semantic_hash": "1ecbc79c3dc37c6801444ce3491b2384"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useToast.test.ts": {
+    "mtime": 1780705028.646422,
+    "ast_hash": "05c0cb92e2ff801deac1dd77b0d9846f",
+    "semantic_hash": "05c0cb92e2ff801deac1dd77b0d9846f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/composables/useToast.ts": {
+    "mtime": 1780705028.646488,
+    "ast_hash": "6818b314a0d9064055ed6b73f38f10f6",
+    "semantic_hash": "6818b314a0d9064055ed6b73f38f10f6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/appActive.test.ts": {
+    "mtime": 1780705028.646577,
+    "ast_hash": "e03eee35c2806072534f832ca9ae1c0e",
+    "semantic_hash": "e03eee35c2806072534f832ca9ae1c0e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/appActive.ts": {
+    "mtime": 1780705028.6466522,
+    "ast_hash": "a18676417e4605e492be58dd2a414626",
+    "semantic_hash": "a18676417e4605e492be58dd2a414626"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/chrome.test.ts": {
+    "mtime": 1781035123.424956,
+    "ast_hash": "2da489819d68e127987d0d9afccfd772",
+    "semantic_hash": "2da489819d68e127987d0d9afccfd772"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/chrome.ts": {
+    "mtime": 1781035123.425069,
+    "ast_hash": "e42c0e37bbd1b26b43c1266efe34d980",
+    "semantic_hash": "e42c0e37bbd1b26b43c1266efe34d980"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/gitlabQueries.ts": {
+    "mtime": 1781133526.7022517,
+    "ast_hash": "f318bc10af3d72435238dcd988473bd0",
+    "semantic_hash": "f318bc10af3d72435238dcd988473bd0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/markdown.test.ts": {
+    "mtime": 1780991727.433795,
+    "ast_hash": "74cf42601cf1a3ca5ff09b8fead5c0f2",
+    "semantic_hash": "74cf42601cf1a3ca5ff09b8fead5c0f2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/markdown.ts": {
+    "mtime": 1780991727.434036,
+    "ast_hash": "3db4fbbd5a6221f07bbfed33fc0e9301",
+    "semantic_hash": "3db4fbbd5a6221f07bbfed33fc0e9301"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/media.test.ts": {
+    "mtime": 1780705028.646978,
+    "ast_hash": "1bc48922507a2f2ac9ced28992aace85",
+    "semantic_hash": "1bc48922507a2f2ac9ced28992aace85"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/media.ts": {
+    "mtime": 1780705028.6470592,
+    "ast_hash": "70c3e5b7c45ea1fa3ce773f0872d0988",
+    "semantic_hash": "70c3e5b7c45ea1fa3ce773f0872d0988"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/persist.test.ts": {
+    "mtime": 1780705028.6471484,
+    "ast_hash": "5827d4db79f79f876757ea9392f12440",
+    "semantic_hash": "5827d4db79f79f876757ea9392f12440"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/persist.ts": {
+    "mtime": 1780991727.4341621,
+    "ast_hash": "c6b4fdadaf2c97d91fcc756c16bbe14f",
+    "semantic_hash": "c6b4fdadaf2c97d91fcc756c16bbe14f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/rpc.ts": {
+    "mtime": 1781133526.7023935,
+    "ast_hash": "dedcaf7a6065d25320b398d0ac9a465e",
+    "semantic_hash": "dedcaf7a6065d25320b398d0ac9a465e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/rpcContract.ts": {
+    "mtime": 1781133526.7026331,
+    "ast_hash": "a8c1607f06dad55c7af0a1c9bfc80ef4",
+    "semantic_hash": "a8c1607f06dad55c7af0a1c9bfc80ef4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/time.test.ts": {
+    "mtime": 1781028587.6200597,
+    "ast_hash": "d3941ab68155f09cfb95a81c55d10106",
+    "semantic_hash": "d3941ab68155f09cfb95a81c55d10106"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/time.ts": {
+    "mtime": 1781028587.6201448,
+    "ast_hash": "70e725907fe1eaadfac37b9a74cbde43",
+    "semantic_hash": "70e725907fe1eaadfac37b9a74cbde43"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/utils.ts": {
+    "mtime": 1780705028.6474423,
+    "ast_hash": "bd7f1534696295bfbab094ac93447322",
+    "semantic_hash": "bd7f1534696295bfbab094ac93447322"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/lib/viewTransition.ts": {
+    "mtime": 1780705028.6475055,
+    "ast_hash": "3bae5fa1e51d2e47bc70cf7cd223ff1b",
+    "semantic_hash": "3bae5fa1e51d2e47bc70cf7cd223ff1b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialog.vue": {
+    "mtime": 1780705028.6476192,
+    "ast_hash": "6ed631bae1638a6a3125a37206cc0480",
+    "semantic_hash": "6ed631bae1638a6a3125a37206cc0480"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogAction.vue": {
+    "mtime": 1780705028.647706,
+    "ast_hash": "021f039662e521f33fbc9c48a3ded9ed",
+    "semantic_hash": "021f039662e521f33fbc9c48a3ded9ed"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogCancel.vue": {
+    "mtime": 1780705028.647784,
+    "ast_hash": "98ac41297efac30a29b56f1353a985b1",
+    "semantic_hash": "98ac41297efac30a29b56f1353a985b1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogContent.vue": {
+    "mtime": 1780705028.6478708,
+    "ast_hash": "4cbe6ef52f1fd6c2e2d08787b0ff609d",
+    "semantic_hash": "4cbe6ef52f1fd6c2e2d08787b0ff609d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogDescription.vue": {
+    "mtime": 1780705028.64795,
+    "ast_hash": "05bce207966f12fc2bd1b99f1e936f18",
+    "semantic_hash": "05bce207966f12fc2bd1b99f1e936f18"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogFooter.vue": {
+    "mtime": 1780705028.6480298,
+    "ast_hash": "7c39e211ca6630277ab10c9f5de6aaca",
+    "semantic_hash": "7c39e211ca6630277ab10c9f5de6aaca"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogHeader.vue": {
+    "mtime": 1780705028.6481147,
+    "ast_hash": "4cbd1a5710f4f52ecccb2ec91649ac9d",
+    "semantic_hash": "4cbd1a5710f4f52ecccb2ec91649ac9d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogTitle.vue": {
+    "mtime": 1780705028.6481938,
+    "ast_hash": "ecfdd9c99ba68da9095afc87d4ae061f",
+    "semantic_hash": "ecfdd9c99ba68da9095afc87d4ae061f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/AlertDialogTrigger.vue": {
+    "mtime": 1780705028.6482599,
+    "ast_hash": "03be70cc95085f5c369bbc6596b2608b",
+    "semantic_hash": "03be70cc95085f5c369bbc6596b2608b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert-dialog/index.ts": {
+    "mtime": 1780705028.6483257,
+    "ast_hash": "e23bce6e2439db00018bd3ad09a18f4c",
+    "semantic_hash": "e23bce6e2439db00018bd3ad09a18f4c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert/Alert.vue": {
+    "mtime": 1780705028.6484215,
+    "ast_hash": "243b7ac962341c4c452565f470ff48af",
+    "semantic_hash": "243b7ac962341c4c452565f470ff48af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert/AlertDescription.vue": {
+    "mtime": 1780705028.6484873,
+    "ast_hash": "6fa7de8be7ea20c14d9d3b58fe8d064b",
+    "semantic_hash": "6fa7de8be7ea20c14d9d3b58fe8d064b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert/AlertTitle.vue": {
+    "mtime": 1780705028.6485536,
+    "ast_hash": "0c93d5adce6f609cf07d00720027d99f",
+    "semantic_hash": "0c93d5adce6f609cf07d00720027d99f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/alert/index.ts": {
+    "mtime": 1780705028.6486123,
+    "ast_hash": "9af9b53c0805b8c78d3a2ecd46261b1f",
+    "semantic_hash": "9af9b53c0805b8c78d3a2ecd46261b1f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/avatar/Avatar.vue": {
+    "mtime": 1780705028.6487007,
+    "ast_hash": "42a4100da3ab84eb7d34e0b1d26d8e2d",
+    "semantic_hash": "42a4100da3ab84eb7d34e0b1d26d8e2d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/avatar/AvatarFallback.vue": {
+    "mtime": 1780705028.6487727,
+    "ast_hash": "f49db11124763a83e6cd42a1efbaec83",
+    "semantic_hash": "f49db11124763a83e6cd42a1efbaec83"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/avatar/AvatarImage.vue": {
+    "mtime": 1780705028.648835,
+    "ast_hash": "20c638a4498f57fd3b9725e7b9eb55e4",
+    "semantic_hash": "20c638a4498f57fd3b9725e7b9eb55e4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/avatar/index.ts": {
+    "mtime": 1780705028.6489007,
+    "ast_hash": "538ba9e1a7c17ab7517ac1ba648753ad",
+    "semantic_hash": "538ba9e1a7c17ab7517ac1ba648753ad"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/badge/Badge.vue": {
+    "mtime": 1780705028.648999,
+    "ast_hash": "5c2b2a7843892c8cbb968a2c4b3510c2",
+    "semantic_hash": "5c2b2a7843892c8cbb968a2c4b3510c2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/badge/index.ts": {
+    "mtime": 1780705028.6490636,
+    "ast_hash": "11bc339e35e81bcc7889e802f8a4223a",
+    "semantic_hash": "11bc339e35e81bcc7889e802f8a4223a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/button/Button.vue": {
+    "mtime": 1780705028.6491687,
+    "ast_hash": "283dc14e0682e6690f19e2b1fe54aef6",
+    "semantic_hash": "283dc14e0682e6690f19e2b1fe54aef6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/button/index.ts": {
+    "mtime": 1780705028.6492295,
+    "ast_hash": "8f7a4a184e8b4d440a885e3eb4b85d4d",
+    "semantic_hash": "8f7a4a184e8b4d440a885e3eb4b85d4d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/Card.vue": {
+    "mtime": 1780705028.6493251,
+    "ast_hash": "d824d7eae35a5cf1d72951973606fa38",
+    "semantic_hash": "d824d7eae35a5cf1d72951973606fa38"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardAction.vue": {
+    "mtime": 1780705028.6493993,
+    "ast_hash": "45bac72a7f7a42641abd152ec21d9504",
+    "semantic_hash": "45bac72a7f7a42641abd152ec21d9504"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardContent.vue": {
+    "mtime": 1780705028.650475,
+    "ast_hash": "354ab459bdd1c34a0d6c3309a0328cee",
+    "semantic_hash": "354ab459bdd1c34a0d6c3309a0328cee"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardDescription.vue": {
+    "mtime": 1780705028.6505873,
+    "ast_hash": "02cf4d96bb8a74053913758c38175340",
+    "semantic_hash": "02cf4d96bb8a74053913758c38175340"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardFooter.vue": {
+    "mtime": 1780705028.6506839,
+    "ast_hash": "6b37ec3c4614f394affdcf21a5912234",
+    "semantic_hash": "6b37ec3c4614f394affdcf21a5912234"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardHeader.vue": {
+    "mtime": 1780705028.6507788,
+    "ast_hash": "c27005d027e6b36733127e5aec211c9c",
+    "semantic_hash": "c27005d027e6b36733127e5aec211c9c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/CardTitle.vue": {
+    "mtime": 1780705028.6508641,
+    "ast_hash": "b2d06d3d8b69531a1d66d73b03743822",
+    "semantic_hash": "b2d06d3d8b69531a1d66d73b03743822"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/card/index.ts": {
+    "mtime": 1780705028.6509304,
+    "ast_hash": "0f63bfc001c2cf9fb88df384a30aac31",
+    "semantic_hash": "0f63bfc001c2cf9fb88df384a30aac31"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/checkbox/Checkbox.test.ts": {
+    "mtime": 1780705028.6510575,
+    "ast_hash": "f94508b9d5f260547a406e13503b12e0",
+    "semantic_hash": "f94508b9d5f260547a406e13503b12e0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/checkbox/Checkbox.vue": {
+    "mtime": 1780705028.6511712,
+    "ast_hash": "cdf1b0f45cd370b9dfd5fc69c1115555",
+    "semantic_hash": "cdf1b0f45cd370b9dfd5fc69c1115555"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/checkbox/index.ts": {
+    "mtime": 1780705028.6512458,
+    "ast_hash": "befc3eb3d3fa7a70ba208bdb41974c4a",
+    "semantic_hash": "befc3eb3d3fa7a70ba208bdb41974c4a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/Dialog.vue": {
+    "mtime": 1780705028.6554043,
+    "ast_hash": "13cfa5974c3961e45058127ddabad10a",
+    "semantic_hash": "13cfa5974c3961e45058127ddabad10a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogClose.vue": {
+    "mtime": 1780705028.6555111,
+    "ast_hash": "18d6266b1eb5ac150c63f6c2faf71297",
+    "semantic_hash": "18d6266b1eb5ac150c63f6c2faf71297"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogContent.vue": {
+    "mtime": 1780976273.9534774,
+    "ast_hash": "ed57b1af1c4a425a6721bd78089c5429",
+    "semantic_hash": "ed57b1af1c4a425a6721bd78089c5429"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogDescription.vue": {
+    "mtime": 1780705028.6556747,
+    "ast_hash": "952d53a60a35dfecc24bd8a2e01ab55d",
+    "semantic_hash": "952d53a60a35dfecc24bd8a2e01ab55d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogFooter.vue": {
+    "mtime": 1780705028.655748,
+    "ast_hash": "1f4e202676355be9551fc8c3a0187bef",
+    "semantic_hash": "1f4e202676355be9551fc8c3a0187bef"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogHeader.vue": {
+    "mtime": 1780705028.6558177,
+    "ast_hash": "489419c894f91be1d856c5e09871a37f",
+    "semantic_hash": "489419c894f91be1d856c5e09871a37f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogTitle.vue": {
+    "mtime": 1780705028.6559005,
+    "ast_hash": "0777e6128c43e6faf19c2a7a5ebac737",
+    "semantic_hash": "0777e6128c43e6faf19c2a7a5ebac737"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/DialogTrigger.vue": {
+    "mtime": 1780705028.6559644,
+    "ast_hash": "c25e1e712b2e2a61421674fe62afbb6a",
+    "semantic_hash": "c25e1e712b2e2a61421674fe62afbb6a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/dialog/index.ts": {
+    "mtime": 1780705028.656032,
+    "ast_hash": "808a0e6223a7f1670da499b7471b7992",
+    "semantic_hash": "808a0e6223a7f1670da499b7471b7992"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/input/Input.vue": {
+    "mtime": 1780705028.6561306,
+    "ast_hash": "8ce25d78668538b4ca8d281d14233fe3",
+    "semantic_hash": "8ce25d78668538b4ca8d281d14233fe3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/input/index.ts": {
+    "mtime": 1780705028.6562052,
+    "ast_hash": "33a6f80d0152c57c8a5a5e80c7394cd6",
+    "semantic_hash": "33a6f80d0152c57c8a5a5e80c7394cd6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/label/Label.vue": {
+    "mtime": 1780705028.6563075,
+    "ast_hash": "b7016110ee651529f49161aaea6161bb",
+    "semantic_hash": "b7016110ee651529f49161aaea6161bb"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/label/index.ts": {
+    "mtime": 1780705028.6563714,
+    "ast_hash": "19690ec7a06c60d3b3195a81073b2124",
+    "semantic_hash": "19690ec7a06c60d3b3195a81073b2124"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/Select.vue": {
+    "mtime": 1780705028.6564589,
+    "ast_hash": "8482c3753957a373c0133f51b28b7a43",
+    "semantic_hash": "8482c3753957a373c0133f51b28b7a43"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectContent.vue": {
+    "mtime": 1780705028.6565301,
+    "ast_hash": "11ab430d593a71b41ca1184bb9104207",
+    "semantic_hash": "11ab430d593a71b41ca1184bb9104207"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectGroup.vue": {
+    "mtime": 1780705028.6565933,
+    "ast_hash": "bf1b99a48ea2b5021cc8e9bd23766fc6",
+    "semantic_hash": "bf1b99a48ea2b5021cc8e9bd23766fc6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectItem.vue": {
+    "mtime": 1780705028.656663,
+    "ast_hash": "4e6e21c0b83ef1db2cdaaa03753d4fb8",
+    "semantic_hash": "4e6e21c0b83ef1db2cdaaa03753d4fb8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectItemText.vue": {
+    "mtime": 1780705028.6567314,
+    "ast_hash": "e3deed0bff92f884cf672e4b2adb63c1",
+    "semantic_hash": "e3deed0bff92f884cf672e4b2adb63c1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectLabel.vue": {
+    "mtime": 1780705028.6568224,
+    "ast_hash": "150ae3009799f03ba7fd042112aaea4d",
+    "semantic_hash": "150ae3009799f03ba7fd042112aaea4d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectScrollDownButton.vue": {
+    "mtime": 1780705028.65691,
+    "ast_hash": "fa7d93db3d2a1744740730e7ab81b4f1",
+    "semantic_hash": "fa7d93db3d2a1744740730e7ab81b4f1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectScrollUpButton.vue": {
+    "mtime": 1780705028.656994,
+    "ast_hash": "e615a0a2c35be24cf1c88729d22dff75",
+    "semantic_hash": "e615a0a2c35be24cf1c88729d22dff75"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectSeparator.vue": {
+    "mtime": 1780705028.6570752,
+    "ast_hash": "90bebeb669b170335f6c1aafb19ce18a",
+    "semantic_hash": "90bebeb669b170335f6c1aafb19ce18a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectTrigger.vue": {
+    "mtime": 1780705028.6571639,
+    "ast_hash": "c645cee60e7dfdbf7767662417f4c9d8",
+    "semantic_hash": "c645cee60e7dfdbf7767662417f4c9d8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/SelectValue.vue": {
+    "mtime": 1780705028.6572368,
+    "ast_hash": "e4255670d6d31701bb44e3e3f6027c3f",
+    "semantic_hash": "e4255670d6d31701bb44e3e3f6027c3f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/select/index.ts": {
+    "mtime": 1780705028.6572998,
+    "ast_hash": "23f42e20b8e8758f80e33b29433a3c19",
+    "semantic_hash": "23f42e20b8e8758f80e33b29433a3c19"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/Sheet.vue": {
+    "mtime": 1780705028.6573918,
+    "ast_hash": "82c1d61d0b8e4543305e0d3294d48ddd",
+    "semantic_hash": "82c1d61d0b8e4543305e0d3294d48ddd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/SheetContent.vue": {
+    "mtime": 1781116457.4652076,
+    "ast_hash": "970064fddfd6dbabe11a6c0971193fba",
+    "semantic_hash": "970064fddfd6dbabe11a6c0971193fba"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/SheetDescription.vue": {
+    "mtime": 1780705028.657614,
+    "ast_hash": "13eb5bbafd0dc2debfd5e97b056b2275",
+    "semantic_hash": "13eb5bbafd0dc2debfd5e97b056b2275"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/SheetHeader.vue": {
+    "mtime": 1780705028.6577432,
+    "ast_hash": "e00530520c0998623bc98fdb11e20e6d",
+    "semantic_hash": "e00530520c0998623bc98fdb11e20e6d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/SheetTitle.vue": {
+    "mtime": 1780705028.657902,
+    "ast_hash": "287c4c9a407509ed92fcbef6836bd83b",
+    "semantic_hash": "287c4c9a407509ed92fcbef6836bd83b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/sheet/index.ts": {
+    "mtime": 1780705028.658009,
+    "ast_hash": "c938257697c40ec961b0080b58ba2e36",
+    "semantic_hash": "c938257697c40ec961b0080b58ba2e36"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/skeleton/Skeleton.vue": {
+    "mtime": 1780705028.6581569,
+    "ast_hash": "99dbc9878cded63f5da8b8e12f370df1",
+    "semantic_hash": "99dbc9878cded63f5da8b8e12f370df1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/skeleton/index.ts": {
+    "mtime": 1780705028.6582475,
+    "ast_hash": "fcf0302ff2862cce4c7fae2cd911a5ad",
+    "semantic_hash": "fcf0302ff2862cce4c7fae2cd911a5ad"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/Stepper.vue": {
+    "mtime": 1780705028.6583865,
+    "ast_hash": "2d51d897bf0f26bb06f94dfcfc5b4be1",
+    "semantic_hash": "2d51d897bf0f26bb06f94dfcfc5b4be1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperDescription.vue": {
+    "mtime": 1780705028.6584852,
+    "ast_hash": "db11f2cc8c4270daf65c971cc9c40974",
+    "semantic_hash": "db11f2cc8c4270daf65c971cc9c40974"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperIndicator.vue": {
+    "mtime": 1780705028.6585822,
+    "ast_hash": "c4e06ea1fe07ed33b9d4bbea7f5a1af5",
+    "semantic_hash": "c4e06ea1fe07ed33b9d4bbea7f5a1af5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperItem.vue": {
+    "mtime": 1780705028.658685,
+    "ast_hash": "890df32eb626bcfaf5901d6400a0f84e",
+    "semantic_hash": "890df32eb626bcfaf5901d6400a0f84e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperSeparator.vue": {
+    "mtime": 1780705028.6587822,
+    "ast_hash": "30747be3b1cfedace6b82c8e81f09e6d",
+    "semantic_hash": "30747be3b1cfedace6b82c8e81f09e6d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperTitle.vue": {
+    "mtime": 1780705028.6588664,
+    "ast_hash": "ad21143cec8bf546166f6b1e3394944d",
+    "semantic_hash": "ad21143cec8bf546166f6b1e3394944d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/StepperTrigger.vue": {
+    "mtime": 1780705028.6589584,
+    "ast_hash": "5f39bdce9e08a4ae8ffa57661dcf8346",
+    "semantic_hash": "5f39bdce9e08a4ae8ffa57661dcf8346"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/stepper/index.ts": {
+    "mtime": 1780705028.6590455,
+    "ast_hash": "7840c470afc77979af53d60e9170c9d6",
+    "semantic_hash": "7840c470afc77979af53d60e9170c9d6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/textarea/Textarea.vue": {
+    "mtime": 1780705028.6591823,
+    "ast_hash": "b2067ae7a6a2fa936b0a028241faad1d",
+    "semantic_hash": "b2067ae7a6a2fa936b0a028241faad1d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/shared/ui/textarea/index.ts": {
+    "mtime": 1780705028.659267,
+    "ast_hash": "d7c90645b4e6c6f42faa7ddfbef3b462",
+    "semantic_hash": "d7c90645b4e6c6f42faa7ddfbef3b462"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/test/setup.ts": {
+    "mtime": 1780818165.962281,
+    "ast_hash": "92651e17c0411b91b2d242c97ef8a343",
+    "semantic_hash": "92651e17c0411b91b2d242c97ef8a343"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/test/withQuery.ts": {
+    "mtime": 1780472962.5615325,
+    "ast_hash": "bd89c0c191fbf82f081a42b245bc7be2",
+    "semantic_hash": "bd89c0c191fbf82f081a42b245bc7be2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/ConnectView.test.ts": {
+    "mtime": 1781028587.620238,
+    "ast_hash": "d094da335c2e86e29d7f3bae54536eb1",
+    "semantic_hash": "d094da335c2e86e29d7f3bae54536eb1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/ConnectView.vue": {
+    "mtime": 1781028587.62047,
+    "ast_hash": "ed1554766e501902c4eee645fed059b6",
+    "semantic_hash": "ed1554766e501902c4eee645fed059b6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/IssueDetail.test.ts": {
+    "mtime": 1781116457.4656847,
+    "ast_hash": "928a876d7722c349af72be97db1145fb",
+    "semantic_hash": "928a876d7722c349af72be97db1145fb"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/IssueDetail.vue": {
+    "mtime": 1781116457.465924,
+    "ast_hash": "214f60e20c73647d6d61f4ad0e7f5ab9",
+    "semantic_hash": "214f60e20c73647d6d61f4ad0e7f5ab9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/IssueList.test.ts": {
+    "mtime": 1781045028.7841518,
+    "ast_hash": "6b9d38d938b61bcb29799262d2edad8e",
+    "semantic_hash": "6b9d38d938b61bcb29799262d2edad8e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/IssueList.vue": {
+    "mtime": 1781116457.4661791,
+    "ast_hash": "c6bee3dcf659ec1bfbf6baea2593bfc4",
+    "semantic_hash": "c6bee3dcf659ec1bfbf6baea2593bfc4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MergeRequestDetail.test.ts": {
+    "mtime": 1781047777.4743876,
+    "ast_hash": "2fd438449664944cedc76d20021d628d",
+    "semantic_hash": "2fd438449664944cedc76d20021d628d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MergeRequestDetail.vue": {
+    "mtime": 1781116457.4663959,
+    "ast_hash": "4ef21f66ccbecc25fcb397e5a27c595c",
+    "semantic_hash": "4ef21f66ccbecc25fcb397e5a27c595c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MergeRequestList.test.ts": {
+    "mtime": 1781045028.7843406,
+    "ast_hash": "587ec4807cd884fcba6498f2a6b9c430",
+    "semantic_hash": "587ec4807cd884fcba6498f2a6b9c430"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MergeRequestList.vue": {
+    "mtime": 1781116457.4665277,
+    "ast_hash": "3f7932399d33c8df2d448ccef71161af",
+    "semantic_hash": "3f7932399d33c8df2d448ccef71161af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MultiIssueWindow.test.ts": {
+    "mtime": 1780818894.8892984,
+    "ast_hash": "073f6da0c16859f1b94fd122167bbb6a",
+    "semantic_hash": "073f6da0c16859f1b94fd122167bbb6a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MultiIssueWindow.vue": {
+    "mtime": 1781116457.46691,
+    "ast_hash": "4d25ec0c9fb59629c4c18c1e2fc4a72a",
+    "semantic_hash": "4d25ec0c9fb59629c4c18c1e2fc4a72a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MyWork.test.ts": {
+    "mtime": 1781035123.425282,
+    "ast_hash": "2820e4f578f59e12979ed352471eb235",
+    "semantic_hash": "2820e4f578f59e12979ed352471eb235"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/MyWork.vue": {
+    "mtime": 1781035123.4253974,
+    "ast_hash": "3dc22a63ee16e0ae2a9e59176d362242",
+    "semantic_hash": "3dc22a63ee16e0ae2a9e59176d362242"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/PipelineList.test.ts": {
+    "mtime": 1781045028.78468,
+    "ast_hash": "ebf4ab1a65b6a1f4975e1c8d1ffc29d6",
+    "semantic_hash": "ebf4ab1a65b6a1f4975e1c8d1ffc29d6"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/PipelineList.vue": {
+    "mtime": 1781116457.46737,
+    "ast_hash": "d86d71fae8ef26666932c1b0d676e27a",
+    "semantic_hash": "d86d71fae8ef26666932c1b0d676e27a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/ProjectPicker.test.ts": {
+    "mtime": 1781035123.4255962,
+    "ast_hash": "e5a5db25fd1a61240d98f885d4554c3e",
+    "semantic_hash": "e5a5db25fd1a61240d98f885d4554c3e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/ProjectPicker.vue": {
+    "mtime": 1781116457.4675703,
+    "ast_hash": "f89786adfbc0747852abb80c320a7cf3",
+    "semantic_hash": "f89786adfbc0747852abb80c320a7cf3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/SettingsWindow.test.ts": {
+    "mtime": 1781129381.115666,
+    "ast_hash": "36d4022a358fc10d2dfcde746b624bcd",
+    "semantic_hash": "36d4022a358fc10d2dfcde746b624bcd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/src/views/SettingsWindow.vue": {
+    "mtime": 1781129381.1157484,
+    "ast_hash": "6453b1155d3dfd6fc9b06f439590a831",
+    "semantic_hash": "6453b1155d3dfd6fc9b06f439590a831"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/tsconfig.json": {
+    "mtime": 1780351127.551561,
+    "ast_hash": "4c6bb6a466046d6e9e9bacebe61529f7",
+    "semantic_hash": "4c6bb6a466046d6e9e9bacebe61529f7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/vite.config.ts": {
+    "mtime": 1780680431.6510565,
+    "ast_hash": "39b558b8cc109277842da92dd090eb39",
+    "semantic_hash": "39b558b8cc109277842da92dd090eb39"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/vitest.config.ts": {
+    "mtime": 1780680431.6512089,
+    "ast_hash": "b3479d4f9e233203886e26966c7f08a8",
+    "semantic_hash": "b3479d4f9e233203886e26966c7f08a8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/.impeccable.md": {
+    "mtime": 1780640217.1867938,
+    "ast_hash": "25560eae0c9c36482bc8d323dac80e57",
+    "semantic_hash": "25560eae0c9c36482bc8d323dac80e57"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/CHANGELOG.md": {
+    "mtime": 1780854291.4430964,
+    "ast_hash": "3d190517184a9ca43c684f7b5d577701",
+    "semantic_hash": "3d190517184a9ca43c684f7b5d577701"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/README.md": {
+    "mtime": 1780852566.948798,
+    "ast_hash": "e83e1c05c9e17b856b3ca4fe5bc420d4",
+    "semantic_hash": "e83e1c05c9e17b856b3ca4fe5bc420d4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/mcp-server.md": {
+    "mtime": 1781122055.6143012,
+    "ast_hash": "62b441648718901c2b55667e60b14b38",
+    "semantic_hash": "62b441648718901c2b55667e60b14b38"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/reference/gitlab-issue-field-shapes.md": {
+    "mtime": 1780970870.069501,
+    "ast_hash": "69b6d0a4125416973640e4bd7f2743c1",
+    "semantic_hash": "69b6d0a4125416973640e4bd7f2743c1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/server-health.md": {
+    "mtime": 1781133526.6974742,
+    "ast_hash": "b9df58a093f03979b43617253210514e",
+    "semantic_hash": "b9df58a093f03979b43617253210514e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-01-issue-drawer.md": {
+    "mtime": 1780363923.708838,
+    "ast_hash": "40f7b8203cab35c894527e0c58375791",
+    "semantic_hash": "40f7b8203cab35c894527e0c58375791"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-01-lumen-mvp.md": {
+    "mtime": 1780423444.0011272,
+    "ast_hash": "550fdc2f437d620ce8ae198cd5661d05",
+    "semantic_hash": "550fdc2f437d620ce8ae198cd5661d05"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-01-scratchpad.md": {
+    "mtime": 1780423444.0014567,
+    "ast_hash": "bc569ae072dc9a7a8839e3d0a2469cd9",
+    "semantic_hash": "bc569ae072dc9a7a8839e3d0a2469cd9"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-assignee-editor.md": {
+    "mtime": 1780433812.176463,
+    "ast_hash": "b3007dfa8f90536d2f711bf220de5fb7",
+    "semantic_hash": "b3007dfa8f90536d2f711bf220de5fb7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-comments-grouped-labels-scratchpad.md": {
+    "mtime": 1780452332.363396,
+    "ast_hash": "93afd7bbeacf2d4703496c72a7802ff5",
+    "semantic_hash": "93afd7bbeacf2d4703496c72a7802ff5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-issue-composer.md": {
+    "mtime": 1780423444.0018132,
+    "ast_hash": "c2c711e00d474fe10fd86e1341cdf641",
+    "semantic_hash": "c2c711e00d474fe10fd86e1341cdf641"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-issue-editing-filtering-tags.md": {
+    "mtime": 1780440445.9100144,
+    "ast_hash": "55ce6cf3e09e8e1d4445d8a2ea753450",
+    "semantic_hash": "55ce6cf3e09e8e1d4445d8a2ea753450"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-quick-assign.md": {
+    "mtime": 1780430862.1782029,
+    "ast_hash": "425476df99c92acc3b4bbbda9fbec003",
+    "semantic_hash": "425476df99c92acc3b4bbbda9fbec003"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-02-rendered-title-description.md": {
+    "mtime": 1780458226.0935276,
+    "ast_hash": "53af25397f1bb2600d0093b778674b45",
+    "semantic_hash": "53af25397f1bb2600d0093b778674b45"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-03-issue-media-viewer.md": {
+    "mtime": 1780532528.8048258,
+    "ast_hash": "897558dfcd15eb4f3aa0c94f805d62b0",
+    "semantic_hash": "897558dfcd15eb4f3aa0c94f805d62b0"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-03-persist-issue-list-view-state.md": {
+    "mtime": 1780601489.4194117,
+    "ast_hash": "ed2226f0036923effcefe2a6db06f109",
+    "semantic_hash": "ed2226f0036923effcefe2a6db06f109"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-04-electrobun-port.md": {
+    "mtime": 1780601489.416297,
+    "ast_hash": "affeb67fc32e647e6b7d6623d8cd2acf",
+    "semantic_hash": "affeb67fc32e647e6b7d6623d8cd2acf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-04-settings-dialog.md": {
+    "mtime": 1780680431.644989,
+    "ast_hash": "b0a24b59606d813a96f74d879977b128",
+    "semantic_hash": "b0a24b59606d813a96f74d879977b128"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-codebase-reorg.md": {
+    "mtime": 1780705028.6307077,
+    "ast_hash": "dd6e0421e817519ce586a9d4d8dabc23",
+    "semantic_hash": "dd6e0421e817519ce586a9d4d8dabc23"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-issue-multiselect-plan1-selection-bulk.md": {
+    "mtime": 1780697330.9879684,
+    "ast_hash": "2c0135af48a256cec5dc67288addc953",
+    "semantic_hash": "2c0135af48a256cec5dc67288addc953"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-issue-multiselect-plan2-combined-window.md": {
+    "mtime": 1780697463.716083,
+    "ast_hash": "219240ba3917cf4a1f4d38b1b4dd777a",
+    "semantic_hash": "219240ba3917cf4a1f4d38b1b4dd777a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-open-issue-in-native-window.md": {
+    "mtime": 1780691748.330577,
+    "ast_hash": "552ad9671f04dea68b2e13cd776a2b10",
+    "semantic_hash": "552ad9671f04dea68b2e13cd776a2b10"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-session-expiry-recovery.md": {
+    "mtime": 1780725628.5455596,
+    "ast_hash": "6f113badf611c6434cadf82ea2269298",
+    "semantic_hash": "6f113badf611c6434cadf82ea2269298"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-05-split-god-views.md": {
+    "mtime": 1780712325.2315423,
+    "ast_hash": "b261ab0f0b1beec2a7b3d172f5074219",
+    "semantic_hash": "b261ab0f0b1beec2a7b3d172f5074219"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-06-reorder-groups-columns.md": {
+    "mtime": 1780753880.9571314,
+    "ast_hash": "dc8a283c6f83a593333accc824ea5c14",
+    "semantic_hash": "dc8a283c6f83a593333accc824ea5c14"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-06-reorder-interactions-polish.md": {
+    "mtime": 1780757739.3983455,
+    "ast_hash": "bd3c385cb3e3f44e9daab9260fec93af",
+    "semantic_hash": "bd3c385cb3e3f44e9daab9260fec93af"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-06-server-unavailable-vs-token-invalid.md": {
+    "mtime": 1780774020.8297431,
+    "ast_hash": "38b076348f289e6d0f4d4fb560221918",
+    "semantic_hash": "38b076348f289e6d0f4d4fb560221918"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-08-command-palette-navigator.md": {
+    "mtime": 1780976273.9516833,
+    "ast_hash": "2d1ec3b5f243ee4717c1673dc47132e3",
+    "semantic_hash": "2d1ec3b5f243ee4717c1673dc47132e3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-08-details-rail-progressive-disclosure.md": {
+    "mtime": 1780970870.0699673,
+    "ast_hash": "dc7ea7f2c8366501efcaed110f256c67",
+    "semantic_hash": "dc7ea7f2c8366501efcaed110f256c67"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-08-merge-requests-browse-triage.md": {
+    "mtime": 1780991727.4253516,
+    "ast_hash": "24477b4ff111d30449792fa9aa47229f",
+    "semantic_hash": "24477b4ff111d30449792fa9aa47229f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-09-my-work-dashboard.md": {
+    "mtime": 1781028587.6176233,
+    "ast_hash": "f197d9fc360f2683a27c692e582f2202",
+    "semantic_hash": "f197d9fc360f2683a27c692e582f2202"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-09-unified-app-shell-phase1.md": {
+    "mtime": 1781035123.4224524,
+    "ast_hash": "b9b586dfa5d280963fa9e4f5720c1372",
+    "semantic_hash": "b9b586dfa5d280963fa9e4f5720c1372"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-09-unified-app-shell-phase2.md": {
+    "mtime": 1781045028.7830348,
+    "ast_hash": "6d3035bbf7c402bba42155fae1edd0f3",
+    "semantic_hash": "6d3035bbf7c402bba42155fae1edd0f3"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-09-unified-app-shell-phase3.md": {
+    "mtime": 1781047777.4718091,
+    "ast_hash": "d6d1b629478465d6fe91cb084f64af6d",
+    "semantic_hash": "d6d1b629478465d6fe91cb084f64af6d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-10-host-server-health.md": {
+    "mtime": 1781133526.697865,
+    "ast_hash": "b80dc2c5f9fcc932660fe44a971cb85a",
+    "semantic_hash": "b80dc2c5f9fcc932660fe44a971cb85a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-10-mcp-server-gitlab.md": {
+    "mtime": 1781122055.6144013,
+    "ast_hash": "e8d29adcd33e33d96cdc303ccb5fb863",
+    "semantic_hash": "e8d29adcd33e33d96cdc303ccb5fb863"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/plans/2026-06-10-settings-window.md": {
+    "mtime": 1781129381.1129506,
+    "ast_hash": "69b372fda9c994a8810d3d50f7d6497c",
+    "semantic_hash": "69b372fda9c994a8810d3d50f7d6497c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-01-issue-drawer-design.md": {
+    "mtime": 1780363923.709051,
+    "ast_hash": "5cc60a9c58618585cf39b99a0aaa7d32",
+    "semantic_hash": "5cc60a9c58618585cf39b99a0aaa7d32"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-01-lumen-design.md": {
+    "mtime": 1780423444.0020885,
+    "ast_hash": "d66695679ad091cacb422eb4fe42acf8",
+    "semantic_hash": "d66695679ad091cacb422eb4fe42acf8"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-01-scratchpad-design.md": {
+    "mtime": 1780423444.0022883,
+    "ast_hash": "c6e80e9feaa25225653a4ae045de19c2",
+    "semantic_hash": "c6e80e9feaa25225653a4ae045de19c2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-assignee-editor-design.md": {
+    "mtime": 1780433512.4644783,
+    "ast_hash": "05ec3f857aa531ebba1d3fe4ebae2c7a",
+    "semantic_hash": "05ec3f857aa531ebba1d3fe4ebae2c7a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-comments-grouped-labels-scratchpad-design.md": {
+    "mtime": 1780452332.363706,
+    "ast_hash": "d9cd5dd4bb82e65476bcc5255bef4410",
+    "semantic_hash": "d9cd5dd4bb82e65476bcc5255bef4410"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-issue-composer-design.md": {
+    "mtime": 1780423444.0024867,
+    "ast_hash": "9e381e019d5f6eaee6f7dae0cc6996bd",
+    "semantic_hash": "9e381e019d5f6eaee6f7dae0cc6996bd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-issue-editing-filtering-tags-design.md": {
+    "mtime": 1780440445.9101949,
+    "ast_hash": "7d2e4743311a5bfc135110f7218a97ff",
+    "semantic_hash": "7d2e4743311a5bfc135110f7218a97ff"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-quick-assign-design.md": {
+    "mtime": 1780425715.2549906,
+    "ast_hash": "8359526227d474016afa7d2d8d1a1066",
+    "semantic_hash": "8359526227d474016afa7d2d8d1a1066"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-02-rendered-title-description-design.md": {
+    "mtime": 1780458226.0938296,
+    "ast_hash": "7c77938b5dfed61436b35dad774f0177",
+    "semantic_hash": "7c77938b5dfed61436b35dad774f0177"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-03-issue-media-viewer-design.md": {
+    "mtime": 1780532528.805122,
+    "ast_hash": "24ebdc791894f6ec566fcac8286a8b01",
+    "semantic_hash": "24ebdc791894f6ec566fcac8286a8b01"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-03-persist-issue-list-view-state-design.md": {
+    "mtime": 1780601489.4200995,
+    "ast_hash": "0def1cb7d46d543ddda4c1445c57af95",
+    "semantic_hash": "0def1cb7d46d543ddda4c1445c57af95"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-04-electrobun-port-design.md": {
+    "mtime": 1780601489.4177446,
+    "ast_hash": "268eb66cfa79a065c235372b671781a2",
+    "semantic_hash": "268eb66cfa79a065c235372b671781a2"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-04-settings-dialog-design.md": {
+    "mtime": 1780680431.645304,
+    "ast_hash": "eb657cf396b4930ae73c555a6b88d24e",
+    "semantic_hash": "eb657cf396b4930ae73c555a6b88d24e"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-05-codebase-reorg-design.md": {
+    "mtime": 1780703139.1210713,
+    "ast_hash": "e0bd77839403eadf14d790e022cca24d",
+    "semantic_hash": "e0bd77839403eadf14d790e022cca24d"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-05-issue-multiselect-bulk-and-combined-window-design.md": {
+    "mtime": 1780696799.55533,
+    "ast_hash": "3425c3898c5770020a9c46a57a01d35b",
+    "semantic_hash": "3425c3898c5770020a9c46a57a01d35b"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-05-open-issue-in-native-window-design.md": {
+    "mtime": 1780691292.6099966,
+    "ast_hash": "d5d5c58b7ec52b3a766b9ca04ee8ec98",
+    "semantic_hash": "d5d5c58b7ec52b3a766b9ca04ee8ec98"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-05-session-expiry-recovery-design.md": {
+    "mtime": 1780725355.8437922,
+    "ast_hash": "80264842586245e6cf70f5eef6873026",
+    "semantic_hash": "80264842586245e6cf70f5eef6873026"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-05-split-god-views-design.md": {
+    "mtime": 1780711606.191861,
+    "ast_hash": "6049c6b13e46b40539e8a3003603bd34",
+    "semantic_hash": "6049c6b13e46b40539e8a3003603bd34"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-06-reorder-groups-columns-design.md": {
+    "mtime": 1780753880.957419,
+    "ast_hash": "0bb8d20a850fc539299490c8497d8fcd",
+    "semantic_hash": "0bb8d20a850fc539299490c8497d8fcd"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-06-reorder-interactions-polish-design.md": {
+    "mtime": 1780757739.3986583,
+    "ast_hash": "0e214ada170749c633994c360e2af8c4",
+    "semantic_hash": "0e214ada170749c633994c360e2af8c4"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-06-server-unavailable-vs-token-invalid-design.md": {
+    "mtime": 1780774020.8300095,
+    "ast_hash": "73c30c3b5a3786ac8433beee93d877b1",
+    "semantic_hash": "73c30c3b5a3786ac8433beee93d877b1"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-08-command-palette-navigator-design.md": {
+    "mtime": 1780976273.9519515,
+    "ast_hash": "dcf22e8f1f65998db3c5664647ca0b6c",
+    "semantic_hash": "dcf22e8f1f65998db3c5664647ca0b6c"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-08-issue-details-rail-progressive-disclosure-design.md": {
+    "mtime": 1780970870.0703475,
+    "ast_hash": "a07506066e4558906798bb6ad72b288f",
+    "semantic_hash": "a07506066e4558906798bb6ad72b288f"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-08-merge-requests-browse-triage-design.md": {
+    "mtime": 1780991727.4256246,
+    "ast_hash": "944754e68759b58bd0770c8cb8fedfc5",
+    "semantic_hash": "944754e68759b58bd0770c8cb8fedfc5"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-09-mcp-server-design.md": {
+    "mtime": 1781116457.4575596,
+    "ast_hash": "4263130a25c31e0f43024afcfb5fbfcf",
+    "semantic_hash": "4263130a25c31e0f43024afcfb5fbfcf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-09-my-work-dashboard-design.md": {
+    "mtime": 1781028587.617894,
+    "ast_hash": "3efe70b3f95095929ec9add172232db7",
+    "semantic_hash": "3efe70b3f95095929ec9add172232db7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-09-unified-app-shell-design.md": {
+    "mtime": 1781035123.4226403,
+    "ast_hash": "c05454acedbe1403d51d390309db9549",
+    "semantic_hash": "c05454acedbe1403d51d390309db9549"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-10-host-server-health-design.md": {
+    "mtime": 1781133526.698148,
+    "ast_hash": "10ff9bf0e2cf16aaa18456a3d2a9f117",
+    "semantic_hash": "10ff9bf0e2cf16aaa18456a3d2a9f117"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/docs/superpowers/specs/2026-06-10-settings-window-design.md": {
+    "mtime": 1781129381.113182,
+    "ast_hash": "09cfe9f92d1332adfdc6f35a11e18bcf",
+    "semantic_hash": "09cfe9f92d1332adfdc6f35a11e18bcf"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/index.html": {
+    "mtime": 1780423444.00266,
+    "ast_hash": "aaaf75d0c2cd1d2a43454164dc1064cb",
+    "semantic_hash": "aaaf75d0c2cd1d2a43454164dc1064cb"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/lumen.png": {
+    "mtime": 1780757739.3728793,
+    "ast_hash": "f16d075cca8ba24db693a49277dc0eca",
+    "semantic_hash": "f16d075cca8ba24db693a49277dc0eca"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/lumen@2x.png": {
+    "mtime": 1780757739.3798687,
+    "ast_hash": "f4c89615ade86d8fee9911771c644bf7",
+    "semantic_hash": "f4c89615ade86d8fee9911771c644bf7"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/lumen@3x.png": {
+    "mtime": 1780757739.3979015,
+    "ast_hash": "f32b7f3de0660dcb7854fcd4927b2267",
+    "semantic_hash": "f32b7f3de0660dcb7854fcd4927b2267"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_128x128.png": {
+    "mtime": 1780636298.74207,
+    "ast_hash": "188f8909a580cd3d7346e64084e29d3a",
+    "semantic_hash": "188f8909a580cd3d7346e64084e29d3a"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_128x128@2x.png": {
+    "mtime": 1780636298.742168,
+    "ast_hash": "7ceb44f19509e7d75b7865b02d538614",
+    "semantic_hash": "7ceb44f19509e7d75b7865b02d538614"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_16x16.png": {
+    "mtime": 1780636298.742257,
+    "ast_hash": "ac4dfd67986dda4f2d9f21df8066c907",
+    "semantic_hash": "ac4dfd67986dda4f2d9f21df8066c907"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_16x16@2x.png": {
+    "mtime": 1780636298.742338,
+    "ast_hash": "c1a9adbb470ac82cf21ce3c9cce8e798",
+    "semantic_hash": "c1a9adbb470ac82cf21ce3c9cce8e798"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_256x256.png": {
+    "mtime": 1780636298.742424,
+    "ast_hash": "7ceb44f19509e7d75b7865b02d538614",
+    "semantic_hash": "7ceb44f19509e7d75b7865b02d538614"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_256x256@2x.png": {
+    "mtime": 1780636298.742506,
+    "ast_hash": "4faca4a356a92c2299805ea23860aa94",
+    "semantic_hash": "4faca4a356a92c2299805ea23860aa94"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_32x32.png": {
+    "mtime": 1780636298.742592,
+    "ast_hash": "c1a9adbb470ac82cf21ce3c9cce8e798",
+    "semantic_hash": "c1a9adbb470ac82cf21ce3c9cce8e798"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_32x32@2x.png": {
+    "mtime": 1780636298.742674,
+    "ast_hash": "4827b35b6223d605def3bf6a067bd989",
+    "semantic_hash": "4827b35b6223d605def3bf6a067bd989"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_512x512.png": {
+    "mtime": 1780636298.742756,
+    "ast_hash": "4faca4a356a92c2299805ea23860aa94",
+    "semantic_hash": "4faca4a356a92c2299805ea23860aa94"
+  },
+  "/Users/la.kyle.dougan/git/personal/lumen/assets/macos/AppIcon.iconset/icon_512x512@2x.png": {
+    "mtime": 1780636298.742832,
+    "ast_hash": "c2afa1e1f82a1d033cf52055b0a4539c",
+    "semantic_hash": "c2afa1e1f82a1d033cf52055b0a4539c"
+  }
+}
