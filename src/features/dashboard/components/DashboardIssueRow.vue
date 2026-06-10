@@ -15,9 +15,12 @@ const rowClass =
 </script>
 
 <template>
+  <!-- Open the issue in its project's list with the drawer (issue sheet) up,
+       mirroring how a row click works inside the list itself — rather than
+       dropping onto the bare full-page detail. -->
   <RouterLink
     v-if="parsed"
-    :to="{ name: 'issue', params: { fullPath: parsed.fullPath, iid: issue.iid } }"
+    :to="{ name: 'issues', params: { fullPath: parsed.fullPath }, query: { issue: issue.iid } }"
     :class="rowClass"
   >
     <FileText class="size-4 shrink-0 text-muted-foreground" />

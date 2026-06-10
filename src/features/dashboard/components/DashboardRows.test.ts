@@ -27,7 +27,7 @@ const mr: DashboardMr = {
 }
 
 describe('DashboardIssueRow', () => {
-  it('shows the project path + title and links to the in-app issue route', () => {
+  it('shows the project path + title and opens the issue sheet over its list', () => {
     const w = mount(DashboardIssueRow, {
       props: { issue },
       global: { stubs: { RouterLink: RouterLinkStub } },
@@ -35,8 +35,9 @@ describe('DashboardIssueRow', () => {
     expect(w.text()).toContain('grp/proj')
     expect(w.text()).toContain('Crash on save')
     expect(w.findComponent(RouterLinkStub).props('to')).toEqual({
-      name: 'issue',
-      params: { fullPath: 'grp/proj', iid: '42' },
+      name: 'issues',
+      params: { fullPath: 'grp/proj' },
+      query: { issue: '42' },
     })
   })
 
