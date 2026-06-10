@@ -5,6 +5,7 @@ import {
   observe,
   retryNow,
   getHealth,
+  isProbing,
   resetForReconnect,
   __resetForTest,
 } from './serverHealth'
@@ -108,6 +109,33 @@ describe('serverHealth state machine', () => {
   it('resetForReconnect clears down/expired back to ok', async () => {
     observe('down')
     resetForReconnect()
+    expect(getHealth().state).toBe('ok')
+  })
+
+  it('isProbing() is true while a recovery probe runs, false after', async () => {
+    let resolve!: (o: 'down') => void
+    startServerHealth({ probe: () => new Promise<'down'>((r) => (resolve = r)), broadcast })
+    observe('down')
+    await vi.advanceTimersByTimeAsync(2000) // timer fires → recovery probe is now awaiting
+    expect(isProbing()).toBe(true)
+    resolve('down')
+    await vi.advanceTimersByTimeAsync(0)
+    expect(isProbing()).toBe(false)
+  })
+
+  it('isProbing() is true during a confirm-auth probe too (guards the hook)', async () => {
+    let resolve!: (o: 'ok') => void
+    startServerHealth({ probe: () => new Promise<'ok'>((r) => (resolve = r)), broadcast })
+    observe('auth') // ok → confirmAuth → probe now awaiting
+    expect(isProbing()).toBe(true)
+    resolve('ok')
+    await vi.advanceTimersByTimeAsync(0)
+    expect(isProbing()).toBe(false)
+  })
+
+  it('observe("ok") while down recovers immediately', () => {
+    observe('down')
+    observe('ok')
     expect(getHealth().state).toBe('ok')
   })
 })

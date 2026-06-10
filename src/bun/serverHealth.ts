@@ -44,6 +44,12 @@ export function startServerHealth(deps: {
   broadcast = deps.broadcast
 }
 
+/**
+ * True while ANY probe (recovery OR confirm-auth) is calling gitlab. The gitlab
+ * hook checks this to avoid feeding a probe's own response back into observe().
+ * Distinct from getHealth().probing, which is the user-visible "retrying…" flag
+ * set only during a recovery probe (confirm-auth probes are silent).
+ */
 export function isProbing(): boolean {
   return probeInFlight
 }
@@ -107,6 +113,7 @@ function scheduleProbe(): void {
       emit()
     }
   }, 1000)
+  if (recoveryTimer) clearTimeout(recoveryTimer)
   recoveryTimer = setTimeout(() => void runProbe(), ms)
 }
 
