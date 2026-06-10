@@ -142,12 +142,15 @@ function buildRpc(initialRoute: string | null = null) {
         getInitialRoute: async () => ({ route: initialRoute }),
         saveConfig: async ({ url, token }) => {
           saveConfig({ url, token })
-          resetForReconnect() // new token → clear any down/expired and re-probe on the next request
           return { ok: true }
         },
         getServerHealth: async () => getHealth(),
         retryServerNow: async () => {
           retryNow()
+          return { ok: true }
+        },
+        resetServerHealth: async () => {
+          resetForReconnect() // a confirmed-good (re)connect → force health back to ok
           return { ok: true }
         },
         clearConfig: async () => {

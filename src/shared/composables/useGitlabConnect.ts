@@ -62,8 +62,9 @@ export function useGitlabConnect(opts: { allowExistingToken?: boolean } = {}) {
         url: url.value.trim(),
         ...(trimmedToken ? { token: trimmedToken } : {}),
       })
-      const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
+      const res = await rpc.gitlabGraphql({ query: PROBE_QUERY, silent: true })
       if (res.status === 200 && !res.errors?.length) {
+        await rpc.resetServerHealth()
         status.value = 'idle'
         if (trimmedToken) tokenSuffix.value = trimmedToken.slice(-6)
         return true

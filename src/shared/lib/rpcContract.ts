@@ -12,6 +12,7 @@ export interface McpStatus {
 export interface GraphqlArgs {
   query: string
   variables?: Record<string, unknown>
+  silent?: boolean // when true, the host does NOT feed this request's outcome into server-health (connect/reconnect/settings probes)
 }
 export interface GraphqlResult {
   status: number
@@ -90,6 +91,7 @@ export interface LumenRequests {
   notifyCacheCleared: () => Promise<{ ok: true }>
   getServerHealth: () => Promise<ServerHealth>
   retryServerNow: () => Promise<{ ok: true }>
+  resetServerHealth: () => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {

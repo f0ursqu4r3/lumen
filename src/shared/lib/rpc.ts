@@ -44,4 +44,5 @@ export const rpc: LumenRequests = {
   notifyCacheCleared: () => client().notifyCacheCleared(),
   getServerHealth: () => client().getServerHealth(),
   retryServerNow: () => client().retryServerNow(),
+  resetServerHealth: () => client().resetServerHealth(),
 }

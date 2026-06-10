@@ -111,14 +111,12 @@ describe('gitlab feeds server-health', () => {
   it('observes "auth" on a REST 403 with a JSON body (real token rejection)', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ message: '403 Forbidden' }), {
-            status: 403,
-            statusText: 'Forbidden',
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: '403 Forbidden' }), {
+          status: 403,
+          statusText: 'Forbidden',
+        }),
+      ),
     )
     await gitlabRest({ method: 'GET', path: '/v4/x' })
     expect(observe).toHaveBeenCalledWith('auth')
@@ -131,5 +129,12 @@ describe('gitlab feeds server-health', () => {
     )
     await gitlabRest({ method: 'GET', path: '/v4/x' })
     expect(observe).toHaveBeenCalledWith('down')
+  })
+
+  it('does NOT observe a silent request, even on 401', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 401 })))
+    await gitlabGraphql({ query: '{x}', silent: true })
+    expect(observe).not.toHaveBeenCalled()
+    vi.unstubAllGlobals()
   })
 })

@@ -5,12 +5,14 @@ const getConfig = vi.fn()
 const saveConfig = vi.fn()
 const clearConfig = vi.fn()
 const gitlabGraphql = vi.fn()
+const resetServerHealth = vi.fn()
 vi.mock('@/shared/lib/rpc', () => ({
   rpc: {
     getConfig: () => getConfig(),
     saveConfig: (a: unknown) => saveConfig(a),
     clearConfig: () => clearConfig(),
     gitlabGraphql: (a: unknown) => gitlabGraphql(a),
+    resetServerHealth: () => resetServerHealth(),
   },
 }))
 
@@ -28,6 +30,7 @@ beforeEach(() => {
     configured: true,
     tokenSuffix: 'abc123',
   })
+  resetServerHealth.mockResolvedValue({ ok: true })
 })
 
 describe('SessionExpiredOverlay', () => {

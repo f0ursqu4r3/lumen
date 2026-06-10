@@ -9,7 +9,7 @@ const username = ref<string | null>(null)
 
 onMounted(async () => {
   try {
-    const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
+    const res = await rpc.gitlabGraphql({ query: PROBE_QUERY, silent: true })
     username.value =
       (res.data as { currentUser?: { username?: string } } | undefined)?.currentUser?.username ??
       null

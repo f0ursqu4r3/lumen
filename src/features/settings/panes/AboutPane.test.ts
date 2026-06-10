@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 
 const gitlabGraphql = vi.fn()
-vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabGraphql: () => gitlabGraphql() } }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { gitlabGraphql: (a: unknown) => gitlabGraphql(a) } }))
 vi.mock('@/shared/composables/useGitlabConnect', () => ({
   PROBE_QUERY: 'query{currentUser{username}}',
 }))

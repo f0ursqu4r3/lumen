@@ -19,9 +19,11 @@ function looksJson(body: string): boolean {
   }
 }
 
-/** Feed a request's outcome into the health monitor, unless we ARE the probe. */
-function report(status: number, hasErrorBody: boolean): void {
-  if (!isProbing()) observe(classifyStatus(status, hasErrorBody))
+/** Feed a request's outcome into the health monitor, unless we ARE the probe
+ *  or the caller opted out (connect/reconnect/settings probes). */
+function report(status: number, hasErrorBody: boolean, silent = false): void {
+  if (silent || isProbing()) return
+  observe(classifyStatus(status, hasErrorBody))
 }
 
 interface Cfg {
@@ -80,21 +82,21 @@ export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
     // Transport failure (DNS, connection refused, timeout): the server is
     // unreachable, not the token. Surface a 503 so the client maps it to
     // `unavailable` (see src/gitlab/errors.ts) rather than a re-auth prompt.
-    report(503, false)
+    report(503, false, a.silent)
     return { status: 503, errors: [{ message: 'GitLab is unreachable' }] }
   }
   // Only 401 needs a synthesized errors array (the body may be empty/non-JSON).
   // Every other status — 403 and real 5xx included — passes through below with
   // its status preserved, so errors.ts can classify it (auth / unavailable).
   if (!res.ok && res.status === 401) {
-    report(401, false)
+    report(401, false, a.silent)
     return { status: 401, errors: [{ message: 'Unauthorized' }] }
   }
   const json = (await res.json().catch(() => ({}))) as {
     data?: unknown
     errors?: { message: string }[]
   }
-  report(res.status, Boolean(json.errors?.length))
+  report(res.status, Boolean(json.errors?.length), a.silent)
   return { status: res.status, data: json.data, errors: json.errors }
 }
 
