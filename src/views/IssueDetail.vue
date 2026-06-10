@@ -353,26 +353,38 @@ if (!props.embedded) {
         />
       </div>
 
-      <!-- Sticky Save/Cancel — slides up the moment edits make the buffer dirty. -->
-      <Transition name="savebar">
-        <div
-          v-if="dirty"
-          class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border/60 bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
-        >
-          <Button
-            type="button"
-            data-testid="cancel-issue"
-            variant="ghost"
-            :disabled="saving"
-            @click="onCancel"
+      <!-- Floating Save/Revert — slides up from the bottom the moment edits make
+           the buffer dirty (kin to the bulk-action bar). Teleported to body so it
+           escapes the article's container-type containing block and floats over
+           the view rather than sitting in the document flow. -->
+      <Teleport to="body">
+        <Transition name="savebar">
+          <div
+            v-if="dirty"
+            class="savebar fixed inset-x-0 bottom-5 z-50 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-2 shadow-float"
           >
-            Revert Changes
-          </Button>
-          <Button type="button" data-testid="save-issue" :disabled="saving" @click="onSave">
-            {{ saving ? 'Saving…' : 'Save changes' }}
-          </Button>
-        </div>
-      </Transition>
+            <Button
+              type="button"
+              data-testid="cancel-issue"
+              variant="ghost"
+              size="sm"
+              :disabled="saving"
+              @click="onCancel"
+            >
+              Revert
+            </Button>
+            <Button
+              type="button"
+              data-testid="save-issue"
+              size="sm"
+              :disabled="saving"
+              @click="onSave"
+            >
+              {{ saving ? 'Saving…' : 'Save changes' }}
+            </Button>
+          </div>
+        </Transition>
+      </Teleport>
 
       <MediaViewer v-model:open="viewerOpen" :items="media" :start-index="viewerIndex" />
     </article>
@@ -404,7 +416,9 @@ if (!props.embedded) {
   .savebar-enter-from,
   .savebar-leave-to {
     opacity: 0;
-    transform: translateY(8px);
+    /* Down by its own height + the bottom-5 gap → starts just below the viewport
+       edge and slides straight up into place. */
+    transform: translateY(calc(100% + 1.25rem));
   }
 }
 
