@@ -13,4 +13,9 @@ export function registerTools(server: McpServer, tools: McpTool[] = allTools): v
       t.handler as never,
     )
   }
+  // Ensure tools/list + tools/call handlers are always registered, even with an
+  // empty tool list, so that the MCP protocol negotiation works correctly.
+  if (tools.length === 0) {
+    ;(server as unknown as { setToolRequestHandlers: () => void }).setToolRequestHandlers()
+  }
 }
