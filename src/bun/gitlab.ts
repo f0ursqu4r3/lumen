@@ -1,4 +1,5 @@
 import { loadConfig } from './config'
+import { observe, isProbing, classifyStatus } from './serverHealth'
 import type {
   GraphqlArgs,
   GraphqlResult,
@@ -7,6 +8,21 @@ import type {
   AssetArgs,
   AssetResult,
 } from '@/shared/lib/rpcContract'
+
+function looksJson(body: string): boolean {
+  if (!body) return false
+  try {
+    JSON.parse(body)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Feed a request's outcome into the health monitor, unless we ARE the probe. */
+function report(status: number, hasErrorBody: boolean): void {
+  if (!isProbing()) observe(classifyStatus(status, hasErrorBody))
+}
 
 interface Cfg {
   gitlabUrl: string
@@ -64,16 +80,21 @@ export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
     // Transport failure (DNS, connection refused, timeout): the server is
     // unreachable, not the token. Surface a 503 so the client maps it to
     // `unavailable` (see src/gitlab/errors.ts) rather than a re-auth prompt.
+    report(503, false)
     return { status: 503, errors: [{ message: 'GitLab is unreachable' }] }
   }
   // Only 401 needs a synthesized errors array (the body may be empty/non-JSON).
   // Every other status — 403 and real 5xx included — passes through below with
   // its status preserved, so errors.ts can classify it (auth / unavailable).
-  if (!res.ok && res.status === 401) return { status: 401, errors: [{ message: 'Unauthorized' }] }
+  if (!res.ok && res.status === 401) {
+    report(401, false)
+    return { status: 401, errors: [{ message: 'Unauthorized' }] }
+  }
   const json = (await res.json().catch(() => ({}))) as {
     data?: unknown
     errors?: { message: string }[]
   }
+  report(res.status, Boolean(json.errors?.length))
   return { status: res.status, data: json.data, errors: json.errors }
 }
 
@@ -84,9 +105,11 @@ export async function gitlabRest(a: RestArgs): Promise<RestResult> {
     res = await fetch(url, init as RequestInit)
   } catch {
     // See gitlabGraphql: transport failure → 503 so rest.ts maps to `unavailable`.
+    report(503, false)
     return { ok: false, status: 503, statusText: 'Service Unavailable', body: '' }
   }
   const body = await res.text()
+  report(res.status, res.status === 403 ? looksJson(body) : false)
   return { ok: res.ok, status: res.status, statusText: res.statusText, body }
 }
 
