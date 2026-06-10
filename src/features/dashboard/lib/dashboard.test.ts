@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseIssuePath, dashboardKeys } from './dashboard'
+import { parseIssuePath, parseIssueRef, dashboardKeys } from './dashboard'
 
 describe('parseIssuePath', () => {
   it('extracts fullPath + iid from a simple project path', () => {
@@ -24,6 +24,20 @@ describe('parseIssuePath', () => {
   })
   it('tolerates a missing leading slash', () => {
     expect(parseIssuePath('grp/proj/-/issues/42')).toEqual({ fullPath: 'grp/proj', iid: '42' })
+  })
+})
+
+describe('parseIssueRef', () => {
+  it('extracts fullPath + iid from a full reference', () => {
+    expect(parseIssueRef('grp/proj#42')).toEqual({ fullPath: 'grp/proj', iid: '42' })
+  })
+  it('handles nested groups', () => {
+    expect(parseIssueRef('grp/sub/proj#7')).toEqual({ fullPath: 'grp/sub/proj', iid: '7' })
+  })
+  it('returns null for empty or malformed references', () => {
+    expect(parseIssueRef('')).toBeNull()
+    expect(parseIssueRef(null)).toBeNull()
+    expect(parseIssueRef('grp/proj')).toBeNull()
   })
 })
 

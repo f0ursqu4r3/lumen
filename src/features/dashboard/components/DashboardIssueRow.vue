@@ -2,13 +2,21 @@
 import { computed } from 'vue'
 import { FileText } from '@lucide/vue'
 import StateBadge from '@/features/issues/components/StateBadge.vue'
-import { parseIssuePath, type DashboardIssue } from '@/features/dashboard/lib/dashboard'
+import {
+  parseIssueRef,
+  parseIssuePath,
+  type DashboardIssue,
+} from '@/features/dashboard/lib/dashboard'
 import { timeAgo } from '@/shared/lib/time'
 import { rpc } from '@/shared/lib/rpc'
 
 const props = defineProps<{ issue: DashboardIssue }>()
 
-const parsed = computed(() => parseIssuePath(props.issue.webPath))
+// Prefer the GitLab-version-stable `reference` (group/project#iid); fall back to
+// parsing webPath only if it's somehow absent.
+const parsed = computed(
+  () => parseIssueRef(props.issue.reference) ?? parseIssuePath(props.issue.webPath),
+)
 const updated = computed(() => timeAgo(props.issue.updatedAt))
 
 // Last resort when the webPath can't be parsed: the native webview can't follow

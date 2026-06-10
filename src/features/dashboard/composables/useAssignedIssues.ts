@@ -15,6 +15,7 @@ const AssignedIssuesDocument = `
         iid
         title
         state
+        reference(full: true)
         webPath
         webUrl
         updatedAt

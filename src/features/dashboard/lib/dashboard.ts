@@ -27,6 +27,18 @@ export function parseIssuePath(webPath: string): { fullPath: string; iid: string
   return { fullPath: m[1].replace(/^\/+/, ''), iid: m[2] }
 }
 
+// `reference(full: true)` returns `group/project#42` — a format-stable source for
+// the project path + iid, independent of the webPath URL structure (which varies
+// by GitLab version). Preferred over parseIssuePath when available.
+export function parseIssueRef(
+  reference: string | null | undefined,
+): { fullPath: string; iid: string } | null {
+  if (!reference) return null
+  const m = reference.match(/^(.+)#(\d+)$/)
+  if (!m) return null
+  return { fullPath: m[1], iid: m[2] }
+}
+
 type UserCore = { name?: string | null; username: string }
 type LabelNode = { id: string; title: string; color: string }
 
@@ -34,6 +46,8 @@ export type DashboardIssue = {
   iid: string
   title: string
   state: string
+  // `group/project#42` — the reliable deep-link source (see parseIssueRef).
+  reference?: string | null
   webPath: string
   webUrl: string
   updatedAt: string

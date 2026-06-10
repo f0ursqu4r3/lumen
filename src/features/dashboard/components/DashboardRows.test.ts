@@ -11,6 +11,7 @@ const issue: DashboardIssue = {
   iid: '42',
   title: 'Crash on save',
   state: 'opened',
+  reference: 'grp/proj#42',
   webPath: '/grp/proj/-/issues/42',
   webUrl: 'https://gl/issue',
   updatedAt: new Date().toISOString(),
@@ -47,7 +48,7 @@ describe('DashboardIssueRow', () => {
   it('opens externally via the host when the webPath is unparseable', async () => {
     openExternal.mockClear()
     const w = mount(DashboardIssueRow, {
-      props: { issue: { ...issue, webPath: 'weird' } },
+      props: { issue: { ...issue, reference: null, webPath: 'weird' } },
       global: { stubs: { RouterLink: RouterLinkStub } },
     })
     // No in-app route — a button routes the open through the host instead.
