@@ -30,36 +30,40 @@ const projectTab = computed(() =>
     : null,
 )
 const detail = computed(() => (fullPath.value ? (DETAIL_ROUTES[name.value] ?? null) : null))
-const { repoName, pathPrefix } = useRepoPath(fullPath)
+const { repoName } = useRepoPath(fullPath)
 
 const GLOBAL_TITLES: Record<string, string> = { home: 'My Work', projects: 'Projects' }
 const globalTitle = computed(() => GLOBAL_TITLES[name.value] ?? '')
 </script>
 
 <template>
-  <header class="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-card/40 px-4">
+  <header class="relative flex h-12 shrink-0 items-center gap-3 border-b border-border/60 px-4">
     <template v-if="projectTab">
-      <span v-if="pathPrefix" class="truncate font-mono text-xs text-muted-foreground/70">
-        {{ pathPrefix }}/
+      <span class="truncate text-sm font-medium text-foreground" :title="fullPath">
+        {{ repoName }}
       </span>
-      <span class="truncate text-sm font-semibold text-foreground">{{ repoName }}</span>
-      <ProjectTabNav :full-path="fullPath" :active="projectTab" class="ml-1" />
+      <ProjectTabNav :full-path="fullPath" :active="projectTab" class="ml-1.5" />
     </template>
 
-    <template v-else-if="detail">
+    <!-- Detail is a focused, single-item view — its crumb is centered over the
+         (centered) content column; the teleported actions stay pinned right. -->
+    <div v-else-if="detail" class="pointer-events-none absolute inset-x-16 flex justify-center">
       <RouterLink
         :to="{ name: detail.list, params: { fullPath } }"
-        class="group/back flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        :title="`Back to ${fullPath}`"
+        class="group/crumb pointer-events-auto flex min-w-0 items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft class="size-4 transition-transform group-hover/back:-translate-x-0.5" />
-        <span class="truncate font-medium">{{ repoName }}</span>
+        <ArrowLeft
+          class="size-4 shrink-0 text-primary transition-transform group-hover/crumb:-translate-x-0.5"
+        />
+        <span class="truncate text-sm font-medium text-foreground">{{ repoName }}</span>
+        <span class="shrink-0 font-mono text-2xs tabular-nums text-muted-foreground/60">
+          {{ detail.sigil }}{{ iid }}
+        </span>
       </RouterLink>
-      <span class="font-mono text-xs tabular-nums text-muted-foreground/80">
-        {{ detail.sigil }}{{ iid }}
-      </span>
-    </template>
+    </div>
 
-    <h1 v-else class="text-sm font-semibold text-foreground">{{ globalTitle }}</h1>
+    <h1 v-else class="text-sm font-medium text-foreground">{{ globalTitle }}</h1>
 
     <!-- Views teleport their context affordances here. -->
     <div id="app-topbar-slot" class="ml-auto flex items-center gap-2" />

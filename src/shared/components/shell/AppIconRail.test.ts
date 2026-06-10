@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
+import { createRouter, createMemoryHistory } from 'vue-router'
 
 const { openSettings } = vi.hoisted(() => ({ openSettings: vi.fn() }))
 vi.mock('@/shared/composables/useSettings', () => ({ openSettings }))
@@ -10,8 +11,18 @@ vi.mock('@/shared/composables/useSession', () => ({ sessionState }))
 import AppIconRail from './AppIconRail.vue'
 import { useCommandPalette } from '@/shared/composables/useCommandPalette'
 
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { path: '/', name: 'home', component: { template: '<div/>' } },
+    { path: '/projects', name: 'projects', component: { template: '<div/>' } },
+  ],
+})
+
 function mountRail() {
-  return mount(AppIconRail, { global: { stubs: { RouterLink: RouterLinkStub } } })
+  return mount(AppIconRail, {
+    global: { plugins: [router], stubs: { RouterLink: RouterLinkStub } },
+  })
 }
 
 describe('AppIconRail', () => {
@@ -41,5 +52,16 @@ describe('AppIconRail', () => {
     const w = mountRail()
     expect(w.get('[data-testid="rail-connection"]').classes().join(' ')).toContain('text-amber')
     sessionState.unavailable = false
+  })
+
+  it('marks the active global view with a lit tile', async () => {
+    await router.push('/projects')
+    await router.isReady()
+    const w = mountRail()
+    const projects = w
+      .findAllComponents(RouterLinkStub)
+      .find((l) => (l.props('to') as { name?: string }).name === 'projects')!
+    expect(projects.classes()).toContain('bg-card')
+    await router.push('/')
   })
 })

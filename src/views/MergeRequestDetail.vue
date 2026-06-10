@@ -38,7 +38,7 @@ const descriptionHtml = computed(() => sanitizeHtml(mr.value?.descriptionHtml))
 </script>
 
 <template>
-  <ViewContainer width="wide">
+  <ViewContainer width="default">
     <ErrorNotice v-if="error" :error="error" />
     <div v-else-if="isLoading" class="text-sm text-muted-foreground">Loading…</div>
 

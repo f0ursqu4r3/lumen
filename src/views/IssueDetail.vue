@@ -203,7 +203,7 @@ if (!props.embedded) {
   <!-- Mode-aware container: 'bare' is a passthrough so the drawer / popped-out
        window keep today's layout (their own <main> sizes the article); the
        full-page main window gets the wide centered, padded column. -->
-  <ViewContainer v-else-if="issue && draft" :width="embedded || windowed ? 'bare' : 'wide'">
+  <ViewContainer v-else-if="issue && draft" :width="embedded || windowed ? 'bare' : 'default'">
     <article class="issue pb-20" :style="railStyle">
       <!-- Condensed title: appears in a window once the main title scrolls out of
          view. `fixed` (not sticky) so toggling it never shifts the document; the

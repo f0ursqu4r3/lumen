@@ -258,55 +258,61 @@ function setComposerOpen(value: boolean) {
 
     <!-- When the bulk bar is up (it's a fixed bottom overlay), pad the bottom so
          the last issue can scroll clear of it instead of hiding behind it. -->
-    <section class="space-y-5" :class="{ 'pb-24': selection.count.value > 0 }">
-      <IssueListToolbar
-        v-model:state="state"
-        v-model:search="search"
-        v-model:labels="labelTitles"
-        v-model:assignee="assignee"
-        v-model:author="author"
-        v-model:sort="sortKey"
-        v-model:group="groupKey"
-        v-model:scope="boardScope"
-        :catalog="labelCatalog"
-        :members="members ?? []"
-        :active-count="activeCount"
-        :view="view"
-        :select-mode="selection.mode.value"
-        :is-refreshing="isRefreshing"
-        :scope-options="scopeOptions"
-        @refresh="refresh"
-        @toggle-select="toggleSelectMode"
-        @set-view="setView"
-        :has-custom-order="hasCustomOrder"
-        @reset-order="resetOrder"
-      >
-        <template #saved-views>
-          <SavedViews
-            :views="savedViews.views.value"
-            :active-id="activeViewId"
-            :loaded-id="loadedViewId"
-            :can-save="canSaveView"
-            @apply="loadView"
-            @save="saveCurrentView"
-            @update="updateView"
-            @rename="savedViews.rename"
-            @remove="removeView"
-          />
-        </template>
-      </IssueListToolbar>
+    <section class="space-y-6" :class="{ 'pb-24': selection.count.value > 0 }">
+      <!-- Controls cluster: the toolbar and its active-filter readout sit close
+           together; the section's larger gap separates them from the content. -->
+      <div class="space-y-2.5">
+        <IssueListToolbar
+          v-model:state="state"
+          v-model:search="search"
+          v-model:labels="labelTitles"
+          v-model:assignee="assignee"
+          v-model:author="author"
+          v-model:sort="sortKey"
+          v-model:group="groupKey"
+          v-model:scope="boardScope"
+          :catalog="labelCatalog"
+          :members="members ?? []"
+          :active-count="activeCount"
+          :count="count"
+          :has-more="hasMore"
+          :view="view"
+          :select-mode="selection.mode.value"
+          :is-refreshing="isRefreshing"
+          :scope-options="scopeOptions"
+          @refresh="refresh"
+          @toggle-select="toggleSelectMode"
+          @set-view="setView"
+          :has-custom-order="hasCustomOrder"
+          @reset-order="resetOrder"
+        >
+          <template #saved-views>
+            <SavedViews
+              :views="savedViews.views.value"
+              :active-id="activeViewId"
+              :loaded-id="loadedViewId"
+              :can-save="canSaveView"
+              @apply="loadView"
+              @save="saveCurrentView"
+              @update="updateView"
+              @rename="savedViews.rename"
+              @remove="removeView"
+            />
+          </template>
+        </IssueListToolbar>
 
-      <!-- Active filter tokens -->
-      <IssueActiveFilters
-        v-if="activeCount"
-        :label-chips="labelChips"
-        :assignee="assignee"
-        :author="author"
-        @remove-label="removeLabel"
-        @clear-assignee="assignee = ''"
-        @clear-author="author = ''"
-        @clear-all="clearFilters"
-      />
+        <!-- Active filter tokens -->
+        <IssueActiveFilters
+          v-if="activeCount"
+          :label-chips="labelChips"
+          :assignee="assignee"
+          :author="author"
+          @remove-label="removeLabel"
+          @clear-assignee="assignee = ''"
+          @clear-author="author = ''"
+          @clear-all="clearFilters"
+        />
+      </div>
 
       <ErrorNotice v-if="error" :error="error" />
 

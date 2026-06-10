@@ -16,8 +16,10 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="relative flex flex-wrap items-center gap-2">
-    <span class="text-2xs tracking-wide text-muted-foreground/60 uppercase"> Filtering </span>
+  <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1.5">
+    <span class="shrink-0 text-2xs tracking-wide text-muted-foreground/60 uppercase">
+      Filtering
+    </span>
     <!-- Tokens animate as a group: each springs in on add, recoils out on
          remove, and the survivors slide to close the gap (see .facet-* in
          styles.css). `contents` keeps the group transparent to the flex row. -->
@@ -61,9 +63,11 @@ defineEmits<{
         </button>
       </span>
     </TransitionGroup>
+    <!-- Pinned right so the escape hatch is always in the same spot, never lost
+         at the tail of a wrapped run of tokens. -->
     <button
       type="button"
-      class="text-2xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
+      class="ml-auto shrink-0 text-2xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
       @click="$emit('clear-all')"
     >
       Clear all

@@ -69,10 +69,23 @@ useIntersectionObserver(sentinel, ([entry]) => {
 <template>
   <ViewContainer width="wide">
     <section class="space-y-5">
-      <!-- The shell top bar carries the "Projects" title and the rail provides My
-           Work, so the in-view header is just the prominent count display. -->
-      <div v-if="!isLoading && !error" class="flex justify-end">
-        <div class="hidden shrink-0 flex-col items-end sm:flex">
+      <!-- Search + count share one line (the shell top bar carries the title and
+           the rail provides My Work), so the picker opens straight onto its work. -->
+      <div class="flex items-center gap-4">
+        <div class="relative flex-1">
+          <Search
+            class="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            ref="searchInput"
+            v-model="search"
+            type="search"
+            placeholder="Search projects…"
+            aria-label="Search projects"
+            class="h-11 rounded-lg pl-11 text-base shadow-card"
+          />
+        </div>
+        <div v-if="!isLoading && !error" class="hidden shrink-0 items-baseline gap-1.5 sm:flex">
           <span
             class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
           >
@@ -80,25 +93,11 @@ useIntersectionObserver(sentinel, ([entry]) => {
             <span v-if="hasMore" class="text-primary">+</span>
           </span>
           <span
-            class="mt-2 font-mono text-micro font-medium tracking-[0.22em] text-muted-foreground/70 uppercase"
+            class="font-mono text-micro font-medium tracking-[0.2em] text-muted-foreground/60 uppercase"
           >
             {{ count === 1 ? 'project' : 'projects' }}
           </span>
         </div>
-      </div>
-
-      <div class="relative">
-        <Search
-          class="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          ref="searchInput"
-          v-model="search"
-          type="search"
-          placeholder="Search projects…"
-          aria-label="Search projects"
-          class="h-11 rounded-lg pl-11 text-base shadow-card"
-        />
       </div>
 
       <ErrorNotice v-if="error" :error="error" />
