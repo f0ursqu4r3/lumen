@@ -39,10 +39,14 @@ const globalTitle = computed(() => GLOBAL_TITLES[name.value] ?? '')
 <template>
   <header class="relative flex h-12 shrink-0 items-center gap-3 border-b border-border/60 px-4">
     <template v-if="projectTab">
-      <span class="truncate text-sm font-medium text-foreground" :title="fullPath">
+      <span class="min-w-0 truncate text-sm font-medium text-foreground" :title="fullPath">
         {{ repoName }}
       </span>
-      <ProjectTabNav :full-path="fullPath" :active="projectTab" class="ml-1.5" />
+      <!-- Tabs are centered over the panel (like the detail crumb); the repo name
+           sits left and the teleported actions stay pinned right. -->
+      <div class="pointer-events-none absolute inset-x-0 flex justify-center">
+        <ProjectTabNav :full-path="fullPath" :active="projectTab" class="pointer-events-auto" />
+      </div>
     </template>
 
     <!-- Detail is a focused, single-item view — its crumb is centered over the

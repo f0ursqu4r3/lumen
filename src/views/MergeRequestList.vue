@@ -21,29 +21,34 @@ const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
 
 <template>
   <ViewContainer>
-    <div class="space-y-3">
-      <MergeRequestListToolbar
-        v-model:search="f.search.value"
-        v-model:sort="f.sort.value"
-        :views="saved.savedViews.views.value"
-        :active-id="saved.activeViewId.value"
-        :loaded-id="saved.loadedViewId.value"
-        :can-save="saved.canSaveView.value"
-        @apply="saved.loadView"
-        @save="saved.saveCurrentView"
-        @update="saved.updateView"
-        @rename="(id, name) => saved.savedViews.rename(id, name)"
-        @remove="saved.removeView"
-      />
-      <MrFilterPanel
-        v-model:state="f.state.value"
-        v-model:draft="f.draft.value"
-        v-model:author="f.author.value"
-        v-model:assignee="f.assignee.value"
-        v-model:reviewer="f.reviewer.value"
-        v-model:milestone="f.milestone.value"
-      />
-    </div>
+    <MergeRequestListToolbar
+      v-model:state="f.state.value"
+      v-model:search="f.search.value"
+      v-model:sort="f.sort.value"
+      :count="mergeRequests.length"
+      :has-more="hasNextPage ?? false"
+      :views="saved.savedViews.views.value"
+      :active-id="saved.activeViewId.value"
+      :loaded-id="saved.loadedViewId.value"
+      :can-save="saved.canSaveView.value"
+      @apply="saved.loadView"
+      @save="saved.saveCurrentView"
+      @update="saved.updateView"
+      @rename="(id, name) => saved.savedViews.rename(id, name)"
+      @remove="saved.removeView"
+    >
+      <template #filters>
+        <MrFilterPanel
+          v-model:draft="f.draft.value"
+          v-model:author="f.author.value"
+          v-model:assignee="f.assignee.value"
+          v-model:reviewer="f.reviewer.value"
+          v-model:milestone="f.milestone.value"
+          :active-count="f.activeCount.value"
+          @clear="f.clearAll"
+        />
+      </template>
+    </MergeRequestListToolbar>
 
     <ErrorNotice v-if="error" :error="error" class="mt-6" />
 
@@ -53,7 +58,7 @@ const saved = useMrSavedViews(fullPath, f.viewSlice, f.applyView)
       No merge requests match these filters.
     </p>
 
-    <ul v-else class="mt-4 divide-y divide-border/60">
+    <ul v-else class="mt-6 divide-y divide-border/60">
       <li v-for="mr in mergeRequests" :key="mr.iid">
         <MergeRequestRow :mr="mr" :full-path="fullPath" />
       </li>

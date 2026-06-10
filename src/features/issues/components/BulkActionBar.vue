@@ -91,7 +91,7 @@ function pickStatus(status: WorkItemStatus) {
         v-if="count > 0"
         ref="barRoot"
         data-testid="bulk-action-bar"
-        class="fixed inset-x-0 bottom-5 z-40 mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-pop backdrop-blur"
+        class="fixed inset-x-0 bottom-5 z-40 mx-auto flex w-fit items-center gap-2 rounded-xl border border-white/10 bg-secondary px-3 py-2 shadow-float"
       >
         <span
           class="px-1 font-mono text-xs font-medium tabular-nums text-foreground"

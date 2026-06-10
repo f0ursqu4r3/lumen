@@ -155,13 +155,18 @@
   /* Sculpted dark elevation. Each surface gets a real layered ambient shadow
      plus a 1px top inner-highlight (the lit edge premium dark UIs use to catch
      the light) — depth without glassmorphism, and never a colored side-stripe.
-     `shadow-card` is the resting state; `shadow-pop` is for the focal panels. */
+     `shadow-card` is the resting state; `shadow-pop` is for the focal panels;
+     `shadow-float` is the top tier for a transient bar that hovers over content —
+     a wide dark halo lifts it clear of whatever's scrolling beneath. */
   --shadow-card:
     0 1px 2px oklch(0 0 0 / 0.3), 0 6px 16px -6px oklch(0 0 0 / 0.4),
     inset 0 1px 0 oklch(1 0 0 / 0.04);
   --shadow-pop:
     0 2px 4px oklch(0 0 0 / 0.34), 0 18px 44px -12px oklch(0 0 0 / 0.5),
     inset 0 1px 0 oklch(1 0 0 / 0.055);
+  --shadow-float:
+    0 4px 10px -2px oklch(0 0 0 / 0.5), 0 24px 60px -14px oklch(0 0 0 / 0.72),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
   /* The amber primary reads as a physical key: a lit top edge at rest, a soft
      amber bloom on hover (kin to the signal lamp). */
   --shadow-key: 0 1px 2px oklch(0.2 0.04 75 / 0.45), inset 0 1px 0 oklch(1 0.05 90 / 0.28);
