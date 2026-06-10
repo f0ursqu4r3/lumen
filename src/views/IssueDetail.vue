@@ -96,7 +96,7 @@ if (props.windowed) {
 // stickyTop, plus the condensed title bar ~2rem) or its top is hidden under it.
 // Elsewhere (full page / drawer) the rail keeps its default 1.5rem inset.
 const railStyle = computed(() =>
-  props.windowed ? { '--rail-top': `calc(${props.stickyTop ?? 0}px + 3.5rem)` } : undefined,
+  props.windowed ? { '--rail-top': `calc(${props.stickyTop ?? 0}px)` } : undefined,
 )
 
 const actionError = computed(() => saveError.value)
