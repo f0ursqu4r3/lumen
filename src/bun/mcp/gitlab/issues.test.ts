@@ -10,6 +10,7 @@ vi.mock('./client', () => c)
 
 import { issueTools } from './issues'
 const tool = (name: string) => issueTools.find((t) => t.name === name)!
+const bodyText = (r: unknown) => (r as { content: Array<{ text: string }> }).content[0].text
 
 beforeEach(() => {
   c.gql.mockReset()
@@ -47,7 +48,7 @@ describe('lumen_issues_list', () => {
       expect.stringContaining('issues('),
       expect.objectContaining({ p: 'g/p', state: 'opened', labelName: ['bug'], first: 10 }),
     )
-    expect(res.content[0].text).toContain('"iid": "5"')
+    expect(bodyText(res)).toContain('"iid": "5"')
   })
 })
 
@@ -60,7 +61,7 @@ describe('lumen_issue_get', () => {
     })
     const res = await tool('lumen_issue_get').handler({ project: 'g/p', iid: '5' })
     expect(c.gql).toHaveBeenCalledWith(expect.stringContaining('issue('), { p: 'g/p', iid: '5' })
-    expect(res.content[0].text).toContain('"description": "desc"')
+    expect(bodyText(res)).toContain('"description": "desc"')
   })
 })
 
@@ -91,14 +92,14 @@ describe('lumen_issue_create', () => {
         }),
       }),
     )
-    expect(res.content[0].text).toContain('"iid": "9"')
+    expect(bodyText(res)).toContain('"iid": "9"')
   })
 
   it('returns an error result when the mutation reports errors', async () => {
     c.gql.mockResolvedValue({ createIssue: { issue: null, errors: ['Title is required'] } })
     const res = await tool('lumen_issue_create').handler({ project: 'g/p', title: '' })
     expect(res.isError).toBe(true)
-    expect(res.content[0].text).toContain('Title is required')
+    expect(bodyText(res)).toContain('Title is required')
   })
 })
 
@@ -150,7 +151,7 @@ describe('lumen_issue_comment', () => {
     expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('createNote'), {
       input: { noteableId: 'gid://gitlab/Issue/100', body: 'hi' },
     })
-    expect(res.content[0].text).toContain('Comment added')
+    expect(bodyText(res)).toContain('Comment added')
   })
 
   it('returns an error result when the issue is not found', async () => {

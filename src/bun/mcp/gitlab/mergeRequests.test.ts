@@ -5,6 +5,7 @@ vi.mock('./client', () => c)
 
 import { mrTools } from './mergeRequests'
 const tool = (name: string) => mrTools.find((t) => t.name === name)!
+const bodyText = (r: unknown) => (r as { content: Array<{ text: string }> }).content[0].text
 
 beforeEach(() => {
   c.gql.mockReset()
@@ -30,7 +31,7 @@ describe('lumen_mrs_list', () => {
       expect.stringContaining('mergeRequests('),
       expect.objectContaining({ p: 'g/p', state: 'opened', authorUsername: 'ana' }),
     )
-    expect(res.content[0].text).toContain('"iid": "3"')
+    expect(bodyText(res)).toContain('"iid": "3"')
   })
 })
 
@@ -52,7 +53,7 @@ describe('lumen_mr_get', () => {
       p: 'g/p',
       iid: '3',
     })
-    expect(res.content[0].text).toContain('"approved": false')
+    expect(bodyText(res)).toContain('"approved": false')
   })
 })
 
@@ -65,7 +66,7 @@ describe('lumen_mr_comment', () => {
     expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('createNote'), {
       input: { noteableId: 'gid://gitlab/MergeRequest/50', body: 'lgtm' },
     })
-    expect(res.content[0].text).toContain('Comment added')
+    expect(bodyText(res)).toContain('Comment added')
   })
 
   it('returns an error result when the MR is not found', async () => {
@@ -87,7 +88,7 @@ describe('lumen_mr_review', () => {
       'POST',
       '/v4/projects/group%2Fproj/merge_requests/3/approve',
     )
-    expect(res.content[0].text).toContain('approved')
+    expect(bodyText(res)).toContain('approved')
   })
   it('unapprove hits the unapprove endpoint', async () => {
     c.rest.mockResolvedValue(undefined)

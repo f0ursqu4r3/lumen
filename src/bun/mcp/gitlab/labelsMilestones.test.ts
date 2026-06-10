@@ -5,6 +5,7 @@ vi.mock('./client', () => c)
 
 import { labelTools } from './labelsMilestones'
 const tool = (name: string) => labelTools.find((t) => t.name === name)!
+const bodyText = (r: unknown) => (r as { content: Array<{ text: string }> }).content[0].text
 
 beforeEach(() => c.gql.mockReset())
 
@@ -18,7 +19,7 @@ describe('lumen_labels_list', () => {
       expect.stringContaining('includeAncestorGroups:true'),
       expect.objectContaining({ p: 'g/p' }),
     )
-    expect(res.content[0].text).toContain('"title": "bug"')
+    expect(bodyText(res)).toContain('"title": "bug"')
   })
 })
 
@@ -34,6 +35,6 @@ describe('lumen_milestones_list', () => {
       expect.stringContaining('milestones('),
       expect.objectContaining({ p: 'g/p', state: 'active' }),
     )
-    expect(res.content[0].text).toContain('"title": "v1"')
+    expect(bodyText(res)).toContain('"title": "v1"')
   })
 })

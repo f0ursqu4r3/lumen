@@ -5,6 +5,7 @@ vi.mock('./client', () => c)
 
 import { userTools } from './usersSearch'
 const tool = (name: string) => userTools.find((t) => t.name === name)!
+const bodyText = (r: unknown) => (r as { content: Array<{ text: string }> }).content[0].text
 
 beforeEach(() => c.gql.mockReset())
 
@@ -13,7 +14,7 @@ describe('lumen_me', () => {
     c.gql.mockResolvedValue({ currentUser: { username: 'ana', name: 'Ana', publicEmail: 'a@x' } })
     const res = await tool('lumen_me').handler({})
     expect(c.gql).toHaveBeenCalledWith(expect.stringContaining('currentUser'))
-    expect(res.content[0].text).toContain('"username": "ana"')
+    expect(bodyText(res)).toContain('"username": "ana"')
   })
 })
 
@@ -27,7 +28,7 @@ describe('lumen_members_list', () => {
       expect.stringContaining('projectMembers('),
       expect.objectContaining({ p: 'g/p', search: 'an' }),
     )
-    expect(res.content[0].text).toContain('"username": "ana"')
+    expect(bodyText(res)).toContain('"username": "ana"')
   })
 })
 
@@ -44,7 +45,7 @@ describe('lumen_search', () => {
       p: 'g/p',
       q: 'bug',
     })
-    const out = JSON.parse(res.content[0].text)
+    const out = JSON.parse(bodyText(res))
     expect(out.issues).toHaveLength(1)
     expect(out.mergeRequests).toHaveLength(1)
   })
