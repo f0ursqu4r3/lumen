@@ -24,8 +24,8 @@ const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
 
 <template>
   <li
-    class="animate-row-in overflow-hidden rounded-xl border border-border bg-card transition-shadow"
-    :class="watched ? 'ring-1 ring-primary/20' : ''"
+    class="animate-row-in transition-colors"
+    :class="watched ? 'bg-primary/5' : ''"
     :style="{ animationDelay: rowDelay(index) }"
   >
     <div class="flex items-center gap-2 pr-2">
@@ -35,7 +35,7 @@ const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
         :is="pipeline.stages.length ? 'button' : 'div'"
         :type="pipeline.stages.length ? 'button' : undefined"
         :data-testid="`pipeline-row-${pipeline.iid}`"
-        class="flex min-w-0 flex-1 items-center gap-3 rounded-l-xl py-2.5 pr-2 pl-3 text-left outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+        class="flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-2 pl-3 text-left outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
         :class="pipeline.stages.length ? 'cursor-pointer' : 'cursor-default'"
         :aria-expanded="pipeline.stages.length ? open : undefined"
         @click="pipeline.stages.length && $emit('toggle-open')"

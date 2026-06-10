@@ -74,7 +74,10 @@ async function refresh() {
       No merge requests match these filters.
     </p>
 
-    <ul v-else class="mt-6 divide-y divide-border/60">
+    <ul
+      v-else
+      class="mt-6 divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+    >
       <li v-for="mr in mergeRequests" :key="mr.iid">
         <MergeRequestRow :mr="mr" :full-path="fullPath" />
       </li>

@@ -87,9 +87,12 @@ function openPipeline(p: Pipeline) {
 
     <ErrorNotice v-if="error" :error="error" />
 
-    <!-- Loading skeletons: collapsed-row height. -->
-    <div v-else-if="isLoading" class="space-y-1.5">
-      <Skeleton v-for="i in 6" :key="i" class="h-12 w-full rounded-xl" />
+    <!-- Loading skeletons: collapsed-row height, in the shared list card. -->
+    <div
+      v-else-if="isLoading"
+      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+    >
+      <Skeleton v-for="i in 6" :key="i" class="h-12 w-full rounded-none" />
     </div>
 
     <!-- Empty state: the instrument at standby. A steady (idle, not breathing)
@@ -113,10 +116,13 @@ function openPipeline(p: Pipeline) {
       </p>
     </div>
 
-    <!-- Pipeline list: compact rows, each expanding to the full labeled stepper.
-         A watched run wears a faint primary ring — a quiet "eye on this" signal,
-         no stripe. -->
-    <ul v-else class="space-y-1.5">
+    <!-- Pipeline list: compact rows in the shared list card, each expanding to
+         the full labeled stepper. A watched run wears a faint primary wash — a
+         quiet "eye on this" signal, no stripe. -->
+    <ul
+      v-else
+      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+    >
       <PipelineRow
         v-for="(p, i) in pipelines"
         :key="p.id"

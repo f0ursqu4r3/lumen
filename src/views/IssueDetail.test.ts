@@ -258,7 +258,9 @@ describe('IssueDetail (buffered)', () => {
   it('offsets the sticky details rail below the window chrome when windowed', async () => {
     const w = mountDetail({ windowed: true, stickyTop: 44 })
     await flushPromises()
-    expect(w.get('article.issue').attributes('style')).toContain('--rail-top: calc(44px + 3.5rem)')
+    // stickyTop already carries the fixed pager's full height (its viewport
+    // bottom), so the rail pins directly to it with no extra offset.
+    expect(w.get('article.issue').attributes('style')).toContain('--rail-top: calc(44px)')
   })
 
   it('leaves the details rail at its default inset outside a window', async () => {

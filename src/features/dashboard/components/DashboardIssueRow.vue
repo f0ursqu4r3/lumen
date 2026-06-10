@@ -11,7 +11,7 @@ const parsed = computed(() => parseIssuePath(props.issue.webPath))
 const updated = computed(() => timeAgo(props.issue.updatedAt))
 
 const rowClass =
-  'flex items-center gap-3 rounded-md px-3 py-2.5 outline-none hover:bg-accent/50 focus-visible:ring-1 focus-visible:ring-ring/50'
+  'flex items-center gap-3 px-4 py-2.5 outline-none transition-colors duration-150 hover:bg-accent/70 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50'
 </script>
 
 <template>

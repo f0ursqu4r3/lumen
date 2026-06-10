@@ -12,7 +12,7 @@ const updated = computed(() => timeAgo(props.mr.updatedAt))
 <template>
   <RouterLink
     :to="{ name: 'merge-request', params: { fullPath: mr.project.fullPath, iid: mr.iid } }"
-    class="flex items-center gap-3 rounded-md px-3 py-2.5 outline-none hover:bg-accent/50 focus-visible:ring-1 focus-visible:ring-ring/50"
+    class="flex items-center gap-3 px-4 py-2.5 outline-none transition-colors duration-150 hover:bg-accent/70 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
   >
     <GitMerge class="size-4 shrink-0 text-muted-foreground" />
     <div class="min-w-0 flex-1">

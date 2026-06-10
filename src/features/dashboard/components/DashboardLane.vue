@@ -22,15 +22,27 @@ defineProps<{
       </span>
     </header>
 
-    <div v-if="isLoading" data-testid="lane-skeleton" class="space-y-1.5">
-      <div v-for="n in 3" :key="n" class="h-11 animate-pulse rounded-md bg-muted/50" />
+    <div
+      v-if="isLoading"
+      data-testid="lane-skeleton"
+      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+    >
+      <div v-for="n in 3" :key="n" class="h-12 animate-pulse bg-muted/40" />
     </div>
 
     <ErrorNotice v-else-if="error" :error="error" />
 
-    <p v-else-if="isEmpty" class="px-3 py-6 text-sm text-muted-foreground">{{ emptyMessage }}</p>
+    <p
+      v-else-if="isEmpty"
+      class="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground"
+    >
+      {{ emptyMessage }}
+    </p>
 
-    <ul v-else class="divide-y divide-border/40">
+    <ul
+      v-else
+      class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+    >
       <slot />
     </ul>
   </section>
