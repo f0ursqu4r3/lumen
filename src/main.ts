@@ -4,7 +4,7 @@ import App from './App.vue'
 import { router } from './router'
 import { rpc } from '@/shared/lib/rpc'
 import { createPersistedQueryClient } from '@/shared/lib/persist'
-import { installAuthWatch } from '@/shared/composables/useSession'
+import { installServerHealth } from '@/shared/composables/useSession'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
@@ -24,10 +24,10 @@ async function boot() {
   // no flash of the default route. The main window gets route === null.
   if (route) window.location.hash = route
   const queryClient = createPersistedQueryClient(url)
-  // App-lifetime watch: any auth failure from a data query/mutation flips
-  // sessionState.expired, which the mounted overlay turns into a re-connect
-  // prompt. Never torn down — lives as long as the webview.
-  installAuthWatch(queryClient)
+  // App-lifetime: mirror host-owned server health into sessionState (banner +
+  // overlay) and refetch this window's queries when the server recovers. Never
+  // torn down — lives as long as the webview.
+  installServerHealth(queryClient)
   createApp(App).use(router).use(VueQueryPlugin, { queryClient }).mount('#app')
 }
 void boot().catch((err) => {
