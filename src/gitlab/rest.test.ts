@@ -29,6 +29,26 @@ describe('rest over RPC', () => {
     await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'auth' })
   })
 
+  it('maps a 403 with a JSON body to auth (real token rejection)', async () => {
+    gitlabRest.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden',
+      body: JSON.stringify({ message: '403 Forbidden - insufficient scope' }),
+    })
+    await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'auth' })
+  })
+
+  it('maps a 403 with an HTML body to unavailable (edge/LB block, e.g. off-VPN)', async () => {
+    gitlabRest.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden',
+      body: '<html>\n<head><title>403 Forbidden</title></head>\n<body>...</body>\n</html>',
+    })
+    await expect(restGet('/projects/7')).rejects.toMatchObject({ kind: 'unavailable' })
+  })
+
   it('maps 5xx to an unavailable error', async () => {
     gitlabRest.mockResolvedValue({
       ok: false,

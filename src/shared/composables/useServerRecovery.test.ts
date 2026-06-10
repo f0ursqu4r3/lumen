@@ -27,11 +27,19 @@ describe('probeServer', () => {
     expect(await probeServer()).toBe('ok')
   })
 
-  it('returns "auth" on 401/403', async () => {
+  it('returns "auth" on 401', async () => {
     gitlabGraphql.mockResolvedValue({ status: 401 })
     expect(await probeServer()).toBe('auth')
-    gitlabGraphql.mockResolvedValue({ status: 403 })
+  })
+
+  it('returns "auth" on a 403 that carries a GraphQL error body (real token rejection)', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 403, errors: [{ message: 'insufficient_scope' }] })
     expect(await probeServer()).toBe('auth')
+  })
+
+  it('returns "down" on a bodyless 403 (edge/LB block, e.g. off-VPN — not the token)', async () => {
+    gitlabGraphql.mockResolvedValue({ status: 403 })
+    expect(await probeServer()).toBe('down')
   })
 
   it('returns "down" on 5xx', async () => {

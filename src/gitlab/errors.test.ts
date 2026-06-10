@@ -9,11 +9,18 @@ const clientError = (status: number, errors: { message: string }[] = []) =>
   )
 
 describe('normalizeError', () => {
-  it('maps 401/403 to an auth error with a .env hint', () => {
+  it('maps 401 to an auth error with a .env hint', () => {
     const e = normalizeError(clientError(401))
     expect(e.kind).toBe('auth')
     expect(e.message).toMatch(/GITLAB_TOKEN/)
-    expect(normalizeError(clientError(403)).kind).toBe('auth')
+  })
+
+  it('maps a 403 that carries a GraphQL error body to auth (real token rejection)', () => {
+    expect(normalizeError(clientError(403, [{ message: 'insufficient_scope' }])).kind).toBe('auth')
+  })
+
+  it('maps a bodyless 403 to unavailable (edge/LB block, e.g. off-VPN — not the token)', () => {
+    expect(normalizeError(clientError(403)).kind).toBe('unavailable')
   })
 
   it('surfaces the first GraphQL error message', () => {

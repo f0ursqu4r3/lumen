@@ -56,7 +56,11 @@ export type ProbeOutcome = 'ok' | 'auth' | 'down'
 export async function probeServer(): Promise<ProbeOutcome> {
   try {
     const res = await rpc.gitlabGraphql({ query: PROBE_QUERY })
-    if (res.status === 401 || res.status === 403) return 'auth'
+    // 401 is always the token. A 403 is only the token when GitLab itself
+    // answers with a GraphQL error body; a bodyless 403 is an edge/LB block
+    // (off-VPN, WAF) — the server is unreachable, not the token — so it falls
+    // through to 'down'.
+    if (res.status === 401 || (res.status === 403 && res.errors?.length)) return 'auth'
     // Any 200 proves the token works and the server is reachable. A real token
     // problem comes back as 401/403 (above), not a 200 with body errors.
     if (res.status === 200) return 'ok'

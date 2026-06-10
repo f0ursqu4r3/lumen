@@ -6,14 +6,28 @@ import type { GitLabError } from './errors'
 // `${gitlabUrl}/api/v4/...` URL and attaches the token (see src/bun/gitlab.ts).
 // Call sites stay token-free. We keep the same restGet/restPost surface and
 // error mapping the previous version had.
-function httpError(status: number, statusText: string): GitLabError {
-  if (status === 401 || status === 403) {
+function isJsonBody(body: string): boolean {
+  if (!body) return false
+  try {
+    JSON.parse(body)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function httpError(status: number, statusText: string, body: string): GitLabError {
+  // 401 is always the token. A 403 is ambiguous: GitLab answers with a JSON
+  // body, but an edge/LB block (off-VPN, WAF) is an HTML 403 — the server is
+  // unreachable, not the token. Only treat a 403 as auth when its body is JSON.
+  if (status === 401 || (status === 403 && isJsonBody(body))) {
     return {
       kind: 'auth',
       message:
         'Authentication failed — open Settings and check the GitLab URL and token (scope: api).',
     }
   }
+  if (status === 403) return { kind: 'unavailable', message: 'GitLab is unavailable.' }
   // A 5xx means the server is unreachable or erroring, not the token. Mirrors
   // normalizeError in src/gitlab/errors.ts.
   if (status >= 500) {
@@ -24,7 +38,7 @@ function httpError(status: number, statusText: string): GitLabError {
 
 async function request<T>(method: 'GET' | 'POST', path: string): Promise<T> {
   const res = await rpc.gitlabRest({ method, path: `/v4${path}` })
-  if (!res.ok) throw httpError(res.status, res.statusText)
+  if (!res.ok) throw httpError(res.status, res.statusText, res.body)
   return (res.body ? JSON.parse(res.body) : null) as T
 }
 
