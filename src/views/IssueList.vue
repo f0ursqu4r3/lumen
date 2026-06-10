@@ -246,7 +246,7 @@ function setComposerOpen(value: boolean) {
 </script>
 
 <template>
-  <ViewContainer :width="view === 'board' ? 'wide' : 'default'">
+  <ViewContainer width="bare">
     <!-- The primary action lives in the shell's top bar. `defer` so the target
          (rendered by the sibling AppTopBar in the same pass) is resolved after
          this render flush rather than synchronously on mount. -->
@@ -256,12 +256,14 @@ function setComposerOpen(value: boolean) {
       </Button>
     </Teleport>
 
-    <!-- When the bulk bar is up (it's a fixed bottom overlay), pad the bottom so
-         the last issue can scroll clear of it instead of hiding behind it. -->
-    <section class="space-y-6" :class="{ 'pb-24': selection.count.value > 0 }">
-      <!-- Controls cluster: the toolbar and its active-filter readout sit close
-           together; the section's larger gap separates them from the content. -->
-      <div class="space-y-2.5">
+    <!-- `bare` container lets us own the width per zone: the toolbar stays at a
+         fixed compact width while the board content spreads. The padding the
+         container used to provide moves here; pb grows when the bulk bar is up so
+         the last issue can scroll clear of the fixed overlay. -->
+    <section class="space-y-6 px-6 pt-8" :class="selection.count.value > 0 ? 'pb-24' : 'pb-8'">
+      <!-- Controls cluster — always compact (max-w-5xl), independent of the
+           content width so the toolbar never widens when the board view does. -->
+      <div class="mx-auto w-full max-w-5xl space-y-2.5">
         <IssueListToolbar
           v-model:state="state"
           v-model:search="search"
@@ -314,96 +316,100 @@ function setComposerOpen(value: boolean) {
         />
       </div>
 
-      <ErrorNotice v-if="error" :error="error" />
+      <!-- Content width follows the view: the board spreads wide, the list and
+           the transient states stay at the compact reading width. -->
+      <div class="mx-auto w-full" :class="view === 'board' ? 'max-w-7xl' : 'max-w-5xl'">
+        <ErrorNotice v-if="error" :error="error" />
 
-      <div
-        v-else-if="isLoading"
-        class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
-      >
-        <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2">
-          <Skeleton class="size-2 rounded-full" />
-          <Skeleton class="size-5 rounded-md" />
-          <Skeleton class="h-3.5 w-6" />
-          <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
-          <Skeleton class="h-5 w-16 rounded-full" />
+        <div
+          v-else-if="isLoading"
+          class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
+        >
+          <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2">
+            <Skeleton class="size-2 rounded-full" />
+            <Skeleton class="size-5 rounded-md" />
+            <Skeleton class="h-3.5 w-6" />
+            <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
+            <Skeleton class="h-5 w-16 rounded-full" />
+          </div>
         </div>
-      </div>
 
-      <template v-else>
-        <template v-if="count">
-          <IssueListGroups
-            v-if="view === 'list'"
-            :groups="listGroups"
-            :group-key="groupKey"
-            :full-path="fullPath"
-            :highlight-iid="highlightIid"
-            :vt-name-for="vtNameFor"
-            @filter="applyFacet"
-            :active-key="activeKey"
-            :bar-offset="barOffset"
-            :pointer="pointer"
-            :just-reordered="justReordered"
-            :dimension="groupKey"
-            :start="start"
-          />
+        <template v-else>
+          <template v-if="count">
+            <IssueListGroups
+              v-if="view === 'list'"
+              :groups="listGroups"
+              :group-key="groupKey"
+              :full-path="fullPath"
+              :highlight-iid="highlightIid"
+              :vt-name-for="vtNameFor"
+              @filter="applyFacet"
+              :active-key="activeKey"
+              :bar-offset="barOffset"
+              :pointer="pointer"
+              :just-reordered="justReordered"
+              :dimension="groupKey"
+              :start="start"
+            />
 
-          <IssueBoard
+            <IssueBoard
+              v-else
+              :board-groups="boardGroups"
+              :full-path="fullPath"
+              :highlight-iid="highlightIid"
+              :select-mode="selection.mode.value"
+              :dragging-iid="draggingIid"
+              :just-dropped="justDropped"
+              :dragging="dragging"
+              :vt-name-for="vtNameFor"
+              :is-drop-target="isDropTarget"
+              :ghost-index="ghostIndex"
+              @filter="applyFacet"
+              @drag-start="onDragStart"
+              @drag-end="clearDrag"
+              @drop="onDrop"
+              @drag-over="dragOverKey = $event"
+              :active-key="activeKey"
+              :bar-offset="barOffset"
+              :pointer="pointer"
+              :just-reordered="justReordered"
+              :dimension="boardScope"
+              :start="start"
+            />
+
+            <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
+            <div v-if="hasMore" ref="sentinel" class="flex justify-center pt-1">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.98] disabled:opacity-60"
+                :disabled="isFetchingNextPage"
+                @click="loadMore"
+              >
+                <LoaderCircle v-if="isFetchingNextPage" class="size-4 animate-spin text-primary" />
+                {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
+              </button>
+            </div>
+          </template>
+
+          <!-- Empty state -->
+          <div
             v-else
-            :board-groups="boardGroups"
-            :full-path="fullPath"
-            :highlight-iid="highlightIid"
-            :select-mode="selection.mode.value"
-            :dragging-iid="draggingIid"
-            :just-dropped="justDropped"
-            :dragging="dragging"
-            :vt-name-for="vtNameFor"
-            :is-drop-target="isDropTarget"
-            :ghost-index="ghostIndex"
-            @filter="applyFacet"
-            @drag-start="onDragStart"
-            @drag-end="clearDrag"
-            @drop="onDrop"
-            @drag-over="dragOverKey = $event"
-            :active-key="activeKey"
-            :bar-offset="barOffset"
-            :pointer="pointer"
-            :just-reordered="justReordered"
-            :dimension="boardScope"
-            :start="start"
-          />
-
-          <!-- Load more: auto-triggers via the sentinel, button is the fallback. -->
-          <div v-if="hasMore" ref="sentinel" class="flex justify-center pt-1">
-            <button
-              type="button"
-              class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.98] disabled:opacity-60"
-              :disabled="isFetchingNextPage"
-              @click="loadMore"
-            >
-              <LoaderCircle v-if="isFetchingNextPage" class="size-4 animate-spin text-primary" />
-              {{ isFetchingNextPage ? 'Loading…' : 'Load more' }}
-            </button>
+            class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
+          >
+            <div class="grid size-11 place-items-center rounded-full bg-muted">
+              <Search class="size-5 text-muted-foreground" />
+            </div>
+            <p class="text-sm font-medium text-foreground">No issues.</p>
+            <p class="max-w-xs text-xs text-muted-foreground">
+              Nothing matches the current filters — adjust them above, or create one.
+            </p>
+            <Button data-testid="empty-new-issue" class="mt-1" @click="composerOpen = true">
+              <Plus />
+              Create issue
+            </Button>
           </div>
         </template>
-
-        <!-- Empty state -->
-        <div
-          v-else
-          class="flex animate-row-in flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-16 text-center"
-        >
-          <div class="grid size-11 place-items-center rounded-full bg-muted">
-            <Search class="size-5 text-muted-foreground" />
-          </div>
-          <p class="text-sm font-medium text-foreground">No issues.</p>
-          <p class="max-w-xs text-xs text-muted-foreground">
-            Nothing matches the current filters — adjust them above, or create one.
-          </p>
-          <Button data-testid="empty-new-issue" class="mt-1" @click="composerOpen = true">
-            <Plus />
-            Create issue
-          </Button>
-        </div>
-      </template>
+      </div>
 
       <IssueDrawer
         :open="!!openIid"
