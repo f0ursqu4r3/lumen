@@ -19,6 +19,7 @@ const ID_Q = `query($p:ID!,$iid:String!){project(fullPath:$p){issue(iid:$iid){id
 
 const CREATE_M = `mutation($input:CreateIssueInput!){createIssue(input:$input){issue{iid webUrl} errors}}`
 const UPDATE_M = `mutation($input:UpdateIssueInput!){updateIssue(input:$input){issue{iid webUrl} errors}}`
+const SET_ASSIGNEES_M = `mutation($input:IssueSetAssigneesInput!){issueSetAssignees(input:$input){issue{iid} errors}}`
 const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{id} errors}}`
 
 export const issueTools: McpTool[] = [
@@ -121,11 +122,6 @@ export const issueTools: McpTool[] = [
       if (a.state) input.stateEvent = a.state === 'close' ? 'CLOSE' : 'REOPEN'
       if (a.labels)
         input.labelIds = await resolveLabelIds(a.project as string, a.labels as string[])
-      if (a.assigneeUsernames)
-        input.assigneeIds = await resolveUserIds(
-          a.project as string,
-          a.assigneeUsernames as string[],
-        )
       if (a.milestoneTitle)
         input.milestoneId = await resolveMilestoneId(
           a.project as string,
@@ -135,6 +131,15 @@ export const issueTools: McpTool[] = [
         updateIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }
       }>(UPDATE_M, { input })
       if (data.updateIssue.errors.length) return errorResult(data.updateIssue.errors.join('; '))
+      // Assignees are not part of UpdateIssueInput — they go through the separate
+      // issueSetAssignees mutation, which takes usernames directly (no id resolution).
+      if (a.assigneeUsernames) {
+        const asg = await gql<{ issueSetAssignees: { errors: string[] } }>(SET_ASSIGNEES_M, {
+          input: { projectPath: a.project, iid: a.iid, assigneeUsernames: a.assigneeUsernames },
+        })
+        if (asg.issueSetAssignees.errors.length)
+          return errorResult(asg.issueSetAssignees.errors.join('; '))
+      }
       return text({ updated: data.updateIssue.issue })
     },
   },

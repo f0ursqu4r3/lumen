@@ -124,6 +124,21 @@ describe('lumen_issue_update', () => {
       }),
     )
   })
+
+  it('sets assignees via the separate issueSetAssignees mutation with usernames directly', async () => {
+    c.gql
+      .mockResolvedValueOnce({ updateIssue: { issue: { iid: '5', webUrl: 'u' }, errors: [] } })
+      .mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
+    await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      assigneeUsernames: ['ana'],
+    })
+    expect(c.resolveUserIds).not.toHaveBeenCalled()
+    expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('issueSetAssignees'), {
+      input: { projectPath: 'g/p', iid: '5', assigneeUsernames: ['ana'] },
+    })
+  })
 })
 
 describe('lumen_issue_comment', () => {
@@ -136,5 +151,15 @@ describe('lumen_issue_comment', () => {
       input: { noteableId: 'gid://gitlab/Issue/100', body: 'hi' },
     })
     expect(res.content[0].text).toContain('Comment added')
+  })
+
+  it('returns an error result when the issue is not found', async () => {
+    c.gql.mockResolvedValue({ project: { issue: null } })
+    const res = await tool('lumen_issue_comment').handler({
+      project: 'g/p',
+      iid: '404',
+      body: 'hi',
+    })
+    expect(res.isError).toBe(true)
   })
 })
