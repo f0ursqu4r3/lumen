@@ -219,11 +219,12 @@ if (!props.embedded) {
         <div
           v-if="windowed && !titleVisible"
           data-testid="condensed-title"
-          class="fixed inset-x-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm"
+          class="fixed inset-x-0 z-20 border-b border-border/60 bg-background/95 backdrop-blur-sm"
           :style="{ top: `${stickyTop ?? 0}px` }"
         >
           <p class="mx-auto max-w-5xl truncate px-4 py-2 text-sm font-medium text-foreground/90">
-            #{{ iid }} · {{ draft.title }}
+            <span class="font-mono tabular-nums text-muted-foreground">#{{ iid }}</span>
+            · {{ draft.title }}
           </p>
         </div>
       </Transition>
@@ -356,7 +357,7 @@ if (!props.embedded) {
       <Transition name="savebar">
         <div
           v-if="dirty"
-          class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
+          class="savebar sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-border/60 bg-background/95 px-4 py-3 shadow-[0_-12px_32px_-14px_oklch(0_0_0/0.55)] backdrop-blur"
         >
           <Button
             type="button"

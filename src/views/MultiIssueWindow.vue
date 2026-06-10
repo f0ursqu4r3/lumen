@@ -64,8 +64,10 @@ onKeyStroke('ArrowRight', (e) => {
   if (!typingInField(e)) next()
 })
 
+// Pager buttons are segments in one pill — the same idiom as the list toolbar's
+// view toggle: borderless tiles inside a bordered, muted track.
 const navBtn =
-  'grid size-7 place-items-center rounded-md border border-border text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground'
+  'grid size-7 place-items-center rounded-[7px] text-muted-foreground transition-colors duration-150 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-40 disabled:hover:text-muted-foreground'
 </script>
 
 <template>
@@ -79,7 +81,7 @@ const navBtn =
          content column so the controls align with the issue content below. -->
     <header
       ref="headerEl"
-      class="sticky top-0 z-10 mx-[calc(50%-50vw)] -mt-6 mb-2 border-b border-border bg-background/95 py-2 backdrop-blur-sm"
+      class="sticky top-0 z-10 mx-[calc(50%-50vw)] -mt-6 mb-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur-sm"
     >
       <div class="relative mx-auto flex min-h-7 max-w-5xl items-center justify-end gap-2 px-4">
         <span
@@ -88,26 +90,32 @@ const navBtn =
         >
           {{ index + 1 }} of {{ total }}
         </span>
-        <button
-          type="button"
-          data-testid="pager-prev"
-          aria-label="Previous issue"
-          :class="navBtn"
-          :disabled="index === 0"
-          @click="prev"
+        <div
+          role="group"
+          aria-label="Page through issues"
+          class="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
         >
-          <ChevronLeft class="size-4" />
-        </button>
-        <button
-          type="button"
-          data-testid="pager-next"
-          aria-label="Next issue"
-          :class="navBtn"
-          :disabled="index >= total - 1"
-          @click="next"
-        >
-          <ChevronRight class="size-4" />
-        </button>
+          <button
+            type="button"
+            data-testid="pager-prev"
+            aria-label="Previous issue"
+            :class="navBtn"
+            :disabled="index === 0"
+            @click="prev"
+          >
+            <ChevronLeft class="size-4" />
+          </button>
+          <button
+            type="button"
+            data-testid="pager-next"
+            aria-label="Next issue"
+            :class="navBtn"
+            :disabled="index >= total - 1"
+            @click="next"
+          >
+            <ChevronRight class="size-4" />
+          </button>
+        </div>
       </div>
     </header>
 

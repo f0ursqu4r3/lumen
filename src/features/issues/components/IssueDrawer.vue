@@ -15,14 +15,16 @@ const emit = defineEmits<{
 <template>
   <Sheet :open="open" @update:open="emit('update:open', $event)">
     <SheetContent side="right" class="w-full gap-0 p-0 sm:max-w-2xl">
-      <SheetHeader class="flex-row items-center gap-2 border-b px-4 py-3">
-        <SheetTitle class="text-sm">#{{ iid ?? '' }}</SheetTitle>
+      <SheetHeader class="flex-row items-center gap-2 border-b border-border/60 px-4 py-3">
+        <SheetTitle class="font-mono text-sm font-medium tabular-nums text-foreground">
+          #{{ iid ?? '' }}
+        </SheetTitle>
         <SheetDescription class="sr-only">Issue details</SheetDescription>
         <!-- mr-6 keeps the expand button clear of SheetContent's absolute close (X) -->
         <Button
           variant="ghost"
           size="icon-sm"
-          class="ml-auto mr-6"
+          class="mr-6 ml-auto text-muted-foreground"
           aria-label="Expand to full page"
           @click="emit('expand')"
         >
