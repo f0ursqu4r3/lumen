@@ -75,15 +75,14 @@ const navBtn =
     No issues.
   </div>
   <div v-else>
-    <!-- Full-bleed bar: mx-[calc(50%-50vw)] breaks out of the app shell's
-         centered max-width to span the whole window at any width; -mt-6 pulls it
-         up under the title bar. The inner row re-creates the centered, padded
-         content column so the controls align with the issue content below. -->
+    <!-- Pager bar: rides inside the rounded card panel (App.vue frames windowed
+         routes), hugging the panel top. -mx-4/-mt-6 cancel the content column's
+         padding so it spans the column and tucks under the native title bar. -->
     <header
       ref="headerEl"
-      class="sticky top-0 z-10 mx-[calc(50%-50vw)] -mt-6 mb-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur-sm"
+      class="sticky top-1.5 z-10 -mx-4 -mt-6 mb-2 border-b border-border/60 bg-card/95 px-4 py-2 backdrop-blur-sm"
     >
-      <div class="relative mx-auto flex min-h-7 max-w-5xl items-center justify-end gap-2 px-4">
+      <div class="relative flex min-h-7 items-center justify-end gap-2">
         <span
           data-testid="pager-position"
           class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-sm font-medium tabular-nums text-foreground"

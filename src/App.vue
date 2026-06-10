@@ -21,6 +21,9 @@ onUnmounted(() => stop?.())
 
 const route = useRoute()
 const chrome = computed(() => shouldShowChrome(route))
+// Popped-out windows (?window=1) carry no rail, but echo the shell's signature:
+// a rounded card panel floating on the bare background.
+const windowed = computed(() => route.query.window === '1')
 </script>
 
 <template>
@@ -31,6 +34,17 @@ const chrome = computed(() => shouldShowChrome(route))
   <AppShell v-if="chrome">
     <RouterView :key="$route.path" />
   </AppShell>
+  <!-- Popped-out window: no rail, but the content rides in the same rounded card
+       panel the shell uses, floating on a thin background frame. -->
+  <div v-else-if="windowed" class="min-h-screen bg-background p-1.5 text-foreground">
+    <div
+      class="min-h-[calc(100vh-0.75rem)] overflow-x-clip rounded-xl border border-border/60 bg-card shadow-sm"
+    >
+      <main class="mx-auto max-w-5xl px-4 py-6">
+        <RouterView :key="$route.path" />
+      </main>
+    </div>
+  </div>
   <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
     <main class="mx-auto max-w-5xl px-4 py-6">
       <RouterView :key="$route.path" />
