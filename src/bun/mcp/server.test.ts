@@ -8,7 +8,9 @@ vi.mock('../config', () => ({ loadConfig, saveMcpConfig }))
 
 import { startMcp, stopMcp, startMcpIfEnabled, isRunning } from './server'
 
-const fakeServe = vi.fn(() => ({ stop: vi.fn() }))
+const fakeServe = vi.fn((_opts: { hostname: string; port: number; fetch: unknown }) => ({
+  stop: vi.fn(),
+}))
 
 beforeEach(() => {
   loadConfig.mockReset()
