@@ -45,6 +45,11 @@ export interface NotifyArgs {
   subtitle?: string
   silent?: boolean
 }
+export interface ServerHealth {
+  state: 'ok' | 'down' | 'expired'
+  secondsLeft: number
+  probing: boolean
+}
 
 export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
@@ -83,6 +88,8 @@ export interface LumenRequests {
   regenerateMcpToken: () => Promise<{ token: string }>
   revealMcpToken: () => Promise<{ token: string | null }>
   notifyCacheCleared: () => Promise<{ ok: true }>
+  getServerHealth: () => Promise<ServerHealth>
+  retryServerNow: () => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {

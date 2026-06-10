@@ -42,4 +42,6 @@ export const rpc: LumenRequests = {
   regenerateMcpToken: () => client().regenerateMcpToken(),
   revealMcpToken: () => client().revealMcpToken(),
   notifyCacheCleared: () => client().notifyCacheCleared(),
+  getServerHealth: () => client().getServerHealth(),
+  retryServerNow: () => client().retryServerNow(),
 }
