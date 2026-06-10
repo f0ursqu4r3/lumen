@@ -107,4 +107,29 @@ describe('gitlab feeds server-health', () => {
     await gitlabGraphql({ query: '{x}' })
     expect(observe).not.toHaveBeenCalled()
   })
+
+  it('observes "auth" on a REST 403 with a JSON body (real token rejection)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ message: '403 Forbidden' }), {
+            status: 403,
+            statusText: 'Forbidden',
+          }),
+        ),
+    )
+    await gitlabRest({ method: 'GET', path: '/v4/x' })
+    expect(observe).toHaveBeenCalledWith('auth')
+  })
+
+  it('observes "down" on a bodyless REST 403 (edge/LB block)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('', { status: 403, statusText: 'Forbidden' })),
+    )
+    await gitlabRest({ method: 'GET', path: '/v4/x' })
+    expect(observe).toHaveBeenCalledWith('down')
+  })
 })
