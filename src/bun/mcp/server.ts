@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { loadConfig, saveMcpConfig } from '../config'
 import { isAuthorized, generateToken } from './auth'
 import { registerTools } from './registry'
+import type { McpStatus } from '@/shared/lib/rpcContract'
 
 const SERVER_NAME = 'lumen'
 const SERVER_VERSION = '0.1.0'
@@ -72,13 +73,6 @@ export function startMcpIfEnabled(): { ok: true } | { ok: false; error: string }
   const { mcp } = loadConfig()
   if (!mcp?.enabled || !mcp.token) return null
   return startMcp(mcp.port ?? DEFAULT_MCP_PORT, mcp.token)
-}
-
-export interface McpStatus {
-  enabled: boolean
-  port: number
-  running: boolean
-  hasToken: boolean
 }
 
 /** Current MCP state for the Settings pane. Never includes the token itself. */

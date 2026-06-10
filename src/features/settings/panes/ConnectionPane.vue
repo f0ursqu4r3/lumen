@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { useQueryClient } from '@tanstack/vue-query'
 import { KeyRound, LoaderCircle, Server, Unplug, TriangleAlert } from '@lucide/vue'
 import { Input } from '@/shared/ui/input'
@@ -12,7 +11,6 @@ import { useConfirm } from '@/shared/composables/useConfirm'
 import { pushToast } from '@/shared/composables/useToast'
 import PaneHeader from './PaneHeader.vue'
 
-const router = useRouter()
 const queryClient = useQueryClient()
 const { confirm } = useConfirm()
 const { url, token, tokenPlaceholder, status, message, testing, canSubmit, save } =
@@ -23,6 +21,7 @@ async function saveConnection() {
     token.value = ''
     queryClient.clear()
     clearPersistedCache()
+    await rpc.notifyCacheCleared()
     pushToast({ title: 'Connection updated', tone: 'success' })
   }
 }
@@ -37,9 +36,6 @@ async function disconnect() {
   if (!ok) return
   try {
     await rpc.clearConfig()
-    queryClient.clear()
-    clearPersistedCache()
-    router.replace({ name: 'connect' })
   } catch (e) {
     pushToast({
       title: 'Could not disconnect',

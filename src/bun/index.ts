@@ -118,6 +118,12 @@ function buildRpc(initialRoute: string | null = null) {
         clearConfig: async () => {
           clearConfig()
           stopMcp() // the MCP server serves with the GitLab token; stop it on disconnect
+          // The disconnect originates in the settings window's JS context; bridge
+          // to the main window so it drops cached data and returns to Connect.
+          win.webview.executeJavascript(
+            "window.dispatchEvent(new CustomEvent('lumen:disconnected'))",
+          )
+          settingsWindow?.close()
           return { ok: true }
         },
         openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
@@ -136,6 +142,12 @@ function buildRpc(initialRoute: string | null = null) {
         setMcpEnabled: async (a) => setMcpEnabled(a),
         regenerateMcpToken: async () => regenerateMcpToken(),
         revealMcpToken: async () => revealMcpToken(),
+        notifyCacheCleared: async () => {
+          win.webview.executeJavascript(
+            "window.dispatchEvent(new CustomEvent('lumen:cache-cleared'))",
+          )
+          return { ok: true }
+        },
       },
       messages: {},
     },

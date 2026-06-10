@@ -82,6 +82,7 @@ export interface LumenRequests {
   }) => Promise<{ ok: true } | { ok: false; error: string }>
   regenerateMcpToken: () => Promise<{ token: string }>
   revealMcpToken: () => Promise<{ token: string | null }>
+  notifyCacheCleared: () => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {

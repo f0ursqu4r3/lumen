@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useQueryClient } from '@tanstack/vue-query'
 import ConfirmDialog from '@/shared/components/ConfirmDialog.vue'
 import ToastHost from '@/shared/components/ToastHost.vue'
 import SessionExpiredOverlay from '@/shared/components/SessionExpiredOverlay.vue'
@@ -9,8 +10,11 @@ import CommandPalette from '@/shared/components/CommandPalette.vue'
 import AppShell from '@/shared/components/shell/AppShell.vue'
 import IssueSavebarSlot from '@/features/issues/components/IssueSavebarSlot.vue'
 import { shouldShowChrome } from '@/shared/lib/chrome'
+import { clearPersistedCache } from '@/shared/lib/persist'
 
 const route = useRoute()
+const router = useRouter()
+const queryClient = useQueryClient()
 const chrome = computed(() => shouldShowChrome(route))
 // Popped-out windows (?window=1) carry no rail, but echo the shell's signature:
 // a rounded card panel floating on the bare background.
@@ -18,6 +22,27 @@ const windowed = computed(() => route.query.window === '1')
 // The multi-issue window owns its own header + scroll region (the pager stays
 // fixed while issues scroll beneath it); other windows scroll the whole panel.
 const multiWindow = computed(() => route.name === 'issues-window')
+// Windows that own their full surface (no centered max-width content wrapper):
+// the multi-issue pager and the two-pane settings shell.
+const fullBleedWindow = computed(() => multiWindow.value || route.name === 'settings')
+
+// Host-bridged events from the separate settings window (see src/bun/index.ts).
+function onDisconnected() {
+  queryClient.clear()
+  clearPersistedCache()
+  router.replace({ name: 'connect' })
+}
+function onCacheCleared() {
+  queryClient.clear()
+}
+onMounted(() => {
+  window.addEventListener('lumen:disconnected', onDisconnected)
+  window.addEventListener('lumen:cache-cleared', onCacheCleared)
+})
+onUnmounted(() => {
+  window.removeEventListener('lumen:disconnected', onDisconnected)
+  window.removeEventListener('lumen:cache-cleared', onCacheCleared)
+})
 </script>
 
 <template>
@@ -39,8 +64,9 @@ const multiWindow = computed(() => route.name === 'issues-window')
     <div
       class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
     >
-      <!-- The multi-issue window manages its own fixed pager + scroll region. -->
-      <RouterView v-if="multiWindow" :key="$route.path" />
+      <!-- The multi-issue window manages its own fixed pager + scroll region.
+           The settings shell is also full-bleed (two-pane, no max-width inset). -->
+      <RouterView v-if="fullBleedWindow" :key="$route.path" />
       <div v-else class="min-h-0 flex-1 overflow-y-auto overflow-x-clip">
         <main class="mx-auto max-w-5xl px-4 py-6">
           <RouterView :key="$route.path" />

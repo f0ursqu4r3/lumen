@@ -9,7 +9,7 @@ const active = computed(
 </script>
 
 <template>
-  <div class="flex h-screen bg-background text-foreground">
+  <div class="flex min-h-0 flex-1 text-foreground">
     <nav class="flex w-52 shrink-0 flex-col gap-0.5 border-r border-border/60 bg-card/40 p-3">
       <p
         class="px-2.5 pb-2 font-mono text-2xs font-semibold tracking-[0.14em] text-muted-foreground uppercase"

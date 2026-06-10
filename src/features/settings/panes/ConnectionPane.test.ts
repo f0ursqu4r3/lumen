@@ -3,8 +3,13 @@ import { mount, flushPromises } from '@vue/test-utils'
 
 const getConfig = vi.fn()
 const clearConfig = vi.fn()
+const notifyCacheCleared = vi.fn()
 vi.mock('@/shared/lib/rpc', () => ({
-  rpc: { getConfig: () => getConfig(), clearConfig: () => clearConfig() },
+  rpc: {
+    getConfig: () => getConfig(),
+    clearConfig: () => clearConfig(),
+    notifyCacheCleared: () => notifyCacheCleared(),
+  },
 }))
 
 const save = vi.fn().mockResolvedValue(true)
@@ -53,12 +58,11 @@ describe('ConnectionPane', () => {
     expect(save).toHaveBeenCalled()
   })
 
-  it('disconnects: clears config and routes to connect', async () => {
+  it('disconnects via the host (clearConfig), which resets the main window', async () => {
     const w = mount(ConnectionPane)
     await flushPromises()
     await w.find('[data-testid="settings-disconnect"]').trigger('click')
     await flushPromises()
     expect(clearConfig).toHaveBeenCalled()
-    expect(replace).toHaveBeenCalledWith({ name: 'connect' })
   })
 })

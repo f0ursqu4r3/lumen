@@ -4,12 +4,14 @@ import { useQueryClient } from '@tanstack/vue-query'
 import { Button } from '@/shared/ui/button'
 import { clearPersistedCache } from '@/shared/lib/persist'
 import { pushToast } from '@/shared/composables/useToast'
+import { rpc } from '@/shared/lib/rpc'
 import PaneHeader from './PaneHeader.vue'
 
 const queryClient = useQueryClient()
-function clearCache() {
+async function clearCache() {
   queryClient.clear()
   clearPersistedCache()
+  await rpc.notifyCacheCleared()
   pushToast({ title: 'Cache cleared', tone: 'success' })
 }
 </script>
