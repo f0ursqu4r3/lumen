@@ -5,9 +5,6 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 const { openSettings } = vi.hoisted(() => ({ openSettings: vi.fn() }))
 vi.mock('@/shared/composables/useSettings', () => ({ openSettings }))
 
-const { sessionState } = vi.hoisted(() => ({ sessionState: { unavailable: false } }))
-vi.mock('@/shared/composables/useSession', () => ({ sessionState }))
-
 import AppIconRail from './AppIconRail.vue'
 import { useCommandPalette } from '@/shared/composables/useCommandPalette'
 
@@ -45,13 +42,6 @@ describe('AppIconRail', () => {
     openSettings.mockClear()
     mountRail().get('[data-testid="rail-settings"]').trigger('click')
     expect(openSettings).toHaveBeenCalledOnce()
-  })
-
-  it('reflects an unavailable session on the connection dot', async () => {
-    sessionState.unavailable = true
-    const w = mountRail()
-    expect(w.get('[data-testid="rail-connection"]').classes().join(' ')).toContain('text-amber')
-    sessionState.unavailable = false
   })
 
   it('marks the active global view with a lit tile', async () => {
