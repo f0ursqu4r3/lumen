@@ -3,6 +3,7 @@ import { SquareArrowOutUpRight, X } from '@lucide/vue'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/ui/sheet'
 import { Button } from '@/shared/ui/button'
 import IssueDetail from '@/views/IssueDetail.vue'
+import IssueSavebarSlot from '@/features/issues/components/IssueSavebarSlot.vue'
 
 defineProps<{ open: boolean; fullPath: string; iid: string | null }>()
 const emit = defineEmits<{
@@ -67,7 +68,7 @@ const emit = defineEmits<{
       </div>
       <!-- The save/revert dock teleports here, on the bare background below the
            card, when there are unsaved edits. -->
-      <div id="issue-savebar-slot" />
+      <IssueSavebarSlot />
     </SheetContent>
   </Sheet>
 </template>

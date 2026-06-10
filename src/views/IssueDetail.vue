@@ -28,6 +28,7 @@ import Scratchpad from '@/shared/components/Scratchpad.vue'
 import MediaViewer from '@/shared/components/MediaViewer.vue'
 import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
 import { useIssueMediaViewer } from '@/features/issues/composables/useIssueMediaViewer'
+import { savebarHostPresent } from '@/features/issues/composables/useSavebarHost'
 
 const props = defineProps<{
   fullPath: string
@@ -93,12 +94,8 @@ if (props.windowed) {
 }
 
 // The issue sheet and popped-out window frame a #issue-savebar-slot in their bare
-// background gutter (below the content panel) for the save/revert dock. If no host
-// frame exists (the full-page route), the dock renders in place instead.
-const hasSavebarHost = ref(false)
-onMounted(() => {
-  hasSavebarHost.value = !!document.getElementById('issue-savebar-slot')
-})
+// background gutter (below the content panel) for the save/revert dock. With no
+// host (the full-page route), the dock renders in place instead.
 
 // In a window the sticky details rail must clear the window chrome (a host pager,
 // stickyTop, plus the condensed title bar ~2rem) or its top is hidden under it.
@@ -365,7 +362,7 @@ if (!props.embedded) {
            on the bare background below the content panel (the issue sheet and the
            popped-out window each frame a #issue-savebar-slot for it). Falls back to
            rendering in place where no host frame exists (the full-page route). -->
-      <Teleport to="#issue-savebar-slot" :disabled="!hasSavebarHost">
+      <Teleport defer to="#issue-savebar-slot" :disabled="!savebarHostPresent">
         <Transition name="savebar">
           <div
             v-if="dirty"

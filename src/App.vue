@@ -8,6 +8,7 @@ import SessionExpiredOverlay from '@/shared/components/SessionExpiredOverlay.vue
 import ConnectionBanner from '@/shared/components/ConnectionBanner.vue'
 import CommandPalette from '@/shared/components/CommandPalette.vue'
 import AppShell from '@/shared/components/shell/AppShell.vue'
+import IssueSavebarSlot from '@/features/issues/components/IssueSavebarSlot.vue'
 import { shouldShowChrome } from '@/shared/lib/chrome'
 import { registerSettingsShortcut } from '@/shared/composables/useSettings'
 
@@ -55,7 +56,7 @@ const multiWindow = computed(() => route.name === 'issues-window')
     </div>
     <!-- The issue save/revert dock lands here, on the bare background below the
          panel, when there are unsaved edits. -->
-    <div id="issue-savebar-slot" />
+    <IssueSavebarSlot />
   </div>
   <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
     <main class="mx-auto max-w-5xl px-4 py-6">
