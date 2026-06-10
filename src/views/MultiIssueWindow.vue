@@ -14,12 +14,14 @@ const index = ref(0)
 const total = computed(() => props.iids.length)
 const current = computed<string | null>(() => props.iids[index.value] ?? null)
 
-// Pin IssueDetail's condensed title bar just below our own sticky pager header —
-// measure the header so the offset tracks its real height.
+// Pin IssueDetail's condensed title bar just below our own fixed pager header.
+// The header sits inside the framed panel, so measure its viewport-relative
+// bottom (not bare height) — the condensed bar is `fixed`, so it needs the real
+// y to land flush under the pager.
 const headerEl = ref<HTMLElement | null>(null)
 const stickyTop = ref(0)
 onMounted(() => {
-  if (headerEl.value) stickyTop.value = headerEl.value.offsetHeight
+  if (headerEl.value) stickyTop.value = Math.round(headerEl.value.getBoundingClientRect().bottom)
 })
 
 // IssueDetail is rendered with :embedded — that keeps its update:dirty emit (which
@@ -71,18 +73,14 @@ const navBtn =
 </script>
 
 <template>
-  <div v-if="total === 0" class="grid place-items-center py-24 text-sm text-muted-foreground">
+  <div v-if="total === 0" class="grid h-full place-items-center text-sm text-muted-foreground">
     No issues.
   </div>
-  <div v-else>
-    <!-- Pager bar: rides inside the rounded card panel (App.vue frames windowed
-         routes), hugging the panel top. -mx-4/-mt-6 cancel the content column's
-         padding so it spans the column and tucks under the native title bar. -->
-    <header
-      ref="headerEl"
-      class="sticky top-0 z-10 -mx-4 -mt-6 mb-2 border-b border-border/60 bg-card px-4 py-2"
-    >
-      <div class="relative flex min-h-7 items-center justify-end gap-2">
+  <div v-else class="flex h-full min-h-0 flex-col">
+    <!-- Pager bar: a fixed (flex-none) header hugging the panel top; the issue
+         content scrolls in the region below it, so the window never scrolls. -->
+    <header ref="headerEl" class="flex-none border-b border-border/60 bg-card">
+      <div class="relative mx-auto flex min-h-7 max-w-5xl items-center justify-end gap-2 px-4 py-2">
         <span
           data-testid="pager-position"
           class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-sm font-medium tabular-nums text-foreground"
@@ -118,14 +116,18 @@ const navBtn =
       </div>
     </header>
 
-    <IssueDetail
-      :key="current ?? ''"
-      :full-path="fullPath"
-      :iid="current ?? ''"
-      embedded
-      windowed
-      :sticky-top="stickyTop"
-      @update:dirty="dirty = $event"
-    />
+    <div class="min-h-0 flex-1 overflow-y-auto overflow-x-clip">
+      <main class="mx-auto max-w-5xl px-4 py-6">
+        <IssueDetail
+          :key="current ?? ''"
+          :full-path="fullPath"
+          :iid="current ?? ''"
+          embedded
+          windowed
+          :sticky-top="stickyTop"
+          @update:dirty="dirty = $event"
+        />
+      </main>
+    </div>
   </div>
 </template>

@@ -24,6 +24,9 @@ const chrome = computed(() => shouldShowChrome(route))
 // Popped-out windows (?window=1) carry no rail, but echo the shell's signature:
 // a rounded card panel floating on the bare background.
 const windowed = computed(() => route.query.window === '1')
+// The multi-issue window owns its own header + scroll region (the pager stays
+// fixed while issues scroll beneath it); other windows scroll the whole panel.
+const multiWindow = computed(() => route.name === 'issues-window')
 </script>
 
 <template>
@@ -35,14 +38,20 @@ const windowed = computed(() => route.query.window === '1')
     <RouterView :key="$route.path" />
   </AppShell>
   <!-- Popped-out window: no rail, but the content rides in the same rounded card
-       panel the shell uses, floating on a thin background frame. -->
-  <div v-else-if="windowed" class="min-h-screen bg-background p-1.5 text-foreground">
+       panel the shell uses, floating on a thin background frame. The panel is a
+       fixed-height column that scrolls internally so the window itself never
+       scrolls. -->
+  <div v-else-if="windowed" class="flex h-screen flex-col bg-background p-1.5 text-foreground">
     <div
-      class="min-h-[calc(100vh-0.75rem)] overflow-x-clip rounded-xl border border-border/60 bg-card shadow-sm"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
     >
-      <main class="mx-auto max-w-5xl px-4 py-6">
-        <RouterView :key="$route.path" />
-      </main>
+      <!-- The multi-issue window manages its own fixed pager + scroll region. -->
+      <RouterView v-if="multiWindow" :key="$route.path" />
+      <div v-else class="min-h-0 flex-1 overflow-y-auto overflow-x-clip">
+        <main class="mx-auto max-w-5xl px-4 py-6">
+          <RouterView :key="$route.path" />
+        </main>
+      </div>
     </div>
   </div>
   <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
