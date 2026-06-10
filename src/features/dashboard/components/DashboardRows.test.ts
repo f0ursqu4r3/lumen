@@ -1,8 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import DashboardIssueRow from './DashboardIssueRow.vue'
 import DashboardMrRow from './DashboardMrRow.vue'
 import type { DashboardIssue, DashboardMr } from '@/features/dashboard/lib/dashboard'
+
+const { openExternal } = vi.hoisted(() => ({ openExternal: vi.fn() }))
+vi.mock('@/shared/lib/rpc', () => ({ rpc: { openExternal } }))
 
 const issue: DashboardIssue = {
   iid: '42',
@@ -41,14 +44,16 @@ describe('DashboardIssueRow', () => {
     })
   })
 
-  it('falls back to an external link when webPath is unparseable', () => {
+  it('opens externally via the host when the webPath is unparseable', async () => {
+    openExternal.mockClear()
     const w = mount(DashboardIssueRow, {
       props: { issue: { ...issue, webPath: 'weird' } },
       global: { stubs: { RouterLink: RouterLinkStub } },
     })
-    // No RouterLink — renders an <a href> to webUrl instead.
+    // No in-app route — a button routes the open through the host instead.
     expect(w.findComponent(RouterLinkStub).exists()).toBe(false)
-    expect(w.find('a').attributes('href')).toBe('https://gl/issue')
+    await w.get('button').trigger('click')
+    expect(openExternal).toHaveBeenCalledWith({ url: 'https://gl/issue' })
   })
 })
 

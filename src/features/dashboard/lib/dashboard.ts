@@ -9,11 +9,22 @@ export const dashboardKeys = {
 
 // GitLab's root `issues` query exposes no project object — only `webPath`, which
 // looks like `/group/sub/proj/-/issues/42`. Pull the project full path and iid so
-// the dashboard can deep-link into the in-app issue route.
+// the dashboard can deep-link into the in-app issue route. Tolerate a full URL
+// and a missing leading slash so a valid issue never falls back to a dead
+// external link.
 export function parseIssuePath(webPath: string): { fullPath: string; iid: string } | null {
-  const m = webPath.match(/^\/(.+)\/-\/issues\/(\d+)/)
+  if (!webPath) return null
+  let path = webPath
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      path = new URL(path).pathname
+    } catch {
+      return null
+    }
+  }
+  const m = path.match(/([^?#]+?)\/-\/issues\/(\d+)/)
   if (!m) return null
-  return { fullPath: m[1], iid: m[2] }
+  return { fullPath: m[1].replace(/^\/+/, ''), iid: m[2] }
 }
 
 type UserCore = { name?: string | null; username: string }
