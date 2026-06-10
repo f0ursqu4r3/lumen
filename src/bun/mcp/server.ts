@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { loadConfig, saveMcpConfig } from '../config'
-import { isAuthorized } from './auth'
+import { isAuthorized, generateToken } from './auth'
 import { registerTools } from './registry'
 
 const SERVER_NAME = 'lumen'
@@ -74,17 +74,53 @@ export function startMcpIfEnabled(): { ok: true } | { ok: false; error: string }
   return startMcp(mcp.port ?? DEFAULT_MCP_PORT, mcp.token)
 }
 
-/**
- * Toggle the server from the (future) Settings UI: persists enabled/port,
- * generates nothing here (caller supplies the token), and (re)starts or stops.
- */
-export function setMcpEnabled(
-  enabled: boolean,
-  port: number,
-  token: string | null,
-): { ok: true } | { ok: false; error: string } {
+export interface McpStatus {
+  enabled: boolean
+  port: number
+  running: boolean
+  hasToken: boolean
+}
+
+/** Current MCP state for the Settings pane. Never includes the token itself. */
+export function getMcpStatus(): McpStatus {
+  const { mcp } = loadConfig()
+  return {
+    enabled: mcp?.enabled ?? false,
+    port: mcp?.port ?? DEFAULT_MCP_PORT,
+    running: isRunning(),
+    hasToken: Boolean(mcp?.token),
+  }
+}
+
+/** Return the current bearer token (explicit reveal/copy action), or null. */
+export function revealMcpToken(): { token: string | null } {
+  return { token: loadConfig().mcp?.token ?? null }
+}
+
+/** Rotate the token: persist a new one, restart if running, return it once. */
+export function regenerateMcpToken(): { token: string } {
+  const { mcp } = loadConfig()
+  const port = mcp?.port ?? DEFAULT_MCP_PORT
+  const enabled = mcp?.enabled ?? false
+  const token = generateToken()
   saveMcpConfig({ enabled, port, token })
   stopMcp()
-  if (enabled && token) return startMcp(port, token)
+  if (enabled) startMcp(port, token)
+  return { token }
+}
+
+/**
+ * Toggle the server from Settings: persists enabled/port, generates a token on
+ * first enable, and (re)starts or stops. Token is never required from the caller.
+ */
+export function setMcpEnabled(a: {
+  enabled: boolean
+  port: number
+}): { ok: true } | { ok: false; error: string } {
+  const current = loadConfig().mcp
+  const token = current?.token ?? (a.enabled ? generateToken() : null)
+  saveMcpConfig({ enabled: a.enabled, port: a.port, token })
+  stopMcp()
+  if (a.enabled && token) return startMcp(a.port, token)
   return { ok: true }
 }
