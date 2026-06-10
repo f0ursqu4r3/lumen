@@ -4,8 +4,16 @@ import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
 import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
+import { settingsWindowRoute } from './settingsWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
-import { startMcpIfEnabled } from './mcp/server'
+import {
+  startMcpIfEnabled,
+  stopMcp,
+  getMcpStatus,
+  setMcpEnabled,
+  regenerateMcpToken,
+  revealMcpToken,
+} from './mcp/server'
 
 // Resolve the base app URL once; every native window (main + per-issue) loads
 // off it. app:hmr sets LUMEN_HMR=1; only then do we poll for the Vite dev server.
@@ -14,6 +22,8 @@ const url = await resolveStartUrl({ hmr: process.env.LUMEN_HMR === '1' })
 // One native window per issue, keyed by `${fullPath}#${iid}`, so re-expanding an
 // already-open issue focuses it instead of spawning a duplicate.
 const issueWindows = new Map<string, BrowserWindow>()
+
+let settingsWindow: BrowserWindow | null = null
 
 function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): {
   ok: boolean
@@ -62,6 +72,24 @@ function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[]
   return { ok: true }
 }
 
+function openSettingsWindow(): { ok: boolean } {
+  if (settingsWindow) {
+    settingsWindow.activate()
+    return { ok: true }
+  }
+  const win = new BrowserWindow({
+    title: 'Settings',
+    url,
+    frame: { width: 820, height: 600, x: 160, y: 120 },
+    rpc: buildRpc(settingsWindowRoute()),
+  })
+  win.on('close', () => {
+    settingsWindow = null
+  })
+  settingsWindow = win
+  return { ok: true }
+}
+
 // Each native window needs its own RPC bridge; build a fresh config per window.
 // `initialRoute` is the hash route the window opens at — null for the main
 // window (default route), set for popouts (which can't carry the route in their
@@ -89,6 +117,7 @@ function buildRpc(initialRoute: string | null = null) {
         },
         clearConfig: async () => {
           clearConfig()
+          stopMcp() // the MCP server serves with the GitLab token; stop it on disconnect
           return { ok: true }
         },
         openExternal: async ({ url }) => ({ ok: Utils.openExternal(url) }),
@@ -102,6 +131,11 @@ function buildRpc(initialRoute: string | null = null) {
         },
         openIssueWindow: async ({ fullPath, iid }) => openIssueWindow({ fullPath, iid }),
         openIssuesWindow: async ({ fullPath, iids }) => openIssuesWindow({ fullPath, iids }),
+        openSettingsWindow: async () => openSettingsWindow(),
+        getMcpStatus: async () => getMcpStatus(),
+        setMcpEnabled: async (a) => setMcpEnabled(a),
+        regenerateMcpToken: async () => regenerateMcpToken(),
+        revealMcpToken: async () => revealMcpToken(),
       },
       messages: {},
     },
@@ -128,8 +162,7 @@ ApplicationMenu.on('application-menu-clicked', (event) => {
   if (action === DEVTOOLS_ACTION) {
     win.webview.toggleDevTools()
   } else if (action === SETTINGS_ACTION) {
-    // Bridge host → webview: dispatch the event the webview's useSettings listens for.
-    win.webview.executeJavascript("window.dispatchEvent(new CustomEvent('lumen:open-settings'))")
+    openSettingsWindow()
   }
 })
 

@@ -36,4 +36,9 @@ export const rpc: LumenRequests = {
   showNotification: (a) => client().showNotification(a),
   openIssueWindow: (a) => client().openIssueWindow(a),
   openIssuesWindow: (a) => client().openIssuesWindow(a),
+  openSettingsWindow: () => client().openSettingsWindow(),
+  getMcpStatus: () => client().getMcpStatus(),
+  setMcpEnabled: (a) => client().setMcpEnabled(a),
+  regenerateMcpToken: () => client().regenerateMcpToken(),
+  revealMcpToken: () => client().revealMcpToken(),
 }

@@ -3,6 +3,12 @@ export interface ConfigStatus {
   configured: boolean
   tokenSuffix: string | null
 }
+export interface McpStatus {
+  enabled: boolean
+  port: number
+  running: boolean
+  hasToken: boolean
+}
 export interface GraphqlArgs {
   query: string
   variables?: Record<string, unknown>
@@ -68,6 +74,14 @@ export interface LumenRequests {
   // Open a combined native window paging through several issues (one window per
   // call, no dedupe). The window loads the issues-window route with ?window=1.
   openIssuesWindow: (a: { fullPath: string; iids: string[] }) => Promise<{ ok: boolean }>
+  openSettingsWindow: () => Promise<{ ok: boolean }>
+  getMcpStatus: () => Promise<McpStatus>
+  setMcpEnabled: (a: {
+    enabled: boolean
+    port: number
+  }) => Promise<{ ok: true } | { ok: false; error: string }>
+  regenerateMcpToken: () => Promise<{ token: string }>
+  revealMcpToken: () => Promise<{ token: string | null }>
 }
 
 export type LumenRPC = {
