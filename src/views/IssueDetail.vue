@@ -20,7 +20,7 @@ import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Images } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { Textarea } from '@/shared/ui/textarea'
+import MentionTextarea from '@/features/issues/components/MentionTextarea.vue'
 import IssueDetailSkeleton from '@/features/issues/components/IssueDetailSkeleton.vue'
 import MarkdownText from '@/shared/components/MarkdownText.vue'
 import EditableField from '@/shared/components/EditableField.vue'
@@ -307,8 +307,10 @@ if (!props.embedded) {
               <p v-else class="text-sm italic text-muted-foreground">No description yet.</p>
             </template>
             <template #edit>
-              <Textarea
+              <MentionTextarea
                 v-model="draft.description"
+                :members="members ?? []"
+                :full-path="fullPath"
                 :rows="8"
                 aria-label="Issue description"
                 placeholder="Add a description…"

@@ -3,7 +3,6 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { Plus, LoaderCircle, ChevronDown } from '@lucide/vue'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/ui/sheet'
 import { Input } from '@/shared/ui/input'
-import { Textarea } from '@/shared/ui/textarea'
 import { Button } from '@/shared/ui/button'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import LabelPicker from '@/features/labels/components/LabelPicker.vue'
@@ -11,6 +10,7 @@ import AssigneePicker from '@/features/assignees/components/AssigneePicker.vue'
 import { useCreateIssue } from '@/features/issues/composables/useIssueMutations'
 import { useProjectLabels } from '@/features/labels/composables/useProjectLabels'
 import { useProjectMembers } from '@/features/projects/composables/useProjectMembers'
+import MentionTextarea from '@/features/issues/components/MentionTextarea.vue'
 
 const props = defineProps<{ open: boolean; fullPath: string }>()
 const emit = defineEmits<{ 'update:open': [value: boolean]; created: [iid: string] }>()
@@ -107,9 +107,11 @@ function onKeydown(e: KeyboardEvent) {
 
         <div class="flex flex-col gap-1.5">
           <label for="composer-description" class="field-label">Description</label>
-          <Textarea
+          <MentionTextarea
             id="composer-description"
             v-model="description"
+            :members="members ?? []"
+            :full-path="fullPath"
             data-testid="composer-description"
             placeholder="Add detail, repro steps, links… (optional)"
             class="min-h-28"
