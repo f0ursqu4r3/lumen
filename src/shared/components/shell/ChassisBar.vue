@@ -16,7 +16,7 @@ const busy = computed(() => fetching.value > 0)
 <template>
   <div
     data-testid="chassis-bar"
-    class="electrobun-webkit-app-region-drag relative flex h-9 shrink-0 items-center gap-3 pr-4 pl-[78px] select-none"
+    class="electrobun-webkit-app-region-drag relative flex h-9 shrink-0 items-center gap-3 pr-4 pl-[96px] select-none"
   >
     <span class="font-mono text-2xs font-medium tracking-[0.22em] text-muted-foreground uppercase">
       {{ title ?? 'Lumen' }}
