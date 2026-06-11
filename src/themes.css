@@ -9,7 +9,7 @@
 /* ── Dark ─────────────────────────────────────────────────────────────────── */
 
 /* Nocturne — deep blue-slate, indigo accent. */
-[data-theme='nocturne'] {
+:root[data-theme='nocturne'] {
   color-scheme: dark;
   --background: oklch(0.2 0.03 264);
   --foreground: oklch(0.93 0.02 264);
@@ -52,7 +52,7 @@
 }
 
 /* Graphite — pure neutral greys, soft-white accent. */
-[data-theme='graphite'] {
+:root[data-theme='graphite'] {
   color-scheme: dark;
   --background: oklch(0.19 0 0);
   --foreground: oklch(0.95 0 0);
@@ -95,7 +95,7 @@
 }
 
 /* Evergreen — forest-slate, green accent. */
-[data-theme='evergreen'] {
+:root[data-theme='evergreen'] {
   color-scheme: dark;
   --background: oklch(0.19 0.012 150);
   --foreground: oklch(0.94 0.01 150);
@@ -138,7 +138,7 @@
 }
 
 /* Crimson — dark wine-slate, red accent. */
-[data-theme='crimson'] {
+:root[data-theme='crimson'] {
   color-scheme: dark;
   --background: oklch(0.19 0.01 20);
   --foreground: oklch(0.94 0.008 20);
@@ -181,7 +181,7 @@
 }
 
 /* Viola — dusk violet-slate, magenta-purple accent. */
-[data-theme='viola'] {
+:root[data-theme='viola'] {
   color-scheme: dark;
   --background: oklch(0.195 0.014 300);
   --foreground: oklch(0.94 0.01 300);
@@ -224,7 +224,7 @@
 }
 
 /* Teal — deep ocean-slate, cyan-teal accent. */
-[data-theme='teal'] {
+:root[data-theme='teal'] {
   color-scheme: dark;
   --background: oklch(0.19 0.018 200);
   --foreground: oklch(0.94 0.012 200);
@@ -267,7 +267,7 @@
 }
 
 /* Sepia Night — warm dark parchment, muted gold accent. */
-[data-theme='sepia-night'] {
+:root[data-theme='sepia-night'] {
   color-scheme: dark;
   --background: oklch(0.2 0.018 60);
   --foreground: oklch(0.93 0.014 70);
@@ -312,7 +312,7 @@
 /* ── Light ────────────────────────────────────────────────────────────────── */
 
 /* Paper — warm off-white, ink text, amber accent (light). */
-[data-theme='paper'] {
+:root[data-theme='paper'] {
   color-scheme: light;
   --background: oklch(0.98 0.006 80);
   --foreground: oklch(0.24 0.01 60);
@@ -350,7 +350,7 @@
 }
 
 /* Daylight — crisp neutral white, blue accent (light). */
-[data-theme='daylight'] {
+:root[data-theme='daylight'] {
   color-scheme: light;
   --background: oklch(0.985 0.002 250);
   --foreground: oklch(0.22 0.01 256);
@@ -388,7 +388,7 @@
 }
 
 /* Solarized — warm cream base, teal-slate text, amber accent (light). */
-[data-theme='solarized'] {
+:root[data-theme='solarized'] {
   color-scheme: light;
   --background: oklch(0.96 0.02 95);
   --foreground: oklch(0.37 0.035 200);
@@ -426,7 +426,7 @@
 }
 
 /* Linen — soft warm beige, brown-ink text, terracotta accent (light). */
-[data-theme='linen'] {
+:root[data-theme='linen'] {
   color-scheme: light;
   --background: oklch(0.96 0.014 70);
   --foreground: oklch(0.28 0.012 50);
@@ -464,7 +464,7 @@
 }
 
 /* Frost — cool blue-white, slate text, steel-blue accent (light). */
-[data-theme='frost'] {
+:root[data-theme='frost'] {
   color-scheme: light;
   --background: oklch(0.98 0.004 230);
   --foreground: oklch(0.26 0.012 240);
@@ -504,7 +504,7 @@
 /* ── Bold ─────────────────────────────────────────────────────────────────── */
 
 /* Dracula — purple-black, vivid magenta-pink accent. */
-[data-theme='dracula'] {
+:root[data-theme='dracula'] {
   color-scheme: dark;
   --background: oklch(0.24 0.03 290);
   --foreground: oklch(0.95 0.02 300);
@@ -551,7 +551,7 @@
 }
 
 /* Gruvbox — warm retro dark, orange accent, rounder corners. */
-[data-theme='gruvbox'] {
+:root[data-theme='gruvbox'] {
   color-scheme: dark;
   --radius: 0.875rem;
   --background: oklch(0.24 0.02 70);
@@ -595,7 +595,7 @@
 }
 
 /* Tokyo Night — inky blue-violet, electric blue accent. */
-[data-theme='tokyo-night'] {
+:root[data-theme='tokyo-night'] {
   color-scheme: dark;
   --background: oklch(0.22 0.03 270);
   --foreground: oklch(0.9 0.025 265);

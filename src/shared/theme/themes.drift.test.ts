@@ -71,4 +71,21 @@ describe('theme registry <-> CSS drift guard', () => {
     expect(themesCss).not.toMatch(/\[data-theme=['"]amber['"]\]/)
     expect(stylesCss).toMatch(/:root[\s\S]*--primary:\s*oklch\(0\.82 0\.142 81\)/)
   })
+
+  // Regression guard: themes.css is @imported ABOVE the :root default block, so a
+  // bare `[data-theme=…]` selector (specificity 0,1,0, equal to `:root`) loses on
+  // source order and the theme never applies. Anchoring to `:root[data-theme=…]`
+  // (0,2,0) makes theme blocks outrank the default regardless of import order.
+  it('every theme selector is :root[data-theme=…] so it outranks the :root default', () => {
+    for (const t of THEMES) {
+      if (t.id === DEFAULT_THEME_ID) continue
+      expect(themesCss, `${t.id} selector must be :root[data-theme='${t.id}']`).toMatch(
+        new RegExp(`:root\\[data-theme=['"]${t.id}['"]\\]`),
+      )
+    }
+    // and no bare (un-anchored) data-theme selector at a line start
+    expect(themesCss, 'found a bare [data-theme=…] selector that :root would override').not.toMatch(
+      /^\[data-theme=/m,
+    )
+  })
 })
