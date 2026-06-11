@@ -63,6 +63,124 @@ describe('lumen_issue_get', () => {
     expect(c.gql).toHaveBeenCalledWith(expect.stringContaining('issue('), { p: 'g/p', iid: '5' })
     expect(bodyText(res)).toContain('"description": "desc"')
   })
+
+  it('selects the work-item status widget so status is exposed', async () => {
+    c.gql.mockResolvedValue({
+      project: {
+        issue: {
+          iid: '5',
+          title: 'B',
+          state: 'opened',
+          webUrl: 'u',
+          status: {
+            id: 'gid://gitlab/WorkItems::Statuses::SystemDefined::Status/2',
+            name: 'In progress',
+            category: 'in_progress',
+          },
+        },
+      },
+    })
+    const res = await tool('lumen_issue_get').handler({ project: 'g/p', iid: '5' })
+    expect(c.gql).toHaveBeenCalledWith(expect.stringContaining('status {'), { p: 'g/p', iid: '5' })
+    expect(bodyText(res)).toContain('"name": "In progress"')
+  })
+})
+
+describe('lumen_issue_set_status', () => {
+  it('resolves the work item id + status id (case-insensitive), then mutates', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: {
+          statuses: {
+            nodes: [
+              { id: 'gid://gitlab/Status/1', name: 'To do' },
+              { id: 'gid://gitlab/Status/2', name: 'In progress' },
+            ],
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        workItemUpdate: {
+          errors: [],
+          workItem: {
+            id: 'gid://gitlab/WorkItem/100',
+            widgets: [
+              {
+                status: {
+                  id: 'gid://gitlab/Status/2',
+                  name: 'In progress',
+                  category: 'in_progress',
+                },
+              },
+            ],
+          },
+        },
+      })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '83',
+      status: 'in progress',
+    })
+    // group path is the project path minus its last segment
+    expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('statuses'), { g: 'g' })
+    expect(c.gql).toHaveBeenNthCalledWith(3, expect.stringContaining('workItemUpdate'), {
+      id: 'gid://gitlab/WorkItem/100',
+      status: 'gid://gitlab/Status/2',
+    })
+    expect(bodyText(res)).toContain('"name": "In progress"')
+  })
+
+  it('errors with the available names when the status is unknown', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/1', name: 'To do' }] } },
+      })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '83',
+      status: 'Shipped',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('To do')
+    expect(c.gql).toHaveBeenCalledTimes(2) // no mutation fired
+  })
+
+  it('errors when the issue has no work item', async () => {
+    c.gql.mockResolvedValueOnce({ project: { workItems: { nodes: [] } } })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '404',
+      status: 'Done',
+    })
+    expect(res.isError).toBe(true)
+    expect(c.gql).toHaveBeenCalledTimes(1) // bailed before resolving statuses
+  })
+
+  it('surfaces mutation errors', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/3', name: 'Done' }] } },
+      })
+      .mockResolvedValueOnce({
+        workItemUpdate: { errors: ['Status is not available'], workItem: null },
+      })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '83',
+      status: 'Done',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('Status is not available')
+  })
 })
 
 describe('lumen_issue_create', () => {

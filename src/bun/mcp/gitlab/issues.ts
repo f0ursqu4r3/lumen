@@ -12,10 +12,25 @@ const GET_Q = `query($p:ID!,$iid:String!){
   project(fullPath:$p){ issue(iid:$iid){
     iid title state description webUrl createdAt updatedAt
     author{username} milestone{title}
+    status {id name category}
     labels{nodes{title}} assignees{nodes{username}}
     discussions{nodes{notes{nodes{body author{username} createdAt}}}} } } }`
 
 const ID_Q = `query($p:ID!,$iid:String!){project(fullPath:$p){issue(iid:$iid){id}}}`
+
+// Work-item "Status" (To do / In progress / Done / …) is a WorkItem widget,
+// not part of UpdateIssue. Setting it takes three hops: resolve the issue's
+// WorkItem id, resolve the status name to its id on the project's namespace,
+// then fire workItemUpdate. Mirrors src/features/issues/composables/useWorkItemStatus.ts.
+const WORK_ITEM_ID_Q = `query($p:ID!,$iid:String!){project(fullPath:$p){workItems(iid:$iid){nodes{id}}}}`
+const STATUSES_Q = `query($g:ID!){namespace(fullPath:$g){statuses{nodes{id name}}}}`
+const SET_STATUS_M = `mutation($id:WorkItemID!,$status:WorkItemsStatusesStatusID!){
+  workItemUpdate(input:{id:$id,statusWidget:{status:$status}}){
+    errors
+    workItem{ widgets{ ... on WorkItemWidgetStatus{ status{id name category} } } } } }`
+
+// The status list lives on the project's parent namespace (its group).
+const groupPath = (fullPath: string) => fullPath.split('/').slice(0, -1).join('/')
 
 const CREATE_M = `mutation($input:CreateIssueInput!){createIssue(input:$input){issue{iid webUrl} errors}}`
 const UPDATE_M = `mutation($input:UpdateIssueInput!){updateIssue(input:$input){issue{iid webUrl} errors}}`
@@ -141,6 +156,46 @@ export const issueTools: McpTool[] = [
           return errorResult(asg.issueSetAssignees.errors.join('; '))
       }
       return text({ updated: data.updateIssue.issue })
+    },
+  },
+  {
+    name: 'lumen_issue_set_status',
+    description:
+      'Set an issue\'s work-item Status (e.g. "To do", "In progress", "Done") — the native status widget, distinct from open/closed state and from labels. Status is matched by name, case-insensitively.',
+    inputSchema: {
+      project: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      status: z.string().describe('Status name, e.g. "In progress".'),
+    },
+    handler: async (a) => {
+      const idData = await gql<{
+        project: { workItems: { nodes: { id: string }[] } | null } | null
+      }>(WORK_ITEM_ID_Q, { p: a.project, iid: a.iid })
+      const workItemId = idData.project?.workItems?.nodes?.[0]?.id
+      if (!workItemId) return errorResult(`Issue ${a.iid} not found in ${a.project}.`)
+
+      const sData = await gql<{
+        namespace: { statuses: { nodes: { id: string; name: string }[] } | null } | null
+      }>(STATUSES_Q, { g: groupPath(a.project as string) })
+      const statuses = sData.namespace?.statuses?.nodes ?? []
+      const want = (a.status as string).toLowerCase()
+      const match = statuses.find((s) => s.name.toLowerCase() === want)
+      if (!match)
+        return errorResult(
+          `Unknown status "${a.status}". Available: ${statuses.map((s) => s.name).join(', ') || '(none)'}.`,
+        )
+
+      const data = await gql<{
+        workItemUpdate: {
+          errors: string[]
+          workItem: { widgets: { status?: { name: string } | null }[] } | null
+        } | null
+      }>(SET_STATUS_M, { id: workItemId, status: match.id })
+      const payload = data.workItemUpdate
+      if (payload?.errors?.length) return errorResult(payload.errors.join('; '))
+      const status =
+        payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
+      return text({ updated: { iid: a.iid, status } })
     },
   },
   {
