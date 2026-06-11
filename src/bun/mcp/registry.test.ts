@@ -21,9 +21,16 @@ it('exposes the full gitlab tool catalog with unique lumen_-prefixed names', () 
       'lumen_me',
       'lumen_members_list',
       'lumen_search',
+      'lumen_app_state',
+      'lumen_app_navigate',
+      'lumen_app_open_issue',
+      'lumen_app_open_issues_window',
+      'lumen_app_open_settings',
+      'lumen_app_notify',
     ]),
   )
   expect(new Set(names).size).toBe(names.length)
+  expect(names).toHaveLength(20)
   expect(names.every((n) => n.startsWith('lumen_'))).toBe(true)
 })
 
