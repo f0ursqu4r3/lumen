@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { SETTINGS_PANES, useSettingsNav } from './useSettingsNav'
 
 describe('settings nav', () => {
-  it('lists the panes in order with Appearance before Data & cache', () => {
+  it('lists the panes in order with General first', () => {
     expect(SETTINGS_PANES.map((p) => p.id)).toEqual([
+      'general',
       'connection',
       'agent',
       'appearance',
@@ -14,7 +15,7 @@ describe('settings nav', () => {
 
   it('selects the first pane by default and can switch', () => {
     const nav = useSettingsNav()
-    expect(nav.selected.value).toBe('connection')
+    expect(nav.selected.value).toBe('general')
     nav.select('agent')
     expect(nav.selected.value).toBe('agent')
   })
