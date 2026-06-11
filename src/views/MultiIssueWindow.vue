@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useTitle, onKeyStroke } from '@vueuse/core'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useTitle, onKeyStroke, useSessionStorage } from '@vueuse/core'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import IssueDetail from '@/views/IssueDetail.vue'
 import { useConfirm } from '@/shared/composables/useConfirm'
@@ -10,9 +10,22 @@ import { useConfirm } from '@/shared/composables/useConfirm'
 // IssueDetail is rendered :windowed (condensed title) and :embedded (no chrome).
 const props = defineProps<{ fullPath: string; iids: string[]; windowed?: boolean }>()
 
-const index = ref(0)
+// Remember which issue was open so a page refresh (mostly: HMR reloads) restores
+// it instead of snapping back to the first. We persist the *iid* — robust to the
+// list being reordered — keyed by this window's identity (repo + its iid set), so
+// distinct multi-issue windows don't clobber each other. sessionStorage is the
+// right scope: it survives reload but is per-window and dies with the window.
+const storageKey = `miw:iid:${props.fullPath}|${props.iids.join(',')}`
+const lastIid = useSessionStorage<string | null>(storageKey, null)
+
+const restored = props.iids.indexOf(lastIid.value ?? '')
+const index = ref(restored >= 0 ? restored : 0)
 const total = computed(() => props.iids.length)
 const current = computed<string | null>(() => props.iids[index.value] ?? null)
+
+watch(current, (iid) => {
+  lastIid.value = iid
+})
 
 // Pin IssueDetail's condensed title bar just below our own fixed pager header.
 // The header sits inside the framed panel, so measure its viewport-relative

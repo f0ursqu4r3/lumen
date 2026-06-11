@@ -23,7 +23,12 @@ const mountWindow = (iids: string[]) =>
     global: { stubs: { IssueDetail: IssueDetailStub } },
   })
 
-beforeEach(() => confirmMock.mockReset())
+beforeEach(() => {
+  confirmMock.mockReset()
+  // The window persists its open issue to sessionStorage; clear it so each test
+  // starts fresh (otherwise a prior test's selection restores into the next).
+  sessionStorage.clear()
+})
 
 describe('MultiIssueWindow', () => {
   it('shows the pager position and the first issue', () => {
@@ -68,6 +73,26 @@ describe('MultiIssueWindow', () => {
     await flushPromises()
     expect(confirmMock).not.toHaveBeenCalled()
     expect(w.get('[data-testid="pager-position"]').text()).toBe('1 of 2')
+  })
+
+  it('restores the open issue after a refresh (remount)', async () => {
+    const first = mountWindow(['42', '7', '13'])
+    await first.get('[data-testid="pager-next"]').trigger('click')
+    expect(first.get('.detail-stub').attributes('data-iid')).toBe('7')
+
+    // Remounting with the same iids simulates a page refresh / HMR reload.
+    const second = mountWindow(['42', '7', '13'])
+    expect(second.get('[data-testid="pager-position"]').text()).toBe('2 of 3')
+    expect(second.get('.detail-stub').attributes('data-iid')).toBe('7')
+  })
+
+  it('falls back to the first issue when the stored iid is gone', async () => {
+    const first = mountWindow(['42', '7', '13'])
+    await first.get('[data-testid="pager-next"]').trigger('click')
+
+    // A different iid set is a different window identity → no restore.
+    const second = mountWindow(['1', '2'])
+    expect(second.get('.detail-stub').attributes('data-iid')).toBe('1')
   })
 
   it('shows "No issues." when iids is empty', () => {
