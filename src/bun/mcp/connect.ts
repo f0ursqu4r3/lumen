@@ -36,6 +36,7 @@ export function mergeCodexToml(existing: string, url: string, token: string): st
 }
 
 type ConnectResult = { ok: true; method: 'cli' | 'file' } | { ok: false; error: string }
+type CodexResult = { ok: true; method: 'file' } | { ok: false; error: string }
 
 /** Current MCP url + token, or an error string when agent access is off. */
 function connection(): { url: string; token: string } | { error: string } {
@@ -86,7 +87,7 @@ export async function connectClaudeCode(): Promise<ConnectResult> {
   }
 }
 
-export async function connectCodex(): Promise<ConnectResult> {
+export async function connectCodex(): Promise<CodexResult> {
   const conn = connection()
   if ('error' in conn) return { ok: false, error: conn.error }
   try {

@@ -15,6 +15,7 @@ import {
   regenerateMcpToken,
   revealMcpToken,
 } from './mcp/server'
+import { connectClaudeCode, connectCodex } from './mcp/connect'
 import {
   startServerHealth,
   retryNow,
@@ -190,6 +191,8 @@ function buildRpc(initialRoute: string | null = null) {
         setMcpEnabled: async (a) => setMcpEnabled(a),
         regenerateMcpToken: async () => regenerateMcpToken(),
         revealMcpToken: async () => revealMcpToken(),
+        connectClaudeCode: async () => connectClaudeCode(),
+        connectCodex: async () => connectCodex(),
         notifyCacheCleared: async () => {
           win.webview.executeJavascript(
             "window.dispatchEvent(new CustomEvent('lumen:cache-cleared'))",

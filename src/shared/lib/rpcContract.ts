@@ -130,6 +130,13 @@ export interface LumenRequests {
   }) => Promise<{ ok: true } | { ok: false; error: string }>
   regenerateMcpToken: () => Promise<{ token: string }>
   revealMcpToken: () => Promise<{ token: string | null }>
+  // Write the lumen MCP server into an agent's user config. Claude Code uses
+  // `claude mcp add` when on PATH, else merges ~/.claude.json; Codex merges
+  // ~/.codex/config.toml (with a .bak). Never throws — returns a structured error.
+  connectClaudeCode: () => Promise<
+    { ok: true; method: 'cli' | 'file' } | { ok: false; error: string }
+  >
+  connectCodex: () => Promise<{ ok: true; method: 'file' } | { ok: false; error: string }>
   notifyCacheCleared: () => Promise<{ ok: true }>
   getServerHealth: () => Promise<ServerHealth>
   retryServerNow: () => Promise<{ ok: true }>
