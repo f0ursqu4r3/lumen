@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Check, Link, ExternalLink } from '@lucide/vue'
+import { Check, Link, ExternalLink, RefreshCw } from '@lucide/vue'
 import { Button } from '@/shared/ui/button'
 import StateBadge from '@/features/issues/components/StateBadge.vue'
 
@@ -18,8 +18,9 @@ const props = defineProps<{
   windowed?: boolean
   linkCopied: null | 'url' | 'md'
   fullPath: string
+  refreshing?: boolean
 }>()
-defineEmits<{ copy: [e: MouseEvent]; 'open-external': []; 'toggle-state': [] }>()
+defineEmits<{ copy: [e: MouseEvent]; 'open-external': []; 'toggle-state': []; refresh: [] }>()
 
 // The shell is present only in the full-page main window. There the action
 // cluster teleports into the shell top bar (and the eyebrow/back-link is dropped,
@@ -85,6 +86,18 @@ function nameOrUsername(user?: { name?: string | null; username: string } | null
         </Button>
         <Button
           type="button"
+          data-testid="refresh-issue"
+          variant="ghost"
+          size="icon-xs"
+          class="text-muted-foreground"
+          title="Refresh this issue"
+          :disabled="refreshing"
+          @click="$emit('refresh')"
+        >
+          <RefreshCw class="size-3.5" :class="refreshing ? 'animate-spin' : ''" />
+        </Button>
+        <Button
+          type="button"
           data-testid="toggle-state"
           variant="outline"
           size="sm"
@@ -125,6 +138,18 @@ function nameOrUsername(user?: { name?: string | null; username: string } | null
       >
         <ExternalLink class="size-3.5" />
         Open in GitLab
+      </Button>
+      <Button
+        type="button"
+        data-testid="refresh-issue"
+        variant="ghost"
+        size="icon-xs"
+        class="text-muted-foreground"
+        title="Refresh this issue"
+        :disabled="refreshing"
+        @click="$emit('refresh')"
+      >
+        <RefreshCw class="size-3.5" :class="refreshing ? 'animate-spin' : ''" />
       </Button>
       <Button
         type="button"

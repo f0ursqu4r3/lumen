@@ -41,7 +41,26 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ 'update:dirty': [value: boolean] }>()
 
-const { data: issue, isLoading, error } = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
+const {
+  data: issue,
+  isLoading,
+  error,
+  refetch: refetchIssue,
+} = useIssue(toRef(props, 'fullPath'), toRef(props, 'iid'))
+
+// Manual refresh: force-refetch the current issue on demand. We track our own
+// flag (rather than the query's `isFetching`) so the spinner reflects only the
+// user's click, not the background poll. Mirrors the list views' pattern.
+const isRefreshing = ref(false)
+async function refresh() {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await refetchIssue()
+  } finally {
+    isRefreshing.value = false
+  }
+}
 const { data: members } = useProjectMembers(toRef(props, 'fullPath'))
 const { data: contributors } = useProjectContributors(toRef(props, 'fullPath'))
 const { data: labelCatalog } = useProjectLabels(toRef(props, 'fullPath'))
@@ -243,9 +262,11 @@ if (!props.embedded) {
         :windowed="windowed"
         :link-copied="linkCopied"
         :full-path="fullPath"
+        :refreshing="isRefreshing"
         @copy="onCopyClick"
         @open-external="openInGitLab"
         @toggle-state="toggleState"
+        @refresh="refresh"
       />
 
       <ErrorNotice v-if="actionError" :error="actionError" class="mt-4" />
