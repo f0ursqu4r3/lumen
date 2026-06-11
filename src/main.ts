@@ -22,11 +22,12 @@ console.log(
 )
 
 async function boot() {
-  const [{ url }, { route }] = await Promise.all([rpc.getConfig(), rpc.getInitialRoute()])
+  const [{ url }, { route, isMain }] = await Promise.all([rpc.getConfig(), rpc.getInitialRoute()])
   // Popout windows load the bare app (the views:// scheme can't carry the route
   // in the initial URL fragment); the host hands us the route and we apply it
   // before the router installs, so vue-router's first navigation lands on it with
-  // no flash of the default route. The main window gets route === null.
+  // no flash of the default route. route is null for the main window by default,
+  // but may be non-null when a previous session route is restored.
   if (route) window.location.hash = route
   const queryClient = createPersistedQueryClient(url)
   // App-lifetime: mirror host-owned server health into sessionState (banner +
@@ -42,9 +43,10 @@ async function boot() {
   // window (host fans out lumen:theme-changed). Apply + persist only — never
   // re-broadcasts, so there is no cross-window feedback loop.
   installThemeSync()
-  // MCP app-control: only the main window reports state / accepts drive
-  // commands. Popouts and the settings window get a non-null initial route.
-  if (!route) installAppStateReport(router)
+  // MCP app-control + session-route reporting live only in the main window. The
+  // main window is identified by isMain (it may now carry a restored route, so a
+  // null route no longer distinguishes it). Popouts and settings get isMain=false.
+  if (isMain) installAppStateReport(router)
   createApp(App).use(router).use(VueQueryPlugin, { queryClient }).mount('#app')
 }
 void boot().catch((err) => {
