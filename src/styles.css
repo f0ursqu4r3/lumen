@@ -496,3 +496,28 @@
     transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
+
+/* ---- Terminal idiom (Phosphor) ---------------------------------------------
+   Everything CSS can flip when [data-idiom='terminal'] is set: mono type,
+   zero radius, plates flattened to ruled rows. Component-level dialect
+   (brackets, glyphs) lives behind useIdiom(). --radius cascades through the
+   rounded-* utilities (they emit var(--radius) chains) and --font-sans through
+   the body font-family; the --shadow-* overrides do NOT yet reach the shadow-*
+   utilities — @theme inline bakes those literals into the emitted CSS — so they
+   sit here inert until the shadow tokens get the same var() indirection the
+   colors use. Note: an explicit user font override (inline --font-sans) still
+   wins — an intentional escape hatch. */
+:root[data-idiom='terminal'] {
+  --radius: 0px;
+  --font-sans: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  --shadow-card: none;
+  --shadow-pop: 0 0 0 1px var(--border);
+  --shadow-float: 0 0 0 1px var(--border), 0 12px 32px -8px oklch(0 0 0 / 0.6);
+  --shadow-key: none;
+  --shadow-key-hover: none;
+}
+
+/* The one sanctioned glow: bright phosphor text is an emitting readout. */
+:root[data-idiom='terminal'] .phosphor-glow {
+  text-shadow: 0 0 8px color-mix(in oklch, var(--primary) 55%, transparent);
+}

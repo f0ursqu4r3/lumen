@@ -34,6 +34,10 @@ describe('styles.css chassis tokens', () => {
     expect(root).toMatch(/--border:\s*oklch\(0\.33/)
   })
 
+  it('defines the terminal idiom block', () => {
+    expect(css).toMatch(/:root\[data-idiom='terminal'\]/)
+  })
+
   it('no longer defines a .dark theme selector or the dark custom-variant', () => {
     expect(css).not.toMatch(/@custom-variant dark/)
     expect(css).not.toMatch(/\.dark\s*\{/)
