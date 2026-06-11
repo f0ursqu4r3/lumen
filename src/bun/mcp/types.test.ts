@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { text, errorResult } from './types'
+import { text, errorResult, iidParam } from './types'
 
 describe('result helpers', () => {
   it('text() wraps a string as a single text content block', () => {
@@ -15,5 +15,20 @@ describe('result helpers', () => {
       content: [{ type: 'text', text: 'boom' }],
       isError: true,
     })
+  })
+})
+
+describe('iidParam', () => {
+  it('accepts a numeric string and passes it through', () => {
+    expect(iidParam.parse('5')).toBe('5')
+  })
+
+  it('coerces a JSON number to its string form', () => {
+    expect(iidParam.parse(42)).toBe('42')
+  })
+
+  it('rejects non-numeric values', () => {
+    expect(() => iidParam.parse('abc')).toThrow(/iid must be numeric/)
+    expect(() => iidParam.parse(5.5)).toThrow(/iid must be numeric/)
   })
 })

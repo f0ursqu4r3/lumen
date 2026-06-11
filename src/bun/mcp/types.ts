@@ -1,7 +1,14 @@
+import { z } from 'zod'
 import type { ZodRawShape } from 'zod'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
 export type { CallToolResult }
+
+/**
+ * A GitLab issue/MR iid. Agents send this as either a JSON string ("5") or a
+ * number (5); we coerce to the string that GraphQL's `String!` iid arg expects.
+ */
+export const iidParam = z.coerce.string().regex(/^\d+$/, 'iid must be numeric')
 
 /** A single MCP tool: a name, a description, a Zod raw-shape input schema, and a handler. */
 export interface McpTool {

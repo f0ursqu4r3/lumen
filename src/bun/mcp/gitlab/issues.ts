@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { McpTool } from '../types'
-import { text, errorResult } from '../types'
+import { text, errorResult, iidParam } from '../types'
 import { gql, resolveLabelIds, resolveUserIds, resolveMilestoneId } from './client'
 import { emitInvalidate } from '../app/bridge'
 
@@ -76,7 +76,7 @@ export const issueTools: McpTool[] = [
     name: 'lumen_issue_get',
     description:
       'Get full detail for one issue (description, labels, assignees, milestone, comments).',
-    inputSchema: { project: z.string(), iid: z.string().regex(/^\d+$/, 'iid must be numeric') },
+    inputSchema: { project: z.string(), iid: iidParam },
     handler: async (a) => {
       const data = await gql<{ project: { issue: unknown } | null }>(GET_Q, {
         p: a.project,
@@ -127,7 +127,7 @@ export const issueTools: McpTool[] = [
       'Update an issue: title, description, state (close/reopen), labels (replace), assignees, milestone.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       title: z.string().optional(),
       description: z.string().optional(),
       state: z.enum(['close', 'reopen']).optional(),
@@ -170,7 +170,7 @@ export const issueTools: McpTool[] = [
       'Set an issue\'s work-item Status (e.g. "To do", "In progress", "Done") — the native status widget, distinct from open/closed state and from labels. Status is matched by name, case-insensitively.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       status: z.string().describe('Status name, e.g. "In progress".'),
     },
     handler: async (a) => {
@@ -211,7 +211,7 @@ export const issueTools: McpTool[] = [
     description: 'Add a comment to an issue.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       body: z.string(),
     },
     handler: async (a) => {
@@ -238,7 +238,7 @@ export const issueTools: McpTool[] = [
       'Edit one of your own comments on an issue. Pass the note id from lumen_issue_get. Refuses to edit comments authored by anyone else.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       noteId: z.string().describe('The note global id (gid://...) from lumen_issue_get.'),
       body: z.string(),
     },

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { McpTool } from '../types'
-import { text, errorResult } from '../types'
+import { text, errorResult, iidParam } from '../types'
 import { gql, rest } from './client'
 
 const LIST_Q = `query($p:ID!,$state:MergeRequestState,$labelName:[String],$authorUsername:String,$reviewerUsername:String,$search:String,$first:Int,$after:String){
@@ -57,7 +57,7 @@ export const mrTools: McpTool[] = [
     name: 'lumen_mr_get',
     description:
       'Get full detail for one merge request (description, diff stats, approvals, comments).',
-    inputSchema: { project: z.string(), iid: z.string().regex(/^\d+$/, 'iid must be numeric') },
+    inputSchema: { project: z.string(), iid: iidParam },
     handler: async (a) => {
       const data = await gql<{ project: { mergeRequest: unknown } | null }>(GET_Q, {
         p: a.project,
@@ -72,7 +72,7 @@ export const mrTools: McpTool[] = [
     description: 'Add a comment to a merge request.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       body: z.string(),
     },
     handler: async (a) => {
@@ -96,7 +96,7 @@ export const mrTools: McpTool[] = [
       'Edit one of your own comments on a merge request. Pass the note id from lumen_mr_get. Refuses to edit comments authored by anyone else.',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       noteId: z.string().describe('The note global id (gid://...) from lumen_mr_get.'),
       body: z.string(),
     },
@@ -136,7 +136,7 @@ export const mrTools: McpTool[] = [
     description: 'Approve or unapprove a merge request. (Merge is not available in this version.)',
     inputSchema: {
       project: z.string(),
-      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      iid: iidParam,
       action: z.enum(['approve', 'unapprove']),
     },
     handler: async (a) => {
