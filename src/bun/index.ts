@@ -195,7 +195,9 @@ function buildRpc(initialRoute: string | null = null) {
           return { ok: true }
         },
         reportAppState: async (s) => {
-          cacheSnapshot(s)
+          // Only the main window (initialRoute === null) may write the snapshot;
+          // popouts never report by construction, host-enforced.
+          if (initialRoute === null) cacheSnapshot(s)
           return { ok: true }
         },
       },
