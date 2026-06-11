@@ -11,6 +11,14 @@ Initial development of **Lumen**, a desktop GitLab issue tracker for self-hosted
 instances (Electrobun host + Vue 3 webview). Not yet tagged/released. Highlights
 are grouped by milestone, newest first.
 
+### MCP app-control tools
+
+#### Added
+
+- MCP app-control tools: `lumen_app_state`, `lumen_app_navigate`,
+  `lumen_app_open_issue`, `lumen_app_open_issues_window`,
+  `lumen_app_open_settings`, `lumen_app_notify` (20 tools total).
+
 ### Build & distribution
 
 #### Added

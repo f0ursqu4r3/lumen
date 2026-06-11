@@ -43,13 +43,40 @@ With the app running and the config above set:
     curl -s "${H[@]}" -X POST http://127.0.0.1:7437/ -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
     curl -s "${H[@]}" -X POST http://127.0.0.1:7437/ -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"lumen_me","arguments":{}}}'
 
-Expected: `401`, then a negotiated `initialize`, the 14-tool list, and your GitLab identity from `lumen_me`.
+Expected: `401`, then a negotiated `initialize`, the 20-tool list, and your GitLab identity from `lumen_me`.
 
 ## Tools
 
-GitLab tools (project paths are full paths like `group/project`):
+### GitLab tools
+
+Project paths are full paths like `group/project` (20 tools total).
 
 - `lumen_issues_list`, `lumen_issue_get`, `lumen_issue_create`, `lumen_issue_update`, `lumen_issue_comment`
 - `lumen_mrs_list`, `lumen_mr_get`, `lumen_mr_comment`, `lumen_mr_review` (approve/unapprove)
 - `lumen_labels_list`, `lumen_milestones_list`
 - `lumen_me`, `lumen_members_list`, `lumen_search` (project-scoped)
+
+### App-control tools
+
+These tools read and drive the live Lumen desktop app. All `iid` values are
+**numeric strings** (e.g. `"42"`). Internal routes (`connect`, `settings`) are
+not reachable via `lumen_app_navigate`. Drive commands are best-effort
+no-ops when the main window is closed; in that case the result carries the note
+`"main window not open"`.
+
+| Tool | Arguments | Description |
+|------|-----------|-------------|
+| `lumen_app_state` | _(none)_ | Returns the main window's cached snapshot (`route`, `view`, `projectPath`, `selectedIssueIids`, `visibleIssueIids`) plus a list of all open native windows (`{kind: main\|issue\|issues-window\|settings, key}`). Snapshot is `null` until the app first reports. |
+| `lumen_app_navigate` | `view` (dashboard\|projects\|issues\|issue\|merge-requests\|merge-request\|pipelines); `project` (required for project-scoped views); `iid` (required for issue/merge-request) | Drives the **main window** to the given route. Fire-and-forget — re-read `lumen_app_state` to confirm the navigation landed. |
+| `lumen_app_open_issue` | `project`, `iid` | Opens (or focuses) a native single-issue window for the given issue. |
+| `lumen_app_open_issues_window` | `project`, `iids` (array, min 1) | Opens a multi-issue pager window for the given set of issues. |
+| `lumen_app_open_settings` | _(none)_ | Opens (or focuses) the Settings window. |
+| `lumen_app_notify` | `title`; `body`? ; `subtitle`? ; `silent`? | Sends a native desktop notification. |
+
+#### Architecture notes
+
+The webview pushes debounced state snapshots to the Bun host via the
+`reportAppState` RPC (main window only; enforced host-side). Drive commands
+travel in the opposite direction: the host dispatches a `lumen:mcp-command`
+`CustomEvent` into the webview, which the app's command handler picks up and
+routes to the appropriate action.
