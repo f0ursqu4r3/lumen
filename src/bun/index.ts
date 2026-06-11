@@ -22,6 +22,7 @@ import {
   classifyStatus,
   type Outcome,
 } from './serverHealth'
+import { cacheSnapshot, setHostActions, type WindowInfo } from './mcp/app/bridge'
 // Relative on purpose: electrobun's host build doesn't resolve tsconfig "@/" paths
 // (the "@/" type-only imports above survive because they're erased before bundling).
 import { PROBE_QUERY } from '../shared/lib/gitlabQueries'
@@ -33,6 +34,10 @@ const url = await resolveStartUrl({ hmr: process.env.LUMEN_HMR === '1' })
 // One native window per issue, keyed by `${fullPath}#${iid}`, so re-expanding an
 // already-open issue focuses it instead of spawning a duplicate.
 const issueWindows = new Map<string, BrowserWindow>()
+
+// Combined multi-issue windows are not deduped/focused, but the MCP app-state
+// tool lists them, so track membership for counting.
+const issuesWindows = new Set<BrowserWindow>()
 
 // Every native window registers here so host-owned state (server health) can be
 // broadcast to all of them. Pruned on close.
@@ -97,7 +102,8 @@ function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[]
       rpc: buildRpc(issuesWindowRoute(fullPath, iids)),
     }),
   )
-  void issuesWin
+  issuesWindows.add(issuesWin)
+  issuesWin.on('close', () => issuesWindows.delete(issuesWin))
   return { ok: true }
 }
 
@@ -188,6 +194,10 @@ function buildRpc(initialRoute: string | null = null) {
           )
           return { ok: true }
         },
+        reportAppState: async (s) => {
+          cacheSnapshot(s)
+          return { ok: true }
+        },
       },
       messages: {},
     },
@@ -202,6 +212,28 @@ const win = track(
     rpc: buildRpc(),
   }),
 )
+
+// Hand the MCP app-control tools their host capabilities. Injected (not
+// imported from the tools) to keep mcp/app free of entrypoint imports.
+setHostActions({
+  openIssueWindow,
+  openIssuesWindow,
+  openSettingsWindow,
+  notify: (a) => Utils.showNotification(a),
+  driveMain: (js) => {
+    if (!windows.has(win)) return { ok: false } // main window closed
+    win.webview.executeJavascript(js)
+    return { ok: true }
+  },
+  listWindows: (): WindowInfo[] => {
+    const out: WindowInfo[] = []
+    if (windows.has(win)) out.push({ kind: 'main' })
+    for (const key of issueWindows.keys()) out.push({ kind: 'issue', key })
+    for (const _ of issuesWindows) out.push({ kind: 'issues-window' })
+    if (settingsWindow) out.push({ kind: 'settings' })
+    return out
+  },
+})
 
 // Start the in-process MCP server iff the user enabled it in config. Off by
 // default; localhost-only + bearer-gated (see src/bun/mcp/server.ts).
