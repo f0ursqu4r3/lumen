@@ -46,3 +46,46 @@ export function useMrAddNote(fullPath: string, iid: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: mrKey(fullPath, iid) }),
   })
 }
+
+const UpdateNoteDocument = `
+  mutation UpdateMrNote($input: UpdateNoteInput!) {
+    updateNote(input: $input) {
+      note { id body bodyHtml }
+      errors
+    }
+  }
+`
+
+type UpdateNoteResult = {
+  updateNote?: {
+    note?: { id: string; body: string; bodyHtml?: string | null } | null
+    errors?: string[] | null
+  } | null
+}
+type UpdateNoteInput = { id: string; body: string }
+
+async function sendUpdateNote(input: UpdateNoteInput): Promise<UpdateNoteResult['updateNote']> {
+  let data: UpdateNoteResult
+  try {
+    data = await gqlClient.request<UpdateNoteResult, { input: UpdateNoteInput }>(
+      UpdateNoteDocument,
+      {
+        input,
+      },
+    )
+  } catch (e) {
+    throw normalizeError(e)
+  }
+  const errors = data.updateNote?.errors
+  if (errors?.length) throw { kind: 'graphql', message: errors[0] } satisfies GitLabError
+  return data.updateNote ?? null
+}
+
+/** Edit an existing MR note by its global id. Invalidates the MR detail query. */
+export function useMrUpdateNote(fullPath: string, iid: string) {
+  const qc = useQueryClient()
+  return useMutation<UpdateNoteResult['updateNote'], GitLabError, UpdateNoteInput>({
+    mutationFn: sendUpdateNote,
+    onSuccess: () => qc.invalidateQueries({ queryKey: mrKey(fullPath, iid) }),
+  })
+}
