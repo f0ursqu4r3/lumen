@@ -7,10 +7,13 @@ import { createPersistedQueryClient } from '@/shared/lib/persist'
 import { installServerHealth } from '@/shared/composables/useSession'
 import { installAppStateReport } from '@/shared/composables/useAppStateReport'
 import { installMcpCacheSync } from '@/shared/composables/useMcpCacheSync'
+import { installThemeSync } from '@/shared/theme/installThemeSync'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
 // readout, in keeping with the instrument it sits behind. (Discovered, not announced.)
+// Splash uses the canonical amber literal intentionally — a static console
+// string, not a rendered color, so it's exempt from the theme token refactor.
 console.log(
   '%c●%c lumen%c ▸ operational',
   'color:oklch(0.82 0.142 81);font-size:13px;text-shadow:0 0 8px oklch(0.82 0.142 81/0.7)',
@@ -35,6 +38,10 @@ async function boot() {
   // Coexists with installAppStateReport's lumen:mcp-command listener: each
   // handles a distinct cmd ('invalidate' vs 'navigate'), so they never collide.
   installMcpCacheSync(queryClient)
+  // Every window re-applies and re-mirrors a theme change broadcast by any
+  // window (host fans out lumen:theme-changed). Apply + persist only — never
+  // re-broadcasts, so there is no cross-window feedback loop.
+  installThemeSync()
   // MCP app-control: only the main window reports state / accepts drive
   // commands. Popouts and the settings window get a non-null initial route.
   if (!route) installAppStateReport(router)

@@ -9,13 +9,20 @@ describe('SettingsWindow', () => {
         stubs: {
           ConnectionPane: true,
           AgentAccessPane: true,
+          AppearancePane: true,
           DataCachePane: true,
           AboutPane: true,
         },
       },
     })
     const items = w.findAll('[data-testid="settings-nav-item"]')
-    expect(items).toHaveLength(4)
+    expect(items.map((i) => i.text())).toEqual([
+      'Connection',
+      'Agent access',
+      'Appearance',
+      'Data & cache',
+      'About',
+    ])
     expect(w.find('connection-pane-stub').exists()).toBe(true)
   })
 
@@ -25,6 +32,7 @@ describe('SettingsWindow', () => {
         stubs: {
           ConnectionPane: true,
           AgentAccessPane: true,
+          AppearancePane: true,
           DataCachePane: true,
           AboutPane: true,
         },
