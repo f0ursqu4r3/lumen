@@ -21,6 +21,7 @@ import {
   parseLabel,
   tint,
   TERMINAL_PRIORITY,
+  TERMINAL_TIER_CLASS,
 } from '@/features/labels/lib/labels'
 import { useIdiom } from '@/shared/theme/useIdiom'
 import type { Facet } from '@/features/issues/lib/issueView'
@@ -35,11 +36,6 @@ const selection = useInjectedSelection()
 // Terminal idiom (Phosphor): priority renders as repeated glyphs whose
 // hierarchy is brightness, not semantic color.
 const idiom = useIdiom()
-const TIER_CLASS = {
-  bright: 'phosphor-glow text-primary',
-  mid: 'text-foreground',
-  dim: 'text-muted-foreground',
-} as const
 
 function onCardClick() {
   if (selection.mode.value) selection.toggle(props.issue.iid)
@@ -132,8 +128,9 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
       >
         <span
           v-if="idiom === 'terminal'"
+          aria-hidden="true"
           class="font-mono text-2xs leading-none"
-          :class="TIER_CLASS[TERMINAL_PRIORITY[priority.level].tier]"
+          :class="TERMINAL_TIER_CLASS[TERMINAL_PRIORITY[priority.level].tier]"
         >
           {{ TERMINAL_PRIORITY[priority.level].glyph }}
         </span>

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
 
 // vi.hoisted runs before any imports so we cannot use ref() here.
 // We mark each stub with __v_isRef so Vue's proxyRefs() unwraps them

@@ -1,6 +1,6 @@
 /* Theme palettes — one [data-theme="id"] block per non-default theme.
-   The default (amber) lives in :root in styles.css. Each block defines the SAME
-   token set as :root so a theme switch never falls back to amber's values.
+   The default (chassis) lives in :root in styles.css. Each block defines the SAME
+   token set as :root so a theme switch never falls back to chassis's values.
    Swatch source of truth: src/shared/theme/themes.ts (bg/surface/fg/accent).
    Dark themes lift surfaces above bg; light themes darken them; foregrounds and
    the accent come straight from the registry swatch. A drift-guard test

@@ -205,6 +205,13 @@ export const TERMINAL_PRIORITY: Record<Priority, TerminalPriorityGlyph> = {
   low: { glyph: '▽', tier: 'dim' },
 }
 
+/** Brightness-tier classes for the terminal priority glyph (IssueRow/IssueCard). */
+export const TERMINAL_TIER_CLASS: Record<TerminalPriorityGlyph['tier'], string> = {
+  bright: 'phosphor-glow text-primary',
+  mid: 'text-foreground',
+  dim: 'text-muted-foreground',
+}
+
 export interface TypeMeta {
   code: string
   icon: 'bug' | 'sparkles' | 'recycle' | 'plug' | 'flask-conical' | 'tag'
