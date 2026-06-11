@@ -196,6 +196,27 @@ describe('non-image upload rendering', () => {
     })
     expect(html).toContain('Quarterly Report')
   })
+
+  it('renders a /-/project/<id>/uploads/ plain link as a file-card', () => {
+    const html = renderMarkdown(`[report.pdf](/-/project/42/uploads/${SECRET}/report.pdf)`)
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain('download')
+    expect(html).toContain('/v4/projects/42/uploads/')
+  })
+
+  it('defers resolution for a plain upload link even without a projectPath', () => {
+    const html = renderMarkdown(`[file.pdf](/uploads/${SECRET}/file.pdf)`)
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain(`data-media-src="/uploads/${SECRET}/file.pdf"`)
+  })
+
+  it('keeps the download attribute through DOMPurify sanitization', () => {
+    const html = renderMarkdown(`[report.pdf](/uploads/${SECRET}/report.pdf)`, {
+      projectPath: 'group/app',
+    })
+    // download is load-bearing for the click-to-save path; assert it survives sanitize.
+    expect(html).toContain('download')
+  })
 })
 
 describe('classifyUpload', () => {
