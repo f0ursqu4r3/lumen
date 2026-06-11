@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { z } from 'zod'
 import { appTools } from './tools'
 import { setHostActions, cacheSnapshot, __resetBridge, type HostActions } from './bridge'
 import type { CallToolResult } from '../types'
@@ -134,4 +135,12 @@ describe('lumen_app_notify', () => {
       silent: true,
     })
   })
+})
+
+it('iid schemas reject non-numeric iids', () => {
+  const nav = tool('lumen_app_navigate').inputSchema
+  expect(z.object(nav).safeParse({ view: 'issue', project: 'a/b', iid: 'abc' }).success).toBe(false)
+  const open = tool('lumen_app_open_issue').inputSchema
+  expect(z.object(open).safeParse({ project: 'a/b', iid: '12' }).success).toBe(true)
+  expect(z.object(open).safeParse({ project: 'a/b', iid: 'x' }).success).toBe(false)
 })

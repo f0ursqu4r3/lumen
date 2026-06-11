@@ -4,6 +4,8 @@ import { text, errorResult } from '../types'
 import { getSnapshot, getHostActions, buildCommandJs, type HostActions } from './bridge'
 import type { McpAppCommand } from '@/shared/lib/rpcContract'
 
+const iid = z.string().regex(/^\d+$/, 'iid must be numeric')
+
 const VIEWS = [
   'dashboard',
   'projects',
@@ -41,7 +43,7 @@ export const appTools: McpTool[] = [
     inputSchema: {
       view: z.enum(VIEWS),
       project: z.string().optional(),
-      iid: z.string().optional(),
+      iid: iid.optional(),
     },
     handler: async (a) => {
       const h = host()
@@ -61,7 +63,7 @@ export const appTools: McpTool[] = [
   {
     name: 'lumen_app_open_issue',
     description: 'Open a native single-issue window (or focus the existing one for that issue).',
-    inputSchema: { project: z.string(), iid: z.string() },
+    inputSchema: { project: z.string(), iid },
     handler: async (a) => {
       const h = host()
       if (!h) return NO_BRIDGE
@@ -71,7 +73,7 @@ export const appTools: McpTool[] = [
   {
     name: 'lumen_app_open_issues_window',
     description: 'Open a native multi-issue pager window over several issues of one project.',
-    inputSchema: { project: z.string(), iids: z.array(z.string()).min(1) },
+    inputSchema: { project: z.string(), iids: z.array(iid).min(1) },
     handler: async (a) => {
       const h = host()
       if (!h) return NO_BRIDGE
