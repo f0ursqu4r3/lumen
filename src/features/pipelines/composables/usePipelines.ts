@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import { PIPELINE_POLL_MS, pipelinesKey, sortPipelines } from '@/gitlab/pipelineParams'
 
 // CI pipelines for a project. Like the issues list this rides a polling cadence
@@ -134,8 +135,8 @@ export function usePipelines(fullPath: Ref<string>) {
     queryFn: () => fetchPipelines(fullPath.value),
     // Running-first, newest-first — the order the view and notifications expect.
     select: sortPipelines,
-    refetchInterval: PIPELINE_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(PIPELINE_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
 
   const pipelines = computed(() => query.data.value ?? [])

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import {
   DASHBOARD_POLL_MS,
   MR_NODE_FIELDS,
@@ -46,8 +47,8 @@ export function useAssignedMergeRequests() {
   const query = useQuery<{ nodes: DashboardMr[]; hasNextPage: boolean }, GitLabError>({
     queryKey: dashboardKeys.assignedMrs,
     queryFn: fetchAssignedMrs,
-    refetchInterval: DASHBOARD_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(DASHBOARD_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
   const mrs = computed(() => query.data.value?.nodes ?? [])
   const hasMore = computed(() => query.data.value?.hasNextPage ?? false)

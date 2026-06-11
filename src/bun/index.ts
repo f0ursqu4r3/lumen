@@ -1,6 +1,12 @@
 import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from 'electrobun/bun'
 import { loadConfig, saveConfig, clearConfig } from './config'
-import { gitlabGraphql, gitlabRest, gitlabAsset, gitlabUpload } from './gitlab'
+import {
+  gitlabGraphql,
+  gitlabRest,
+  gitlabAsset,
+  gitlabUpload,
+  clearGitlabReadCache,
+} from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { buildThemeBroadcastJs } from './themeBroadcast'
 import { resolveStartUrl } from './startUrl'
@@ -153,6 +159,7 @@ function buildRpc(initialRoute: string | null = null) {
         getInitialRoute: async () => ({ route: initialRoute }),
         saveConfig: async ({ url, token }) => {
           saveConfig({ url, token })
+          clearGitlabReadCache() // a new url/token invalidates every cached read
           return { ok: true }
         },
         getServerHealth: async () => getHealth(),
@@ -162,10 +169,12 @@ function buildRpc(initialRoute: string | null = null) {
         },
         resetServerHealth: async () => {
           resetForReconnect() // a confirmed-good (re)connect → force health back to ok
+          clearGitlabReadCache() // drop any stale-token reads cached before reconnect
           return { ok: true }
         },
         clearConfig: async () => {
           clearConfig()
+          clearGitlabReadCache() // disconnect: drop every cached read for the old token
           stopMcp() // the MCP server serves with the GitLab token; stop it on disconnect
           // The disconnect originates in the settings window's JS context; bridge
           // to the main window so it drops cached data and returns to Connect.

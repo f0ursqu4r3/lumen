@@ -19,9 +19,10 @@ export type PipelineStatus =
   | 'CANCELED'
   | 'SKIPPED'
 
-// Pipelines change far faster than issues, so the list polls more aggressively
-// than ISSUE_POLL_MS (30s). 10s keeps "what's running" honest without hammering.
-export const PIPELINE_POLL_MS = 10_000
+// Pipelines change faster than issues, but a 10s cadence × every open window was
+// a real load source on the shared GitLab, so this matches ISSUE_POLL_MS (30s).
+// Polling is health-gated and jittered host-side (see src/shared/lib/polling.ts).
+export const PIPELINE_POLL_MS = 30_000
 
 export const pipelinesKey = (fullPath: string) => ['pipelines', fullPath] as const
 

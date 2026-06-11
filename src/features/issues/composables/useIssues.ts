@@ -3,6 +3,7 @@ import { computed, type Ref } from 'vue'
 import { graphql } from '@/gitlab/generated'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import { ISSUE_POLL_MS, issuesKey, toIssuesVars, type IssueFilters } from '@/gitlab/issueParams'
 
 const IssuesDocument = graphql(`
@@ -96,8 +97,8 @@ export function useIssues(fullPath: Ref<string>, filters: Ref<IssueFilters>) {
       last.pageInfo.hasNextPage ? (last.pageInfo.endCursor ?? undefined) : undefined,
     // Live-ish updates without a manual refresh: refetch every loaded page on an
     // interval and whenever the tab regains focus.
-    refetchInterval: ISSUE_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(ISSUE_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
 
   // Flatten the paged results so callers see one contiguous list.

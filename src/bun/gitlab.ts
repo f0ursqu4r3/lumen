@@ -1,5 +1,6 @@
 import { loadConfig } from './config'
 import { observe, isProbing, classifyStatus } from './serverHealth'
+import { PROBE_QUERY } from '../shared/lib/gitlabQueries'
 import type {
   GraphqlArgs,
   GraphqlResult,
@@ -26,6 +27,67 @@ function looksJson(body: string): boolean {
 function report(status: number, hasErrorBody: boolean, silent = false): void {
   if (silent || isProbing()) return
   observe(classifyStatus(status, hasErrorBody))
+}
+
+// ── Cross-window read cache ─────────────────────────────────────────────────
+// Each window has its own QueryClient, so N windows viewing the same thing would
+// otherwise fire N identical GitLab requests per poll. The host is the only
+// process that talks to GitLab, so it dedupes here: identical reads share one
+// in-flight request, and a successful read is served from a short-TTL cache so
+// staggered polls across windows collapse onto a single upstream fetch. Just
+// under the 30s poll cadence, so each window still refreshes every cycle while
+// secondary windows ride the cache. Writes/reconnect/config-change bust it.
+const READ_CACHE_TTL_MS = 25_000
+
+type ReadResult = GraphqlResult | RestResult
+const readCache = new Map<string, { at: number; value: ReadResult }>()
+const inFlight = new Map<string, Promise<ReadResult>>()
+
+/** Drop all cached/in-flight reads so the next read reflects ground truth — call
+ *  after any write or identity change (mutation, REST write, reconnect, config). */
+export function clearGitlabReadCache(): void {
+  readCache.clear()
+  inFlight.clear()
+}
+
+/** Stable JSON (sorted object keys) so {a,b} and {b,a} share one cache key. */
+function stableKey(v: unknown): string {
+  return JSON.stringify(v ?? null, (_k, val) =>
+    val && typeof val === 'object' && !Array.isArray(val)
+      ? Object.fromEntries(Object.entries(val).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : val,
+  )
+}
+
+/** True for a GraphQL document whose first operation is a mutation. */
+function isMutation(query: string): boolean {
+  return /^\s*(#[^\n]*\n\s*)*mutation\b/.test(query)
+}
+
+/**
+ * Serve `run()` through the read cache under `key`: return a fresh cached value,
+ * else join an in-flight request, else run it and cache only when `ok` holds.
+ */
+function cachedRead(
+  key: string,
+  run: () => Promise<ReadResult>,
+  ok: (r: ReadResult) => boolean,
+): Promise<ReadResult> {
+  const hit = readCache.get(key)
+  if (hit && Date.now() - hit.at < READ_CACHE_TTL_MS) return Promise.resolve(hit.value)
+  if (hit) readCache.delete(key)
+  const flying = inFlight.get(key)
+  if (flying) return flying
+  const p = run()
+    .then((value) => {
+      if (ok(value)) readCache.set(key, { at: Date.now(), value })
+      return value
+    })
+    .finally(() => {
+      if (inFlight.get(key) === p) inFlight.delete(key)
+    })
+  inFlight.set(key, p)
+  return p
 }
 
 interface Cfg {
@@ -92,6 +154,22 @@ function requireCfg(): Cfg {
 }
 
 export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
+  // Probes (recovery + connect/settings) must always hit GitLab to test
+  // reachability; mutations must never be cached and bust the cache so writes
+  // are reflected immediately. Everything else is a cacheable cross-window read.
+  if (a.silent || a.query === PROBE_QUERY || isMutation(a.query)) {
+    const res = await graphqlUpstream(a)
+    if (isMutation(a.query)) clearGitlabReadCache()
+    return res
+  }
+  return cachedRead(
+    `gql\0${a.query}\0${stableKey(a.variables)}`,
+    () => graphqlUpstream(a),
+    (r) => (r as GraphqlResult).status === 200 && !(r as GraphqlResult).errors?.length,
+  ) as Promise<GraphqlResult>
+}
+
+async function graphqlUpstream(a: GraphqlArgs): Promise<GraphqlResult> {
   const { url, init } = buildGraphql(requireCfg(), a)
   let res: Response
   try {
@@ -119,6 +197,21 @@ export async function gitlabGraphql(a: GraphqlArgs): Promise<GraphqlResult> {
 }
 
 export async function gitlabRest(a: RestArgs): Promise<RestResult> {
+  // Only GETs are cacheable reads; any write busts the cache so a follow-up read
+  // doesn't serve a pre-write snapshot.
+  if (a.method !== 'GET') {
+    const res = await restUpstream(a)
+    clearGitlabReadCache()
+    return res
+  }
+  return cachedRead(
+    `rest\0${a.path}`,
+    () => restUpstream(a),
+    (r) => (r as RestResult).ok,
+  ) as Promise<RestResult>
+}
+
+async function restUpstream(a: RestArgs): Promise<RestResult> {
   const { url, init } = buildRest(requireCfg(), a)
   let res: Response
   try {

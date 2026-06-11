@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import { ISSUE_POLL_MS, issueKey } from '@/gitlab/issueParams'
 
 const IssueDocument = `
@@ -131,7 +132,7 @@ export function useIssue(fullPath: Ref<string>, iid: Ref<string>) {
     queryFn: () => fetchIssue(fullPath.value, iid.value),
     // Polls the open issue (incl. its comments) until per-issue GraphQL
     // subscriptions replace this. Shares the list's cadence.
-    refetchInterval: ISSUE_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(ISSUE_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
 }

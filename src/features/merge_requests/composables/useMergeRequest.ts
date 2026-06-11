@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import { MR_POLL_MS, mrKey } from '@/features/merge_requests/lib/mrView'
 
 const MergeRequestDocument = `
@@ -86,7 +87,7 @@ export function useMergeRequest(fullPath: Ref<string>, iid: Ref<string>) {
   return useQuery<MergeRequestDetail | null, GitLabError>({
     queryKey: computed(() => mrKey(fullPath.value, iid.value)),
     queryFn: () => fetchMr(fullPath.value, iid.value),
-    refetchInterval: MR_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(MR_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
 }

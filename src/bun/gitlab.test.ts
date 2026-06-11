@@ -20,9 +20,20 @@ vi.mock('./serverHealth', () => ({
         : 'ok',
 }))
 
-import { gitlabGraphql, gitlabRest, gitlabUpload } from './gitlab'
+import { gitlabGraphql, gitlabRest, gitlabUpload, clearGitlabReadCache } from './gitlab'
+import { PROBE_QUERY } from '@/shared/lib/gitlabQueries'
+
+// The read cache is module-level state; start every test from a clean slate so a
+// success cached in one test can't satisfy (and silence the fetch/observe in)
+// the next.
+beforeEach(() => clearGitlabReadCache())
 
 const cfg = { gitlabUrl: 'https://gl.example.com', token: 'glpat-xyz' }
+
+// A fresh Response per call — a body can only be read once, and these mocks back
+// multiple fetches.
+const ok200 = () =>
+  vi.fn(async () => new Response(JSON.stringify({ data: { v: 1 } }), { status: 200 }))
 
 describe('gitlab request builders', () => {
   it('builds a graphql POST with token + TLS-off', () => {
@@ -222,5 +233,93 @@ describe('gitlab feeds server-health', () => {
       dataBase64: 'AA==',
     })
     expect(observe).toHaveBeenCalledWith('down')
+  })
+})
+
+describe('cross-window read cache', () => {
+  beforeEach(() => {
+    loadConfig.mockReturnValue({ gitlabUrl: 'https://gl.example.com', token: 't' })
+    isProbing.mockReturnValue(false)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+  })
+
+  it('serves a repeated identical read from cache (one upstream fetch)', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: '{ a }' })
+    await gitlabGraphql({ query: '{ a }' })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('coalesces concurrent identical reads into a single fetch', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await Promise.all([gitlabGraphql({ query: '{ a }' }), gitlabGraphql({ query: '{ a }' })])
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('keys the cache by variables (different vars → separate fetches)', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: '{ a }', variables: { id: 1 } })
+    await gitlabGraphql({ query: '{ a }', variables: { id: 2 } })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('never caches the reachability probe (always hits upstream)', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: PROBE_QUERY })
+    await gitlabGraphql({ query: PROBE_QUERY })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('bypasses the cache for silent reads', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: '{ a }', silent: true })
+    await gitlabGraphql({ query: '{ a }', silent: true })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('busts the cache after a mutation so the next read refetches', async () => {
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: '{ a }' }) // fetch #1, cached
+    await gitlabGraphql({ query: '{ a }' }) // cache hit
+    await gitlabGraphql({ query: 'mutation M { go }' }) // fetch #2, busts cache
+    await gitlabGraphql({ query: '{ a }' }) // fetch #3 (cache empty)
+    expect(fetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('does not cache a failed read (next identical read retries)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
+    await gitlabGraphql({ query: '{ a }' })
+    await gitlabGraphql({ query: '{ a }' })
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('caches REST GETs but a write busts the cache', async () => {
+    const fetch = vi.fn(async () => new Response('{}', { status: 200 }))
+    vi.stubGlobal('fetch', fetch)
+    await gitlabRest({ method: 'GET', path: '/v4/x' }) // fetch #1, cached
+    await gitlabRest({ method: 'GET', path: '/v4/x' }) // cache hit
+    await gitlabRest({ method: 'POST', path: '/v4/x/star' }) // fetch #2, busts cache
+    await gitlabRest({ method: 'GET', path: '/v4/x' }) // fetch #3
+    expect(fetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('refetches once the cache entry passes its TTL', async () => {
+    vi.useFakeTimers()
+    const fetch = ok200()
+    vi.stubGlobal('fetch', fetch)
+    await gitlabGraphql({ query: '{ a }' })
+    vi.setSystemTime(Date.now() + 26_000) // TTL is 25s
+    await gitlabGraphql({ query: '{ a }' })
+    expect(fetch).toHaveBeenCalledTimes(2)
   })
 })
