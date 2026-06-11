@@ -14,6 +14,10 @@ const { draftSave, draftReset, draftState } = vi.hoisted(() => ({
     comment: null as null | { value: string },
   },
 }))
+vi.mock('@/features/dashboard/composables/useCurrentUser', async () => {
+  const { ref } = await import('vue')
+  return { useCurrentUser: () => ({ data: ref(null as string | null) }) }
+})
 vi.mock('@/features/projects/composables/useProjectMembers', async () => {
   const { ref } = await import('vue')
   return { useProjectMembers: () => ({ data: ref([]) }) }
@@ -78,6 +82,12 @@ vi.mock('@/features/issues/composables/useIssueMutations', async () => {
   return {
     useAddNote: () => ({
       mutateAsync: addNoteMutate,
+      isPending: ref(false),
+      error: ref(null),
+      reset: vi.fn(),
+    }),
+    useUpdateNote: () => ({
+      mutateAsync: vi.fn(),
       isPending: ref(false),
       error: ref(null),
       reset: vi.fn(),

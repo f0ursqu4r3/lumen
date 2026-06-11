@@ -7,6 +7,7 @@ import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { useIssueDiscussion } from '@/features/issues/composables/useIssueDiscussion'
 import MentionTextarea from '@/features/issues/components/MentionTextarea.vue'
 import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
+import { useCurrentUser } from '@/features/dashboard/composables/useCurrentUser'
 
 type NoteAuthor = { name?: string | null; username: string } | null | undefined
 type Note = { id: string; body: string; author?: NoteAuthor; createdAt: string }
@@ -32,12 +33,24 @@ const {
   openReply,
   cancelReply,
   submitReply,
+  editingNoteId,
+  editBody,
+  editPending,
+  editError,
+  openEdit,
+  cancelEdit,
+  submitEdit,
 } = useIssueDiscussion({
   fullPath: props.fullPath,
   iid: props.iid,
   issue: computed(() => props.issue),
   notes: computed(() => props.notes),
 })
+
+const { data: currentUsername } = useCurrentUser()
+function isOwn(note: Note) {
+  return !!currentUsername.value && note.author?.username === currentUsername.value
+}
 
 function nameOrUsername(user?: NoteAuthor) {
   return user?.name || `@${user?.username}` || '(deleted user)'
@@ -72,7 +85,7 @@ function initials(user?: NoteAuthor) {
           v-for="(n, i) in t.notes"
           :key="n.id"
           data-testid="note"
-          class="flex gap-3"
+          class="group/note flex gap-3"
           :class="[i > 0 && 'mt-4 pl-10', fresh.has(n.id) && 'animate-note-in']"
         >
           <Avatar class="mt-0.5 size-7 shrink-0 text-2xs ring-1 ring-border/70">
@@ -86,12 +99,55 @@ function initials(user?: NoteAuthor) {
               <span class="font-mono text-xs text-muted-foreground">
                 {{ new Date(n.createdAt).toLocaleDateString() }}
               </span>
+              <Button
+                v-if="isOwn(n) && editingNoteId !== n.id"
+                type="button"
+                variant="ghost"
+                size="sm"
+                class="ml-auto h-6 px-2 text-xs text-muted-foreground opacity-0 transition group-hover/note:opacity-100 focus-visible:opacity-100"
+                @click="openEdit({ id: n.id, body: n.body })"
+              >
+                Edit
+              </Button>
             </div>
             <MarkdownText
+              v-if="editingNoteId !== n.id"
               :source="n.body"
               :project-path="fullPath"
               class="mt-1 max-w-[68ch] text-sm leading-relaxed"
             />
+            <div v-else class="mt-1 space-y-2">
+              <MentionTextarea
+                v-model="editBody"
+                :members="members"
+                :full-path="fullPath"
+                :rows="3"
+                placeholder="Edit your comment…"
+                aria-label="Edit comment"
+                @keydown.esc="cancelEdit"
+                @open-change="mentionOpen = $event"
+              />
+              <ErrorNotice v-if="editError" :error="editError" />
+              <div class="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  :disabled="editPending || !editBody.trim()"
+                  @click="submitEdit(n.id)"
+                >
+                  {{ editPending ? 'Saving…' : 'Save' }}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="editPending"
+                  @click="cancelEdit"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
