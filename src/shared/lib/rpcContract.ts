@@ -99,11 +99,12 @@ export interface LumenRequests {
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
   gitlabUpload: (a: UploadArgs) => Promise<UploadResult>
   getConfig: () => Promise<ConfigStatus>
-  // The hash route this window should open at, applied client-side before mount.
-  // The bundled views:// scheme can't load an initial URL with the route in its
-  // fragment, so popouts load the bare app and ask the host where to go. The main
-  // window gets `{ route: null }` and stays on the default route.
-  getInitialRoute: () => Promise<{ route: string | null }>
+  // The hash route this window should open at, applied client-side before mount,
+  // plus whether this is the main window. The bundled views:// scheme can't load
+  // an initial URL with the route in its fragment, so popouts load the bare app
+  // and ask the host where to go. `isMain` (not a null route) identifies the main
+  // window, so the main window can also carry a restored route.
+  getInitialRoute: () => Promise<{ route: string | null; isMain: boolean }>
   saveConfig: (a: SaveConfigArgs) => Promise<{ ok: true }>
   clearConfig: () => Promise<{ ok: true }>
   // Open a URL in the OS default browser. The native webview ignores
@@ -130,6 +131,10 @@ export interface LumenRequests {
   }) => Promise<{ ok: true } | { ok: false; error: string }>
   regenerateMcpToken: () => Promise<{ token: string }>
   revealMcpToken: () => Promise<{ token: string | null }>
+  // Startup behavior. The settings General pane reads/writes the single
+  // "Restore windows on startup" preference (config.json), default on.
+  getStartupPrefs: () => Promise<{ restoreOnStartup: boolean }>
+  setRestoreOnStartup: (a: { enabled: boolean }) => Promise<{ ok: true }>
   // Write the lumen MCP server into an agent's user config. Claude Code uses
   // `claude mcp add` when on PATH, else merges ~/.claude.json; Codex merges
   // ~/.codex/config.toml (with a .bak). Never throws — returns a structured error.
