@@ -167,6 +167,8 @@ watch(
   ([sel, iids]) => setReportedIssueIids([...sel], iids),
   { immediate: true },
 )
+// Clear-then-set on route swaps: Vue unmounts the old keyed view (clear) before
+// mounting the new one (immediate watch re-sets) — don't reorder this pairing.
 onUnmounted(clearReportedIssueIids)
 
 const boardGroups = computed(() =>
