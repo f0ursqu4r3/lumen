@@ -13,9 +13,11 @@ it('exposes the full tool catalog with unique lumen_-prefixed names', () => {
       'lumen_issue_update',
       'lumen_issue_set_status',
       'lumen_issue_comment',
+      'lumen_issue_comment_edit',
       'lumen_mrs_list',
       'lumen_mr_get',
       'lumen_mr_comment',
+      'lumen_mr_comment_edit',
       'lumen_mr_review',
       'lumen_labels_list',
       'lumen_milestones_list',
@@ -31,7 +33,7 @@ it('exposes the full tool catalog with unique lumen_-prefixed names', () => {
     ]),
   )
   expect(new Set(names).size).toBe(names.length)
-  expect(names).toHaveLength(21)
+  expect(names).toHaveLength(23)
   expect(names.every((n) => n.startsWith('lumen_'))).toBe(true)
 })
 

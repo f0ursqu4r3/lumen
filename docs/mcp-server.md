@@ -43,16 +43,16 @@ With the app running and the config above set:
     curl -s "${H[@]}" -X POST http://127.0.0.1:7437/ -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
     curl -s "${H[@]}" -X POST http://127.0.0.1:7437/ -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"lumen_me","arguments":{}}}'
 
-Expected: `401`, then a negotiated `initialize`, the 20-tool list, and your GitLab identity from `lumen_me`.
+Expected: `401`, then a negotiated `initialize`, the 23-tool list, and your GitLab identity from `lumen_me`.
 
 ## Tools
 
 ### GitLab tools
 
-Project paths are full paths like `group/project` (20 tools total).
+Project paths are full paths like `group/project` (23 tools total; 17 GitLab + 6 app-control).
 
-- `lumen_issues_list`, `lumen_issue_get`, `lumen_issue_create`, `lumen_issue_update`, `lumen_issue_comment`
-- `lumen_mrs_list`, `lumen_mr_get`, `lumen_mr_comment`, `lumen_mr_review` (approve/unapprove)
+- `lumen_issues_list`, `lumen_issue_get`, `lumen_issue_create`, `lumen_issue_update`, `lumen_issue_set_status`, `lumen_issue_comment`, `lumen_issue_comment_edit`
+- `lumen_mrs_list`, `lumen_mr_get`, `lumen_mr_comment`, `lumen_mr_comment_edit`, `lumen_mr_review` (approve/unapprove)
 - `lumen_labels_list`, `lumen_milestones_list`
 - `lumen_me`, `lumen_members_list`, `lumen_search` (project-scoped)
 
