@@ -69,7 +69,7 @@ describe('theme registry <-> CSS drift guard', () => {
 
   it('the default theme lives in :root, not a data-theme block', () => {
     expect(themesCss).not.toMatch(/\[data-theme=['"]amber['"]\]/)
-    expect(stylesCss).toMatch(/:root[\s\S]*--primary:\s*oklch\(0\.82 0\.142 81\)/)
+    expect(stylesCss).toMatch(/:root[\s\S]*--primary:\s*oklch\(0\.69 0\.2 42\)/)
   })
 
   // Regression guard: themes.css is @imported ABOVE the :root default block, so a
