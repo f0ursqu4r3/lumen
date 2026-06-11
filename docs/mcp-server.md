@@ -30,6 +30,20 @@ Point an MCP client at it (streamable HTTP):
       }
     }
 
+## Connecting agents
+
+Settings ▸ Agent access shows ready-to-paste config for **Claude Code** and
+**Codex CLI**, with your live port and token filled in. Use the **Copy** buttons,
+or **Connect** to write the config automatically:
+
+- **Claude Code** — runs `claude mcp add --scope user` when the `claude` CLI is on
+  your PATH, otherwise merges `~/.claude.json`.
+- **Codex** — merges `~/.codex/config.toml` (a `.bak` is written first) and enables
+  `experimental_use_rmcp_client` so Codex can speak streamable HTTP.
+
+Connections work only while Lumen is running with agent access enabled. After
+regenerating the token, re-run **Connect** to update already-configured agents.
+
 ## Smoke test (real app, real GitLab — requires VPN)
 
 With the app running and the config above set:

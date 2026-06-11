@@ -5,6 +5,8 @@ import { Input } from '@/shared/ui/input'
 import { Button } from '@/shared/ui/button'
 import { rpc } from '@/shared/lib/rpc'
 import { pushToast } from '@/shared/composables/useToast'
+import { useConfirm } from '@/shared/composables/useConfirm'
+import { buildConnect } from '@/shared/lib/agentConnect'
 import type { McpStatus } from '@/shared/lib/rpcContract'
 import PaneHeader from './PaneHeader.vue'
 
@@ -13,6 +15,11 @@ const port = ref(7437)
 const error = ref('')
 const busy = ref(false)
 const revealed = ref<string | null>(null)
+const token = ref<string | null>(null)
+const connecting = ref<'claude' | 'codex' | null>(null)
+const needsReconnect = ref(false)
+
+const { confirm } = useConfirm()
 
 const statusLabel = computed(() => {
   if (error.value) return error.value
@@ -22,24 +29,26 @@ const statusLabel = computed(() => {
 const maskedToken = computed(() =>
   revealed.value ? revealed.value : status.value.hasToken ? 'lmcp_••••••••••••' : '—',
 )
-const snippet = computed(() =>
-  JSON.stringify(
-    {
-      mcpServers: {
-        lumen: {
-          url: `http://127.0.0.1:${status.value.port}/`,
-          headers: { Authorization: 'Bearer <token>' },
-        },
-      },
-    },
-    null,
-    2,
-  ),
+const ready = computed(() => status.value.enabled && status.value.hasToken)
+const snippets = computed(() =>
+  token.value
+    ? buildConnect({ host: '127.0.0.1', port: status.value.port, token: token.value })
+    : null,
 )
+
+async function loadToken() {
+  if (!status.value.hasToken) {
+    token.value = null
+    return
+  }
+  const { token: t } = await rpc.revealMcpToken()
+  token.value = t
+}
 
 async function refresh() {
   status.value = await rpc.getMcpStatus()
   port.value = status.value.port
+  await loadToken()
 }
 onMounted(refresh)
 
@@ -62,10 +71,11 @@ async function regenerate() {
   if (busy.value) return
   busy.value = true
   try {
-    const { token } = await rpc.regenerateMcpToken()
-    revealed.value = token
-    await rpc.clipboardWriteText({ text: token })
+    const { token: newToken } = await rpc.regenerateMcpToken()
+    revealed.value = newToken
+    await rpc.clipboardWriteText({ text: newToken })
     pushToast({ title: 'New token copied', tone: 'success' })
+    needsReconnect.value = true
     await refresh()
   } finally {
     busy.value = false
@@ -73,16 +83,53 @@ async function regenerate() {
 }
 
 async function copyToken() {
-  const { token } = await rpc.revealMcpToken()
-  if (!token) return
-  revealed.value = token
-  await rpc.clipboardWriteText({ text: token })
+  const { token: t } = await rpc.revealMcpToken()
+  if (!t) return
+  revealed.value = t
+  await rpc.clipboardWriteText({ text: t })
   pushToast({ title: 'Token copied', tone: 'success' })
 }
 
-async function copySnippet() {
-  await rpc.clipboardWriteText({ text: snippet.value })
-  pushToast({ title: 'Client config copied', tone: 'success' })
+async function copy(text: string, label: string) {
+  await rpc.clipboardWriteText({ text })
+  pushToast({ title: `${label} copied`, tone: 'success' })
+}
+
+async function connect(which: 'claude' | 'codex') {
+  const ok = await confirm(
+    which === 'claude'
+      ? {
+          title: 'Connect Claude Code?',
+          description:
+            'Runs claude mcp add if available, otherwise writes ~/.claude.json. Overwrites any existing "lumen" server entry.',
+          confirmLabel: 'Connect',
+          cancelLabel: 'Cancel',
+        }
+      : {
+          title: 'Connect Codex?',
+          description:
+            'Writes ~/.codex/config.toml (a .bak is saved first). Overwrites any existing "lumen" server entry.',
+          confirmLabel: 'Connect',
+          cancelLabel: 'Cancel',
+        },
+  )
+  if (!ok) return
+  connecting.value = which
+  try {
+    const res = which === 'claude' ? await rpc.connectClaudeCode() : await rpc.connectCodex()
+    if (res.ok) {
+      needsReconnect.value = false
+      pushToast({
+        title: which === 'claude' ? 'Claude Code connected' : 'Codex connected',
+        description: res.method === 'cli' ? 'Added via claude mcp add' : 'Wrote agent config file',
+        tone: 'success',
+      })
+    } else {
+      pushToast({ title: 'Connect failed', description: res.error, tone: 'failed' })
+    }
+  } finally {
+    connecting.value = null
+  }
 }
 </script>
 
@@ -146,21 +193,99 @@ async function copySnippet() {
       </div>
     </div>
 
-    <div class="space-y-2">
-      <div class="flex items-center justify-between">
+    <div
+      v-if="!ready"
+      class="rounded-lg border border-border/60 bg-card/40 p-4 text-sm text-muted-foreground"
+    >
+      Enable agent access first to connect Claude Code or Codex.
+    </div>
+
+    <template v-else-if="snippets">
+      <p v-if="needsReconnect" class="font-mono text-2xs text-amber-400">
+        Token changed — re-run Connect to update already-configured agents.
+      </p>
+
+      <!-- Claude Code -->
+      <div class="space-y-2 rounded-lg border border-border/60 bg-card/40 p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium text-foreground">Claude Code</p>
+          <Button
+            data-testid="connect-claude"
+            size="sm"
+            :disabled="connecting === 'claude'"
+            @click="connect('claude')"
+            >Connect</Button
+          >
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="font-mono text-2xs text-muted-foreground">CLI</p>
+          <Button variant="ghost" size="sm" @click="copy(snippets.claude.cli, 'CLI command')"
+            ><Copy class="size-3.5" /> Copy</Button
+          >
+        </div>
+        <pre
+          class="overflow-auto rounded-lg border border-border/60 bg-card/50 p-3 font-mono text-xs text-muted-foreground"
+          >{{ snippets.claude.cli }}</pre
+        >
+        <div class="flex items-center justify-between">
+          <p class="font-mono text-2xs text-muted-foreground">.mcp.json</p>
+          <Button variant="ghost" size="sm" @click="copy(snippets.claude.json, '.mcp.json')"
+            ><Copy class="size-3.5" /> Copy</Button
+          >
+        </div>
+        <pre
+          class="overflow-auto rounded-lg border border-border/60 bg-card/50 p-3 font-mono text-xs text-muted-foreground"
+          >{{ snippets.claude.json }}</pre
+        >
+      </div>
+
+      <!-- Codex -->
+      <div class="space-y-2 rounded-lg border border-border/60 bg-card/40 p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium text-foreground">Codex CLI</p>
+          <Button
+            data-testid="connect-codex"
+            size="sm"
+            :disabled="connecting === 'codex'"
+            @click="connect('codex')"
+            >Connect</Button
+          >
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="font-mono text-2xs text-muted-foreground">~/.codex/config.toml</p>
+          <Button variant="ghost" size="sm" @click="copy(snippets.codex.toml, 'Codex config')"
+            ><Copy class="size-3.5" /> Copy</Button
+          >
+        </div>
+        <pre
+          class="overflow-auto rounded-lg border border-border/60 bg-card/50 p-3 font-mono text-xs text-muted-foreground"
+          >{{ snippets.codex.toml }}</pre
+        >
+      </div>
+
+      <!-- Other client -->
+      <div class="space-y-2 rounded-lg border border-border/60 bg-card/40 p-4">
         <p
           class="font-mono text-2xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
         >
-          Client config
+          Other client
         </p>
-        <Button variant="ghost" size="sm" @click="copySnippet"
-          ><Copy class="size-3.5" /> Copy</Button
-        >
+        <p class="font-mono text-xs text-muted-foreground">
+          URL <span class="text-foreground">{{ snippets.raw.url }}</span>
+        </p>
+        <div class="flex items-center justify-between gap-2">
+          <p class="overflow-auto font-mono text-xs text-muted-foreground">
+            Header <span class="text-foreground">{{ snippets.raw.header }}</span>
+          </p>
+          <Button variant="ghost" size="sm" @click="copy(snippets.raw.header, 'Auth header')"
+            ><Copy class="size-3.5" /> Copy</Button
+          >
+        </div>
       </div>
-      <pre
-        class="overflow-auto rounded-lg border border-border/60 bg-card/50 p-3 font-mono text-xs text-muted-foreground"
-        >{{ snippet }}</pre
-      >
-    </div>
+
+      <p class="font-mono text-2xs text-muted-foreground">
+        Connections work only while Lumen is running with agent access enabled.
+      </p>
+    </template>
   </section>
 </template>
