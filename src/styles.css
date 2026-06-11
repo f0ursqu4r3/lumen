@@ -14,6 +14,7 @@
   color-scheme: dark;
 
   --radius: 0.625rem;
+  --density: 1;
 
   --background: oklch(0.178 0.008 256);
   --foreground: oklch(0.945 0.006 256);
@@ -128,6 +129,13 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Density surface — list rows + controls reference these so a single --density
+     override (Appearance ▸ Customize) rescales them. Deliberately narrow: only the
+     issue-list row padding + primary control height consume these (wired in a later
+     task). */
+  --space-row-y: calc(0.5rem * var(--density));
+  --height-control: calc(2rem * var(--density));
 
   /* Sculpted dark elevation. Each surface gets a real layered ambient shadow
      plus a 1px top inner-highlight (the lit edge premium dark UIs use to catch
