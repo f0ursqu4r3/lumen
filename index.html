@@ -11,7 +11,7 @@
       // tested helpers are the source of truth — update both when presets change).
       ;(function () {
         try {
-          var DEFAULT = 'amber'
+          var DEFAULT = 'chassis'
           var LIGHT = { paper: 1, daylight: 1, solarized: 1, linen: 1, frost: 1 }
           var id = localStorage.getItem('lumen:theme') || DEFAULT
           var el = document.documentElement
@@ -41,7 +41,7 @@
     <style>
       /* Avoid a white flash before the stylesheet loads. */
       html {
-        background: oklch(0.178 0.008 256);
+        background: oklch(0.195 0.006 240);
       }
     </style>
   </head>
