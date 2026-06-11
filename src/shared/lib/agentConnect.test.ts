@@ -29,9 +29,11 @@ describe('buildConnect', () => {
     expect(codex.toml).toContain('experimental_use_rmcp_client = true')
     expect(codex.toml).toContain('[mcp_servers.lumen]')
     expect(codex.toml).toContain('url = "http://127.0.0.1:7437"')
-    expect(codex.toml).toContain('bearer_token = "lmcp_abc123"')
     expect(codex.toml).toContain('startup_timeout_sec = 10')
     expect(codex.toml).toContain('tool_timeout_sec = 60')
+    expect(codex.toml).toContain('[mcp_servers.lumen.http_headers]')
+    expect(codex.toml).toContain('Authorization = "Bearer lmcp_abc123"')
+    expect(codex.toml).not.toContain('bearer_token')
   })
 
   it('exposes raw url and header for other clients', () => {

@@ -58,9 +58,9 @@ describe('mergeCodexToml', () => {
     expect(doc.experimental_use_rmcp_client).toBe(true)
     expect(doc.mcp_servers.lumen).toEqual({
       url: 'http://127.0.0.1:7437',
-      bearer_token: 'lmcp_x',
       startup_timeout_sec: 10,
       tool_timeout_sec: 60,
+      http_headers: { Authorization: 'Bearer lmcp_x' },
     })
   })
 
@@ -77,7 +77,7 @@ describe('mergeCodexToml', () => {
     const doc = parse(mergeCodexToml(existing, 'http://127.0.0.1:7437', 'lmcp_new')) as any
     expect(doc.model).toBe('gpt-5')
     expect(doc.mcp_servers.other.command).toBe('x')
-    expect(doc.mcp_servers.lumen.bearer_token).toBe('lmcp_new')
+    expect(doc.mcp_servers.lumen.http_headers.Authorization).toBe('Bearer lmcp_new')
     expect(doc.mcp_servers.lumen.url).toBe('http://127.0.0.1:7437')
   })
 })
@@ -133,7 +133,7 @@ describe('connectCodex', () => {
     expect(existsSync(cfg + '.bak')).toBe(true)
     const doc = parse(readFileSync(cfg, 'utf8')) as any
     expect(doc.model).toBe('gpt-5')
-    expect(doc.mcp_servers.lumen.bearer_token).toBe('lmcp_live')
+    expect(doc.mcp_servers.lumen.http_headers.Authorization).toBe('Bearer lmcp_live')
   })
 
   it('creates the .codex dir and file when none exists', async () => {

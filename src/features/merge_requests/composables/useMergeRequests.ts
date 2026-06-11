@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import {
   MR_POLL_MS,
   mrListKey,
@@ -108,8 +109,8 @@ export function useMergeRequests(fullPath: Ref<string>, filters: Ref<MrFilters>)
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) =>
       last.pageInfo.hasNextPage ? (last.pageInfo.endCursor ?? undefined) : undefined,
-    refetchInterval: MR_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(MR_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
 
   const mergeRequests = computed(() => query.data.value?.pages.flatMap((p) => p.nodes) ?? [])

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { gqlClient } from '@/gitlab/client'
 import { normalizeError, type GitLabError } from '@/gitlab/errors'
+import { pollInterval, pollOnFocus } from '@/shared/lib/polling'
 import {
   DASHBOARD_POLL_MS,
   dashboardKeys,
@@ -53,8 +54,8 @@ export function useAssignedIssues(username: Ref<string | null | undefined>) {
     queryKey: computed(() => dashboardKeys.assignedIssues(username.value ?? '')),
     queryFn: () => fetchAssignedIssues(username.value as string),
     enabled,
-    refetchInterval: DASHBOARD_POLL_MS,
-    refetchOnWindowFocus: true,
+    refetchInterval: pollInterval(DASHBOARD_POLL_MS),
+    refetchOnWindowFocus: pollOnFocus(),
   })
   const issues = computed(() => query.data.value?.nodes ?? [])
   const hasMore = computed(() => query.data.value?.hasNextPage ?? false)
