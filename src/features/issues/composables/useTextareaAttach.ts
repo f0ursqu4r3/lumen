@@ -1,0 +1,96 @@
+import { ref, type Ref } from 'vue'
+import { useFileUpload, MAX_SOFT_BYTES } from './useFileUpload'
+import { pushToast } from '@/shared/composables/useToast'
+
+/**
+ * DOM glue for attaching files to a textarea: paste/drop/picker handlers plus a
+ * placeholder-then-swap insertion. `caret()` returns the current selection offset
+ * in `text` (the host component tracks it). Each in-flight upload gets a unique
+ * token so concurrent uploads never collide, and completion swaps by exact-string
+ * replace — so the user typing elsewhere mid-upload cannot misplace the reference.
+ */
+export function useTextareaAttach(fullPath: string, text: Ref<string>, caret: () => number) {
+  const { uploadFile } = useFileUpload(fullPath)
+  const dragging = ref(false)
+  const fileInput = ref<HTMLInputElement | null>(null)
+  let seq = 0
+
+  function tokenFor(name: string, id: number, isImage: boolean): string {
+    const label = `Uploading ${name}… #u${id}`
+    return `${isImage ? '!' : ''}[${label}]()`
+  }
+
+  async function uploadOne(file: File): Promise<void> {
+    if (file.size > MAX_SOFT_BYTES) {
+      pushToast({ tone: 'info', title: `${file.name} is large; upload may be slow or rejected.` })
+    }
+    const id = (seq += 1)
+    const token = tokenFor(file.name, id, file.type.startsWith('image/'))
+    const at = caret()
+    text.value = `${text.value.slice(0, at)}${token}\n${text.value.slice(at)}`
+    try {
+      const { markdown } = await uploadFile(file)
+      text.value = text.value.replace(token, markdown)
+    } catch (error) {
+      text.value = text.value.replace(`${token}\n`, '').replace(token, '')
+      pushToast({
+        tone: 'failed',
+        title: 'Upload failed',
+        description: error instanceof Error ? error.message : undefined,
+      })
+    }
+  }
+
+  async function handleFiles(list: FileList | File[] | null | undefined): Promise<void> {
+    const files = Array.from(list ?? [])
+    if (!files.length) return
+    await Promise.all(files.map(uploadOne))
+  }
+
+  function onPaste(event: ClipboardEvent): void {
+    const files = event.clipboardData?.files
+    if (files && files.length) {
+      event.preventDefault()
+      void handleFiles(files)
+    }
+  }
+
+  function onDragOver(event: DragEvent): void {
+    if (event.dataTransfer?.types?.includes('Files')) {
+      event.preventDefault()
+      dragging.value = true
+    }
+  }
+
+  function onDragLeave(): void {
+    dragging.value = false
+  }
+
+  function onDrop(event: DragEvent): void {
+    event.preventDefault()
+    dragging.value = false
+    void handleFiles(event.dataTransfer?.files)
+  }
+
+  function openPicker(): void {
+    fileInput.value?.click()
+  }
+
+  function onPick(event: Event): void {
+    const input = event.target as HTMLInputElement
+    void handleFiles(input.files)
+    input.value = '' // allow re-selecting the same file
+  }
+
+  return {
+    dragging,
+    fileInput,
+    handleFiles,
+    onPaste,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    openPicker,
+    onPick,
+  }
+}
