@@ -105,7 +105,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
        instead of navigating. Avoids invalid <button>-inside-<a> nesting. -->
   <div
     data-testid="issue-row"
-    class="group relative flex items-center gap-3 px-4 transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
+    class="group relative flex items-center gap-3 rounded-md border border-border/80 bg-secondary/60 px-4 shadow-card transition-colors duration-150 hover:bg-accent/70 focus-within:bg-accent/70"
     :class="[
       highlight ? 'animate-flash' : 'animate-row-in',
       selection.mode.value ? 'cursor-pointer select-none' : '',
@@ -179,7 +179,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       v-if="status"
       type="button"
       :title="`Filter: ${status.value}`"
-      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-2xs font-medium ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
+      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-[3px] px-2 py-0.5 font-mono text-micro font-medium tracking-[0.06em] uppercase ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
       :style="{
         backgroundColor: tint(status.color, 0.18),
         color: status.color,

@@ -47,7 +47,7 @@ export function useIssueBoardDnd(opts: {
       'gap:0.5rem',
       'max-width:18rem',
       'padding:0.5rem 0.75rem',
-      'border-radius:0.625rem',
+      'border-radius:var(--radius)',
       'background:var(--card)',
       'color:var(--foreground)',
       'border:1px solid color-mix(in oklab, var(--primary) 55%, transparent)',

@@ -87,7 +87,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
         </div>
         <div v-if="!isLoading && !error" class="hidden shrink-0 items-baseline gap-1.5 sm:flex">
           <span
-            class="inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
+            class="counter-bezel inline-flex items-baseline font-mono text-hero font-semibold tabular-nums text-foreground"
           >
             <Odometer :value="count" />
             <span v-if="hasMore" class="text-primary">+</span>

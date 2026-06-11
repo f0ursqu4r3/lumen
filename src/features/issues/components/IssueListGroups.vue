@@ -79,7 +79,7 @@ const activeGroup = computed(() => props.groups.find((g) => g.key === props.acti
             {{ g.issues.length }}
           </span>
         </header>
-        <Card class="gap-0 divide-y divide-border/60 overflow-hidden p-0">
+        <Card class="gap-1.5 p-1.5">
           <IssueRow
             v-for="(issue, i) in g.issues"
             :key="issue.iid"

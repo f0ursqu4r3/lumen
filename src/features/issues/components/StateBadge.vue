@@ -20,7 +20,7 @@ const label = computed(() => (open.value ? 'Open' : 'Closed'))
   />
   <span
     v-else
-    class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
+    class="inline-flex items-center gap-1.5 rounded-[3px] border px-2.5 py-0.5 font-mono text-2xs font-medium tracking-[0.06em] uppercase"
     :class="
       open
         ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'

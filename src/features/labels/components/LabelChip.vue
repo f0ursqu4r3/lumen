@@ -27,7 +27,7 @@ const xHover = computed(() => v.value.xHover)
 
 <template>
   <span
-    class="inline-flex h-5 items-center overflow-hidden rounded-full text-2xs leading-none font-medium whitespace-nowrap"
+    class="inline-flex h-5 items-center overflow-hidden rounded-[3px] font-mono text-micro leading-none font-medium tracking-[0.06em] uppercase whitespace-nowrap"
     :style="{
       backgroundColor: valueBg,
       color: valueText,

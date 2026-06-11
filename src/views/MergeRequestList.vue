@@ -76,7 +76,7 @@ async function refresh() {
 
     <ul
       v-else
-      class="mt-6 divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card shadow-card"
+      class="mt-6 flex flex-col gap-1.5 rounded-xl border border-border bg-card p-1.5 shadow-card"
     >
       <li v-for="mr in mergeRequests" :key="mr.iid">
         <MergeRequestRow :mr="mr" :full-path="fullPath" />
