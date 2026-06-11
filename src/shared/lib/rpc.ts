@@ -27,6 +27,7 @@ export const rpc: LumenRequests = {
   gitlabGraphql: (a) => client().gitlabGraphql(a),
   gitlabRest: (a) => client().gitlabRest(a),
   gitlabAsset: (a) => client().gitlabAsset(a),
+  gitlabUpload: (a) => client().gitlabUpload(a),
   getConfig: () => client().getConfig(),
   getInitialRoute: () => client().getInitialRoute(),
   saveConfig: (a) => client().saveConfig(a),

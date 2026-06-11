@@ -88,6 +88,7 @@ export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
   gitlabRest: (a: RestArgs) => Promise<RestResult>
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
+  gitlabUpload: (a: UploadArgs) => Promise<UploadResult>
   getConfig: () => Promise<ConfigStatus>
   // The hash route this window should open at, applied client-side before mount.
   // The bundled views:// scheme can't load an initial URL with the route in its
