@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
+import { computed, nextTick, onUnmounted, provide, ref, toRef, watch } from 'vue'
 import { useIntersectionObserver, useTitle } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { Plus, Search, LoaderCircle } from '@lucide/vue'
@@ -13,6 +13,10 @@ import { useIssueSavedViews } from '@/features/issues/composables/useIssueSavedV
 import { useIssueBulkHandlers } from '@/features/issues/composables/useIssueBulkHandlers'
 import { useIssueComposer } from '@/features/issues/composables/useIssueComposer'
 import { useRepoPath } from '@/shared/composables/useRepoPath'
+import {
+  setReportedIssueIids,
+  clearReportedIssueIids,
+} from '@/shared/composables/useAppStateReport'
 import { useIssueDrawerRoute } from '@/features/issues/composables/useIssueDrawerRoute'
 import { IssueSelectionKey } from '@/features/issues/composables/useIssueSelection'
 import {
@@ -155,6 +159,15 @@ provide(IssueSelectionKey, selection)
 
 // The iids currently loaded (across pages) — what "Select all" selects.
 const loadedIids = computed(() => issues.value.map((i) => i.iid))
+
+// Mirror selection + loaded iids into the MCP app-state report (no-op when the
+// MCP server is off — the report is a cheap cached push either way).
+watch(
+  [() => selection.selected.value, loadedIids],
+  ([sel, iids]) => setReportedIssueIids([...sel], iids),
+  { immediate: true },
+)
+onUnmounted(clearReportedIssueIids)
 
 const boardGroups = computed(() =>
   applyOrder(

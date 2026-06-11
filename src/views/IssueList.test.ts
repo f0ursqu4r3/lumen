@@ -52,6 +52,7 @@ vi.mock('@/shared/lib/rpc', () => ({
   rpc: {
     openIssueWindow: (a: { fullPath: string; iid: string }) => openIssueWindow(a),
     openIssuesWindow: (a: { fullPath: string; iids: string[] }) => openIssuesWindow(a),
+    reportAppState: async () => ({ ok: true }),
   },
 }))
 

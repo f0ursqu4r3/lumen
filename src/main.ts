@@ -5,6 +5,7 @@ import { router } from './router'
 import { rpc } from '@/shared/lib/rpc'
 import { createPersistedQueryClient } from '@/shared/lib/persist'
 import { installServerHealth } from '@/shared/composables/useSession'
+import { installAppStateReport } from '@/shared/composables/useAppStateReport'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
@@ -28,6 +29,9 @@ async function boot() {
   // overlay) and refetch this window's queries when the server recovers. Never
   // torn down — lives as long as the webview.
   installServerHealth(queryClient)
+  // MCP app-control: only the main window reports state / accepts drive
+  // commands. Popouts and the settings window get a non-null initial route.
+  if (!route) installAppStateReport(router)
   createApp(App).use(router).use(VueQueryPlugin, { queryClient }).mount('#app')
 }
 void boot().catch((err) => {
