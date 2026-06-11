@@ -26,7 +26,7 @@ describe('installThemeSync', () => {
         detail: { themeId: 'chassis', overrides: { radius: 'round' } },
       }),
     )
-    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('1rem')
+    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('0.625rem')
   })
 
   it('ignores malformed events without a themeId', () => {

@@ -23,6 +23,6 @@ describe('applyStoredTheme (boot path)', () => {
     localStorage.setItem('lumen:theme', 'chassis')
     localStorage.setItem('lumen:theme-overrides', JSON.stringify({ radius: 'round' }))
     applyStoredTheme(document, localStorage)
-    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('1rem')
+    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('0.625rem')
   })
 })

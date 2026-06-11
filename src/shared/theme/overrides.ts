@@ -6,9 +6,9 @@ export interface ThemeOverrides {
 }
 
 export const RADIUS_PRESETS = {
-  sharp: '0.25rem',
-  default: '0.625rem',
-  round: '1rem',
+  sharp: '0px',
+  default: '0.25rem',
+  round: '0.625rem',
 } as const
 
 // --density scales list-row vertical padding + control heights ONLY (see styles.css).

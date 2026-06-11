@@ -14,7 +14,9 @@ describe('overridesToVars', () => {
   })
 
   it('maps radius/density/font presets to their token values', () => {
-    expect(overridesToVars({ radius: 'sharp' })['--radius']).toBe(RADIUS_PRESETS.sharp)
+    expect(overridesToVars({ radius: 'sharp' })['--radius']).toBe('0px')
+    expect(overridesToVars({ radius: 'default' })['--radius']).toBe('0.25rem')
+    expect(overridesToVars({ radius: 'round' })['--radius']).toBe('0.625rem')
     expect(overridesToVars({ density: 'compact' })['--density']).toBe(DENSITY_PRESETS.compact)
     expect(overridesToVars({ font: 'system' })['--font-sans']).toBe(FONT_PRESETS.system)
   })

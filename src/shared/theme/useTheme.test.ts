@@ -29,7 +29,7 @@ describe('useTheme', () => {
     await t.setOverride({ accent: 'oklch(0.7 0.13 264)' })
     await t.setOverride({ radius: 'round' })
     expect(t.overrides.value).toEqual({ accent: 'oklch(0.7 0.13 264)', radius: 'round' })
-    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('1rem')
+    expect(document.documentElement.style.getPropertyValue('--radius')).toBe('0.625rem')
     expect(JSON.parse(localStorage.getItem(OVERRIDES_KEY)!)).toEqual({
       accent: 'oklch(0.7 0.13 264)',
       radius: 'round',
