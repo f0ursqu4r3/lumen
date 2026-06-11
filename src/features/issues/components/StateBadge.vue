@@ -1,16 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useIdiom } from '@/shared/theme/useIdiom'
 
 const props = defineProps<{ state: string; compact?: boolean }>()
 const open = computed(() => props.state === 'opened')
 const label = computed(() => (open.value ? 'Open' : 'Closed'))
+const idiom = useIdiom()
 </script>
 
 <template>
-  <!-- Compact: a status dot (used in dense lists where the column is implied).
+  <!-- Terminal idiom (Phosphor): bracketed phosphor text, open states glow.
+       Compact: a status dot (used in dense lists where the column is implied).
        Full: a pill with a leading dot (used on the detail page). -->
   <span
-    v-if="compact"
+    v-if="idiom === 'terminal'"
+    :title="label"
+    class="font-mono text-2xs whitespace-nowrap"
+    :class="open ? 'phosphor-glow text-primary' : 'text-muted-foreground'"
+  >
+    [{{ label.toUpperCase() }}]
+  </span>
+  <span
+    v-else-if="compact"
     :title="label"
     :aria-label="label"
     class="inline-block size-2 shrink-0 rounded-full"

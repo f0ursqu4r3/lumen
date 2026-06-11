@@ -7,6 +7,7 @@ import {
   typeOf,
   statusOf,
   remainingLabels,
+  TERMINAL_PRIORITY,
 } from './labels'
 
 describe('parseLabel', () => {
@@ -93,5 +94,15 @@ describe('semantic scopes', () => {
 
   it('leaves only non-lifted labels as pills', () => {
     expect(remainingLabels(labels).map((l) => l.title)).toEqual(['team::HMI'])
+  })
+})
+
+describe('TERMINAL_PRIORITY', () => {
+  it('maps every priority level to a glyph + brightness tier', () => {
+    expect(TERMINAL_PRIORITY.critical).toEqual({ glyph: '▲▲▲', tier: 'bright' })
+    expect(TERMINAL_PRIORITY.fasttrack).toEqual({ glyph: '▲▲', tier: 'bright' })
+    expect(TERMINAL_PRIORITY.high).toEqual({ glyph: '▲▲', tier: 'mid' })
+    expect(TERMINAL_PRIORITY.medium).toEqual({ glyph: '▲', tier: 'mid' })
+    expect(TERMINAL_PRIORITY.low).toEqual({ glyph: '▽', tier: 'dim' })
   })
 })

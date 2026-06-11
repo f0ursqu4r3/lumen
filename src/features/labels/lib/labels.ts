@@ -190,6 +190,21 @@ const PRIORITY: Record<Priority, PriorityMeta> = {
   },
 }
 
+/** Terminal-idiom (Phosphor) rendering: priority as repeated glyphs, hierarchy
+ *  as brightness tier instead of semantic color. */
+export interface TerminalPriorityGlyph {
+  glyph: string
+  tier: 'bright' | 'mid' | 'dim'
+}
+
+export const TERMINAL_PRIORITY: Record<Priority, TerminalPriorityGlyph> = {
+  critical: { glyph: '▲▲▲', tier: 'bright' },
+  fasttrack: { glyph: '▲▲', tier: 'bright' },
+  high: { glyph: '▲▲', tier: 'mid' },
+  medium: { glyph: '▲', tier: 'mid' },
+  low: { glyph: '▽', tier: 'dim' },
+}
+
 export interface TypeMeta {
   code: string
   icon: 'bug' | 'sparkles' | 'recycle' | 'plug' | 'flask-conical' | 'tag'

@@ -15,7 +15,14 @@ import {
 } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Checkbox } from '@/shared/ui/checkbox'
-import { priorityOf, typeOf, parseLabel, tint } from '@/features/labels/lib/labels'
+import {
+  priorityOf,
+  typeOf,
+  parseLabel,
+  tint,
+  TERMINAL_PRIORITY,
+} from '@/features/labels/lib/labels'
+import { useIdiom } from '@/shared/theme/useIdiom'
 import type { Facet } from '@/features/issues/lib/issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'
@@ -24,6 +31,15 @@ const props = defineProps<{ issue: IssueListItem; fullPath: string; highlight?: 
 const emit = defineEmits<{ filter: [facet: Facet] }>()
 
 const selection = useInjectedSelection()
+
+// Terminal idiom (Phosphor): priority renders as repeated glyphs whose
+// hierarchy is brightness, not semantic color.
+const idiom = useIdiom()
+const TIER_CLASS = {
+  bright: 'phosphor-glow text-primary',
+  mid: 'text-foreground',
+  dim: 'text-muted-foreground',
+} as const
 
 function onCardClick() {
   if (selection.mode.value) selection.toggle(props.issue.iid)
@@ -114,7 +130,15 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
         class="relative z-10 grid size-5 shrink-0 cursor-pointer place-items-center rounded outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
         @click="filterLabel(priorityLabel)"
       >
+        <span
+          v-if="idiom === 'terminal'"
+          class="font-mono text-2xs leading-none"
+          :class="TIER_CLASS[TERMINAL_PRIORITY[priority.level].tier]"
+        >
+          {{ TERMINAL_PRIORITY[priority.level].glyph }}
+        </span>
         <component
+          v-else
           :is="ICONS[priority.icon]"
           class="size-3.5"
           :style="{ color: priority.color }"

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { X } from '@lucide/vue'
 import { labelVisual } from '@/features/labels/lib/labels'
+import { useIdiom } from '@/shared/theme/useIdiom'
 
 const props = defineProps<{
   title: string
@@ -9,6 +10,10 @@ const props = defineProps<{
   closeable?: boolean
 }>()
 const emit = defineEmits<{ remove: [] }>()
+
+// Terminal idiom (Phosphor): labels render as bracketed dim text — no GitLab
+// color, no pill chrome. Hierarchy comes from brightness, not hue.
+const idiom = useIdiom()
 
 // GitLab supplies an arbitrary hex color. Scoped labels (`scope::value`) render
 // as two-tone pills — a darker scope segment and a softened value segment, with
@@ -27,6 +32,23 @@ const xHover = computed(() => v.value.xHover)
 
 <template>
   <span
+    v-if="idiom === 'terminal'"
+    class="inline-flex h-5 items-center gap-1 font-mono text-2xs whitespace-nowrap text-muted-foreground"
+    :title="title"
+  >
+    [{{ title }}]
+    <button
+      v-if="closeable"
+      type="button"
+      :aria-label="`Remove filter ${title}`"
+      class="grid size-3.5 place-items-center outline-none hover:text-foreground focus-visible:text-foreground"
+      @click="emit('remove')"
+    >
+      <X class="size-2.5" :stroke-width="2.5" />
+    </button>
+  </span>
+  <span
+    v-else
     class="inline-flex h-5 items-center overflow-hidden rounded-[3px] font-mono text-micro leading-none font-medium tracking-[0.06em] uppercase whitespace-nowrap"
     :style="{
       backgroundColor: valueBg,

@@ -24,12 +24,23 @@ import {
   remainingLabels,
   parseLabel,
   tint,
+  TERMINAL_PRIORITY,
 } from '@/features/labels/lib/labels'
+import { useIdiom } from '@/shared/theme/useIdiom'
 import type { Facet } from '@/features/issues/lib/issueView'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import { useInjectedSelection } from '@/features/issues/composables/useIssueSelection'
 
 const selection = useInjectedSelection()
+
+// Terminal idiom (Phosphor): priority renders as repeated glyphs whose
+// hierarchy is brightness, not semantic color.
+const idiom = useIdiom()
+const TIER_CLASS = {
+  bright: 'phosphor-glow text-primary',
+  mid: 'text-foreground',
+  dim: 'text-muted-foreground',
+} as const
 
 // In select mode the whole row toggles selection; out of it, clicks fall through
 // to the stretched RouterLink as before.
@@ -156,7 +167,15 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       class="relative z-10 grid size-5 shrink-0 cursor-pointer place-items-center rounded outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
       @click="filterLabel(priorityLabel)"
     >
+      <span
+        v-if="idiom === 'terminal'"
+        class="font-mono text-2xs leading-none"
+        :class="TIER_CLASS[TERMINAL_PRIORITY[priority.level].tier]"
+      >
+        {{ TERMINAL_PRIORITY[priority.level].glyph }}
+      </span>
       <component
+        v-else
         :is="ICONS[priority.icon]"
         class="size-3.5"
         :style="{ color: priority.color }"
@@ -180,14 +199,21 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       type="button"
       :title="`Filter: ${status.value}`"
       class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 rounded-[3px] px-2 py-0.5 font-mono text-micro font-medium tracking-[0.06em] uppercase ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
-      :style="{
-        backgroundColor: tint(status.color, 0.18),
-        color: status.color,
-      }"
+      :class="idiom === 'terminal' && 'text-muted-foreground'"
+      :style="
+        idiom === 'terminal'
+          ? undefined
+          : { backgroundColor: tint(status.color, 0.18), color: status.color }
+      "
       @click="filterLabel({ title: status.raw, color: status.color })"
     >
-      <span class="size-1.5 rounded-full" :style="{ backgroundColor: status.color }" />
-      {{ status.value }}
+      <span
+        v-if="idiom !== 'terminal'"
+        class="size-1.5 rounded-full"
+        :style="{ backgroundColor: status.color }"
+      />
+      <template v-if="idiom === 'terminal'">[{{ status.value.toUpperCase() }}]</template>
+      <template v-else>{{ status.value }}</template>
     </button>
 
     <span v-if="pills.length" class="relative z-10 hidden shrink-0 gap-1 lg:flex">
