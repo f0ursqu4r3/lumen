@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { RADIUS_PRESETS, DENSITY_PRESETS, FONT_PRESETS } from './overrides'
-import { THEMES } from './themes'
+import { THEMES, DEFAULT_THEME_ID, themeById } from './themes'
 
 const html = readFileSync(fileURLToPath(new URL('../../../index.html', import.meta.url)), 'utf8')
 
@@ -36,5 +36,25 @@ describe('index.html inline boot script stays in sync with source', () => {
       .sort()
     const inlineLight = Object.keys(objLiteral('LIGHT')).sort()
     expect(inlineLight).toEqual(light)
+  })
+
+  it('TERMINAL id set matches the idiom-carrying themes in the registry', () => {
+    const terminal = THEMES.filter((t) => t.idiom)
+      .map((t) => t.id)
+      .sort()
+    const inlineTerminal = Object.keys(objLiteral('TERMINAL')).sort()
+    expect(inlineTerminal).toEqual(terminal)
+  })
+
+  it('inline DEFAULT matches DEFAULT_THEME_ID', () => {
+    const m = html.match(/var DEFAULT\s*=\s*'([^']+)'/)
+    if (!m) throw new Error('inline DEFAULT not found in index.html')
+    expect(m[1]).toBe(DEFAULT_THEME_ID)
+  })
+
+  it('flash-guard background matches the default theme swatch bg', () => {
+    const m = html.match(/html\s*\{\s*background:\s*([^;]+);/)
+    if (!m) throw new Error('flash-guard background not found in index.html')
+    expect(m[1].trim()).toBe(themeById(DEFAULT_THEME_ID)!.swatch.bg)
   })
 })

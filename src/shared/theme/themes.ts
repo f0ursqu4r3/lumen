@@ -7,6 +7,8 @@ export interface ThemeMeta {
   name: string
   group: ThemeGroup
   colorScheme: ColorScheme
+  /** Rendering idiom: 'terminal' flips components to the phosphor readout dialect. */
+  idiom?: 'terminal'
   /** Representative colors for the picker preview card (no computed-style reads). */
   swatch: { bg: string; surface: string; fg: string; accent: string }
 }
@@ -109,6 +111,19 @@ export const THEMES: ThemeMeta[] = [
       surface: 'oklch(0.24 0.02 60)',
       fg: 'oklch(0.93 0.014 70)',
       accent: 'oklch(0.78 0.09 70)',
+    },
+  },
+  {
+    id: 'phosphor',
+    name: 'Phosphor',
+    group: 'dark',
+    colorScheme: 'dark',
+    idiom: 'terminal',
+    swatch: {
+      bg: 'oklch(0.17 0.018 150)',
+      surface: 'oklch(0.195 0.022 150)',
+      fg: 'oklch(0.85 0.13 150)',
+      accent: 'oklch(0.87 0.19 150)',
     },
   },
   // Light

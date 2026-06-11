@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { installThemeSync, __resetThemeSync } from './installThemeSync'
 import { THEME_KEY } from './applyTheme'
+import { DEFAULT_THEME_ID } from './themes'
 
 beforeEach(() => {
   __resetThemeSync()
@@ -34,6 +35,15 @@ describe('installThemeSync', () => {
     window.dispatchEvent(new CustomEvent('lumen:theme-changed', { detail: {} }))
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
     expect(localStorage.getItem(THEME_KEY)).toBeNull()
+  })
+
+  it('coerces an unknown broadcast theme id to the default before persisting', () => {
+    installThemeSync()
+    window.dispatchEvent(
+      new CustomEvent('lumen:theme-changed', { detail: { themeId: 'amber', overrides: {} } }),
+    )
+    expect(localStorage.getItem(THEME_KEY)).toBe(DEFAULT_THEME_ID)
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
   it('installs only once (idempotent)', () => {

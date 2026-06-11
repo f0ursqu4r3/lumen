@@ -8,6 +8,7 @@ import { installServerHealth } from '@/shared/composables/useSession'
 import { installAppStateReport } from '@/shared/composables/useAppStateReport'
 import { installMcpCacheSync } from '@/shared/composables/useMcpCacheSync'
 import { installThemeSync } from '@/shared/theme/installThemeSync'
+import { applyStoredTheme } from '@/shared/theme/applyTheme'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
@@ -43,6 +44,10 @@ async function boot() {
   // window (host fans out lumen:theme-changed). Apply + persist only — never
   // re-broadcasts, so there is no cross-window feedback loop.
   installThemeSync()
+  // Re-apply the stored theme through the tested helper: coerces legacy/unknown
+  // ids to the default and clears any stale data-theme/data-idiom the inline
+  // boot script set from an id the registry no longer knows.
+  applyStoredTheme(document, localStorage)
   // MCP app-control + session-route reporting live only in the main window. The
   // main window is identified by isMain (it may now carry a restored route, so a
   // null route no longer distinguishes it). Popouts and settings get isMain=false.

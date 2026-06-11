@@ -14,6 +14,8 @@ export function applyTheme(doc: Document, state: ThemeState): void {
   const meta = themeById(state.themeId) ?? themeById(DEFAULT_THEME_ID)!
   if (meta.id === DEFAULT_THEME_ID) el.removeAttribute('data-theme')
   else el.setAttribute('data-theme', meta.id)
+  if (meta.idiom) el.setAttribute('data-idiom', meta.idiom)
+  else el.removeAttribute('data-idiom')
   el.style.colorScheme = meta.colorScheme
 
   const vars = overridesToVars(state.overrides)

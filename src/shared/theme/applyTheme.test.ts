@@ -28,6 +28,13 @@ describe('applyTheme', () => {
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   })
 
+  it('sets data-idiom for a terminal theme and clears it on switch back', () => {
+    applyTheme(document, { themeId: 'phosphor', overrides: {} })
+    expect(document.documentElement.getAttribute('data-idiom')).toBe('terminal')
+    applyTheme(document, { themeId: DEFAULT_THEME_ID, overrides: {} })
+    expect(document.documentElement.hasAttribute('data-idiom')).toBe(false)
+  })
+
   it('round-trips through storage', () => {
     writeStored(localStorage, { themeId: 'teal', overrides: { radius: 'round' } })
     expect(localStorage.getItem(THEME_KEY)).toBe('teal')

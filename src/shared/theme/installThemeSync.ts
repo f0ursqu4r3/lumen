@@ -1,5 +1,6 @@
 import type { ThemeState } from '@/shared/lib/rpcContract'
 import { applyTheme, writeStored } from './applyTheme'
+import { DEFAULT_THEME_ID, themeById } from './themes'
 
 let listener: ((e: Event) => void) | null = null
 
@@ -13,8 +14,11 @@ let listener: ((e: Event) => void) | null = null
 export function installThemeSync(): void {
   if (listener) return // install-once: a second call would duplicate the listener
   listener = (e: Event) => {
-    const state = (e as CustomEvent).detail as ThemeState | undefined
+    let state = (e as CustomEvent).detail as ThemeState | undefined
     if (!state?.themeId) return
+    // Coerce unknown ids (e.g. a stale window broadcasting a legacy theme) to
+    // the default so we never persist an id readStored would have to repair.
+    if (!themeById(state.themeId)) state = { ...state, themeId: DEFAULT_THEME_ID }
     applyTheme(document, state)
     writeStored(localStorage, state)
   }

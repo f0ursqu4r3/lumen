@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { THEMES, DEFAULT_THEME_ID, themeById } from './themes'
 
 describe('theme registry', () => {
-  it('has 16 themes with unique ids', () => {
-    expect(THEMES).toHaveLength(16)
-    expect(new Set(THEMES.map((t) => t.id)).size).toBe(16)
+  it('has 17 themes with unique ids', () => {
+    expect(THEMES).toHaveLength(17)
+    expect(new Set(THEMES.map((t) => t.id)).size).toBe(17)
   })
 
   it('default is chassis and is the first dark theme', () => {
@@ -26,6 +26,16 @@ describe('theme registry', () => {
         expect(t.swatch[key]).toMatch(/^oklch\(/)
       }
     }
+  })
+
+  it('registers phosphor as a dark terminal-idiom theme', () => {
+    const t = themeById('phosphor')
+    expect(t?.group).toBe('dark')
+    expect(t?.idiom).toBe('terminal')
+  })
+
+  it('only phosphor carries an idiom', () => {
+    expect(THEMES.filter((t) => t.idiom).map((t) => t.id)).toEqual(['phosphor'])
   })
 
   it('themeById returns undefined for unknown ids', () => {

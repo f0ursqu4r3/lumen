@@ -309,6 +309,46 @@
   );
 }
 
+/* Phosphor — single-hue CRT readout. Hierarchy is brightness, not color:
+   bright = --primary, body = --foreground, dim = --muted-foreground. The
+   terminal idiom block in styles.css (Task 8) handles geometry/type; this is palette. */
+:root[data-theme='phosphor'] {
+  color-scheme: dark;
+  --background: oklch(0.17 0.018 150);
+  --foreground: oklch(0.85 0.13 150);
+  --card: oklch(0.195 0.022 150);
+  --card-foreground: oklch(0.85 0.13 150);
+  --popover: oklch(0.195 0.022 150);
+  --popover-foreground: oklch(0.85 0.13 150);
+  --primary: oklch(0.87 0.19 150);
+  --primary-foreground: oklch(0.18 0.05 150);
+  --secondary: oklch(0.225 0.025 150);
+  --secondary-foreground: oklch(0.85 0.13 150);
+  --muted: oklch(0.225 0.025 150);
+  --muted-foreground: oklch(0.58 0.07 150);
+  --accent: oklch(0.245 0.028 150);
+  --accent-foreground: oklch(0.88 0.13 150);
+  --destructive: oklch(0.62 0.2 25);
+  --destructive-foreground: oklch(0.96 0.02 25);
+  --border: oklch(0.28 0.04 150);
+  --input: oklch(0.3 0.04 150);
+  --ring: oklch(0.87 0.19 150);
+  --chart-1: oklch(0.87 0.19 150);
+  --chart-2: oklch(0.7 0.13 150);
+  --chart-3: oklch(0.58 0.07 150);
+  --chart-4: oklch(0.7 0.16 25);
+  --chart-5: oklch(0.85 0.13 150);
+  --sidebar: oklch(0.195 0.022 150);
+  --sidebar-foreground: oklch(0.85 0.13 150);
+  --sidebar-primary: oklch(0.87 0.19 150);
+  --sidebar-primary-foreground: oklch(0.18 0.05 150);
+  --sidebar-accent: oklch(0.245 0.028 150);
+  --sidebar-accent-foreground: oklch(0.88 0.13 150);
+  --sidebar-border: oklch(0.28 0.04 150);
+  --sidebar-ring: oklch(0.87 0.19 150);
+  --canvas-gradient: linear-gradient(180deg, oklch(0.185 0.02 150) 0%, oklch(0.17 0.018 150) 18rem);
+}
+
 /* ── Light ────────────────────────────────────────────────────────────────── */
 
 /* Paper — warm off-white, ink text, amber accent (light). */

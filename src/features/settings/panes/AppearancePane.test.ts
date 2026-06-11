@@ -19,9 +19,9 @@ beforeEach(() => {
 })
 
 describe('AppearancePane', () => {
-  it('renders all 16 themes grouped', () => {
+  it('renders all 17 themes grouped', () => {
     const w = mount(AppearancePane)
-    expect(w.findAll('[data-test="theme-card"]')).toHaveLength(16)
+    expect(w.findAll('[data-test="theme-card"]')).toHaveLength(17)
     expect(w.text()).toContain('Dark')
     expect(w.text()).toContain('Light')
     expect(w.text()).toContain('Bold')
