@@ -12,7 +12,10 @@
 /* Refined dark — cool slate neutrals tinted toward hue 256, with a single rare
    amber signal accent (hue ~80). Chroma stays low near the lightness extremes so
    nothing looks garish. Deliberately avoids the cyan/purple-on-dark AI palette.
-   This is the default (and currently only) theme, so it lives on :root. */
+   This is the default theme, so it lives on :root; the other 15 themes live in
+   themes.css as [data-theme="id"] blocks. The theme registry + runtime are in
+   src/shared/theme/, and the per-user override layer (accent/radius/density/font)
+   is applied on top via Appearance settings. */
 :root {
   color-scheme: dark;
 
