@@ -147,6 +147,36 @@ describe('renderMarkdown', () => {
   })
 })
 
+// Regression: non-image file attachments must render as a downloadable file-card
+// anchor so users can retrieve their uploads. GitLab's upload API returns
+// `![filename](/uploads/<32-hex-secret>/filename)` for non-image files (same
+// image-token syntax as media), and the gitlabImageExtension renderer branches on
+// extension to emit a <a class="file-card" download> instead of an <img>.
+describe('non-image upload rendering', () => {
+  const s = '0123456789abcdef0123456789abcdef' // 32 hex chars — matches SECRET regex
+
+  it('renders a non-image upload as a downloadable file-card with a deferred src', () => {
+    // GitLab returns `![filename](...)` for non-image files too; the renderer
+    // classifies by extension and emits a file-card anchor instead of an <img>.
+    const html = renderMarkdown(`![report.pdf](/uploads/${s}/report.pdf)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain('download')
+    expect(html).toContain('data-media-src=')
+    expect(html).toContain('report.pdf')
+    expect(html).not.toContain('<img')
+  })
+
+  it('renders an image upload inline (not a file-card)', () => {
+    const html = renderMarkdown(`![shot](/uploads/${s}/shot.png)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('data-media-kind="image"')
+    expect(html).not.toContain('file-card')
+  })
+})
+
 describe('classifyUpload', () => {
   it('classifies uploads by extension, case-insensitively', () => {
     expect(classifyUpload('/uploads/x/a.PNG')).toBe('image')
