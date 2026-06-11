@@ -5,6 +5,7 @@ import {
   setHostActions,
   getHostActions,
   buildCommandJs,
+  emitInvalidate,
   __resetBridge,
   type HostActions,
 } from './bridge'
@@ -42,6 +43,7 @@ describe('host actions', () => {
       openSettingsWindow: vi.fn(() => ({ ok: true })),
       notify: vi.fn(),
       driveMain: vi.fn(() => ({ ok: true })),
+      broadcast: vi.fn(() => {}),
       listWindows: vi.fn(() => []),
     }
     setHostActions(host)
@@ -66,5 +68,28 @@ describe('buildCommandJs', () => {
     // The hostile string must stay inside the JSON string literal.
     expect(js).toContain('\\"})); alert(1); (\\"')
     expect(js.startsWith('window.dispatchEvent(')).toBe(true)
+  })
+})
+
+describe('emitInvalidate', () => {
+  it('broadcasts the invalidate command JS through the host', () => {
+    const broadcast = vi.fn()
+    setHostActions({
+      openIssueWindow: vi.fn(() => ({ ok: true })),
+      openIssuesWindow: vi.fn(() => ({ ok: true })),
+      openSettingsWindow: vi.fn(() => ({ ok: true })),
+      notify: vi.fn(),
+      driveMain: vi.fn(() => ({ ok: true })),
+      listWindows: vi.fn(() => []),
+      broadcast,
+    })
+    emitInvalidate({ resource: 'issue', project: 'a/b', iid: '5' })
+    expect(broadcast).toHaveBeenCalledWith(
+      buildCommandJs({ cmd: 'invalidate', resource: 'issue', project: 'a/b', iid: '5' }),
+    )
+  })
+
+  it('no-ops (no throw) when no host is registered', () => {
+    expect(() => emitInvalidate({ resource: 'issue', project: 'a/b' })).not.toThrow()
   })
 })

@@ -22,6 +22,7 @@ function stubHost(overrides: Partial<HostActions> = {}): HostActions {
     openSettingsWindow: vi.fn(() => ({ ok: true })),
     notify: vi.fn(),
     driveMain: vi.fn(() => ({ ok: true })),
+    broadcast: vi.fn(),
     listWindows: vi.fn(() => [{ kind: 'main' as const }]),
     ...overrides,
   }
