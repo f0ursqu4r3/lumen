@@ -130,7 +130,7 @@ function pickStatus(status: WorkItemStatus) {
                 Remove
               </button>
             </div>
-            <LabelPicker v-model="pendingTitles" :catalog="catalog" label="Labels" />
+            <LabelPicker v-model="pendingTitles" :catalog="catalog" label="Labels" placement="up" />
             <Button
               class="mt-2 w-full"
               size="sm"
@@ -157,7 +157,12 @@ function pickStatus(status: WorkItemStatus) {
             v-if="openMenu === 'assignee'"
             class="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-popover p-2 shadow-pop"
           >
-            <AssigneePicker v-model="pendingAssignee" :members="members" label="Assignee" />
+            <AssigneePicker
+              v-model="pendingAssignee"
+              :members="members"
+              label="Assignee"
+              placement="up"
+            />
             <Button
               class="mt-2 w-full"
               size="sm"

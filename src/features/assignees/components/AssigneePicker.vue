@@ -6,8 +6,15 @@ import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 
 const props = withDefaults(
-  defineProps<{ members: ProjectMember[]; modelValue: string | null; label?: string }>(),
-  { label: 'Assignee' },
+  defineProps<{
+    members: ProjectMember[]
+    modelValue: string | null
+    label?: string
+    // Which way the dropdown opens. Default down; pass 'up' when the trigger sits
+    // near the viewport bottom (e.g. the bulk action bar) so the list doesn't clip.
+    placement?: 'down' | 'up'
+  }>(),
+  { label: 'Assignee', placement: 'down' },
 )
 const emit = defineEmits<{ 'update:modelValue': [id: string | null] }>()
 
@@ -66,7 +73,8 @@ const initial = (m: ProjectMember) => (m.name || m.username).charAt(0).toUpperCa
 
       <div
         v-if="open"
-        class="absolute right-0 z-50 mt-1 flex max-h-60 w-60 flex-col rounded-lg border border-border bg-popover p-1 shadow-md"
+        class="absolute right-0 z-50 flex max-h-60 w-60 flex-col rounded-lg border border-border bg-popover p-1 shadow-md"
+        :class="placement === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'"
         @keydown.escape.stop="open = false"
       >
         <div class="relative mb-1 shrink-0">

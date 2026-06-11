@@ -8,8 +8,15 @@ import { groupLabelsByScope, toggleScoped } from '@/features/labels/lib/labelGro
 import type { ProjectLabel } from '@/features/labels/composables/useProjectLabels'
 
 const props = withDefaults(
-  defineProps<{ catalog: ProjectLabel[]; modelValue: string[]; label?: string }>(),
-  { label: 'Labels' },
+  defineProps<{
+    catalog: ProjectLabel[]
+    modelValue: string[]
+    label?: string
+    // Which way the dropdown opens. Default down; pass 'up' when the trigger sits
+    // near the viewport bottom (e.g. the bulk action bar) so the list doesn't clip.
+    placement?: 'down' | 'up'
+  }>(),
+  { label: 'Labels', placement: 'down' },
 )
 const emit = defineEmits<{ 'update:modelValue': [titles: string[]] }>()
 
@@ -43,7 +50,8 @@ const chipFor = (title: string) =>
 
         <div
           v-if="open"
-          class="absolute right-0 z-50 mt-1 w-56 rounded-lg border border-border bg-popover p-1 shadow-md"
+          class="absolute right-0 z-50 w-56 rounded-lg border border-border bg-popover p-1 shadow-md"
+          :class="placement === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'"
         >
           <LabelGroupMenu
             :groups="groups"
