@@ -25,9 +25,11 @@ const busy = computed(() => fetching.value > 0)
     <!-- Liveness lamp: steady orange when idle, breathes while fetching. -->
     <span
       data-testid="chassis-lamp"
+      role="status"
       class="electrobun-webkit-app-region-no-drag size-1.5 rounded-full bg-primary"
       :class="busy && 'lamp-busy'"
       :title="busy ? 'Syncing…' : 'Connected'"
+      :aria-label="busy ? 'Syncing' : 'Connected'"
     />
   </div>
 </template>

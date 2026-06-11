@@ -20,6 +20,7 @@ const chrome = computed(() => shouldShowChrome(route))
 // Popped-out windows (?window=1) carry no rail, but echo the shell's signature:
 // a rounded card panel floating on the bare background.
 const windowed = computed(() => route.query.window === '1')
+const windowTitle = computed(() => (route.name === 'settings' ? 'Settings' : undefined))
 // The multi-issue window owns its own header + scroll region (the pager stays
 // fixed while issues scroll beneath it); other windows scroll the whole panel.
 const multiWindow = computed(() => route.name === 'issues-window')
@@ -63,7 +64,7 @@ onUnmounted(() => {
     v-else-if="windowed"
     class="flex h-screen flex-col overflow-hidden bg-background text-foreground"
   >
-    <ChassisBar />
+    <ChassisBar :title="windowTitle" />
     <div class="flex min-h-0 flex-1 flex-col px-1.5 pb-1.5">
       <div
         class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
@@ -82,8 +83,9 @@ onUnmounted(() => {
       <IssueSavebarSlot />
     </div>
   </div>
-  <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
-    <main class="mx-auto max-w-5xl px-4 py-6">
+  <div v-else class="flex min-h-screen flex-col overflow-x-clip bg-background text-foreground">
+    <ChassisBar />
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
       <RouterView :key="$route.path" />
     </main>
   </div>

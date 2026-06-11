@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 
@@ -8,6 +8,10 @@ vi.mock('@tanstack/vue-query', () => ({ useIsFetching: () => fetching }))
 import ChassisBar from './ChassisBar.vue'
 
 describe('ChassisBar', () => {
+  beforeEach(() => {
+    fetching.value = 0
+  })
+
   it('is a window drag region with a no-drag lamp', () => {
     const w = mount(ChassisBar)
     expect(w.classes()).toContain('electrobun-webkit-app-region-drag')

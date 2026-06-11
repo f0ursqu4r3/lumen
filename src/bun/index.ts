@@ -34,6 +34,7 @@ import { resolveStartUrl } from './startUrl'
 import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
 import { settingsWindowRoute } from './settingsWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
+import { WINDOW_CHROME } from './windowChrome'
 import {
   startMcpIfEnabled,
   stopMcp,
@@ -128,6 +129,7 @@ function openIssueWindow(
       url,
       frame: resolved,
       rpc: buildRpc({ route: issueWindowRoute(fullPath, iid), isMain: false }),
+      ...WINDOW_CHROME,
     }),
   )
   // Per-window close event (scoped by window id) keeps the registry accurate.
@@ -165,6 +167,7 @@ function openIssuesWindow(
       url,
       frame: resolved,
       rpc: buildRpc({ route: issuesWindowRoute(fullPath, iids), isMain: false }),
+      ...WINDOW_CHROME,
     }),
   )
   issuesWindows.add(issuesWin)
@@ -201,6 +204,7 @@ function openSettingsWindow(): { ok: boolean } {
       url,
       frame,
       rpc: buildRpc({ route: settingsWindowRoute(), isMain: false }),
+      ...WINDOW_CHROME,
     }),
   )
   winS.on('close', () => {
@@ -328,6 +332,7 @@ const win = track(
     url,
     frame: mainFrame,
     rpc: buildRpc({ route: restorePlan.mainRoute, isMain: true }),
+    ...WINDOW_CHROME,
   }),
 )
 // Seed the model with the opening frame so move/resize merges have a base, and
