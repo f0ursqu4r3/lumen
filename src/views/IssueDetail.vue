@@ -209,7 +209,7 @@ if (!props.embedded) {
        window keep today's layout (their own <main> sizes the article); the
        full-page main window gets the wide centered, padded column. -->
   <ViewContainer v-else-if="issue && draft" :width="embedded || windowed ? 'bare' : 'default'">
-    <article class="issue pb-20" :style="railStyle">
+    <article class="issue" :style="railStyle">
       <!-- Condensed title: appears in a window once the main title scrolls out of
          view. `fixed` (not sticky) so toggling it never shifts the document; the
          inner wrapper re-creates the app shell's centered, padded column so it
