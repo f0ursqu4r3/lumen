@@ -6,6 +6,9 @@
 @import '@fontsource-variable/hanken-grotesk';
 @import '@fontsource-variable/geist-mono';
 
+/* Non-default theme palettes — one [data-theme="id"] block each. */
+@import './themes.css';
+
 /* Refined dark — cool slate neutrals tinted toward hue 256, with a single rare
    amber signal accent (hue ~80). Chroma stays low near the lightness extremes so
    nothing looks garish. Deliberately avoids the cyan/purple-on-dark AI palette.
