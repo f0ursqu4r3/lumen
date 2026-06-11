@@ -40,3 +40,8 @@ export function writeStored(storage: Storage, state: ThemeState): void {
   storage.setItem(THEME_KEY, state.themeId)
   storage.setItem(OVERRIDES_KEY, JSON.stringify(state.overrides))
 }
+
+/** Read storage + apply in one call (used at boot and by installThemeSync). */
+export function applyStoredTheme(doc: Document, storage: Storage): void {
+  applyTheme(doc, readStored(storage))
+}

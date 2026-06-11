@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <title>lumen</title>
+    <script>
+      // Anti-flash: apply the stored theme before the bundle paints. Mirrors
+      // src/shared/theme/applyTheme.ts + overrides.ts (kept in sync by hand; those
+      // tested helpers are the source of truth — update both when presets change).
+      ;(function () {
+        try {
+          var DEFAULT = 'amber'
+          var LIGHT = { paper: 1, daylight: 1, solarized: 1, linen: 1, frost: 1 }
+          var id = localStorage.getItem('lumen:theme') || DEFAULT
+          var el = document.documentElement
+          if (id !== DEFAULT) el.setAttribute('data-theme', id)
+          el.style.colorScheme = LIGHT[id] ? 'light' : 'dark'
+          var raw = localStorage.getItem('lumen:theme-overrides')
+          if (raw) {
+            var o = JSON.parse(raw)
+            var RAD = { sharp: '0.25rem', default: '0.625rem', round: '1rem' }
+            var DEN = { comfortable: '1', compact: '0.8' }
+            var FONT = {
+              default: "'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
+              system: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+              geist: "'Geist Mono Variable', ui-monospace, monospace",
+            }
+            if (o.accent) {
+              el.style.setProperty('--primary', o.accent)
+              el.style.setProperty('--ring', o.accent)
+            }
+            if (o.radius && RAD[o.radius]) el.style.setProperty('--radius', RAD[o.radius])
+            if (o.density && DEN[o.density]) el.style.setProperty('--density', DEN[o.density])
+            if (o.font && FONT[o.font]) el.style.setProperty('--font-sans', FONT[o.font])
+          }
+        } catch (e) {}
+      })()
+    </script>
     <style>
       /* Avoid a white flash before the stylesheet loads. */
       html {
