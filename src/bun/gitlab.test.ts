@@ -198,4 +198,29 @@ describe('gitlab feeds server-health', () => {
     expect(observe).not.toHaveBeenCalled()
     vi.unstubAllGlobals()
   })
+
+  it('observes "ok" on a successful upload (201)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 201, json: async () => ({ markdown: '' }) }),
+    )
+    await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'x.png',
+      contentType: 'image/png',
+      dataBase64: 'AA==',
+    })
+    expect(observe).toHaveBeenCalledWith('ok')
+  })
+
+  it('observes "down" on an upload transport failure', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
+    await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'x.png',
+      contentType: 'image/png',
+      dataBase64: 'AA==',
+    })
+    expect(observe).toHaveBeenCalledWith('down')
+  })
 })

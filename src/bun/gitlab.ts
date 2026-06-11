@@ -157,6 +157,6 @@ export async function gitlabUpload(a: UploadArgs): Promise<UploadResult> {
     url?: string
     alt?: string
   }
-  report(res.status, !res.ok)
+  report(res.status, res.status === 403 && Object.keys(json).length > 0)
   return { ok: res.ok, status: res.status, markdown: json.markdown, url: json.url, alt: json.alt }
 }
