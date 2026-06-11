@@ -11,6 +11,7 @@ it('exposes the full tool catalog with unique lumen_-prefixed names', () => {
       'lumen_issue_get',
       'lumen_issue_create',
       'lumen_issue_update',
+      'lumen_issue_set_status',
       'lumen_issue_comment',
       'lumen_mrs_list',
       'lumen_mr_get',
@@ -30,7 +31,7 @@ it('exposes the full tool catalog with unique lumen_-prefixed names', () => {
     ]),
   )
   expect(new Set(names).size).toBe(names.length)
-  expect(names).toHaveLength(20)
+  expect(names).toHaveLength(21)
   expect(names.every((n) => n.startsWith('lumen_'))).toBe(true)
 })
 
