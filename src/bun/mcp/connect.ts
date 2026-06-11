@@ -26,11 +26,12 @@ export function mergeCodexToml(existing: string, url: string, token: string): st
   const doc = (existing.trim() ? parse(existing) : {}) as Record<string, unknown>
   doc.experimental_use_rmcp_client = true
   const servers = (doc.mcp_servers ??= {}) as Record<string, unknown>
+  // Codex's streamable-HTTP transport rejects a bearer_token field; auth goes via http_headers.
   servers.lumen = {
     url,
-    bearer_token: token,
     startup_timeout_sec: 10,
     tool_timeout_sec: 60,
+    http_headers: { Authorization: `Bearer ${token}` },
   }
   return stringify(doc)
 }
