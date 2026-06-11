@@ -35,11 +35,12 @@ if (w?.localStorage && w?.sessionStorage) {
     writable: true,
     configurable: true,
   })
-} else {
-  // Fail loud: this file exists solely to provide a working Storage. A silent
-  // no-op here would surface later as a cryptic "localStorage.clear is not a
-  // function" in whatever test ran first, hiding the real cause.
+} else if (typeof document !== 'undefined') {
+  // We are in a jsdom-like environment but couldn't find the Storage objects —
+  // fail loud so this doesn't silently corrupt browser-component tests.
   throw new Error(
     "test setup: could not locate jsdom's localStorage/sessionStorage to patch onto globalThis",
   )
 }
+// Non-browser environments (e.g. @vitest-environment node tests for Bun host
+// code) have no window at all; Storage is irrelevant there, so we skip silently.

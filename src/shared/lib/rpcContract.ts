@@ -36,6 +36,19 @@ export interface AssetResult {
   base64: string
   contentType: string
 }
+export interface UploadArgs {
+  fullPath: string
+  filename: string
+  contentType: string
+  dataBase64: string
+}
+export interface UploadResult {
+  ok: boolean
+  status: number
+  markdown?: string
+  url?: string
+  alt?: string
+}
 export interface SaveConfigArgs {
   url: string
   token?: string
