@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { loadConfig, saveConfig, saveMcpConfig, clearConfig } from './config'
+import { loadConfig, saveConfig, saveMcpConfig, clearConfig, saveRestoreOnStartup } from './config'
 
 let dir: string
 beforeEach(() => {
@@ -18,7 +18,12 @@ afterEach(() => {
 
 describe('config', () => {
   it('reports unconfigured when no file and no env', () => {
-    expect(loadConfig()).toEqual({ gitlabUrl: null, token: null, mcp: null })
+    expect(loadConfig()).toEqual({
+      gitlabUrl: null,
+      token: null,
+      mcp: null,
+      restoreOnStartup: true,
+    })
   })
 
   it('imports from env on first run when no file exists', () => {
@@ -28,6 +33,7 @@ describe('config', () => {
       gitlabUrl: 'https://gl.example.com',
       token: 'glpat-abc',
       mcp: null,
+      restoreOnStartup: true,
     })
   })
 
@@ -39,6 +45,7 @@ describe('config', () => {
       gitlabUrl: 'https://saved.example.com',
       token: 'glpat-saved',
       mcp: null,
+      restoreOnStartup: true,
     })
   })
 
@@ -49,13 +56,19 @@ describe('config', () => {
       gitlabUrl: 'https://new.example.com',
       token: 'glpat-saved',
       mcp: null,
+      restoreOnStartup: true,
     })
   })
 
   it('clearConfig removes the saved file', () => {
     saveConfig({ url: 'https://x.example.com', token: 't' })
     clearConfig()
-    expect(loadConfig()).toEqual({ gitlabUrl: null, token: null, mcp: null })
+    expect(loadConfig()).toEqual({
+      gitlabUrl: null,
+      token: null,
+      mcp: null,
+      restoreOnStartup: true,
+    })
   })
 
   it('defaults mcp to null when absent', () => {
@@ -74,5 +87,25 @@ describe('config', () => {
     saveMcpConfig({ enabled: true, port: 7437, token: 'lmcp_xyz' })
     saveConfig({ url: 'https://gl.example.com', token: 'glpat-abc' })
     expect(loadConfig().mcp).toEqual({ enabled: true, port: 7437, token: 'lmcp_xyz' })
+  })
+
+  it('defaults restoreOnStartup to true when absent', () => {
+    expect(loadConfig().restoreOnStartup).toBe(true)
+  })
+
+  it('persists restoreOnStartup and preserves url/token/mcp', () => {
+    saveConfig({ url: 'https://gl.example.com', token: 'glpat-x' })
+    saveRestoreOnStartup(false)
+    const c = loadConfig()
+    expect(c.restoreOnStartup).toBe(false)
+    expect(c.gitlabUrl).toBe('https://gl.example.com')
+    expect(c.token).toBe('glpat-x')
+  })
+
+  it('saveConfig preserves an existing restoreOnStartup=false', () => {
+    saveConfig({ url: 'https://gl.example.com', token: 'glpat-x' })
+    saveRestoreOnStartup(false)
+    saveConfig({ url: 'https://gl2.example.com', token: 'glpat-y' })
+    expect(loadConfig().restoreOnStartup).toBe(false)
   })
 })

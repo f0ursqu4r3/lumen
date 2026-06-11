@@ -12,6 +12,7 @@ export interface AppConfig {
   gitlabUrl: string | null
   token: string | null
   mcp: McpConfig | null
+  restoreOnStartup: boolean
 }
 
 const trimSlash = (s: string) => s.replace(/\/+$/, '')
@@ -40,13 +41,15 @@ export function loadConfig(): AppConfig {
       gitlabUrl: raw.gitlabUrl ? trimSlash(raw.gitlabUrl) : null,
       token: raw.token ?? null,
       mcp: raw.mcp ?? null,
+      restoreOnStartup: raw.restoreOnStartup ?? true,
     }
   }
   // First-run convenience: import from environment (.env in dev) if present.
   const envUrl = process.env.GITLAB_URL
   const envToken = process.env.GITLAB_TOKEN
-  if (envUrl && envToken) return { gitlabUrl: trimSlash(envUrl), token: envToken, mcp: null }
-  return { gitlabUrl: null, token: null, mcp: null }
+  if (envUrl && envToken)
+    return { gitlabUrl: trimSlash(envUrl), token: envToken, mcp: null, restoreOnStartup: true }
+  return { gitlabUrl: null, token: null, mcp: null, restoreOnStartup: true }
 }
 
 function persist(data: AppConfig): void {
@@ -59,12 +62,32 @@ export function saveConfig(input: { url: string; token?: string }): void {
   const current = loadConfig()
   const token = input.token ?? current.token
   if (!token) throw new Error('GitLab token is required')
-  persist({ gitlabUrl: trimSlash(input.url), token, mcp: current.mcp })
+  persist({
+    gitlabUrl: trimSlash(input.url),
+    token,
+    mcp: current.mcp,
+    restoreOnStartup: current.restoreOnStartup,
+  })
 }
 
 export function saveMcpConfig(mcp: McpConfig): void {
   const current = loadConfig()
-  persist({ gitlabUrl: current.gitlabUrl, token: current.token, mcp })
+  persist({
+    gitlabUrl: current.gitlabUrl,
+    token: current.token,
+    mcp,
+    restoreOnStartup: current.restoreOnStartup,
+  })
+}
+
+export function saveRestoreOnStartup(enabled: boolean): void {
+  const current = loadConfig()
+  persist({
+    gitlabUrl: current.gitlabUrl,
+    token: current.token,
+    mcp: current.mcp,
+    restoreOnStartup: enabled,
+  })
 }
 
 export function clearConfig(): void {
