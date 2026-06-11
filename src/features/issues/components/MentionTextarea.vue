@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, ref, useAttrs, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useAttrs, watch } from 'vue'
+import { Paperclip } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Textarea } from '@/shared/ui/textarea'
+import { useTextareaAttach } from '@/features/issues/composables/useTextareaAttach'
 import type { ProjectMember } from '@/features/projects/composables/useProjectMembers'
 
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps<{
   members: ProjectMember[]
+  fullPath?: string
 }>()
 const emit = defineEmits<{ 'open-change': [value: boolean] }>()
 
@@ -16,6 +19,12 @@ const attrs = useAttrs()
 const textarea = ref<{ $el: HTMLTextAreaElement } | null>(null)
 const active = ref(0)
 const cursor = ref(0)
+
+const attach = props.fullPath ? useTextareaAttach(props.fullPath, text, () => cursor.value) : null
+const attachInput = ref<HTMLInputElement | null>(null)
+onMounted(() => {
+  if (attach) attach.fileInput.value = attachInput.value
+})
 
 function mentionRange(value: string, at: number) {
   const before = value.slice(0, at)
@@ -93,11 +102,29 @@ function onKeydown(event: KeyboardEvent) {
       v-bind="attrs"
       ref="textarea"
       v-model="text"
+      :class="attach?.dragging.value ? 'ring-2 ring-primary/60' : ''"
       @click="syncCursor"
       @keyup="syncCursor"
       @select="syncCursor"
       @keydown="onKeydown"
+      @paste="attach?.onPaste"
+      @dragover="attach?.onDragOver"
+      @dragleave="attach?.onDragLeave"
+      @drop="attach?.onDrop"
     />
+
+    <div v-if="attach" class="mt-1.5 flex items-center gap-2">
+      <input ref="attachInput" type="file" multiple class="hidden" @change="attach.onPick" />
+      <button
+        type="button"
+        data-testid="attach-file"
+        class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:underline"
+        @click="attach.openPicker"
+      >
+        <Paperclip class="size-3.5" />
+        Attach file
+      </button>
+    </div>
 
     <div
       v-if="open"
