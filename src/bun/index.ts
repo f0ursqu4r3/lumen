@@ -1,5 +1,26 @@
-import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from 'electrobun/bun'
-import { loadConfig, saveConfig, clearConfig } from './config'
+import Electrobun, {
+  BrowserWindow,
+  BrowserView,
+  Utils,
+  ApplicationMenu,
+  Screen,
+} from 'electrobun/bun'
+import { loadConfig, saveConfig, clearConfig, saveRestoreOnStartup } from './config'
+import {
+  loadSession,
+  initMain,
+  setMainPosition,
+  setMainSize,
+  setMainRoute,
+  registerPopout,
+  setPopoutPosition,
+  setPopoutSize,
+  removePopout,
+  clearPopouts,
+  type Frame,
+} from './session'
+import { planRestore } from './restore'
+import { centerOn } from './display'
 import { gitlabGraphql, gitlabRest, gitlabAsset, gitlabUpload } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { buildThemeBroadcastJs } from './themeBroadcast'
@@ -51,15 +72,37 @@ function track(w: BrowserWindow): BrowserWindow {
   return w
 }
 
+// Attach OS-driven geometry capture: resize carries the full frame, move only
+// x/y (we keep the last-known size). Both schedule a debounced session write.
+function wireGeometry(
+  w: BrowserWindow,
+  onResize: (x: number, y: number, width: number, height: number) => void,
+  onMove: (x: number, y: number) => void,
+): void {
+  w.on('resize', (e: unknown) => {
+    const d = (e as { data: { x: number; y: number; width: number; height: number } }).data
+    onResize(d.x, d.y, d.width, d.height)
+  })
+  w.on('move', (e: unknown) => {
+    const d = (e as { data: { x: number; y: number } }).data
+    onMove(d.x, d.y)
+  })
+}
+
+// Combined-issues windows have no natural key; assign a stable id per open so
+// geometry updates and the session entry line up. Issue windows reuse their key.
+let issuesSeq = 0
+
 function broadcast(js: string): void {
   for (const w of windows) w.webview.executeJavascript(js)
 }
 
 let settingsWindow: BrowserWindow | null = null
 
-function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): {
-  ok: boolean
-} {
+function openIssueWindow(
+  { fullPath, iid }: { fullPath: string; iid: string },
+  frame?: Frame,
+): { ok: boolean } {
   const key = `${fullPath}#${iid}`
   const existing = issueWindows.get(key)
   if (existing) {
@@ -69,6 +112,7 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
   const repo = fullPath.split('/').at(-1) ?? fullPath
   // Cascade each new window so stacked issue windows don't perfectly overlap.
   const offset = issueWindows.size * 24
+  const resolved: Frame = frame ?? { x: 120 + offset, y: 120 + offset, width: 720, height: 900 }
   const issueWin = track(
     new BrowserWindow({
       title: `#${iid} · ${repo}`,
@@ -76,37 +120,67 @@ function openIssueWindow({ fullPath, iid }: { fullPath: string; iid: string }): 
       // handed over via getInitialRoute) — see issueWindow.ts for why it can't ride
       // in this URL's fragment under views://.
       url,
-      frame: { width: 720, height: 900, x: 120 + offset, y: 120 + offset },
-      rpc: buildRpc(issueWindowRoute(fullPath, iid)),
+      frame: resolved,
+      rpc: buildRpc({ route: issueWindowRoute(fullPath, iid), isMain: false }),
     }),
   )
   // Per-window close event (scoped by window id) keeps the registry accurate.
   // Register before inserting so a synchronous close can't strand a stale entry.
-  issueWin.on('close', () => issueWindows.delete(key))
+  issueWin.on('close', () => {
+    issueWindows.delete(key)
+    removePopout(key)
+  })
+  wireGeometry(
+    issueWin,
+    (x, y, w, h) => setPopoutSize(key, x, y, w, h),
+    (x, y) => setPopoutPosition(key, x, y),
+  )
   issueWindows.set(key, issueWin)
+  registerPopout({ id: key, kind: 'issue', fullPath, iid, frame: resolved })
   return { ok: true }
 }
 
-function openIssuesWindow({ fullPath, iids }: { fullPath: string; iids: string[] }): {
-  ok: boolean
-} {
+function openIssuesWindow(
+  { fullPath, iids }: { fullPath: string; iids: string[] },
+  frame?: Frame,
+  restoreId?: string,
+): { ok: boolean } {
   const repo = fullPath.split('/').at(-1) ?? fullPath
   // Cascade off the count of all open issue windows so a combined window doesn't
   // land exactly on a single-issue one. No registry: combined windows are not
   // deduped or focused — each "Open combined" is a fresh window.
   const offset = issueWindows.size * 24
+  const resolved: Frame = frame ?? { x: 140 + offset, y: 140 + offset, width: 760, height: 920 }
+  const id = restoreId ?? `issues:${++issuesSeq}`
   const issuesWin = track(
     new BrowserWindow({
       title: `${iids.length} issues · ${repo}`,
       // See openIssueWindow: bare base + client-side route via getInitialRoute.
       url,
-      frame: { width: 760, height: 920, x: 140 + offset, y: 140 + offset },
-      rpc: buildRpc(issuesWindowRoute(fullPath, iids)),
+      frame: resolved,
+      rpc: buildRpc({ route: issuesWindowRoute(fullPath, iids), isMain: false }),
     }),
   )
   issuesWindows.add(issuesWin)
-  issuesWin.on('close', () => issuesWindows.delete(issuesWin))
+  issuesWin.on('close', () => {
+    issuesWindows.delete(issuesWin)
+    removePopout(id)
+  })
+  wireGeometry(
+    issuesWin,
+    (x, y, w, h) => setPopoutSize(id, x, y, w, h),
+    (x, y) => setPopoutPosition(id, x, y),
+  )
+  registerPopout({ id, kind: 'issues', fullPath, iids, frame: resolved })
   return { ok: true }
+}
+
+// Center on the display holding the main window (else primary). Settings is
+// never restored from session — always opens centered on the current display.
+function mainWindowCenter(): { x: number; y: number } | null {
+  if (!windows.has(win)) return null
+  const f = win.getFrame()
+  return { x: f.x + f.width / 2, y: f.y + f.height / 2 }
 }
 
 function openSettingsWindow(): { ok: boolean } {
@@ -114,26 +188,27 @@ function openSettingsWindow(): { ok: boolean } {
     settingsWindow.activate()
     return { ok: true }
   }
-  const win = track(
+  const frame = centerOn({ width: 820, height: 600 }, Screen.getAllDisplays(), mainWindowCenter())
+  const winS = track(
     new BrowserWindow({
       title: 'Settings',
       url,
-      frame: { width: 820, height: 600, x: 160, y: 120 },
-      rpc: buildRpc(settingsWindowRoute()),
+      frame,
+      rpc: buildRpc({ route: settingsWindowRoute(), isMain: false }),
     }),
   )
-  win.on('close', () => {
+  winS.on('close', () => {
     settingsWindow = null
   })
-  settingsWindow = win
+  settingsWindow = winS
   return { ok: true }
 }
 
 // Each native window needs its own RPC bridge; build a fresh config per window.
-// `initialRoute` is the hash route the window opens at — null for the main
-// window (default route), set for popouts (which can't carry the route in their
-// views:// URL fragment). The webview reads it via getInitialRoute at boot.
-function buildRpc(initialRoute: string | null = null) {
+// `opts.route` is the hash route the window opens at, and `opts.isMain` marks the
+// main window (which may also carry a restored route). Popouts can't carry the
+// route in their views:// URL fragment. The webview reads it via getInitialRoute.
+function buildRpc(opts: { route: string | null; isMain: boolean }) {
   return BrowserView.defineRPC<any>({
     maxRequestTime: 30000,
     handlers: {
@@ -150,7 +225,7 @@ function buildRpc(initialRoute: string | null = null) {
             tokenSuffix: token ? token.slice(-6) : null,
           }
         },
-        getInitialRoute: async () => ({ route: initialRoute }),
+        getInitialRoute: async () => ({ route: opts.route, isMain: opts.isMain }),
         saveConfig: async ({ url, token }) => {
           saveConfig({ url, token })
           return { ok: true }
@@ -191,6 +266,11 @@ function buildRpc(initialRoute: string | null = null) {
         setMcpEnabled: async (a) => setMcpEnabled(a),
         regenerateMcpToken: async () => regenerateMcpToken(),
         revealMcpToken: async () => revealMcpToken(),
+        getStartupPrefs: async () => ({ restoreOnStartup: loadConfig().restoreOnStartup }),
+        setRestoreOnStartup: async ({ enabled }) => {
+          saveRestoreOnStartup(enabled)
+          return { ok: true }
+        },
         connectClaudeCode: async () => connectClaudeCode(),
         connectCodex: async () => connectCodex(),
         notifyCacheCleared: async () => {
@@ -200,9 +280,12 @@ function buildRpc(initialRoute: string | null = null) {
           return { ok: true }
         },
         reportAppState: async (s) => {
-          // Only the main window (initialRoute === null) may write the snapshot;
-          // popouts never report by construction, host-enforced.
-          if (initialRoute === null) cacheSnapshot(s)
+          // Only the main window reports; cache for MCP and fold the route into
+          // the session model so a restored launch reopens on the same view.
+          if (opts.isMain) {
+            cacheSnapshot(s)
+            setMainRoute(s.route, s.view)
+          }
           return { ok: true }
         },
         broadcastTheme: async (state) => {
@@ -218,13 +301,32 @@ function buildRpc(initialRoute: string | null = null) {
   } satisfies LumenRPC)
 }
 
+const startupConfig = loadConfig()
+const restorePlan = planRestore({
+  enabled: startupConfig.restoreOnStartup,
+  connected: Boolean(startupConfig.gitlabUrl && startupConfig.token),
+  session: loadSession(),
+})
+const MAIN_DEFAULT_FRAME: Frame = { x: 80, y: 80, width: 1280, height: 860 }
+const mainFrame: Frame = restorePlan.mainFrame ?? MAIN_DEFAULT_FRAME
+
 const win = track(
   new BrowserWindow({
     title: 'Lumen',
     url,
-    frame: { width: 1280, height: 860, x: 80, y: 80 },
-    rpc: buildRpc(),
+    frame: mainFrame,
+    rpc: buildRpc({ route: restorePlan.mainRoute, isMain: true }),
   }),
+)
+// Seed the model with the opening frame so move/resize merges have a base, and
+// drop last session's popout list from the model — the replay loop below
+// re-registers only the popouts we actually reopen (none if restore is off).
+initMain(mainFrame, restorePlan.mainRoute, restorePlan.mainView)
+clearPopouts()
+wireGeometry(
+  win,
+  (x, y, w, h) => setMainSize(x, y, w, h),
+  (x, y) => setMainPosition(x, y),
 )
 
 // Hand the MCP app-control tools their host capabilities. Injected (not
@@ -279,6 +381,17 @@ ApplicationMenu.on('application-menu-clicked', (event) => {
     openSettingsWindow()
   }
 })
+
+// Reopen the issue/combined popouts that were open at last quit, each at its
+// remembered frame. Gated entirely by planRestore (empty unless enabled +
+// connected). The settings window is intentionally never replayed.
+for (const p of restorePlan.popouts) {
+  if (p.kind === 'issue') {
+    openIssueWindow({ fullPath: p.fullPath, iid: p.iid }, p.frame)
+  } else {
+    openIssuesWindow({ fullPath: p.fullPath, iids: p.iids }, p.frame, p.id)
+  }
+}
 
 void win
 void Electrobun
