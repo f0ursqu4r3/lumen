@@ -15,7 +15,7 @@ const GET_Q = `query($p:ID!,$iid:String!){
     author{username} milestone{title}
     status {id name category}
     labels{nodes{title}} assignees{nodes{username}}
-    discussions{nodes{notes{nodes{body author{username} createdAt}}}} } } }`
+    discussions{nodes{notes{nodes{id body author{username} createdAt}}}} } } }`
 
 const ID_Q = `query($p:ID!,$iid:String!){project(fullPath:$p){issue(iid:$iid){id}}}`
 
@@ -37,6 +37,8 @@ const CREATE_M = `mutation($input:CreateIssueInput!){createIssue(input:$input){i
 const UPDATE_M = `mutation($input:UpdateIssueInput!){updateIssue(input:$input){issue{iid webUrl} errors}}`
 const SET_ASSIGNEES_M = `mutation($input:IssueSetAssigneesInput!){issueSetAssignees(input:$input){issue{iid} errors}}`
 const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{id} errors}}`
+const CURRENT_USER_Q = `{currentUser{username}}`
+const UPDATE_NOTE_M = `mutation($input:UpdateNoteInput!){updateNote(input:$input){note{id} errors}}`
 
 export const issueTools: McpTool[] = [
   {
@@ -228,6 +230,47 @@ export const issueTools: McpTool[] = [
       if (data.createNote.errors.length) return errorResult(data.createNote.errors.join('; '))
       emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
       return text(`Comment added to ${a.project}#${a.iid}.`)
+    },
+  },
+  {
+    name: 'lumen_issue_comment_edit',
+    description:
+      'Edit one of your own comments on an issue. Pass the note id from lumen_issue_get. Refuses to edit comments authored by anyone else.',
+    inputSchema: {
+      project: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      noteId: z.string().describe('The note global id (gid://...) from lumen_issue_get.'),
+      body: z.string(),
+    },
+    handler: async (a) => {
+      const me = await gql<{ currentUser: { username: string } | null }>(CURRENT_USER_Q)
+      const myUsername = me.currentUser?.username
+      if (!myUsername) return errorResult('Could not resolve the current user.')
+
+      const data = await gql<{
+        project: {
+          issue: {
+            discussions: {
+              nodes: { notes: { nodes: { id: string; author: { username: string } | null }[] } }[]
+            }
+          } | null
+        } | null
+      }>(GET_Q, { p: a.project, iid: a.iid })
+      const notes = data.project?.issue?.discussions.nodes.flatMap((d) => d.notes.nodes) ?? []
+      const note = notes.find((n) => n.id === a.noteId)
+      if (!note) return errorResult(`Comment ${a.noteId} not found on ${a.project}#${a.iid}.`)
+      if (!note.author)
+        return errorResult(`Comment ${a.noteId} has no resolvable author; cannot verify ownership.`)
+      if (note.author.username !== myUsername)
+        return errorResult('You can only edit your own comments.')
+
+      const res = await gql<{
+        updateNote: { note: { id: string } | null; errors: string[] } | null
+      }>(UPDATE_NOTE_M, { input: { id: a.noteId, body: a.body } })
+      if (!res.updateNote || res.updateNote.errors.length)
+        return errorResult(res.updateNote?.errors.join('; ') || 'Comment update failed.')
+      emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
+      return text(`Comment ${a.noteId} on ${a.project}#${a.iid} updated.`)
     },
   },
 ]

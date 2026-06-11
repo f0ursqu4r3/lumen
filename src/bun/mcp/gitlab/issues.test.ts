@@ -369,3 +369,78 @@ describe('lumen_issue_comment', () => {
     expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p', iid: '5' })
   })
 })
+
+describe('lumen_issue_comment_edit', () => {
+  const issueWithNote = (noteAuthor: string) => ({
+    project: {
+      issue: {
+        discussions: {
+          nodes: [{ notes: { nodes: [{ id: 'gid://Note/1', author: { username: noteAuthor } }] } }],
+        },
+      },
+    },
+  })
+
+  it('edits the comment when the current user is its author', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(issueWithNote('me'))
+      .mockResolvedValueOnce({ updateNote: { note: { id: 'gid://Note/1' }, errors: [] } })
+    const res = await tool('lumen_issue_comment_edit').handler({
+      project: 'g/p',
+      iid: '7',
+      noteId: 'gid://Note/1',
+      body: 'edited',
+    })
+    expect(c.gql).toHaveBeenLastCalledWith(expect.stringContaining('updateNote'), {
+      input: { id: 'gid://Note/1', body: 'edited' },
+    })
+    expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p', iid: '7' })
+    expect(bodyText(res)).toContain('updated')
+  })
+
+  it('refuses to edit a comment authored by someone else', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(issueWithNote('other'))
+    const res = await tool('lumen_issue_comment_edit').handler({
+      project: 'g/p',
+      iid: '7',
+      noteId: 'gid://Note/1',
+      body: 'edited',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('your own')
+    expect(emitInvalidate).not.toHaveBeenCalled()
+    expect(c.gql).toHaveBeenCalledTimes(2)
+  })
+
+  it('surfaces updateNote errors', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(issueWithNote('me'))
+      .mockResolvedValueOnce({ updateNote: { note: null, errors: ['forbidden'] } })
+    const res = await tool('lumen_issue_comment_edit').handler({
+      project: 'g/p',
+      iid: '7',
+      noteId: 'gid://Note/1',
+      body: 'x',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('forbidden')
+  })
+
+  it('errors when the note id is not on the issue', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(issueWithNote('me'))
+    const res = await tool('lumen_issue_comment_edit').handler({
+      project: 'g/p',
+      iid: '7',
+      noteId: 'gid://Note/999',
+      body: 'edited',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('not found')
+  })
+})
