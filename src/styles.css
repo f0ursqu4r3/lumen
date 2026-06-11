@@ -69,6 +69,18 @@
     oklch(0.215 0.007 240) 0%,
     oklch(0.195 0.006 240) 18rem
   );
+
+  /* Elevation sources — the @theme block points the shadow-* utilities at these
+     so themes and the terminal idiom can re-shape depth per-surface. */
+  --elev-card: inset 0 1px 0 oklch(1 0 0 / 0.05);
+  --elev-pop: 0 2px 8px -2px oklch(0 0 0 / 0.4), inset 0 1px 0 oklch(1 0 0 / 0.06);
+  --elev-float:
+    0 4px 10px -2px oklch(0 0 0 / 0.5), 0 24px 60px -14px oklch(0 0 0 / 0.72),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
+  --elev-key: 0 1px 2px oklch(0.18 0.05 42 / 0.5), inset 0 1px 0 oklch(1 0.04 60 / 0.3);
+  --elev-key-hover:
+    0 6px 18px -4px color-mix(in oklch, var(--primary) 42%, transparent),
+    inset 0 1px 0 oklch(1 0.04 60 / 0.34);
 }
 
 @theme inline {
@@ -141,18 +153,17 @@
   --height-control: calc(2.25rem * var(--density));
 
   /* Chassis depth: resting surfaces get a seam + lit top edge, not blur.
-     Only transient layers (menus/toasts = pop, hovering bars = float) cast. */
-  --shadow-card: inset 0 1px 0 oklch(1 0 0 / 0.05);
-  --shadow-pop: 0 2px 8px -2px oklch(0 0 0 / 0.4), inset 0 1px 0 oklch(1 0 0 / 0.06);
-  --shadow-float:
-    0 4px 10px -2px oklch(0 0 0 / 0.5), 0 24px 60px -14px oklch(0 0 0 / 0.72),
-    inset 0 1px 0 oklch(1 0 0 / 0.08);
+     Only transient layers (menus/toasts = pop, hovering bars = float) cast.
+     Each shadow-* utility references an --elev-* source var on :root, so
+     themes and the terminal idiom can override depth by setting --elev-*
+     (identical cascade path as --radius and the color tokens). */
+  --shadow-card: var(--elev-card);
+  --shadow-pop: var(--elev-pop);
+  --shadow-float: var(--elev-float);
   /* The orange primary reads as a backlit physical key. Fixed warm lit edge;
      only the hover bloom uses var(--primary). */
-  --shadow-key: 0 1px 2px oklch(0.18 0.05 42 / 0.5), inset 0 1px 0 oklch(1 0.04 60 / 0.3);
-  --shadow-key-hover:
-    0 6px 18px -4px color-mix(in oklch, var(--primary) 42%, transparent),
-    inset 0 1px 0 oklch(1 0.04 60 / 0.34);
+  --shadow-key: var(--elev-key);
+  --shadow-key-hover: var(--elev-key-hover);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -501,20 +512,19 @@
    Everything CSS can flip when [data-idiom='terminal'] is set: mono type,
    zero radius, plates flattened to ruled rows. Component-level dialect
    (brackets, glyphs) lives behind useIdiom(). --radius cascades through the
-   rounded-* utilities (they emit var(--radius) chains) and --font-sans through
-   the body font-family; the --shadow-* overrides do NOT yet reach the shadow-*
-   utilities — @theme inline bakes those literals into the emitted CSS — so they
-   sit here inert until the shadow tokens get the same var() indirection the
-   colors use. Note: an explicit user font override (inline --font-sans) still
-   wins — an intentional escape hatch. */
+   rounded-* utilities (they emit var(--radius) chains), --font-sans through
+   the body font-family, and --elev-* through the shadow-* utilities (which
+   now reference var(--elev-*) in @theme inline, giving them the same real
+   cascade path as the color and radius tokens). Note: an explicit user font
+   override (inline --font-sans) still wins — an intentional escape hatch. */
 :root[data-idiom='terminal'] {
   --radius: 0px;
   --font-sans: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
-  --shadow-card: none;
-  --shadow-pop: 0 0 0 1px var(--border);
-  --shadow-float: 0 0 0 1px var(--border), 0 12px 32px -8px oklch(0 0 0 / 0.6);
-  --shadow-key: none;
-  --shadow-key-hover: none;
+  --elev-card: none;
+  --elev-pop: 0 0 0 1px var(--border);
+  --elev-float: 0 0 0 1px var(--border), 0 12px 32px -8px oklch(0 0 0 / 0.6);
+  --elev-key: none;
+  --elev-key-hover: none;
 }
 
 /* The one sanctioned glow: bright phosphor text is an emitting readout. */

@@ -42,4 +42,13 @@ describe('styles.css chassis tokens', () => {
     expect(css).not.toMatch(/@custom-variant dark/)
     expect(css).not.toMatch(/\.dark\s*\{/)
   })
+
+  it('routes shadow utilities through themable elevation vars', () => {
+    const theme = css.slice(css.indexOf('@theme inline'))
+    for (const t of ['card', 'pop', 'float', 'key', 'key-hover']) {
+      expect(theme).toMatch(new RegExp(`--shadow-${t}:\\s*var\\(--elev-${t}\\)`))
+    }
+    const root = css.slice(css.indexOf(':root'), css.indexOf('@theme inline'))
+    expect(root).toMatch(/--elev-card:/)
+  })
 })
