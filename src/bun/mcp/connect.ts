@@ -80,6 +80,8 @@ export async function connectClaudeCode(): Promise<ConnectResult> {
     const path = claudeJsonPath()
     const existing = existsSync(path) ? readFileSync(path, 'utf8') : ''
     mkdirSync(dirname(path), { recursive: true })
+    // ~/.claude.json holds unrelated user state; back it up before the rewrite.
+    if (existing) copyFileSync(path, `${path}.bak`)
     writeFileSync(path, mergeClaudeJson(existing, conn.url, conn.token))
     return { ok: true, method: 'file' }
   } catch (e) {

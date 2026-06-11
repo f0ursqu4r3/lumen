@@ -115,10 +115,10 @@ async function connect(which: 'claude' | 'codex') {
   )
   if (!ok) return
   connecting.value = which
-  needsReconnect.value = false
   try {
     const res = which === 'claude' ? await rpc.connectClaudeCode() : await rpc.connectCodex()
     if (res.ok) {
+      needsReconnect.value = false
       pushToast({
         title: which === 'claude' ? 'Claude Code connected' : 'Codex connected',
         description: res.method === 'cli' ? 'Added via claude mcp add' : 'Wrote agent config file',

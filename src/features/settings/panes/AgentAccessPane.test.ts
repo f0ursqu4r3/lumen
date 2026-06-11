@@ -119,4 +119,16 @@ describe('AgentAccessPane connect cards', () => {
       expect.objectContaining({ title: 'Connect failed', tone: 'failed' }),
     )
   })
+
+  it('keeps the re-connect hint when a connect fails after a token regenerate', async () => {
+    connectClaudeCode.mockResolvedValue({ ok: false, error: 'boom' })
+    const w = mount(AgentAccessPane)
+    await flushPromises()
+    await w.find('[data-testid="mcp-regenerate"]').trigger('click')
+    await flushPromises()
+    expect(w.text()).toContain('re-run Connect')
+    await w.find('[data-testid="connect-claude"]').trigger('click')
+    await flushPromises()
+    expect(w.text()).toContain('re-run Connect')
+  })
 })

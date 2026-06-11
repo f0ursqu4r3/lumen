@@ -110,6 +110,17 @@ describe('connectClaudeCode', () => {
     const doc = JSON.parse(readFileSync(process.env.LUMEN_CLAUDE_JSON!, 'utf8'))
     expect(doc.mcpServers.lumen.url).toBe('http://127.0.0.1:7437')
   })
+
+  it('backs up an existing ~/.claude.json before the file-fallback rewrite', async () => {
+    spawnSync.mockReturnValue({ status: null, error: new Error('ENOENT') })
+    const path = process.env.LUMEN_CLAUDE_JSON!
+    writeFileSync(path, JSON.stringify({ numStartups: 3 }))
+    const res = await connectClaudeCode()
+    expect(res).toEqual({ ok: true, method: 'file' })
+    expect(existsSync(path + '.bak')).toBe(true)
+    expect(JSON.parse(readFileSync(path + '.bak', 'utf8')).numStartups).toBe(3)
+    expect(JSON.parse(readFileSync(path, 'utf8')).numStartups).toBe(3)
+  })
 })
 
 describe('connectCodex', () => {
