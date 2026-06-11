@@ -20,6 +20,8 @@ const textarea = ref<{ $el: HTMLTextAreaElement } | null>(null)
 const active = ref(0)
 const cursor = ref(0)
 
+// fullPath is read non-reactively: each editor mounts a fresh instance, so it
+// never changes for a live component — no need to watch it.
 const attach = props.fullPath ? useTextareaAttach(props.fullPath, text, () => cursor.value) : null
 const attachInput = ref<HTMLInputElement | null>(null)
 onMounted(() => {
