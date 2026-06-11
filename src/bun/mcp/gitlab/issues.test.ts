@@ -217,6 +217,24 @@ describe('lumen_issue_set_status', () => {
     await tool('lumen_issue_set_status').handler({ project: 'g/p', iid: '83', status: 'Nope' })
     expect(emitInvalidate).not.toHaveBeenCalled()
   })
+
+  it('errors and does not emit when workItemUpdate returns null', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/2', name: 'Done' }] } },
+      })
+      .mockResolvedValueOnce({ workItemUpdate: null })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '83',
+      status: 'Done',
+    })
+    expect(res.isError).toBe(true)
+    expect(emitInvalidate).not.toHaveBeenCalled()
+  })
 })
 
 describe('lumen_issue_create', () => {
@@ -254,6 +272,13 @@ describe('lumen_issue_create', () => {
     const res = await tool('lumen_issue_create').handler({ project: 'g/p', title: '' })
     expect(res.isError).toBe(true)
     expect(bodyText(res)).toContain('Title is required')
+  })
+
+  it('errors and does not emit when the issue comes back null with no errors', async () => {
+    c.gql.mockResolvedValue({ createIssue: { issue: null, errors: [] } })
+    const res = await tool('lumen_issue_create').handler({ project: 'g/p', title: 'New' })
+    expect(res.isError).toBe(true)
+    expect(emitInvalidate).not.toHaveBeenCalled()
   })
 
   it('emits a project-level issue invalidate signal (no iid) on success', async () => {

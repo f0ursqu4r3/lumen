@@ -113,7 +113,8 @@ export const issueTools: McpTool[] = [
       const data = await gql<{
         createIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }
       }>(CREATE_M, { input })
-      if (data.createIssue.errors.length) return errorResult(data.createIssue.errors.join('; '))
+      if (data.createIssue.errors.length || !data.createIssue.issue)
+        return errorResult(data.createIssue.errors.join('; ') || 'Issue was not created.')
       emitInvalidate({ resource: 'issue', project: a.project as string })
       return text({ created: data.createIssue.issue })
     },
@@ -195,7 +196,8 @@ export const issueTools: McpTool[] = [
         } | null
       }>(SET_STATUS_M, { id: workItemId, status: match.id })
       const payload = data.workItemUpdate
-      if (payload?.errors?.length) return errorResult(payload.errors.join('; '))
+      if (!payload || payload.errors.length)
+        return errorResult(payload?.errors.join('; ') || 'Status update failed.')
       const status =
         payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
       emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })

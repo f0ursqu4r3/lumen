@@ -32,6 +32,8 @@ async function boot() {
   installServerHealth(queryClient)
   // Every window — main and popouts — refreshes its issue views when an MCP
   // write lands in the host. (Unlike app-state report, this is not main-only.)
+  // Coexists with installAppStateReport's lumen:mcp-command listener: each
+  // handles a distinct cmd ('invalidate' vs 'navigate'), so they never collide.
   installMcpCacheSync(queryClient)
   // MCP app-control: only the main window reports state / accepts drive
   // commands. Popouts and the settings window get a non-null initial route.
