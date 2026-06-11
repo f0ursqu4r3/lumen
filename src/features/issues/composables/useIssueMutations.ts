@@ -47,6 +47,15 @@ const SetAssigneesDocument = graphql(`
     }
   }
 `)
+// Raw-string (not codegen graphql()) so editing notes needs no `bun codegen`.
+const UpdateNoteDocument = `
+  mutation UpdateNote($input: UpdateNoteInput!) {
+    updateNote(input: $input) {
+      note { id body bodyHtml }
+      errors
+    }
+  }
+`
 
 // Only models the `errors[]` field that `run` inspects — not the full payload.
 type ErrorsCarrier = { errors: string[] } | null | undefined
@@ -80,6 +89,10 @@ type SetAssigneesPayload = {
   issue?: { iid: string } | null
   errors: string[]
 }
+type UpdateNotePayload = {
+  note?: { id: string; body: string; bodyHtml?: string | null } | null
+  errors: string[]
+}
 
 export function useCreateIssue(fullPath: string) {
   const qc = useQueryClient()
@@ -102,6 +115,24 @@ export function useCreateIssue(fullPath: string) {
         (d: { createIssue?: CreateIssuePayload | null }) => d.createIssue,
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['issues', fullPath] }),
+  })
+}
+
+// Edit an existing note by its global id. Invalidates the issue detail query so
+// the rendered body refreshes on the next fetch.
+export function useUpdateNote(fullPath: string, iid: string) {
+  const qc = useQueryClient()
+  return useMutation<UpdateNotePayload, GitLabError, { id: string; body: string }>({
+    mutationFn: (input) =>
+      run(
+        () =>
+          gqlClient.request<
+            { updateNote: UpdateNotePayload },
+            { input: { id: string; body: string } }
+          >(UpdateNoteDocument, { input }),
+        (d: { updateNote?: UpdateNotePayload | null }) => d.updateNote,
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['issue', fullPath, iid] }),
   })
 }
 

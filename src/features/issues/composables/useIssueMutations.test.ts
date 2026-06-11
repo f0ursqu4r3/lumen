@@ -7,7 +7,13 @@ vi.mock('@/gitlab/client', () => ({
   gqlClient: { request: (...a: unknown[]) => request(...a) },
 }))
 
-import { useAddNote, useUpdateIssue, useCreateIssue, useSetAssignees } from './useIssueMutations'
+import {
+  useAddNote,
+  useUpdateIssue,
+  useCreateIssue,
+  useSetAssignees,
+  useUpdateNote,
+} from './useIssueMutations'
 
 beforeEach(() => {
   request.mockReset()
@@ -119,5 +125,42 @@ describe('issue mutations', () => {
         body: 'hi',
       }),
     ).rejects.toMatchObject({ kind: 'unknown', message: 'down' })
+  })
+})
+
+describe('useUpdateNote', () => {
+  it('sends the note id and new body', async () => {
+    request.mockResolvedValue({ updateNote: { note: { id: 'n1', body: 'edited' }, errors: [] } })
+    const { result } = withQuery(() => useUpdateNote('grp/proj', '7'))
+    await result().mutateAsync({ id: 'gid://Note/1', body: 'edited' })
+    await flushPromises()
+    expect(request.mock.calls[0][1]).toEqual({ input: { id: 'gid://Note/1', body: 'edited' } })
+  })
+
+  it('rejects on a mutation-level errors[] payload', async () => {
+    request.mockResolvedValue({ updateNote: { note: null, errors: ['permission denied'] } })
+    const { result } = withQuery(() => useUpdateNote('grp/proj', '7'))
+    await expect(result().mutateAsync({ id: 'x', body: 'b' })).rejects.toMatchObject({
+      kind: 'graphql',
+      message: 'permission denied',
+    })
+  })
+
+  it('rejects with a normalized error on a transport failure', async () => {
+    request.mockRejectedValue(new Error('boom'))
+    const { result } = withQuery(() => useUpdateNote('grp/proj', '7'))
+    await expect(result().mutateAsync({ id: 'x', body: 'b' })).rejects.toMatchObject({
+      kind: 'unknown',
+      message: 'boom',
+    })
+  })
+
+  it('invalidates the issue detail query on success', async () => {
+    request.mockResolvedValue({ updateNote: { note: { id: 'n1', body: 'b' }, errors: [] } })
+    const { result, queryClient } = withQuery(() => useUpdateNote('grp/proj', '7'))
+    const spy = vi.spyOn(queryClient, 'invalidateQueries')
+    await result().mutateAsync({ id: 'gid://Note/1', body: 'b' })
+    await flushPromises()
+    expect(spy).toHaveBeenCalledWith({ queryKey: ['issue', 'grp/proj', '7'] })
   })
 })
