@@ -3,10 +3,11 @@ import { mount } from '@vue/test-utils'
 import SettingsWindow from './SettingsWindow.vue'
 
 describe('SettingsWindow', () => {
-  it('renders a nav item per pane and shows the connection pane first', () => {
+  it('renders a nav item per pane and shows the general pane first', () => {
     const w = mount(SettingsWindow, {
       global: {
         stubs: {
+          GeneralPane: true,
           ConnectionPane: true,
           AgentAccessPane: true,
           AppearancePane: true,
@@ -17,19 +18,21 @@ describe('SettingsWindow', () => {
     })
     const items = w.findAll('[data-testid="settings-nav-item"]')
     expect(items.map((i) => i.text())).toEqual([
+      'General',
       'Connection',
       'Agent access',
       'Appearance',
       'Data & cache',
       'About',
     ])
-    expect(w.find('connection-pane-stub').exists()).toBe(true)
+    expect(w.find('general-pane-stub').exists()).toBe(true)
   })
 
   it('switches the active pane on nav click', async () => {
     const w = mount(SettingsWindow, {
       global: {
         stubs: {
+          GeneralPane: true,
           ConnectionPane: true,
           AgentAccessPane: true,
           AppearancePane: true,
@@ -39,6 +42,6 @@ describe('SettingsWindow', () => {
       },
     })
     await w.findAll('[data-testid="settings-nav-item"]')[1].trigger('click')
-    expect(w.find('agent-access-pane-stub').exists()).toBe(true)
+    expect(w.find('connection-pane-stub').exists()).toBe(true)
   })
 })

@@ -21,6 +21,17 @@ export interface RestorePlan {
   popouts: PopoutSession[]
 }
 
+/** Highest N among restored combined-window ids (`issues:N`); 0 if none. Used to
+ *  seed the live counter so a newly opened combined window can't reuse a
+ *  restored id. */
+export function maxIssuesSeq(popouts: PopoutSession[]): number {
+  return popouts.reduce((max, p) => {
+    if (p.kind !== 'issues') return max
+    const n = Number(p.id.split(':')[1])
+    return Number.isFinite(n) && n > max ? n : max
+  }, 0)
+}
+
 /** Decide what to restore. Off / not-connected ⇒ clean launch (everything null). */
 export function planRestore(args: {
   enabled: boolean

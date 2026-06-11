@@ -19,7 +19,7 @@ import {
   clearPopouts,
   type Frame,
 } from './session'
-import { planRestore } from './restore'
+import { planRestore, maxIssuesSeq } from './restore'
 import { centerOn } from './display'
 import { gitlabGraphql, gitlabRest, gitlabAsset, gitlabUpload } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
@@ -307,6 +307,9 @@ const restorePlan = planRestore({
   connected: Boolean(startupConfig.gitlabUrl && startupConfig.token),
   session: loadSession(),
 })
+// Seed the combined-window counter past any restored ids so a newly opened
+// combined window can't reuse a restored one (both -> issues:1).
+issuesSeq = maxIssuesSeq(restorePlan.popouts)
 const MAIN_DEFAULT_FRAME: Frame = { x: 80, y: 80, width: 1280, height: 860 }
 const mainFrame: Frame = restorePlan.mainFrame ?? MAIN_DEFAULT_FRAME
 

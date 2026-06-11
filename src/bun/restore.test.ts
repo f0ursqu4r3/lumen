@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { planRestore } from './restore'
+import { planRestore, maxIssuesSeq } from './restore'
 import type { SessionState } from './session'
 
 const session = (
@@ -89,5 +89,49 @@ describe('planRestore', () => {
       })
       expect(plan.mainView).toBe(view)
     }
+  })
+})
+
+describe('maxIssuesSeq', () => {
+  it('returns 0 when there are no combined windows', () => {
+    expect(maxIssuesSeq([])).toBe(0)
+    expect(
+      maxIssuesSeq([
+        {
+          id: 'a/b#3',
+          kind: 'issue',
+          fullPath: 'a/b',
+          iid: '3',
+          frame: { x: 0, y: 0, width: 1, height: 1 },
+        },
+      ]),
+    ).toBe(0)
+  })
+  it('returns the highest N among issues:N ids', () => {
+    expect(
+      maxIssuesSeq([
+        {
+          id: 'issues:1',
+          kind: 'issues',
+          fullPath: 'a/b',
+          iids: ['1'],
+          frame: { x: 0, y: 0, width: 1, height: 1 },
+        },
+        {
+          id: 'issues:4',
+          kind: 'issues',
+          fullPath: 'a/b',
+          iids: ['2'],
+          frame: { x: 0, y: 0, width: 1, height: 1 },
+        },
+        {
+          id: 'a/b#9',
+          kind: 'issue',
+          fullPath: 'a/b',
+          iid: '9',
+          frame: { x: 0, y: 0, width: 1, height: 1 },
+        },
+      ]),
+    ).toBe(4)
   })
 })
