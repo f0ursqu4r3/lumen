@@ -1,5 +1,5 @@
 import { computed, ref, watch, type Ref } from 'vue'
-import { useAddNote } from '@/features/issues/composables/useIssueMutations'
+import { useAddNote, useUpdateNote } from '@/features/issues/composables/useIssueMutations'
 
 export function useIssueDiscussion(opts: {
   fullPath: string
@@ -69,6 +69,36 @@ export function useIssueDiscussion(opts: {
     }
   }
 
+  // Inline edit-in-place for the user's own notes. One note editable at a time;
+  // the mutation invalidates the issue query so the edited body refreshes.
+  const editMut = useUpdateNote(opts.fullPath, opts.iid)
+  const editingNoteId = ref<string | null>(null)
+  const editBody = ref('')
+  const editPending = computed(() => editMut.isPending.value)
+  const editError = computed(() => editMut.error.value)
+
+  // UI contract: the Edit control is hidden and the editor shown for the editing note
+  // (Save disabled while pending), so a new edit can't be opened while a submit is in flight.
+  function openEdit(note: { id: string; body: string }) {
+    editingNoteId.value = note.id
+    editBody.value = note.body
+    editMut.reset()
+  }
+  function cancelEdit() {
+    editingNoteId.value = null
+    editBody.value = ''
+  }
+  async function submitEdit(noteId: string) {
+    const body = editBody.value.trim()
+    if (!body || editMut.isPending.value) return
+    try {
+      await editMut.mutateAsync({ id: noteId, body })
+      cancelEdit()
+    } catch {
+      // Left open with text intact; the error surfaces via editError below.
+    }
+  }
+
   return {
     fresh,
     replyingTo,
@@ -78,5 +108,12 @@ export function useIssueDiscussion(opts: {
     openReply,
     cancelReply,
     submitReply,
+    editingNoteId,
+    editBody,
+    editPending,
+    editError,
+    openEdit,
+    cancelEdit,
+    submitEdit,
   }
 }
