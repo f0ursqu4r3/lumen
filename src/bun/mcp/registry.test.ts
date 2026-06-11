@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { registerTools, allTools } from './registry'
 import type { McpTool } from './types'
 
-it('exposes the full gitlab tool catalog with unique lumen_-prefixed names', () => {
+it('exposes the full tool catalog with unique lumen_-prefixed names', () => {
   const names = allTools.map((t) => t.name)
   expect(names).toEqual(
     expect.arrayContaining([

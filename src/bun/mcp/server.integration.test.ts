@@ -56,6 +56,7 @@ describe('mcp request handler (real transport)', () => {
       await post({ jsonrpc: '2.0', id: 3, method: 'tools/list', params: {} })
     ).json()
     expect(list.result.tools.map((t: { name: string }) => t.name)).toContain('lumen_me')
+    expect(list.result.tools.map((t: { name: string }) => t.name)).toContain('lumen_app_state')
 
     gitlabGraphql.mockResolvedValue({ status: 200, data: { currentUser: { username: 'ana' } } })
     const call = await (
