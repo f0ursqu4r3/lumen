@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -54,6 +54,11 @@ describe('session', () => {
     expect(sessionSnapshot().main.frame).toEqual({ x: 50, y: 60, width: 800, height: 600 })
     setMainSize(70, 80, 900, 700)
     expect(sessionSnapshot().main.frame).toEqual({ x: 70, y: 80, width: 900, height: 700 })
+  })
+
+  it('setMainPosition is a no-op before initMain seeds a frame', () => {
+    setMainPosition(50, 60)
+    expect(sessionSnapshot().main.frame).toBeNull()
   })
 
   it('upserts, updates, and removes popouts by id', () => {
@@ -134,7 +139,6 @@ describe('session', () => {
   it('falls back to empty on a corrupt file', () => {
     initMain({ x: 1, y: 1, width: 1, height: 1 }, null, null)
     saveSessionNow()
-    const { writeFileSync } = require('node:fs')
     writeFileSync(join(dir, 'session.json'), '{ not json')
     __resetSessionForTest()
     expect(loadSession()).toEqual({ main: { frame: null, route: null, view: null }, popouts: [] })

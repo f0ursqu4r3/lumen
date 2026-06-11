@@ -84,11 +84,11 @@ export function initMain(frame: Frame, route: string | null, view: string | null
 }
 
 export function setMainPosition(x: number, y: number): void {
-  if (!state.main.frame) state.main.frame = { x, y, width: 0, height: 0 }
-  else {
-    state.main.frame.x = x
-    state.main.frame.y = y
-  }
+  // No-op without a base frame: a position is meaningless without a size, and
+  // initMain always seeds the frame before any move event in production.
+  if (!state.main.frame) return
+  state.main.frame.x = x
+  state.main.frame.y = y
   scheduleSave()
 }
 
