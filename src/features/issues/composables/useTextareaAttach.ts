@@ -44,6 +44,10 @@ export function useTextareaAttach(fullPath: string, text: Ref<string>, caret: ()
   async function handleFiles(list: FileList | File[] | null | undefined): Promise<void> {
     const files = Array.from(list ?? [])
     if (!files.length) return
+    // Concurrent uploadOnes each capture caret() at call time, so simultaneous
+    // drops stack their placeholders at the same position. Order is intentionally
+    // unspecified here; do not thread caret through in a way that breaks the
+    // unique-token guarantee that keeps the swaps collision-free.
     await Promise.all(files.map(uploadOne))
   }
 
@@ -78,8 +82,9 @@ export function useTextareaAttach(fullPath: string, text: Ref<string>, caret: ()
 
   function onPick(event: Event): void {
     const input = event.target as HTMLInputElement
-    void handleFiles(input.files)
-    input.value = '' // allow re-selecting the same file
+    const files = input.files // read before resetting the input
+    input.value = '' // reset so the same file can be re-selected
+    void handleFiles(files)
   }
 
   return {
