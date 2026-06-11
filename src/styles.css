@@ -137,8 +137,8 @@
      override (Appearance ▸ Customize) rescales them. Deliberately narrow: only the
      issue-list row padding + primary control height consume these (wired in a later
      task). */
-  --space-row-y: calc(0.5rem * var(--density));
-  --height-control: calc(2rem * var(--density));
+  --space-row-y: calc(0.625rem * var(--density));
+  --height-control: calc(2.25rem * var(--density));
 
   /* Sculpted dark elevation. Each surface gets a real layered ambient shadow
      plus a 1px top inner-highlight (the lit edge premium dark UIs use to catch
