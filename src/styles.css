@@ -520,11 +520,14 @@
 :root[data-idiom='terminal'] {
   --radius: 0px;
   --font-sans: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
-  --elev-card: none;
+  /* "0 0 #0000", not "none": these substitute into the utilities' comma-joined
+     box-shadow list, where a literal none would invalidate the whole declaration
+     and wipe co-applied ring-* shadows (Tailwind's shadow-none does the same). */
+  --elev-card: 0 0 #0000;
   --elev-pop: 0 0 0 1px var(--border);
   --elev-float: 0 0 0 1px var(--border), 0 12px 32px -8px oklch(0 0 0 / 0.6);
-  --elev-key: none;
-  --elev-key-hover: none;
+  --elev-key: 0 0 #0000;
+  --elev-key-hover: 0 0 #0000;
 }
 
 /* The one sanctioned glow: bright phosphor text is an emitting readout. */
