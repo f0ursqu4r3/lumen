@@ -2,9 +2,13 @@
 import { computed } from 'vue'
 import { GitMerge, ArrowRight } from '@lucide/vue'
 import MrStateBadge from '@/features/merge_requests/components/MrStateBadge.vue'
+import { useIdiom } from '@/shared/theme/useIdiom'
 import type { MergeRequestListItem } from '@/features/merge_requests/composables/useMergeRequests'
 
 const props = defineProps<{ mr: MergeRequestListItem; fullPath: string }>()
+
+// Terminal idiom (Phosphor): plates flatten to ruled rows.
+const idiom = useIdiom()
 
 const reviewers = computed(
   () =>
@@ -22,7 +26,12 @@ const approvals = computed(() =>
 <template>
   <RouterLink
     :to="{ name: 'merge-request', params: { fullPath, iid: mr.iid } }"
-    class="flex items-center gap-3 rounded-md border border-border/80 bg-secondary/60 px-4 py-2.5 shadow-card outline-none transition-colors duration-150 hover:bg-accent/70 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+    class="flex items-center gap-3 px-4 py-2.5 outline-none transition-colors duration-150 hover:bg-accent/70 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/50"
+    :class="
+      idiom === 'terminal'
+        ? 'rounded-none border-0 border-b border-border/60'
+        : 'rounded-md border border-border/80 bg-secondary/60 shadow-card'
+    "
   >
     <GitMerge class="size-4 shrink-0 text-muted-foreground" />
     <div class="min-w-0 flex-1">

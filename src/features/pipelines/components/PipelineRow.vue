@@ -99,7 +99,7 @@ const rowDelay = (i: number) => `${Math.min(i, 14) * 26}ms`
           "
           @click="$emit('toggle-watch')"
         >
-          <!-- Armed: the bell breathes amber while the run is in flight — the
+          <!-- Armed: the bell breathes in the accent while the run is in flight — the
                liveness-lamp idiom, meaning "listening for this one." The breath
                starting on arm is the confirmation. -->
           <BellRing v-if="watched" class="bell-listening" />

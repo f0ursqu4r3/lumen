@@ -113,7 +113,12 @@ const filterAssignee = (u: string) => emit('filter', { kind: 'assignee', value: 
         type="button"
         :title="type.label"
         class="relative z-10 grid size-5 shrink-0 cursor-pointer place-items-center rounded-md ring-1 ring-inset ring-white/10 outline-none transition-[scale] hover:ring-white/25 focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-90"
-        :style="{ backgroundColor: tint(type.color, 0.18), color: type.color }"
+        :class="idiom === 'terminal' && 'text-muted-foreground'"
+        :style="
+          idiom === 'terminal'
+            ? undefined
+            : { backgroundColor: tint(type.color, 0.18), color: type.color }
+        "
         @click="filterLabel({ title: `type::${type.code}`, color: type.color })"
       >
         <component :is="ICONS[type.icon]" class="size-3" :stroke-width="2.25" />

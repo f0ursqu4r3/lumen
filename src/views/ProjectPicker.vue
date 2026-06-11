@@ -41,7 +41,7 @@ const startsSection = (i: number) =>
 // --- selection cursor -------------------------------------------------------
 // The picker is a launcher first, a list second: a selection glides on the
 // keyboard like a command palette. `active` is the logical cursor (an index into
-// the flattened row list); the amber rail (`cursor`) chases it with a
+// the flattened row list); the accent rail (`cursor`) chases it with a
 // critically-damped spring so it has weight without the tackiness of a bounce.
 const listEl = ref<HTMLElement | null>(null)
 const { active, cursor, pinTo, springTo, move } = useSpringCursor({
@@ -121,7 +121,7 @@ useIntersectionObserver(sentinel, ([entry]) => {
           aria-label="Projects"
         >
           <!-- The selection rail: one element that glides between rows on a spring.
-             The amber "you are here" signal lives in the active row's monogram,
+             The orange "you are here" signal lives in the active row's monogram,
              so the rail itself is a clean accent band. -->
           <div
             class="pointer-events-none absolute inset-x-1 top-0 z-0 rounded-lg bg-accent ring-1 ring-inset ring-border transition-[height,opacity] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"

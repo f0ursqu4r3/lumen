@@ -5,8 +5,12 @@ import IssueRow from '@/features/issues/components/IssueRow.vue'
 import GroupSelectCheckbox from '@/features/issues/components/GroupSelectCheckbox.vue'
 import ReorderGhost from '@/features/issues/components/ReorderGhost.vue'
 import { Card } from '@/shared/ui/card'
+import { useIdiom } from '@/shared/theme/useIdiom'
 import type { Facet, IssueGroup } from '@/features/issues/lib/issueView'
 import type { ReorderContext } from '@/features/issues/composables/useGroupReorder'
+
+// Terminal idiom (Phosphor): ruled rows sit flush — no gap or inset padding.
+const idiom = useIdiom()
 
 const props = defineProps<{
   groups: IssueGroup[]
@@ -79,7 +83,7 @@ const activeGroup = computed(() => props.groups.find((g) => g.key === props.acti
             {{ g.issues.length }}
           </span>
         </header>
-        <Card class="gap-1.5 p-1.5">
+        <Card :class="idiom === 'terminal' ? 'gap-0 p-0' : 'gap-1.5 p-1.5'">
           <IssueRow
             v-for="(issue, i) in g.issues"
             :key="issue.iid"

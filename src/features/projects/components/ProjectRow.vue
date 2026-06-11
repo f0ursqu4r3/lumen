@@ -22,7 +22,7 @@ const namespace = (fullPath: string) => {
 }
 
 // One-letter monogram for the launcher rows — a derived initial, consistent with
-// the initials-only avatars elsewhere (no fetched icons). It lights amber on the
+// the initials-only avatars elsewhere (no fetched icons). It lights orange on the
 // active row, so the glyph doubles as the "this one launches" selection signal.
 const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 </script>
@@ -39,7 +39,7 @@ const monogram = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
     @click="$emit('row-click', $event)"
     @focus="$emit('activate')"
   >
-    <!-- Monogram: a derived initial that lights amber on the active row, so
+    <!-- Monogram: a derived initial that lights orange on the active row, so
        the glyph is also the "this one launches" signal. -->
     <span
       class="grid size-7 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold ring-1 ring-inset transition-colors"

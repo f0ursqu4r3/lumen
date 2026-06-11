@@ -8,9 +8,13 @@ import MrFilterPanel from '@/features/merge_requests/components/MrFilterPanel.vu
 import MergeRequestRow from '@/features/merge_requests/components/MergeRequestRow.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import ViewContainer from '@/shared/components/shell/ViewContainer.vue'
+import { useIdiom } from '@/shared/theme/useIdiom'
 
 const props = defineProps<{ fullPath: string }>()
 const fullPath = toRef(props, 'fullPath')
+
+// Terminal idiom (Phosphor): ruled rows sit flush — no gap or inset padding.
+const idiom = useIdiom()
 
 const f = useMrFilters()
 const { mergeRequests, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } =
@@ -76,7 +80,8 @@ async function refresh() {
 
     <ul
       v-else
-      class="mt-6 flex flex-col gap-1.5 rounded-xl border border-border bg-card p-1.5 shadow-card"
+      class="mt-6 flex flex-col rounded-xl border border-border bg-card shadow-card"
+      :class="idiom === 'terminal' ? 'gap-0 p-0' : 'gap-1.5 p-1.5'"
     >
       <li v-for="mr in mergeRequests" :key="mr.iid">
         <MergeRequestRow :mr="mr" :full-path="fullPath" />

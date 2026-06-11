@@ -158,3 +158,15 @@ theme only*.
 - Non-macOS window controls.
 - CRT gimmicks (scanlines, curvature, flicker) — banned.
 - Changing the shipped font families.
+
+## Accepted implementation deviations (final review)
+
+- Row plates use `bg-secondary/60` (not `bg-card`) — rows sit on a `bg-card` panel.
+- `#app-topbar-slot` actions stay in `AppTopBar` below the ChassisBar; the bar keeps
+  only wordmark + lamp, so the drag region stays uncluttered.
+- The counter bezel uses an inset shadow (the one sanctioned inset).
+- `readStored` coerces legacy theme ids on read without writing back; storage
+  self-heals on the next theme change.
+- `--elev-key`'s warm lit edge applies to all themes' primary key (chroma 0.04 —
+  visually neutral on cool-accent themes).
+- Dashboard (MyWork) lanes and PipelineList keep the divided-rows idiom.

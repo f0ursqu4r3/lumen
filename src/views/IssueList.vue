@@ -42,10 +42,15 @@ import SavedViews from '@/shared/components/SavedViews.vue'
 import ErrorNotice from '@/shared/components/ErrorNotice.vue'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
+import { useIdiom } from '@/shared/theme/useIdiom'
 
 const props = defineProps<{ fullPath: string }>()
 const route = useRoute()
 const router = useRouter()
+
+// Terminal idiom (Phosphor): the loading skeleton flattens to ruled rows too,
+// so the swap to real rows doesn't jump between plate and ruled geometry.
+const idiom = useIdiom()
 
 const { drawerDirty, openIid, setDrawerOpen, expandIssue } = useIssueDrawerRoute(
   toRef(props, 'fullPath'),
@@ -338,12 +343,18 @@ function setComposerOpen(value: boolean) {
 
         <div
           v-else-if="isLoading"
-          class="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-1.5"
+          class="flex flex-col rounded-xl border border-border bg-card"
+          :class="idiom === 'terminal' ? 'gap-0 p-0' : 'gap-1.5 p-1.5'"
         >
           <div
             v-for="i in 6"
             :key="i"
-            class="flex items-center gap-3 rounded-md border border-border/80 bg-secondary/60 px-4"
+            class="flex items-center gap-3 px-4"
+            :class="
+              idiom === 'terminal'
+                ? 'rounded-none border-0 border-b border-border/60'
+                : 'rounded-md border border-border/80 bg-secondary/60'
+            "
             style="padding-block: var(--space-row-y)"
           >
             <Skeleton class="size-2 rounded-full" />

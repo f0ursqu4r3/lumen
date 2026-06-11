@@ -18,8 +18,8 @@ import './styles.css'
 console.log(
   '%c●%c lumen%c ▸ operational',
   'color:oklch(0.69 0.2 42);font-size:13px;text-shadow:0 0 8px oklch(0.69 0.2 42/0.7)',
-  'color:oklch(0.945 0.006 256);font-weight:600;font-family:ui-monospace,monospace',
-  'color:oklch(0.66 0.018 256);font-family:ui-monospace,monospace',
+  'color:oklch(0.93 0.005 240);font-weight:600;font-family:ui-monospace,monospace',
+  'color:oklch(0.64 0.015 240);font-family:ui-monospace,monospace',
 )
 
 async function boot() {
