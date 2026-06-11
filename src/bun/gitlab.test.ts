@@ -1,5 +1,6 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { buildGraphql, buildRest, buildAsset } from './gitlab'
+import { buildGraphql, buildRest, buildAsset, buildUpload } from './gitlab'
 
 const { loadConfig } = vi.hoisted(() => ({ loadConfig: vi.fn() }))
 vi.mock('./config', () => ({ loadConfig }))
@@ -19,7 +20,7 @@ vi.mock('./serverHealth', () => ({
         : 'ok',
 }))
 
-import { gitlabGraphql, gitlabRest } from './gitlab'
+import { gitlabGraphql, gitlabRest, gitlabUpload } from './gitlab'
 
 const cfg = { gitlabUrl: 'https://gl.example.com', token: 'glpat-xyz' }
 
@@ -46,6 +47,26 @@ describe('gitlab request builders', () => {
     expect(url).toBe('https://gl.example.com/api/v4/projects/1/uploads/abc/x.png')
     expect((init.headers as Record<string, string>)['PRIVATE-TOKEN']).toBe('glpat-xyz')
   })
+
+  it('builds a multipart upload POST with token + TLS-off', async () => {
+    const { url, init } = buildUpload(cfg, {
+      fullPath: 'group/app',
+      filename: 'log.txt',
+      contentType: 'text/plain',
+      dataBase64: Buffer.from('hello').toString('base64'),
+    })
+    expect(url).toBe('https://gl.example.com/api/v4/projects/group%2Fapp/uploads')
+    expect(init.method).toBe('POST')
+    expect((init.headers as Record<string, string>)['PRIVATE-TOKEN']).toBe('glpat-xyz')
+    // Content-Type is NOT set: fetch derives the multipart boundary from FormData.
+    expect((init.headers as Record<string, string>)['Content-Type']).toBeUndefined()
+    expect((init as { tls?: { rejectUnauthorized?: boolean } }).tls?.rejectUnauthorized).toBe(false)
+    const body = init.body as FormData
+    const file = body.get('file') as File
+    expect(file.name).toBe('log.txt')
+    expect(file.type).toBe('text/plain')
+    expect(await file.text()).toBe('hello')
+  })
 })
 
 describe('host transport-failure handling', () => {
@@ -69,6 +90,46 @@ describe('host transport-failure handling', () => {
     const res = await gitlabRest({ method: 'GET', path: '/v4/projects/7' })
     expect(res.ok).toBe(false)
     expect(res.status).toBe(503)
+  })
+
+  it('returns markdown + ok on a successful upload', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          markdown: '![x](/uploads/abc/x.png)',
+          url: '/uploads/abc/x.png',
+          alt: 'x',
+        }),
+      }),
+    )
+    const res = await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'x.png',
+      contentType: 'image/png',
+      dataBase64: 'AA==',
+    })
+    expect(res.ok).toBe(true)
+    expect(res.status).toBe(201)
+    expect(res.markdown).toBe('![x](/uploads/abc/x.png)')
+  })
+
+  it('returns ok:false with status on an upload failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 413, json: async () => ({}) }),
+    )
+    const res = await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'big.zip',
+      contentType: 'application/zip',
+      dataBase64: 'AA==',
+    })
+    expect(res.ok).toBe(false)
+    expect(res.status).toBe(413)
+    expect(res.markdown).toBeUndefined()
   })
 })
 
@@ -136,5 +197,30 @@ describe('gitlab feeds server-health', () => {
     await gitlabGraphql({ query: '{x}', silent: true })
     expect(observe).not.toHaveBeenCalled()
     vi.unstubAllGlobals()
+  })
+
+  it('observes "ok" on a successful upload (201)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 201, json: async () => ({ markdown: '' }) }),
+    )
+    await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'x.png',
+      contentType: 'image/png',
+      dataBase64: 'AA==',
+    })
+    expect(observe).toHaveBeenCalledWith('ok')
+  })
+
+  it('observes "down" on an upload transport failure', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))
+    await gitlabUpload({
+      fullPath: 'g/a',
+      filename: 'x.png',
+      contentType: 'image/png',
+      dataBase64: 'AA==',
+    })
+    expect(observe).toHaveBeenCalledWith('down')
   })
 })

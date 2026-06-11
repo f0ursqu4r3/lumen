@@ -36,6 +36,19 @@ export interface AssetResult {
   base64: string
   contentType: string
 }
+export interface UploadArgs {
+  fullPath: string
+  filename: string
+  contentType: string
+  dataBase64: string
+}
+export interface UploadResult {
+  ok: boolean
+  status: number
+  markdown?: string
+  url?: string
+  alt?: string
+}
 export interface SaveConfigArgs {
   url: string
   token?: string
@@ -75,6 +88,7 @@ export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
   gitlabRest: (a: RestArgs) => Promise<RestResult>
   gitlabAsset: (a: AssetArgs) => Promise<AssetResult>
+  gitlabUpload: (a: UploadArgs) => Promise<UploadResult>
   getConfig: () => Promise<ConfigStatus>
   // The hash route this window should open at, applied client-side before mount.
   // The bundled views:// scheme can't load an initial URL with the route in its

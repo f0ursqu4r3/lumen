@@ -147,6 +147,78 @@ describe('renderMarkdown', () => {
   })
 })
 
+// Regression: non-image file attachments must render as a downloadable file-card
+// anchor so users can retrieve their uploads. GitLab's upload API returns a PLAIN
+// markdown link `[filename](/uploads/<32-hex-secret>/filename)` (no leading `!`)
+// for non-image files — only IMAGES get the `![...]` embed form. Both must reach
+// the same file-card: the gitlabImageExtension handles `![...]`, and a link
+// renderer override turns plain upload links into the same downloadable anchor.
+describe('non-image upload rendering', () => {
+  const SECRET = '0123456789abcdef0123456789abcdef' // 32 hex chars — matches SECRET regex
+
+  it('renders a PLAIN-link non-image upload (GitLab non-image form) as a downloadable file-card', () => {
+    const html = renderMarkdown(`[report.pdf](/uploads/${SECRET}/report.pdf)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain('download')
+    expect(html).toContain('data-media-src=')
+    expect(html).toContain('report.pdf')
+  })
+
+  it('still renders a ![..] non-image token as a downloadable file-card', () => {
+    const html = renderMarkdown(`![report.pdf](/uploads/${SECRET}/report.pdf)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain('download')
+  })
+
+  it('renders an image upload inline (not a file-card)', () => {
+    const html = renderMarkdown(`![shot](/uploads/${SECRET}/shot.png)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('data-media-kind="image"')
+    expect(html).not.toContain('file-card')
+  })
+
+  it('leaves a normal external link untouched (no file-card)', () => {
+    const html = renderMarkdown('[docs](https://example.com/page)', {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('href="https://example.com/page"')
+    expect(html).not.toContain('file-card')
+  })
+
+  it('uses the link text as the file-card label, falling back to filename', () => {
+    const html = renderMarkdown(`[Quarterly Report](/uploads/${SECRET}/q3.pdf)`, {
+      projectPath: 'group/app',
+    })
+    expect(html).toContain('Quarterly Report')
+  })
+
+  it('renders a /-/project/<id>/uploads/ plain link as a file-card', () => {
+    const html = renderMarkdown(`[report.pdf](/-/project/42/uploads/${SECRET}/report.pdf)`)
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain('download')
+    expect(html).toContain('/v4/projects/42/uploads/')
+  })
+
+  it('defers resolution for a plain upload link even without a projectPath', () => {
+    const html = renderMarkdown(`[file.pdf](/uploads/${SECRET}/file.pdf)`)
+    expect(html).toContain('class="file-card"')
+    expect(html).toContain(`data-media-src="/uploads/${SECRET}/file.pdf"`)
+  })
+
+  it('keeps the download attribute through DOMPurify sanitization', () => {
+    const html = renderMarkdown(`[report.pdf](/uploads/${SECRET}/report.pdf)`, {
+      projectPath: 'group/app',
+    })
+    // download is load-bearing for the click-to-save path; assert it survives sanitize.
+    expect(html).toContain('download')
+  })
+})
+
 describe('classifyUpload', () => {
   it('classifies uploads by extension, case-insensitively', () => {
     expect(classifyUpload('/uploads/x/a.PNG')).toBe('image')

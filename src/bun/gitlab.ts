@@ -7,6 +7,8 @@ import type {
   RestResult,
   AssetArgs,
   AssetResult,
+  UploadArgs,
+  UploadResult,
 } from '@/shared/lib/rpcContract'
 
 function looksJson(body: string): boolean {
@@ -67,6 +69,22 @@ export function buildAsset(cfg: Cfg, a: AssetArgs): { url: string; init: FetchIn
   }
 }
 
+export function buildUpload(cfg: Cfg, a: UploadArgs): { url: string; init: FetchInit } {
+  const bytes = Buffer.from(a.dataBase64, 'base64')
+  const form = new FormData()
+  form.append('file', new File([bytes], a.filename, { type: a.contentType }))
+  return {
+    url: `${cfg.gitlabUrl}/api/v4/projects/${encodeURIComponent(a.fullPath)}/uploads`,
+    init: {
+      method: 'POST',
+      // No Content-Type: fetch sets multipart/form-data + boundary from the FormData body.
+      headers: { ...authHeaders(cfg.token), Accept: 'application/json' },
+      body: form,
+      tls: tlsOff,
+    },
+  }
+}
+
 function requireCfg(): Cfg {
   const { gitlabUrl, token } = loadConfig()
   if (!gitlabUrl || !token) throw new Error('GitLab is not configured')
@@ -123,4 +141,22 @@ export async function gitlabAsset(a: AssetArgs): Promise<AssetResult> {
     base64: buf.toString('base64'),
     contentType: res.headers.get('content-type') ?? 'application/octet-stream',
   }
+}
+
+export async function gitlabUpload(a: UploadArgs): Promise<UploadResult> {
+  const { url, init } = buildUpload(requireCfg(), a)
+  let res: Response
+  try {
+    res = await fetch(url, init as RequestInit)
+  } catch {
+    report(503, false)
+    return { ok: false, status: 503 }
+  }
+  const json = (await res.json().catch(() => ({}))) as {
+    markdown?: string
+    url?: string
+    alt?: string
+  }
+  report(res.status, res.status === 403 && Object.keys(json).length > 0)
+  return { ok: res.ok, status: res.status, markdown: json.markdown, url: json.url, alt: json.alt }
 }

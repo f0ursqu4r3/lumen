@@ -111,6 +111,7 @@ function initials(user?: NoteAuthor) {
             <MentionTextarea
               v-model="replyBody"
               :members="members"
+              :full-path="fullPath"
               :rows="2"
               placeholder="Write a reply…"
               aria-label="Write a reply"
@@ -151,6 +152,7 @@ function initials(user?: NoteAuthor) {
         id="issue-comment"
         v-model="comment"
         :members="members"
+        :full-path="fullPath"
         :rows="3"
         placeholder="Add a comment…"
         aria-label="Add a comment"

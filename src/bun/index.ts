@@ -1,6 +1,6 @@
 import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from 'electrobun/bun'
 import { loadConfig, saveConfig, clearConfig } from './config'
-import { gitlabGraphql, gitlabRest, gitlabAsset } from './gitlab'
+import { gitlabGraphql, gitlabRest, gitlabAsset, gitlabUpload } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
 import { resolveStartUrl } from './startUrl'
 import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
@@ -139,6 +139,7 @@ function buildRpc(initialRoute: string | null = null) {
         gitlabGraphql,
         gitlabRest,
         gitlabAsset,
+        gitlabUpload,
         getConfig: async () => {
           const { gitlabUrl, token } = loadConfig()
           return {
