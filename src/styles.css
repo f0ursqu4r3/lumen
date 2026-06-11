@@ -206,7 +206,6 @@
 
 /* Counter window — an inset bezel plate behind the hero Odometer digits. */
 .counter-bezel {
-  display: inline-block;
   padding: 0.125rem 0.625rem;
   border-radius: var(--radius-sm);
   background: color-mix(in oklch, var(--background) 85%, oklch(0 0 0));

@@ -338,9 +338,14 @@ function setComposerOpen(value: boolean) {
 
         <div
           v-else-if="isLoading"
-          class="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-card"
+          class="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-1.5"
         >
-          <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-2">
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="flex items-center gap-3 rounded-md border border-border/80 bg-secondary/60 px-4"
+            style="padding-block: var(--space-row-y)"
+          >
             <Skeleton class="size-2 rounded-full" />
             <Skeleton class="size-5 rounded-md" />
             <Skeleton class="h-3.5 w-6" />
