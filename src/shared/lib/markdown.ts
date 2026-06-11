@@ -178,6 +178,29 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
   }
 }
 
+// GitLab's upload API returns a PLAIN markdown link `[name](/uploads/<secret>/x)`
+// for NON-IMAGE files (only images get the `![...]` embed form). The default link
+// renderer would leave that as a bare `<a href="/uploads/...">` — which 404s under
+// the views:// origin and never gets the authenticated blob URL. Override `link` to
+// emit the same downloadable file-card the image extension produces for files, so
+// applyResolvedMedia() resolves it and MarkdownText's download anchor handling
+// triggers a download instead of an in-place navigation. Non-upload links return
+// `false`, which marked falls back to its default link rendering.
+function gitlabUploadLinkRenderer(projectPath?: string) {
+  return {
+    link(token: { href: string; text: string }): string | false {
+      const href = token.href
+      const isUpload = PROJECT_UPLOAD.test(href) || RELATIVE_UPLOAD.test(href)
+      if (!isUpload) return false
+      const src = rewriteUploadSrc(href, projectPath)
+      const deferred = needsAssetResolution(src)
+      const mediaSrcAttr = deferred ? ` data-media-src="${escapeAttr(src)}"` : ''
+      const label = token.text || uploadFilename(href)
+      return `<a class="file-card" href="${escapeAttr(src)}"${mediaSrcAttr} download>${escapeAttr(label)}</a>`
+    },
+  }
+}
+
 // GitLab descriptions/notes are Markdown that may contain attacker-authored raw
 // HTML. marked does not sanitize, so an unsanitized `<img onerror=...>` could run
 // arbitrary script in the webview. The token now lives in the Bun process (not the
@@ -186,7 +209,10 @@ function gitlabImageExtension(projectPath?: string): TokenizerAndRendererExtensi
 export function renderMarkdown(src: string | null | undefined, opts: RenderOptions = {}): string {
   if (!src) return ''
   const marked = new Marked()
-  marked.use({ extensions: [gitlabImageExtension(opts.projectPath)] })
+  marked.use({
+    extensions: [gitlabImageExtension(opts.projectPath)],
+    renderer: gitlabUploadLinkRenderer(opts.projectPath),
+  })
   const html = marked.parse(src, { async: false }) as string
   // video/audio are in DOMPurify's current default allow-list; ADD_TAGS pins them
   // so a future DOMPurify tightening can't silently break rendering. ADD_ATTR is
