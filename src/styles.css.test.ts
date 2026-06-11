@@ -7,16 +7,21 @@ const css = readFileSync(fileURLToPath(new URL('./styles.css', import.meta.url))
 
 describe('styles.css amber de-hardcoding', () => {
   it('does not hardcode the amber accent inside keyframes/shadows', () => {
-    // The default amber may appear ONLY as a token definition (--primary / --ring).
-    const body = css
-      .split('\n')
-      .filter((l) => !l.includes('--primary') && !l.includes('--ring'))
-      .join('\n')
-    expect(body).not.toMatch(/oklch\(\s*0\.82\s+0\.142\s+81/)
+    const lines = css.split('\n')
+    const canonicalDef = /^\s*--(primary|ring):\s*oklch\(/
+    // trailing-zero tolerant (0.82 or 0.820)
+    const amberLiteral = /oklch\(\s*0\.820?\s+0\.142\s+81/
+    const violations = lines.filter((l) => amberLiteral.test(l) && !canonicalDef.test(l))
+    expect(violations).toEqual([])
   })
 
   it('drives the canvas gradient through a token', () => {
     expect(css).toMatch(/--canvas-gradient/)
     expect(css).toMatch(/background-image:\s*var\(--canvas-gradient\)/)
+  })
+
+  it('defines the canvas gradient token inside .dark', () => {
+    const darkBlock = css.match(/\.dark\s*\{[^}]*\}/s)?.[0] ?? ''
+    expect(darkBlock).toMatch(/--canvas-gradient/)
   })
 })
