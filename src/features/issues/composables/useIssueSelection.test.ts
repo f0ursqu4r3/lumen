@@ -21,6 +21,15 @@ describe('useIssueSelection', () => {
     expect(s.count.value).toBe(0)
   })
 
+  it('setMany adds and removes a batch without touching the rest', () => {
+    const s = useIssueSelection(ref('grp/proj'))
+    s.toggle('9')
+    s.setMany(['1', '2'], true)
+    expect([...s.selected.value].sort()).toEqual(['1', '2', '9'])
+    s.setMany(['1', '2'], false)
+    expect([...s.selected.value]).toEqual(['9'])
+  })
+
   it('setMode(false) and exit() both clear the selection and turn mode off', () => {
     const s = useIssueSelection(ref('grp/proj'))
     s.setMode(true)

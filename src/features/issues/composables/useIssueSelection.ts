@@ -8,6 +8,9 @@ export interface IssueSelection {
   count: ComputedRef<number>
   isSelected: (iid: string) => boolean
   toggle: (iid: string) => void
+  /** Add or remove a batch of iids at once, leaving the rest of the selection
+   *  untouched — used by group/column "select all" headers. */
+  setMany: (iids: string[], on: boolean) => void
   selectAll: (iids: string[]) => void
   clear: () => void
   /** Clear the selection and turn mode off. */
@@ -36,6 +39,14 @@ export function useIssueSelection(fullPath: Ref<string>): IssueSelection {
     else next.add(iid)
     selected.value = next
   }
+  function setMany(iids: string[], on: boolean) {
+    const next = new Set(selected.value)
+    for (const iid of iids) {
+      if (on) next.add(iid)
+      else next.delete(iid)
+    }
+    selected.value = next
+  }
   const selectAll = (iids: string[]) => (selected.value = new Set(iids))
   const clear = () => (selected.value = new Set())
   const exit = () => {
@@ -47,7 +58,7 @@ export function useIssueSelection(fullPath: Ref<string>): IssueSelection {
     if (!on) selected.value = new Set()
   }
 
-  return { mode, selected, count, isSelected, toggle, selectAll, clear, exit, setMode }
+  return { mode, selected, count, isSelected, toggle, setMany, selectAll, clear, exit, setMode }
 }
 
 // A no-op selection used when a row/card renders without a provider (isolated
@@ -59,6 +70,7 @@ const DISABLED_SELECTION: IssueSelection = {
   count: computed(() => 0),
   isSelected: () => false,
   toggle: () => {},
+  setMany: () => {},
   selectAll: () => {},
   clear: () => {},
   exit: () => {},

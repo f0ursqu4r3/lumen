@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { GripVertical } from '@lucide/vue'
 import IssueRow from '@/features/issues/components/IssueRow.vue'
+import GroupSelectCheckbox from '@/features/issues/components/GroupSelectCheckbox.vue'
 import ReorderGhost from '@/features/issues/components/ReorderGhost.vue'
 import { Card } from '@/shared/ui/card'
 import type { Facet, IssueGroup } from '@/features/issues/lib/issueView'
@@ -71,6 +72,7 @@ const activeGroup = computed(() => props.groups.find((g) => g.key === props.acti
           >
             <GripVertical class="size-3.5" />
           </span>
+          <GroupSelectCheckbox :iids="g.issues.map((i) => i.iid)" :label="g.label" />
           <span v-if="g.color" class="size-2 rounded-full" :style="{ backgroundColor: g.color }" />
           <h2 class="text-sm font-medium text-foreground">{{ g.label }}</h2>
           <span class="font-mono text-xs tabular-nums text-muted-foreground/60">

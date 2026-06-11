@@ -3,7 +3,7 @@ import type { CheckboxRootProps, CheckboxRootEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { CheckboxRoot, CheckboxIndicator, useForwardPropsEmits } from 'reka-ui'
 import { reactiveOmit } from '@vueuse/core'
-import { Check } from '@lucide/vue'
+import { Check, Minus } from '@lucide/vue'
 import { cn } from '@/shared/lib/utils'
 
 const props = defineProps<CheckboxRootProps & { class?: HTMLAttributes['class'] }>()
@@ -19,16 +19,20 @@ const forwarded = useForwardPropsEmits(delegated, emits)
     v-bind="forwarded"
     :class="
       cn(
-        'peer size-4 shrink-0 rounded-[4px] border border-input bg-card/40 outline-none transition-colors',
+        'group peer size-4 shrink-0 rounded-[4px] border border-input bg-card/40 outline-none transition-colors',
         'focus-visible:ring-2 focus-visible:ring-ring/60',
         'disabled:cursor-not-allowed disabled:opacity-50',
         'data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
+        'data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground',
         props.class,
       )
     "
   >
+    <!-- The indicator mounts for both checked and indeterminate; pick the glyph
+         off the root's data-state so a mixed group reads as a minus, not a tick. -->
     <CheckboxIndicator class="grid size-full place-items-center text-current">
-      <Check class="size-3" :stroke-width="3" />
+      <Minus class="hidden size-3 group-data-[state=indeterminate]:block" :stroke-width="3" />
+      <Check class="hidden size-3 group-data-[state=checked]:block" :stroke-width="3" />
     </CheckboxIndicator>
   </CheckboxRoot>
 </template>

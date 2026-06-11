@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useElementBounding } from '@vueuse/core'
 import { GripVertical } from '@lucide/vue'
 import IssueCard from '@/features/issues/components/IssueCard.vue'
+import GroupSelectCheckbox from '@/features/issues/components/GroupSelectCheckbox.vue'
 import ReorderGhost from '@/features/issues/components/ReorderGhost.vue'
 import type { IssueListItem } from '@/features/issues/composables/useIssues'
 import type { IssueGroup, Facet } from '@/features/issues/lib/issueView'
@@ -115,6 +116,7 @@ const boardStyle = computed(() => ({
           >
             <GripVertical class="size-3.5" />
           </span>
+          <GroupSelectCheckbox :iids="g.issues.map((i) => i.iid)" :label="g.label" />
           <span
             v-if="g.color"
             class="size-2 shrink-0 rounded-full"
