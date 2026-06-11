@@ -1,3 +1,5 @@
+import type { ThemeOverrides } from '@/shared/theme/overrides'
+
 export interface ConfigStatus {
   url: string | null
   configured: boolean
@@ -66,16 +68,11 @@ export interface ServerHealth {
 }
 
 // A window's chosen theme + override delta. The RPC payload for broadcastTheme;
-// also the shape applyTheme/useTheme operate on. Kept structurally identical to
-// ThemeOverrides in src/shared/theme/overrides.ts.
+// also the shape applyTheme/useTheme operate on. overrides reuses ThemeOverrides
+// from src/shared/theme/overrides.ts (type-only import, erased at compile).
 export interface ThemeState {
   themeId: string
-  overrides: {
-    accent?: string
-    radius?: 'sharp' | 'default' | 'round'
-    density?: 'comfortable' | 'compact'
-    font?: 'default' | 'system' | 'geist'
-  }
+  overrides: ThemeOverrides
 }
 
 // What the main window's webview reports about itself (cached host-side for

@@ -51,4 +51,16 @@ describe('useTheme', () => {
     expect(t.themeId.value).toBe('teal')
     expect(t.overrides.value).toEqual({ density: 'compact' })
   })
+
+  it('re-seeds refs when another window broadcasts a change (no re-broadcast)', () => {
+    const t = useTheme()
+    window.dispatchEvent(
+      new CustomEvent('lumen:theme-changed', {
+        detail: { themeId: 'gruvbox', overrides: { radius: 'sharp' } },
+      }),
+    )
+    expect(t.themeId.value).toBe('gruvbox')
+    expect(t.overrides.value).toEqual({ radius: 'sharp' })
+    expect(broadcastTheme).not.toHaveBeenCalled() // updating refs must NOT broadcast
+  })
 })
