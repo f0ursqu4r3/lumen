@@ -2,6 +2,7 @@ import { z } from 'zod'
 import type { McpTool } from '../types'
 import { text, errorResult } from '../types'
 import { gql, resolveLabelIds, resolveUserIds, resolveMilestoneId } from './client'
+import { emitInvalidate } from '../app/bridge'
 
 const LIST_Q = `query($p:ID!,$state:IssuableState,$labelName:[String],$assigneeUsernames:[String!],$milestoneTitle:[String],$search:String,$first:Int,$after:String){
   project(fullPath:$p){ issues(state:$state,labelName:$labelName,assigneeUsernames:$assigneeUsernames,milestoneTitle:$milestoneTitle,search:$search,first:$first,after:$after,sort:UPDATED_DESC){
@@ -113,6 +114,7 @@ export const issueTools: McpTool[] = [
         createIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }
       }>(CREATE_M, { input })
       if (data.createIssue.errors.length) return errorResult(data.createIssue.errors.join('; '))
+      emitInvalidate({ resource: 'issue', project: a.project as string })
       return text({ created: data.createIssue.issue })
     },
   },
@@ -155,6 +157,7 @@ export const issueTools: McpTool[] = [
         if (asg.issueSetAssignees.errors.length)
           return errorResult(asg.issueSetAssignees.errors.join('; '))
       }
+      emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
       return text({ updated: data.updateIssue.issue })
     },
   },
@@ -195,6 +198,7 @@ export const issueTools: McpTool[] = [
       if (payload?.errors?.length) return errorResult(payload.errors.join('; '))
       const status =
         payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
+      emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
       return text({ updated: { iid: a.iid, status } })
     },
   },
@@ -220,6 +224,7 @@ export const issueTools: McpTool[] = [
         },
       )
       if (data.createNote.errors.length) return errorResult(data.createNote.errors.join('; '))
+      emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
       return text(`Comment added to ${a.project}#${a.iid}.`)
     },
   },
