@@ -228,6 +228,7 @@ setHostActions({
     win.webview.executeJavascript(js)
     return { ok: true }
   },
+  broadcast: (js) => broadcast(js),
   listWindows: (): WindowInfo[] => {
     const out: WindowInfo[] = []
     if (windows.has(win)) out.push({ kind: 'main' })

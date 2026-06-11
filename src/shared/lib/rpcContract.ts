@@ -75,14 +75,13 @@ export interface AppStateSnapshot {
   visibleIssueIids: string[] // iids loaded in the current list/board
 }
 
-// Commands the host pushes into the main webview via the lumen:mcp-command
-// CustomEvent (MCP lumen_app_navigate). Unknown cmds are ignored by the webview.
-export interface McpAppCommand {
-  cmd: 'navigate'
-  view: string
-  project?: string
-  iid?: string
-}
+// Commands the host pushes into webviews via the lumen:mcp-command CustomEvent.
+// Unknown cmds are ignored by the webview.
+// - navigate: MCP lumen_app_navigate, main window only.
+// - invalidate: emitted after a successful MCP write so open views refetch.
+export type McpAppCommand =
+  | { cmd: 'navigate'; view: string; project?: string; iid?: string }
+  | { cmd: 'invalidate'; resource: 'issue'; project: string; iid?: string }
 
 export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>

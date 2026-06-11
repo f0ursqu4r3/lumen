@@ -17,6 +17,8 @@ export interface HostActions {
   notify: (a: { title: string; body?: string; subtitle?: string; silent?: boolean }) => void
   /** Run JS in the main window's webview; { ok: false } if it's gone. */
   driveMain: (js: string) => { ok: boolean }
+  /** Run JS in every open window (main + popouts + pager). */
+  broadcast: (js: string) => void
   listWindows: () => WindowInfo[]
 }
 
@@ -44,6 +46,16 @@ export function getHostActions(): HostActions | null {
 /** The executeJavascript payload for a drive command. JSON.stringify owns escaping. */
 export function buildCommandJs(command: McpAppCommand): string {
   return `window.dispatchEvent(new CustomEvent('lumen:mcp-command',{detail:${JSON.stringify(command)}}))`
+}
+
+type InvalidateSignal = Omit<Extract<McpAppCommand, { cmd: 'invalidate' }>, 'cmd'>
+
+/**
+ * Broadcast a cache-invalidation signal to every window after a successful MCP
+ * write. No-ops when the host bridge isn't registered (tests, headless, boot).
+ */
+export function emitInvalidate(signal: InvalidateSignal): void {
+  host?.broadcast(buildCommandJs({ cmd: 'invalidate', ...signal }))
 }
 
 /** Test-only: reset module state between cases. */

@@ -8,6 +8,9 @@ const c = vi.hoisted(() => ({
 }))
 vi.mock('./client', () => c)
 
+const { emitInvalidate } = vi.hoisted(() => ({ emitInvalidate: vi.fn() }))
+vi.mock('../app/bridge', () => ({ emitInvalidate }))
+
 import { issueTools } from './issues'
 const tool = (name: string) => issueTools.find((t) => t.name === name)!
 const bodyText = (r: unknown) => (r as { content: Array<{ text: string }> }).content[0].text
@@ -17,6 +20,7 @@ beforeEach(() => {
   c.resolveLabelIds.mockReset()
   c.resolveUserIds.mockReset()
   c.resolveMilestoneId.mockReset()
+  emitInvalidate.mockReset()
 })
 
 describe('lumen_issues_list', () => {
@@ -181,6 +185,56 @@ describe('lumen_issue_set_status', () => {
     expect(res.isError).toBe(true)
     expect(bodyText(res)).toContain('Status is not available')
   })
+
+  it('emits an issue invalidate signal on success', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/2', name: 'Done' }] } },
+      })
+      .mockResolvedValueOnce({
+        workItemUpdate: {
+          errors: [],
+          workItem: {
+            widgets: [{ status: { id: 'gid://gitlab/Status/2', name: 'Done', category: 'done' } }],
+          },
+        },
+      })
+    await tool('lumen_issue_set_status').handler({ project: 'g/p', iid: '83', status: 'Done' })
+    expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p', iid: '83' })
+  })
+
+  it('does not emit when the status is unknown', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/1', name: 'To do' }] } },
+      })
+    await tool('lumen_issue_set_status').handler({ project: 'g/p', iid: '83', status: 'Nope' })
+    expect(emitInvalidate).not.toHaveBeenCalled()
+  })
+
+  it('errors and does not emit when workItemUpdate returns null', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/2', name: 'Done' }] } },
+      })
+      .mockResolvedValueOnce({ workItemUpdate: null })
+    const res = await tool('lumen_issue_set_status').handler({
+      project: 'g/p',
+      iid: '83',
+      status: 'Done',
+    })
+    expect(res.isError).toBe(true)
+    expect(emitInvalidate).not.toHaveBeenCalled()
+  })
 })
 
 describe('lumen_issue_create', () => {
@@ -218,6 +272,19 @@ describe('lumen_issue_create', () => {
     const res = await tool('lumen_issue_create').handler({ project: 'g/p', title: '' })
     expect(res.isError).toBe(true)
     expect(bodyText(res)).toContain('Title is required')
+  })
+
+  it('errors and does not emit when the issue comes back null with no errors', async () => {
+    c.gql.mockResolvedValue({ createIssue: { issue: null, errors: [] } })
+    const res = await tool('lumen_issue_create').handler({ project: 'g/p', title: 'New' })
+    expect(res.isError).toBe(true)
+    expect(emitInvalidate).not.toHaveBeenCalled()
+  })
+
+  it('emits a project-level issue invalidate signal (no iid) on success', async () => {
+    c.gql.mockResolvedValue({ createIssue: { issue: { iid: '9', webUrl: 'u' }, errors: [] } })
+    await tool('lumen_issue_create').handler({ project: 'g/p', title: 'New' })
+    expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p' })
   })
 })
 
@@ -258,6 +325,18 @@ describe('lumen_issue_update', () => {
       input: { projectPath: 'g/p', iid: '5', assigneeUsernames: ['ana'] },
     })
   })
+
+  it('emits an issue invalidate signal on success', async () => {
+    c.gql.mockResolvedValue({ updateIssue: { issue: { iid: '5', webUrl: 'u' }, errors: [] } })
+    await tool('lumen_issue_update').handler({ project: 'g/p', iid: '5', title: 'X' })
+    expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p', iid: '5' })
+  })
+
+  it('does not emit when the update reports errors', async () => {
+    c.gql.mockResolvedValue({ updateIssue: { issue: null, errors: ['nope'] } })
+    await tool('lumen_issue_update').handler({ project: 'g/p', iid: '5', title: 'X' })
+    expect(emitInvalidate).not.toHaveBeenCalled()
+  })
 })
 
 describe('lumen_issue_comment', () => {
@@ -280,5 +359,13 @@ describe('lumen_issue_comment', () => {
       body: 'hi',
     })
     expect(res.isError).toBe(true)
+  })
+
+  it('emits an issue invalidate signal on success', async () => {
+    c.gql
+      .mockResolvedValueOnce({ project: { issue: { id: 'gid://gitlab/Issue/100' } } })
+      .mockResolvedValueOnce({ createNote: { note: { id: 'gid://gitlab/Note/1' }, errors: [] } })
+    await tool('lumen_issue_comment').handler({ project: 'g/p', iid: '5', body: 'hi' })
+    expect(emitInvalidate).toHaveBeenCalledWith({ resource: 'issue', project: 'g/p', iid: '5' })
   })
 })

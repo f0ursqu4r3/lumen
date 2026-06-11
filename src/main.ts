@@ -6,6 +6,7 @@ import { rpc } from '@/shared/lib/rpc'
 import { createPersistedQueryClient } from '@/shared/lib/persist'
 import { installServerHealth } from '@/shared/composables/useSession'
 import { installAppStateReport } from '@/shared/composables/useAppStateReport'
+import { installMcpCacheSync } from '@/shared/composables/useMcpCacheSync'
 import './styles.css'
 
 // A quiet boot signature for whoever opens the console — styled like a telemetry
@@ -29,6 +30,11 @@ async function boot() {
   // overlay) and refetch this window's queries when the server recovers. Never
   // torn down — lives as long as the webview.
   installServerHealth(queryClient)
+  // Every window — main and popouts — refreshes its issue views when an MCP
+  // write lands in the host. (Unlike app-state report, this is not main-only.)
+  // Coexists with installAppStateReport's lumen:mcp-command listener: each
+  // handles a distinct cmd ('invalidate' vs 'navigate'), so they never collide.
+  installMcpCacheSync(queryClient)
   // MCP app-control: only the main window reports state / accepts drive
   // commands. Popouts and the settings window get a non-null initial route.
   if (!route) installAppStateReport(router)
