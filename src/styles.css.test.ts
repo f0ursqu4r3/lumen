@@ -20,8 +20,20 @@ describe('styles.css amber de-hardcoding', () => {
     expect(css).toMatch(/background-image:\s*var\(--canvas-gradient\)/)
   })
 
-  it('defines the canvas gradient token inside .dark', () => {
-    const darkBlock = css.match(/\.dark\s*\{[^}]*\}/s)?.[0] ?? ''
-    expect(darkBlock).toMatch(/--canvas-gradient/)
+  it('defines the canvas gradient token inside :root', () => {
+    const root = css.slice(css.indexOf(':root'), css.indexOf('@theme inline'))
+    expect(root).toMatch(/--canvas-gradient/)
+  })
+
+  it('puts the default theme on :root with color-scheme dark', () => {
+    const root = css.slice(css.indexOf(':root'), css.indexOf('@theme inline'))
+    expect(root).toMatch(/color-scheme:\s*dark/)
+    expect(root).toMatch(/--primary:\s*oklch\(0\.82 0\.142 81\)/)
+    expect(root).toMatch(/--background:\s*oklch\(0\.178/)
+  })
+
+  it('no longer defines a .dark theme selector or the dark custom-variant', () => {
+    expect(css).not.toMatch(/@custom-variant dark/)
+    expect(css).not.toMatch(/\.dark\s*\{/)
   })
 })
