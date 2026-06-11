@@ -23,7 +23,7 @@ describe('installThemeSync', () => {
     installThemeSync()
     window.dispatchEvent(
       new CustomEvent('lumen:theme-changed', {
-        detail: { themeId: 'amber', overrides: { radius: 'round' } },
+        detail: { themeId: 'chassis', overrides: { radius: 'round' } },
       }),
     )
     expect(document.documentElement.style.getPropertyValue('--radius')).toBe('1rem')

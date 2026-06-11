@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 const setTheme = vi.fn().mockResolvedValue(undefined)
 const setOverride = vi.fn().mockResolvedValue(undefined)
 const reset = vi.fn().mockResolvedValue(undefined)
-const themeId = { value: 'amber' }
+const themeId = { value: 'chassis' }
 const overrides = { value: {} as Record<string, unknown> }
 vi.mock('@/shared/theme/useTheme', () => ({
   useTheme: () => ({ themeId, overrides, setTheme, setOverride, reset }),
@@ -14,7 +14,7 @@ import AppearancePane from './AppearancePane.vue'
 
 beforeEach(() => {
   vi.clearAllMocks()
-  themeId.value = 'amber'
+  themeId.value = 'chassis'
   overrides.value = {}
 })
 
@@ -28,10 +28,10 @@ describe('AppearancePane', () => {
   })
 
   it('marks the active theme selected', () => {
-    themeId.value = 'amber'
+    themeId.value = 'chassis'
     const w = mount(AppearancePane)
-    const amber = w.get('[data-test="theme-card"][data-theme-id="amber"]')
-    expect(amber.attributes('aria-pressed')).toBe('true')
+    const chassis = w.get('[data-test="theme-card"][data-theme-id="chassis"]')
+    expect(chassis.attributes('aria-pressed')).toBe('true')
   })
 
   it('clicking a theme card calls setTheme', async () => {

@@ -11,20 +11,20 @@ export interface ThemeMeta {
   swatch: { bg: string; surface: string; fg: string; accent: string }
 }
 
-export const DEFAULT_THEME_ID = 'amber'
+export const DEFAULT_THEME_ID = 'chassis'
 
 export const THEMES: ThemeMeta[] = [
   // Dark
   {
-    id: 'amber',
-    name: 'Amber',
+    id: 'chassis',
+    name: 'Chassis',
     group: 'dark',
     colorScheme: 'dark',
     swatch: {
-      bg: 'oklch(0.178 0.008 256)',
-      surface: 'oklch(0.214 0.009 256)',
-      fg: 'oklch(0.945 0.006 256)',
-      accent: 'oklch(0.82 0.142 81)',
+      bg: 'oklch(0.195 0.006 240)',
+      surface: 'oklch(0.235 0.008 240)',
+      fg: 'oklch(0.93 0.005 240)',
+      accent: 'oklch(0.69 0.2 42)',
     },
   },
   {

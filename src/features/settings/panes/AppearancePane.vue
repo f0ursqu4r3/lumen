@@ -20,7 +20,7 @@ const activeId = computed(() => themeId.value)
 
 const customizing = ref(false)
 const ACCENTS = [
-  'oklch(0.82 0.142 81)',
+  'oklch(0.69 0.2 42)',
   'oklch(0.7 0.13 264)',
   'oklch(0.72 0.15 150)',
   'oklch(0.62 0.2 22)',

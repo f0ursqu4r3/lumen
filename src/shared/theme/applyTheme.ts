@@ -25,7 +25,8 @@ export function applyTheme(doc: Document, state: ThemeState): void {
 }
 
 export function readStored(storage: Storage): ThemeState {
-  const themeId = storage.getItem(THEME_KEY) ?? DEFAULT_THEME_ID
+  const storedId = storage.getItem(THEME_KEY) ?? DEFAULT_THEME_ID
+  const themeId = themeById(storedId) ? storedId : DEFAULT_THEME_ID
   let overrides: ThemeOverrides = {}
   try {
     const raw = storage.getItem(OVERRIDES_KEY)

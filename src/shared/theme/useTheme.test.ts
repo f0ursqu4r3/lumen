@@ -25,7 +25,7 @@ describe('useTheme', () => {
 
   it('setOverride merges the delta, applies, persists, and broadcasts the full state', async () => {
     const t = useTheme()
-    await t.setTheme('amber')
+    await t.setTheme('chassis')
     await t.setOverride({ accent: 'oklch(0.7 0.13 264)' })
     await t.setOverride({ radius: 'round' })
     expect(t.overrides.value).toEqual({ accent: 'oklch(0.7 0.13 264)', radius: 'round' })

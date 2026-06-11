@@ -20,7 +20,7 @@ describe('applyStoredTheme (boot path)', () => {
   })
 
   it('applies a stored override (radius) at boot', () => {
-    localStorage.setItem('lumen:theme', 'amber')
+    localStorage.setItem('lumen:theme', 'chassis')
     localStorage.setItem('lumen:theme-overrides', JSON.stringify({ radius: 'round' }))
     applyStoredTheme(document, localStorage)
     expect(document.documentElement.style.getPropertyValue('--radius')).toBe('1rem')

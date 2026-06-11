@@ -7,10 +7,14 @@ describe('theme registry', () => {
     expect(new Set(THEMES.map((t) => t.id)).size).toBe(16)
   })
 
-  it('default is amber and is the first dark theme', () => {
-    expect(DEFAULT_THEME_ID).toBe('amber')
-    expect(themeById('amber')?.group).toBe('dark')
-    expect(themeById('amber')?.colorScheme).toBe('dark')
+  it('default is chassis and is the first dark theme', () => {
+    expect(DEFAULT_THEME_ID).toBe('chassis')
+    expect(themeById('chassis')?.group).toBe('dark')
+    expect(themeById('chassis')?.colorScheme).toBe('dark')
+  })
+
+  it('no longer registers the legacy amber id', () => {
+    expect(themeById('amber')).toBeUndefined()
   })
 
   it('every theme has a valid group, colorScheme, and 4 swatch colors', () => {

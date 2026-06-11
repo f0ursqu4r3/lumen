@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { applyTheme, readStored, writeStored, THEME_KEY, OVERRIDES_KEY } from './applyTheme'
+import { DEFAULT_THEME_ID } from './themes'
 
 beforeEach(() => {
   localStorage.clear()
@@ -9,7 +10,7 @@ beforeEach(() => {
 
 describe('applyTheme', () => {
   it('omits data-theme for the default and sets color-scheme dark', () => {
-    applyTheme(document, { themeId: 'amber', overrides: {} })
+    applyTheme(document, { themeId: 'chassis', overrides: {} })
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
     expect(document.documentElement.style.colorScheme).toBe('dark')
   })
@@ -21,9 +22,9 @@ describe('applyTheme', () => {
   })
 
   it('applies override vars as inline custom properties and clears stale ones', () => {
-    applyTheme(document, { themeId: 'amber', overrides: { accent: 'oklch(0.7 0.13 264)' } })
+    applyTheme(document, { themeId: 'chassis', overrides: { accent: 'oklch(0.7 0.13 264)' } })
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('oklch(0.7 0.13 264)')
-    applyTheme(document, { themeId: 'amber', overrides: {} })
+    applyTheme(document, { themeId: 'chassis', overrides: {} })
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   })
 
@@ -35,7 +36,12 @@ describe('applyTheme', () => {
   })
 
   it('readStored falls back to the default when storage is empty', () => {
-    expect(readStored(localStorage)).toEqual({ themeId: 'amber', overrides: {} })
+    expect(readStored(localStorage)).toEqual({ themeId: DEFAULT_THEME_ID, overrides: {} })
+  })
+
+  it('coerces a stored legacy/unknown theme id to the default', () => {
+    localStorage.setItem('lumen:theme', 'amber')
+    expect(readStored(localStorage).themeId).toBe(DEFAULT_THEME_ID)
   })
 
   it('readStored tolerates corrupt overrides JSON', () => {
