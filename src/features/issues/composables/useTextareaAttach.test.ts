@@ -55,4 +55,23 @@ describe('useTextareaAttach', () => {
     expect(text.value).toContain('![b](/u/b.png)')
     expect(text.value).not.toContain('Uploading')
   })
+
+  it('appends the markdown when the placeholder was deleted mid-upload (no silent loss)', async () => {
+    const text = ref('')
+    let resolveUpload: (v: { markdown: string; url: string; isImage: boolean }) => void
+    uploadFile.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpload = resolve
+      }),
+    )
+    const { handleFiles } = useTextareaAttach('g/a', text, () => 0)
+    const pending = handleFiles([fileOf('a.png', 'image/png')])
+    // Simulate the user clearing the editor (and the placeholder) before completion.
+    text.value = 'rewritten body'
+    resolveUpload!({ markdown: '![a](/u/a.png)', url: '', isImage: true })
+    await pending
+    expect(text.value).toContain('![a](/u/a.png)')
+    expect(text.value).toContain('rewritten body')
+    expect(text.value).not.toContain('Uploading')
+  })
 })

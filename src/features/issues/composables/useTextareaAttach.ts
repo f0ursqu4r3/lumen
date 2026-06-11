@@ -22,6 +22,8 @@ export function useTextareaAttach(fullPath: string, text: Ref<string>, caret: ()
 
   async function uploadOne(file: File): Promise<void> {
     if (file.size > MAX_SOFT_BYTES) {
+      // The RPC client caps a request at 30s; a base64 payload this large can
+      // approach that ceiling on a slow link, surfacing as a generic failure.
       pushToast({ tone: 'info', title: `${file.name} is large; upload may be slow or rejected.` })
     }
     const id = (seq += 1)
@@ -30,7 +32,12 @@ export function useTextareaAttach(fullPath: string, text: Ref<string>, caret: ()
     text.value = `${text.value.slice(0, at)}${token}\n${text.value.slice(at)}`
     try {
       const { markdown } = await uploadFile(file)
-      text.value = text.value.replace(token, markdown)
+      // The upload succeeded, so the file lives in GitLab regardless of the editor
+      // state. If the placeholder is still present, swap in place; if the user
+      // deleted it mid-flight, append the reference rather than silently losing it.
+      text.value = text.value.includes(token)
+        ? text.value.replace(token, markdown)
+        : `${text.value}${text.value.endsWith('\n') || text.value === '' ? '' : '\n'}${markdown}`
     } catch (error) {
       text.value = text.value.replace(`${token}\n`, '').replace(token, '')
       pushToast({
