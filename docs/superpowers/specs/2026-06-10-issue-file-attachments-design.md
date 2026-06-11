@@ -3,6 +3,25 @@
 **Date:** 2026-06-10
 **Status:** Approved, ready for implementation planning
 
+## Plan-Time Refinements (post-code-read)
+
+Two adjustments discovered while reading the real code, folded into the plan:
+
+1. **Non-image download already works.** `renderMarkdown` already emits
+   `<a class="file-card" … download>` for non-image uploads, `applyResolvedMedia`
+   already swaps the href to an authenticated blob URL, and `MarkdownText`'s click
+   handler deliberately lets `download` anchors through. Section 4 below is
+   therefore **pre-existing** — the plan only adds a regression test, no new code.
+2. **Extend `MentionTextarea` instead of a separate `AttachmentTextarea` wrapper.**
+   `MentionTextarea` already maintains the caret (`cursor` ref) and inner
+   `<textarea>` ref, which the placeholder-and-swap insertion needs. A wrapper
+   would have to fight it for caret position. Instead, add an opt-in `fullPath`
+   prop to `MentionTextarea`; when set, it wires paste/drop/picker via a new
+   `useTextareaAttach` composable and renders the footer row. Upload network logic
+   stays in `useFileUpload`. **Consequence:** the composer and description editor
+   are switched from the bare `Textarea` to `MentionTextarea`, so they gain
+   `@mention` autocomplete in addition to uploads (an expected GitLab behavior).
+
 ## Summary
 
 Add the ability to upload and attach files to issues across all body-editing
