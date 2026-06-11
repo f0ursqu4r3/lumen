@@ -14,10 +14,12 @@ const GET_Q = `query($p:ID!,$iid:String!){
     author{username} reviewers{nodes{username}} labels{nodes{title}}
     approved approvedBy{nodes{username}} commitCount detailedMergeStatus
     diffStatsSummary{additions deletions fileCount}
-    discussions{nodes{notes{nodes{body author{username} createdAt}}}} } } }`
+    discussions{nodes{notes{nodes{id body author{username} createdAt}}}} } } }`
 
 const ID_Q = `query($p:ID!,$iid:String!){project(fullPath:$p){mergeRequest(iid:$iid){id}}}`
 const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{id} errors}}`
+const CURRENT_USER_Q = `{currentUser{username}}`
+const UPDATE_NOTE_M = `mutation($input:UpdateNoteInput!){updateNote(input:$input){note{id} errors}}`
 
 export const mrTools: McpTool[] = [
   {
@@ -86,6 +88,47 @@ export const mrTools: McpTool[] = [
       })
       if (data.createNote.errors.length) return errorResult(data.createNote.errors.join('; '))
       return text(`Comment added to ${a.project}!${a.iid}.`)
+    },
+  },
+  {
+    name: 'lumen_mr_comment_edit',
+    description:
+      'Edit one of your own comments on a merge request. Pass the note id from lumen_mr_get. Refuses to edit comments authored by anyone else.',
+    inputSchema: {
+      project: z.string(),
+      iid: z.string().regex(/^\d+$/, 'iid must be numeric'),
+      noteId: z.string().describe('The note global id (gid://...) from lumen_mr_get.'),
+      body: z.string(),
+    },
+    handler: async (a) => {
+      const me = await gql<{ currentUser: { username: string } | null }>(CURRENT_USER_Q)
+      const myUsername = me.currentUser?.username
+      if (!myUsername) return errorResult('Could not resolve the current user.')
+
+      const data = await gql<{
+        project: {
+          mergeRequest: {
+            discussions: {
+              nodes: { notes: { nodes: { id: string; author: { username: string } | null }[] } }[]
+            }
+          } | null
+        } | null
+      }>(GET_Q, { p: a.project, iid: a.iid })
+      const notes =
+        data.project?.mergeRequest?.discussions.nodes.flatMap((d) => d.notes.nodes) ?? []
+      const note = notes.find((n) => n.id === a.noteId)
+      if (!note) return errorResult(`Comment ${a.noteId} not found on ${a.project}!${a.iid}.`)
+      if (!note.author)
+        return errorResult(`Comment ${a.noteId} has no resolvable author; cannot verify ownership.`)
+      if (note.author.username !== myUsername)
+        return errorResult('You can only edit your own comments.')
+
+      const res = await gql<{
+        updateNote: { note: { id: string } | null; errors: string[] } | null
+      }>(UPDATE_NOTE_M, { input: { id: a.noteId, body: a.body } })
+      if (!res.updateNote || res.updateNote.errors.length)
+        return errorResult(res.updateNote?.errors.join('; ') || 'Comment update failed.')
+      return text(`Comment ${a.noteId} on ${a.project}!${a.iid} updated.`)
     },
   },
   {

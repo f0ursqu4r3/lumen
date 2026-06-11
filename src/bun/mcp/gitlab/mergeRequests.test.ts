@@ -76,6 +76,79 @@ describe('lumen_mr_comment', () => {
   })
 })
 
+describe('lumen_mr_comment_edit', () => {
+  const mrWithNote = (noteAuthor: string) => ({
+    project: {
+      mergeRequest: {
+        discussions: {
+          nodes: [{ notes: { nodes: [{ id: 'gid://Note/1', author: { username: noteAuthor } }] } }],
+        },
+      },
+    },
+  })
+
+  it('edits the comment when the current user is its author', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(mrWithNote('me'))
+      .mockResolvedValueOnce({ updateNote: { note: { id: 'gid://Note/1' }, errors: [] } })
+    const res = await tool('lumen_mr_comment_edit').handler({
+      project: 'g/p',
+      iid: '5',
+      noteId: 'gid://Note/1',
+      body: 'edited',
+    })
+    expect(c.gql).toHaveBeenLastCalledWith(expect.stringContaining('updateNote'), {
+      input: { id: 'gid://Note/1', body: 'edited' },
+    })
+    expect(bodyText(res)).toContain('updated')
+  })
+
+  it('refuses to edit a comment authored by someone else', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(mrWithNote('other'))
+    const res = await tool('lumen_mr_comment_edit').handler({
+      project: 'g/p',
+      iid: '5',
+      noteId: 'gid://Note/1',
+      body: 'edited',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('your own')
+    expect(c.gql).toHaveBeenCalledTimes(2)
+  })
+
+  it('errors when the note id is not on the MR', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(mrWithNote('me'))
+    const res = await tool('lumen_mr_comment_edit').handler({
+      project: 'g/p',
+      iid: '5',
+      noteId: 'gid://Note/999',
+      body: 'edited',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('not found')
+  })
+
+  it('surfaces updateNote errors', async () => {
+    c.gql
+      .mockResolvedValueOnce({ currentUser: { username: 'me' } })
+      .mockResolvedValueOnce(mrWithNote('me'))
+      .mockResolvedValueOnce({ updateNote: { note: null, errors: ['forbidden'] } })
+    const res = await tool('lumen_mr_comment_edit').handler({
+      project: 'g/p',
+      iid: '5',
+      noteId: 'gid://Note/1',
+      body: 'x',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('forbidden')
+  })
+})
+
 describe('lumen_mr_review', () => {
   it('approve hits the REST approve endpoint with the encoded path', async () => {
     c.rest.mockResolvedValue(undefined)
