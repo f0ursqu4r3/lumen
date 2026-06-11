@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { overridesToVars, RADIUS_PRESETS, DENSITY_PRESETS, FONT_PRESETS } from './overrides'
+import { overridesToVars, DENSITY_PRESETS, FONT_PRESETS } from './overrides'
 
 describe('overridesToVars', () => {
   it('returns an empty map for an empty delta', () => {
