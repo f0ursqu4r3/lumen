@@ -8,6 +8,7 @@ import SessionExpiredOverlay from '@/shared/components/SessionExpiredOverlay.vue
 import ConnectionBanner from '@/shared/components/ConnectionBanner.vue'
 import CommandPalette from '@/shared/components/CommandPalette.vue'
 import AppShell from '@/shared/components/shell/AppShell.vue'
+import ChassisBar from '@/shared/components/shell/ChassisBar.vue'
 import IssueSavebarSlot from '@/features/issues/components/IssueSavebarSlot.vue'
 import { shouldShowChrome } from '@/shared/lib/chrome'
 import { clearPersistedCache } from '@/shared/lib/persist'
@@ -54,28 +55,32 @@ onUnmounted(() => {
     <RouterView :key="$route.path" />
   </AppShell>
   <!-- Popped-out window: no rail, but the content rides in the same rounded card
-       panel the shell uses, floating on a thin background frame. The panel is a
-       fixed-height column that scrolls internally so the window itself never
-       scrolls. -->
+       panel the shell uses, floating on a thin background frame. The ChassisBar
+       spans the full window width as the custom titlebar (OS titlebar is hidden).
+       The panel is a fixed-height column that scrolls internally so the window
+       itself never scrolls. -->
   <div
     v-else-if="windowed"
-    class="flex h-screen flex-col overflow-hidden bg-background p-1.5 text-foreground"
+    class="flex h-screen flex-col overflow-hidden bg-background text-foreground"
   >
-    <div
-      class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
-    >
-      <!-- The multi-issue window manages its own fixed pager + scroll region.
-           The settings shell is also full-bleed (two-pane, no max-width inset). -->
-      <RouterView v-if="fullBleedWindow" :key="$route.path" />
-      <div v-else class="min-h-0 flex-1 overflow-y-auto overflow-x-clip">
-        <main class="mx-auto max-w-5xl px-4 py-6">
-          <RouterView :key="$route.path" />
-        </main>
+    <ChassisBar />
+    <div class="flex min-h-0 flex-1 flex-col px-1.5 pb-1.5">
+      <div
+        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
+      >
+        <!-- The multi-issue window manages its own fixed pager + scroll region.
+             The settings shell is also full-bleed (two-pane, no max-width inset). -->
+        <RouterView v-if="fullBleedWindow" :key="$route.path" />
+        <div v-else class="min-h-0 flex-1 overflow-y-auto overflow-x-clip">
+          <main class="mx-auto max-w-5xl px-4 py-6">
+            <RouterView :key="$route.path" />
+          </main>
+        </div>
       </div>
+      <!-- The issue save/revert dock lands here, on the bare background below the
+           panel, when there are unsaved edits. -->
+      <IssueSavebarSlot />
     </div>
-    <!-- The issue save/revert dock lands here, on the bare background below the
-         panel, when there are unsaved edits. -->
-    <IssueSavebarSlot />
   </div>
   <div v-else class="min-h-screen overflow-x-clip bg-background text-foreground">
     <main class="mx-auto max-w-5xl px-4 py-6">
