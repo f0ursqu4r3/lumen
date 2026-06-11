@@ -21,7 +21,7 @@ const tone = computed(
 
 <template>
   <span
-    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+    class="inline-flex items-center rounded-[3px] px-2 py-0.5 font-mono text-2xs font-medium tracking-[0.06em] uppercase ring-1 ring-inset"
     :class="tone"
   >
     {{ label }}

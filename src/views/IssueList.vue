@@ -345,7 +345,7 @@ function setComposerOpen(value: boolean) {
             <Skeleton class="size-5 rounded-md" />
             <Skeleton class="h-3.5 w-6" />
             <Skeleton class="h-3.5 flex-1" :style="{ maxWidth: `${40 + ((i * 13) % 45)}%` }" />
-            <Skeleton class="h-5 w-16 rounded-full" />
+            <Skeleton class="h-5 w-16 rounded-[3px]" />
           </div>
         </div>
 

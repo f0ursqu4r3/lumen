@@ -21,7 +21,7 @@ const tone = computed(() => TONE_VISUALS[meta.value.tone])
   />
   <span
     v-else
-    class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
+    class="inline-flex items-center gap-1.5 rounded-[3px] border px-2.5 py-0.5 font-mono text-2xs font-medium tracking-[0.06em] uppercase"
     :class="tone.pill"
   >
     <component :is="tone.icon" class="size-3.5" :class="tone.spin ? 'animate-spin' : ''" />

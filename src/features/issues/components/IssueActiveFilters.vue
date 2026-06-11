@@ -35,7 +35,7 @@ defineEmits<{
       <span
         v-if="assignee"
         key="facet:assignee"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+        class="inline-flex items-center gap-1 rounded-[3px] bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
         <span class="font-mono">{{ assignee === '__none__' ? 'Unassigned' : '@' + assignee }}</span>
         <button
@@ -50,7 +50,7 @@ defineEmits<{
       <span
         v-if="author"
         key="facet:author"
-        class="inline-flex items-center gap-1 rounded-full bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
+        class="inline-flex items-center gap-1 rounded-[3px] bg-muted/60 py-0.5 pr-1 pl-2 text-2xs font-medium text-foreground/80 ring-1 ring-inset ring-white/10"
       >
         <span class="font-mono">author:@{{ author }}</span>
         <button

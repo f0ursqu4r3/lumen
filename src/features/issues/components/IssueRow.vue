@@ -196,7 +196,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
         :key="l.id"
         type="button"
         :title="`Filter: ${l.title}`"
-        class="cursor-pointer rounded-full outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95"
+        class="cursor-pointer rounded-[3px] outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95"
         @click="filterLabel(l)"
       >
         <LabelChip :title="l.title" :color="l.color" />

@@ -7,7 +7,7 @@ import { Skeleton } from '@/shared/ui/skeleton'
     <span class="sr-only">Loading issue…</span>
     <header>
       <div class="flex items-center gap-2.5">
-        <Skeleton class="h-5 w-16 rounded-full" />
+        <Skeleton class="h-5 w-16 rounded-[3px]" />
         <Skeleton class="h-4 w-10" />
         <Skeleton class="ml-auto h-8 w-24 rounded-md" />
       </div>
