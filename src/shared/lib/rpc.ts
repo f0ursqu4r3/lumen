@@ -45,4 +45,5 @@ export const rpc: LumenRequests = {
   getServerHealth: () => client().getServerHealth(),
   retryServerNow: () => client().retryServerNow(),
   resetServerHealth: () => client().resetServerHealth(),
+  reportAppState: (a) => client().reportAppState(a),
 }

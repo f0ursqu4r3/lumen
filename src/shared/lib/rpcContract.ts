@@ -52,6 +52,25 @@ export interface ServerHealth {
   probing: boolean
 }
 
+// What the main window's webview reports about itself (cached host-side for
+// the MCP lumen_app_state tool). Popout windows never report.
+export interface AppStateSnapshot {
+  route: string // current route path, e.g. /projects/a/b/issues
+  view: string // route name, e.g. 'issues'
+  projectPath: string | null
+  selectedIssueIids: string[] // multi-select state; [] when none
+  visibleIssueIids: string[] // iids loaded in the current list/board
+}
+
+// Commands the host pushes into the main webview via the lumen:mcp-command
+// CustomEvent (MCP lumen_app_navigate). Unknown cmds are ignored by the webview.
+export interface McpAppCommand {
+  cmd: 'navigate'
+  view: string
+  project?: string
+  iid?: string
+}
+
 export interface LumenRequests {
   gitlabGraphql: (a: GraphqlArgs) => Promise<GraphqlResult>
   gitlabRest: (a: RestArgs) => Promise<RestResult>
@@ -92,6 +111,9 @@ export interface LumenRequests {
   getServerHealth: () => Promise<ServerHealth>
   retryServerNow: () => Promise<{ ok: true }>
   resetServerHealth: () => Promise<{ ok: true }>
+  // Main window pushes its state snapshot on change (debounced webview-side);
+  // the host caches it for the MCP app-control read tool.
+  reportAppState: (a: AppStateSnapshot) => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {
