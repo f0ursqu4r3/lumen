@@ -18,17 +18,22 @@ Add a setting that, when enabled, restores on startup:
    each at its remembered size and position.
 
 The **settings window** is deliberately **out of scope** for replay — reopening
-Settings on launch is unhelpful. Its geometry is not remembered either.
+Settings on launch is unhelpful. Its geometry is not remembered; instead it
+**always opens centered on the current display** (the display holding the main
+window), replacing today's hardcoded `160,120` origin.
 
 ## Goals / Non-goals
 
 **Goals**
 - A single "Restore windows on startup" toggle, **default ON**, in a new General pane.
 - Persist window/session state continuously so it survives crash / force-quit.
-- Fully backward compatible: toggle off (or not connected) ⇒ today's exact launch.
+- Fully backward compatible: toggle off (or not connected) ⇒ today's exact launch
+  (except the settings window, which always opens centered — see below).
+- The settings window always opens centered on the current display, regardless of
+  the restore toggle.
 
 **Non-goals**
-- Restoring the settings window.
+- Restoring the settings window's *position* (it is always centered, never stored).
 - Restoring scroll position / in-issue selection inside popouts (route only).
 - Granular per-aspect toggles (one switch covers geometry + route + popouts).
 - Multi-monitor reconciliation beyond storing raw x/y (see Edge cases).
@@ -130,13 +135,35 @@ function planRestore(args: {
   is not safe, return `null` (default route).
 - `popouts` pass through as-is (issue/combined only — settings never stored).
 
+### `src/bun/display.ts` (new, pure)
+A pure geometry helper so centering is testable without native screens:
+
+```ts
+function centerOn(
+  size: { width: number; height: number },
+  displays: Display[],          // electrobun Screen.getAllDisplays()
+  anchor: Point | null,         // main window center, or null
+): Frame
+```
+
+- Pick the **target display**: the one whose `bounds` contains `anchor`; if
+  `anchor` is null or outside every display, fall back to `isPrimary` (or the
+  first display, or `0,0` origin if the list is empty).
+- Return a frame centered within the target display's **`workArea`** (so it
+  respects the menu bar / dock), clamped so the window's origin is never negative
+  within that work area.
+
 ### `src/bun/index.ts` (wire)
 - **Geometry capture:** extend `track(w)` (or add a sibling helper) so every
   tracked window also gets `on('resize')` and `on('move')` handlers. The main
   window updates `setMainFrame`; popouts call `updatePopoutFrame(id, …)`.
 - **Popout registration:** `openIssueWindow` / `openIssuesWindow` call
   `upsertPopout` on open and `removePopout` on close (alongside the existing
-  registry bookkeeping). `openSettingsWindow` does **not** touch the session.
+  registry bookkeeping). `openSettingsWindow` does **not** touch the session;
+  instead it computes its frame via `centerOn({width:820,height:600},
+  Screen.getAllDisplays(), mainWindowCenter())` at open time, where
+  `mainWindowCenter()` reads the main window's `getFrame()` (null if the main
+  window is closed ⇒ centers on primary).
 - **Frame override:** the three open functions gain an optional `frame?: Frame`
   param; when provided it replaces the hardcoded/cascade frame, else current
   behavior is unchanged.
@@ -200,6 +227,9 @@ loadSession()                 ┘                └▶ replay issue/combined po
   `saveRestoreOnStartup` preserves url/token/mcp.
 - `restore.test.ts`: `planRestore` gating matrix (enabled×connected),
   safe-route allowlist filtering, popout pass-through.
+- `display.test.ts`: `centerOn` picks the display containing the anchor, centers
+  within `workArea`, falls back to primary when anchor is null/off-screen, and
+  handles an empty display list.
 - `GeneralPane.test.ts`: renders toggle, reads pref on mount, writes on change
   (mirrors `AppearancePane.test.ts`).
 - `useSettingsNav.test.ts`: General pane present and first.
