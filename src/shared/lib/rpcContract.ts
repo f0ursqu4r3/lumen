@@ -65,6 +65,19 @@ export interface ServerHealth {
   probing: boolean
 }
 
+// A window's chosen theme + override delta. The RPC payload for broadcastTheme;
+// also the shape applyTheme/useTheme operate on. Kept structurally identical to
+// ThemeOverrides in src/shared/theme/overrides.ts.
+export interface ThemeState {
+  themeId: string
+  overrides: {
+    accent?: string
+    radius?: 'sharp' | 'default' | 'round'
+    density?: 'comfortable' | 'compact'
+    font?: 'default' | 'system' | 'geist'
+  }
+}
+
 // What the main window's webview reports about itself (cached host-side for
 // the MCP lumen_app_state tool). Popout windows never report.
 export interface AppStateSnapshot {
@@ -127,6 +140,9 @@ export interface LumenRequests {
   // Main window pushes its state snapshot on change (debounced webview-side);
   // the host caches it for the MCP app-control read tool.
   reportAppState: (a: AppStateSnapshot) => Promise<{ ok: true }>
+  // A window's theme change; the host broadcasts a lumen:theme-changed event to
+  // every window so all re-apply live. Durable store is localStorage (per window).
+  broadcastTheme: (a: ThemeState) => Promise<{ ok: true }>
 }
 
 export type LumenRPC = {

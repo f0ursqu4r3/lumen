@@ -2,6 +2,8 @@ import Electrobun, { BrowserWindow, BrowserView, Utils, ApplicationMenu } from '
 import { loadConfig, saveConfig, clearConfig } from './config'
 import { gitlabGraphql, gitlabRest, gitlabAsset, gitlabUpload } from './gitlab'
 import type { LumenRPC } from '@/shared/lib/rpcContract'
+import { buildThemeBroadcastJs } from './themeBroadcast'
+export { buildThemeBroadcastJs } from './themeBroadcast'
 import { resolveStartUrl } from './startUrl'
 import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
 import { settingsWindowRoute } from './settingsWindow'
@@ -199,6 +201,13 @@ function buildRpc(initialRoute: string | null = null) {
           // Only the main window (initialRoute === null) may write the snapshot;
           // popouts never report by construction, host-enforced.
           if (initialRoute === null) cacheSnapshot(s)
+          return { ok: true }
+        },
+        broadcastTheme: async (state) => {
+          // Re-apply in every window (the originator already applied locally +
+          // wrote localStorage; re-applying there is idempotent). Mirrors the
+          // server-health / mcp-cache broadcast pattern.
+          broadcast(buildThemeBroadcastJs(state))
           return { ok: true }
         },
       },

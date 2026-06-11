@@ -1,13 +1,10 @@
 import { DEFAULT_THEME_ID, themeById } from './themes'
 import { overridesToVars, type ThemeOverrides } from './overrides'
+import type { ThemeState } from '@/shared/lib/rpcContract'
+export type { ThemeState }
 
 export const THEME_KEY = 'lumen:theme'
 export const OVERRIDES_KEY = 'lumen:theme-overrides'
-
-export interface ThemeState {
-  themeId: string
-  overrides: ThemeOverrides
-}
 
 const OVERRIDE_VARS = ['--primary', '--ring', '--radius', '--density', '--font-sans'] as const
 
