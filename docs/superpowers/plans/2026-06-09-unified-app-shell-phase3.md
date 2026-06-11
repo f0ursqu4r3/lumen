@@ -23,14 +23,14 @@ The teleport happens **only** in the `!embedded && !windowed` branch.
 
 ## File Structure
 
-| Path                                               | Responsibility                                                  |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| `src/shared/components/shell/ViewContainer.vue`    | (modify) add `'bare'` width (passthrough)                       |
-| `src/shared/components/shell/AppTopBar.vue`        | (modify) add the detail branch (back + breadcrumb + #iid)       |
-| `src/router/index.ts`                              | (modify) `meta.shell` on `issue` + `merge-request`              |
-| `src/views/MergeRequestDetail.vue`                 | (modify) drop back-link; teleport Open-in-GitLab; ViewContainer |
-| `src/features/issues/components/IssueMasthead.vue` | (modify) full-page mode teleports actions + drops eyebrow/back  |
-| `src/views/IssueDetail.vue`                        | (modify) wrap in mode-aware ViewContainer                       |
+| Path | Responsibility |
+|---|---|
+| `src/shared/components/shell/ViewContainer.vue` | (modify) add `'bare'` width (passthrough) |
+| `src/shared/components/shell/AppTopBar.vue` | (modify) add the detail branch (back + breadcrumb + #iid) |
+| `src/router/index.ts` | (modify) `meta.shell` on `issue` + `merge-request` |
+| `src/views/MergeRequestDetail.vue` | (modify) drop back-link; teleport Open-in-GitLab; ViewContainer |
+| `src/features/issues/components/IssueMasthead.vue` | (modify) full-page mode teleports actions + drops eyebrow/back |
+| `src/views/IssueDetail.vue` | (modify) wrap in mode-aware ViewContainer |
 
 ---
 
@@ -498,7 +498,7 @@ Add `Teleport` is a built-in — reference it in `<script setup>` via `import { 
 
 In `src/views/IssueDetail.vue`:
 1. Add `import ViewContainer from '@/shared/components/shell/ViewContainer.vue'`.
-2. Wrap the `<article class="issue" …>` (the `v-else-if="issue && draft"` block) in `<ViewContainer :width="embedded || windowed ? 'bare' : 'wide'">…</ViewContainer>`. In embedded/windowed the `'bare'` passthrough preserves today's layout (the drawer / the popped-out window's `<main>` already size it); full-page gets `wide` centering + padding. Do **not** change the inner `<article>`, its `railStyle`, container queries, condensed-title bar, save bar, or any body content.
+2. Wrap the `<article class="issue pb-20" …>` (the `v-else-if="issue && draft"` block) in `<ViewContainer :width="embedded || windowed ? 'bare' : 'wide'">…</ViewContainer>`. In embedded/windowed the `'bare'` passthrough preserves today's layout (the drawer / the popped-out window's `<main>` already size it); full-page gets `wide` centering + padding. Do **not** change the inner `<article>`, its `railStyle`, container queries, condensed-title bar, save bar, or any body content.
 
 - [ ] **Step 5: Update `IssueDetail.test.ts`**
 
