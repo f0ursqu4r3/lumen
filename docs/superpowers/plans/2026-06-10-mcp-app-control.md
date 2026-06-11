@@ -24,7 +24,7 @@
 - Modify: `src/shared/lib/rpcContract.ts`
 - Modify: `src/shared/lib/rpc.ts`
 
-- [ ] **Step 1: Add types and the `reportAppState` request to the contract**
+- [x] **Step 1: Add types and the `reportAppState` request to the contract**
 
 In `src/shared/lib/rpcContract.ts`, add above `LumenRequests`:
 
@@ -57,7 +57,7 @@ And inside `interface LumenRequests` (after `resetServerHealth`):
   reportAppState: (a: AppStateSnapshot) => Promise<{ ok: true }>
 ```
 
-- [ ] **Step 2: Add the funnel method**
+- [x] **Step 2: Add the funnel method**
 
 In `src/shared/lib/rpc.ts`, add to the `rpc` object (after `resetServerHealth`):
 
@@ -65,12 +65,12 @@ In `src/shared/lib/rpc.ts`, add to the `rpc` object (after `resetServerHealth`):
   reportAppState: (a) => client().reportAppState(a),
 ```
 
-- [ ] **Step 3: Verify the suite still passes (type-level change)**
+- [x] **Step 3: Verify the suite still passes (type-level change)**
 
 Run: `bunx vitest run src/shared/lib`
 Expected: PASS (no behavior change; vitest compiles the contract).
 
-- [ ] **Step 4: Format and commit**
+- [x] **Step 4: Format and commit**
 
 ```bash
 bun run format
@@ -86,7 +86,7 @@ git commit -m "feat(mcp): app-state snapshot + command types in RPC contract"
 - Create: `src/bun/mcp/app/bridge.ts`
 - Test: `src/bun/mcp/app/bridge.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/bun/mcp/app/bridge.test.ts`:
 
@@ -158,12 +158,12 @@ describe('buildCommandJs', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx vitest run src/bun/mcp/app/bridge.test.ts`
 Expected: FAIL — cannot resolve `./bridge`.
 
-- [ ] **Step 3: Implement the bridge**
+- [x] **Step 3: Implement the bridge**
 
 Create `src/bun/mcp/app/bridge.ts`:
 
@@ -223,12 +223,12 @@ export function __resetBridge(): void {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bunx vitest run src/bun/mcp/app/bridge.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Format and commit**
+- [x] **Step 5: Format and commit**
 
 ```bash
 bun run format
@@ -244,7 +244,7 @@ git commit -m "feat(mcp): app-control bridge — snapshot cache, host actions, c
 - Create: `src/bun/mcp/app/tools.ts`
 - Test: `src/bun/mcp/app/tools.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/bun/mcp/app/tools.test.ts`:
 
@@ -382,12 +382,12 @@ describe('lumen_app_notify', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx vitest run src/bun/mcp/app/tools.test.ts`
 Expected: FAIL — cannot resolve `./tools`.
 
-- [ ] **Step 3: Implement the tools**
+- [x] **Step 3: Implement the tools**
 
 Create `src/bun/mcp/app/tools.ts`:
 
@@ -507,12 +507,12 @@ export const appTools: McpTool[] = [
 ]
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bunx vitest run src/bun/mcp/app/tools.test.ts`
 Expected: PASS (12 tests).
 
-- [ ] **Step 5: Format and commit**
+- [x] **Step 5: Format and commit**
 
 ```bash
 bun run format
@@ -528,7 +528,7 @@ git commit -m "feat(mcp): six lumen_app_* app-control tools"
 - Modify: `src/bun/mcp/registry.ts`
 - Test: `src/bun/mcp/registry.test.ts`
 
-- [ ] **Step 1: Extend the registry test (failing first)**
+- [x] **Step 1: Extend the registry test (failing first)**
 
 In `src/bun/mcp/registry.test.ts`, in the catalog test, add the six names to the
 `expect.arrayContaining([...])` list:
@@ -550,12 +550,12 @@ and add a total-count assertion after the uniqueness check:
 
 (If the test previously asserted a length of 14, update it to 20.)
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bunx vitest run src/bun/mcp/registry.test.ts`
 Expected: FAIL — missing `lumen_app_*` names.
 
-- [ ] **Step 3: Register**
+- [x] **Step 3: Register**
 
 In `src/bun/mcp/registry.ts`:
 
@@ -575,12 +575,12 @@ export const allTools: McpTool[] = [
 ]
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bunx vitest run src/bun/mcp`
 Expected: PASS (all MCP suites, including server integration tests).
 
-- [ ] **Step 5: Format and commit**
+- [x] **Step 5: Format and commit**
 
 ```bash
 bun run format
@@ -599,7 +599,7 @@ No unit test — `index.ts` is the untested entrypoint (existing convention); th
 bridge/tool behavior is covered in Tasks 2–3 and the wiring is verified by the
 bundle check below plus the Task 8 smoke test.
 
-- [ ] **Step 1: Import the bridge**
+- [x] **Step 1: Import the bridge**
 
 Add to the imports in `src/bun/index.ts` (after the `./serverHealth` import block):
 
@@ -609,7 +609,7 @@ import { cacheSnapshot, setHostActions, type WindowInfo } from './mcp/app/bridge
 
 (Relative import — this is a value import inside `src/bun`.)
 
-- [ ] **Step 2: Track combined issues-windows**
+- [x] **Step 2: Track combined issues-windows**
 
 Below the `issueWindows` map declaration, add:
 
@@ -626,7 +626,7 @@ In `openIssuesWindow`, replace `void issuesWin` with:
   issuesWin.on('close', () => issuesWindows.delete(issuesWin))
 ```
 
-- [ ] **Step 3: Add the `reportAppState` RPC handler**
+- [x] **Step 3: Add the `reportAppState` RPC handler**
 
 In `buildRpc`'s `requests` object (after `notifyCacheCleared`):
 
@@ -637,7 +637,7 @@ In `buildRpc`'s `requests` object (after `notifyCacheCleared`):
         },
 ```
 
-- [ ] **Step 4: Register host actions after the main window is created**
+- [x] **Step 4: Register host actions after the main window is created**
 
 After the `const win = track(new BrowserWindow({...}))` block and **before**
 `startMcpIfEnabled()`:
@@ -666,12 +666,12 @@ setHostActions({
 })
 ```
 
-- [ ] **Step 5: Verify the host bundle builds and tests pass**
+- [x] **Step 5: Verify the host bundle builds and tests pass**
 
 Run: `bun build src/bun/index.ts --target=bun --outdir=/tmp/lumen-build-check && rm -rf /tmp/lumen-build-check && bunx vitest run src/bun`
 Expected: bundle builds (no unresolved imports); all `src/bun` tests PASS.
 
-- [ ] **Step 6: Format and commit**
+- [x] **Step 6: Format and commit**
 
 ```bash
 bun run format
@@ -687,7 +687,7 @@ git commit -m "feat(mcp): wire app-control host actions + reportAppState handler
 - Create: `src/shared/composables/useAppStateReport.ts`
 - Test: `src/shared/composables/useAppStateReport.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/shared/composables/useAppStateReport.test.ts`:
 
@@ -807,12 +807,12 @@ describe('command listener', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx vitest run src/shared/composables/useAppStateReport.test.ts`
 Expected: FAIL — cannot resolve `./useAppStateReport`.
 
-- [ ] **Step 3: Implement the composable**
+- [x] **Step 3: Implement the composable**
 
 Create `src/shared/composables/useAppStateReport.ts`:
 
@@ -907,12 +907,12 @@ export function __resetAppStateReport(): void {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bunx vitest run src/shared/composables/useAppStateReport.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Format and commit**
+- [x] **Step 5: Format and commit**
 
 ```bash
 bun run format
@@ -928,7 +928,7 @@ git commit -m "feat(mcp): webview app-state reporter + mcp-command listener"
 - Modify: `src/main.ts`
 - Modify: `src/views/IssueList.vue`
 
-- [ ] **Step 1: Install in the main window only**
+- [x] **Step 1: Install in the main window only**
 
 In `src/main.ts`, add the import:
 
@@ -944,7 +944,7 @@ In `boot()`, after `installServerHealth(queryClient)` and before `createApp`:
   if (!route) installAppStateReport(router)
 ```
 
-- [ ] **Step 2: Push selection + visible iids from IssueList**
+- [x] **Step 2: Push selection + visible iids from IssueList**
 
 In `src/views/IssueList.vue`, add to the imports:
 
@@ -971,7 +971,7 @@ onUnmounted(clearReportedIssueIids)
 `watch` is already imported in this file; add `onUnmounted` to the existing `vue`
 import if it isn't there.
 
-- [ ] **Step 3: Run the full suite**
+- [x] **Step 3: Run the full suite**
 
 Run: `bunx vitest run`
 Expected: PASS — all suites (the IssueList tests exercise the new watch; the
@@ -979,7 +979,7 @@ mocked rpc in test setup absorbs `reportAppState` calls — if a test fails with
 "reportAppState is not a function", add `reportAppState: async () => ({ ok: true })`
 to that test file's rpc mock).
 
-- [ ] **Step 4: Format and commit**
+- [x] **Step 4: Format and commit**
 
 ```bash
 bun run format
@@ -995,7 +995,7 @@ git commit -m "feat(mcp): main window reports app state; IssueList feeds selecti
 - Modify: `docs/mcp-server.md`
 - Modify: `CHANGELOG.md`
 
-- [ ] **Step 1: Update docs**
+- [x] **Step 1: Update docs**
 
 In `docs/mcp-server.md`: update the tool count (14 → 20) and add an
 "App-control tools" section documenting the six tools, the main-window-only
@@ -1010,7 +1010,7 @@ In `CHANGELOG.md`: add an entry under the unreleased/latest section:
   `lumen_app_open_settings`, `lumen_app_notify` (20 tools total).
 ```
 
-- [ ] **Step 2: Commit docs**
+- [x] **Step 2: Commit docs**
 
 ```bash
 bun run format
@@ -1018,7 +1018,7 @@ git add docs/mcp-server.md CHANGELOG.md
 git commit -m "docs(mcp): app-control tools"
 ```
 
-- [ ] **Step 3: Manual smoke test (requires the app running)**
+- [x] **Step 3: Manual smoke test (requires the app running)**
 
 Ask the user to restart the app (`bun run app:dev` or `app:hmr`) with MCP
 enabled, then (token from Settings ▸ Agent access):

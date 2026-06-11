@@ -7,7 +7,7 @@ import {
   __resetAppStateReport,
 } from './useAppStateReport'
 
-const reportAppState = vi.fn(async () => ({ ok: true as const }))
+const reportAppState = vi.fn(async (_a: unknown) => ({ ok: true as const }))
 vi.mock('@/shared/lib/rpc', () => ({
   rpc: { reportAppState: (a: unknown) => reportAppState(a) },
 }))
