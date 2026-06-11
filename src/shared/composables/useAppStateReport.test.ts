@@ -114,4 +114,17 @@ describe('command listener', () => {
     await vi.runAllTimersAsync()
     expect(router.currentRoute.value.name).toBe('home')
   })
+
+  it('is idempotent — a second install does not duplicate listeners', async () => {
+    installAppStateReport(router) // second call; first happened in beforeEach
+    dispatch({ cmd: 'navigate', view: 'projects' })
+    await vi.runAllTimersAsync()
+    expect(router.currentRoute.value.name).toBe('projects')
+    // One listener → one navigation; with a duplicate, push would race twice.
+    // Also assert reports aren't doubled after the debounce window:
+    reportAppState.mockClear()
+    setReportedIssueIids(['9'], ['9'])
+    await vi.advanceTimersByTimeAsync(200)
+    expect(reportAppState).toHaveBeenCalledTimes(1)
+  })
 })

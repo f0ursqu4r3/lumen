@@ -42,6 +42,10 @@ let commandListener: ((e: Event) => void) | null = null
  * into vue-router. Never torn down in production — lives as long as the webview.
  */
 export function installAppStateReport(router: Router): void {
+  // Install-once: a second call would leak the prior watcher and duplicate the
+  // window listener. The main window installs exactly once at boot.
+  if (stopWatch) return
+
   const push = () => {
     const r = router.currentRoute.value
     const snapshot: AppStateSnapshot = {
