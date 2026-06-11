@@ -74,7 +74,7 @@
   --input: oklch(0.3 0.012 256);
   --ring: oklch(0.82 0.142 81);
 
-  --chart-1: oklch(0.82 0.142 81);
+  --chart-1: var(--primary);
   --chart-2: oklch(0.7 0.13 162);
   --chart-3: oklch(0.66 0.15 256);
   --chart-4: oklch(0.7 0.16 25);
@@ -82,12 +82,24 @@
 
   --sidebar: oklch(0.214 0.009 256);
   --sidebar-foreground: oklch(0.945 0.006 256);
-  --sidebar-primary: oklch(0.82 0.142 81);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(0.24 0.04 75);
   --sidebar-accent: oklch(0.282 0.013 256);
   --sidebar-accent-foreground: oklch(0.96 0.006 256);
   --sidebar-border: oklch(0.288 0.012 256);
-  --sidebar-ring: oklch(0.82 0.142 81);
+  --sidebar-ring: var(--ring);
+
+  /* Ambient canvas — a faint top-down slate lift so the page reads as a sculpted
+     surface catching light from above, not dead-flat fill. No hue shift (amber
+     stays reserved for signal), low enough chroma to never look like a
+     glowing-accent backdrop. Themed via this token so other palettes can re-tint
+     the canvas. */
+  --canvas-gradient: radial-gradient(
+    128% 72% at 50% -12%,
+    oklch(0.236 0.014 256) 0%,
+    oklch(0.196 0.01 256) 38%,
+    oklch(0.178 0.008 256) 72%
+  );
 }
 
 @theme inline {
@@ -171,7 +183,8 @@
      amber bloom on hover (kin to the signal lamp). */
   --shadow-key: 0 1px 2px oklch(0.2 0.04 75 / 0.45), inset 0 1px 0 oklch(1 0.05 90 / 0.28);
   --shadow-key-hover:
-    0 6px 18px -4px oklch(0.82 0.142 81 / 0.42), inset 0 1px 0 oklch(1 0.05 90 / 0.32);
+    0 6px 18px -4px color-mix(in oklch, var(--primary) 42%, transparent),
+    inset 0 1px 0 oklch(1 0.05 90 / 0.32);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -188,26 +201,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: var(--canvas-gradient);
+    background-attachment: fixed;
     font-family: var(--font-sans);
     font-feature-settings:
       'cv05' 1,
       'ss01' 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  /* Ambient canvas — a faint top-down slate lift so the page reads as a sculpted
-     surface catching light from above, not dead-flat fill. Fixed so it stays put
-     while content scrolls. No hue shift (amber stays reserved for signal), low
-     enough chroma to never look like a glowing-accent backdrop. */
-  .dark body {
-    background-image: radial-gradient(
-      128% 72% at 50% -12%,
-      oklch(0.236 0.014 256) 0%,
-      oklch(0.196 0.01 256) 38%,
-      oklch(0.178 0.008 256) 72%
-    );
-    background-attachment: fixed;
   }
 
   /* Tinted, slim scrollbar so it sits inside the slate palette. */
@@ -267,7 +268,7 @@
   height: 2px;
   border-radius: 1px;
   background: var(--primary);
-  box-shadow: 0 0 6px oklch(0.82 0.142 81 / 0.6);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--primary) 60%, transparent);
 }
 
 /* Quiet field tag — a consistent second tier under the big title, so every
@@ -327,11 +328,11 @@
 @keyframes lamp-breathe {
   0%,
   100% {
-    box-shadow: 0 0 6px oklch(0.82 0.142 81 / 0.45);
+    box-shadow: 0 0 6px color-mix(in oklch, var(--primary) 45%, transparent);
     opacity: 0.8;
   }
   50% {
-    box-shadow: 0 0 13px oklch(0.82 0.142 81 / 0.95);
+    box-shadow: 0 0 13px color-mix(in oklch, var(--primary) 95%, transparent);
     opacity: 1;
   }
 }
@@ -385,7 +386,7 @@
   }
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 4px oklch(0.82 0.142 81 / 0.6));
+    filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 60%, transparent));
   }
 }
 
@@ -399,7 +400,7 @@
    issue announces itself in the list without a toast. Kin to .animate-status. */
 @keyframes flash-in {
   0% {
-    background-color: oklch(0.82 0.142 81 / 0.16);
+    background-color: color-mix(in oklch, var(--primary) 16%, transparent);
   }
   100% {
     background-color: transparent;
@@ -419,7 +420,7 @@
   0% {
     opacity: 0;
     transform: translateY(6px);
-    background-color: oklch(0.82 0.142 81 / 0.14);
+    background-color: color-mix(in oklch, var(--primary) 14%, transparent);
   }
   60% {
     opacity: 1;
@@ -472,7 +473,7 @@
     transform: scale(1.035);
     box-shadow:
       0 8px 20px -6px oklch(0 0 0 / 0.5),
-      0 0 0 1.5px oklch(0.82 0.142 81 / 0.5);
+      0 0 0 1.5px color-mix(in oklch, var(--primary) 50%, transparent);
   }
   100% {
     transform: none;
