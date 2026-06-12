@@ -203,7 +203,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       v-if="status"
       type="button"
       :title="`Filter: ${status.value}`"
-      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 font-mono text-micro font-medium tracking-[0.06em] uppercase outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
+      class="relative z-10 hidden shrink-0 cursor-pointer items-center gap-1.5 font-mono text-micro leading-none font-medium tracking-[0.06em] uppercase outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95 sm:inline-flex"
       :class="
         idiom === 'terminal'
           ? 'text-muted-foreground'
