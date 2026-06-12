@@ -21,6 +21,13 @@ describe('installDeepLinkRoute', () => {
     expect(router.push).toHaveBeenCalledWith(location)
   })
 
+  it('ignores a null detail', () => {
+    const router = stubRouter()
+    installDeepLinkRoute(router)
+    emit(null)
+    expect(router.push).not.toHaveBeenCalled()
+  })
+
   it('ignores a non-object detail', () => {
     const router = stubRouter()
     installDeepLinkRoute(router)
