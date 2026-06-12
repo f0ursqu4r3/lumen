@@ -21,6 +21,12 @@ const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{
 const CURRENT_USER_Q = `{currentUser{username}}`
 const UPDATE_NOTE_M = `mutation($input:UpdateNoteInput!){updateNote(input:$input){note{id} errors}}`
 
+/** Fetch one MR's full detail, or null if it doesn't exist. Shared by the tool and the MCP resource. */
+export async function fetchMergeRequest(project: string, iid: string): Promise<unknown | null> {
+  const data = await gql<{ project: { mergeRequest: unknown } | null }>(GET_Q, { p: project, iid })
+  return data.project?.mergeRequest ?? null
+}
+
 export const mrTools: McpTool[] = [
   {
     name: 'lumen_mrs_list',
@@ -59,12 +65,9 @@ export const mrTools: McpTool[] = [
       'Get full detail for one merge request (description, diff stats, approvals, comments).',
     inputSchema: { project: z.string(), iid: iidParam },
     handler: async (a) => {
-      const data = await gql<{ project: { mergeRequest: unknown } | null }>(GET_Q, {
-        p: a.project,
-        iid: a.iid,
-      })
-      if (!data.project?.mergeRequest) return errorResult(`MR ${a.iid} not found in ${a.project}.`)
-      return text(data.project.mergeRequest)
+      const mr = await fetchMergeRequest(a.project as string, a.iid as string)
+      if (!mr) return errorResult(`MR ${a.iid} not found in ${a.project}.`)
+      return text(mr)
     },
   },
   {

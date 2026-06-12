@@ -40,8 +40,15 @@ const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{
 const CURRENT_USER_Q = `{currentUser{username}}`
 const UPDATE_NOTE_M = `mutation($input:UpdateNoteInput!){updateNote(input:$input){note{id} errors}}`
 
-const unique = (values: readonly string[] | undefined): string[] =>
-  [...new Set((values ?? []).map((v) => v.trim()).filter(Boolean))]
+const unique = (values: readonly string[] | undefined): string[] => [
+  ...new Set((values ?? []).map((v) => v.trim()).filter(Boolean)),
+]
+
+/** Fetch one issue's full detail, or null if it doesn't exist. Shared by the tool and the MCP resource. */
+export async function fetchIssue(project: string, iid: string): Promise<unknown | null> {
+  const data = await gql<{ project: { issue: unknown } | null }>(GET_Q, { p: project, iid })
+  return data.project?.issue ?? null
+}
 
 async function setIssueStatus(
   project: string,
@@ -119,12 +126,9 @@ export const issueTools: McpTool[] = [
       'Get full detail for one issue (description, labels, assignees, milestone, comments).',
     inputSchema: { project: z.string(), iid: iidParam },
     handler: async (a) => {
-      const data = await gql<{ project: { issue: unknown } | null }>(GET_Q, {
-        p: a.project,
-        iid: a.iid,
-      })
-      if (!data.project?.issue) return errorResult(`Issue ${a.iid} not found in ${a.project}.`)
-      return text(data.project.issue)
+      const issue = await fetchIssue(a.project as string, a.iid as string)
+      if (!issue) return errorResult(`Issue ${a.iid} not found in ${a.project}.`)
+      return text(issue)
     },
   },
   {
@@ -205,7 +209,8 @@ export const issueTools: McpTool[] = [
       if (a.state) input.stateEvent = a.state === 'close' ? 'CLOSE' : 'REOPEN'
       if (a.labels)
         input.labelIds = await resolveLabelIds(a.project as string, a.labels as string[])
-      if (addLabels.length) input.addLabelIds = await resolveLabelIds(a.project as string, addLabels)
+      if (addLabels.length)
+        input.addLabelIds = await resolveLabelIds(a.project as string, addLabels)
       if (removeLabels.length)
         input.removeLabelIds = await resolveLabelIds(a.project as string, removeLabels)
       if (a.milestoneTitle)
@@ -214,7 +219,9 @@ export const issueTools: McpTool[] = [
           a.milestoneTitle as string,
         )
       let updated: { iid: string; webUrl?: string } | null = { iid: a.iid as string }
-      const hasIssueUpdate = Object.keys(input).some((key) => key !== 'projectPath' && key !== 'iid')
+      const hasIssueUpdate = Object.keys(input).some(
+        (key) => key !== 'projectPath' && key !== 'iid',
+      )
       if (hasIssueUpdate) {
         const data = await gql<{
           updateIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }

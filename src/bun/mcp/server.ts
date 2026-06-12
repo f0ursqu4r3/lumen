@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { loadConfig, saveMcpConfig } from '../config'
 import { isAuthorized, generateToken } from './auth'
 import { registerTools } from './registry'
+import { registerResources } from './resources'
 import type { McpStatus } from '@/shared/lib/rpcContract'
 
 const SERVER_NAME = 'lumen'
@@ -15,6 +16,7 @@ let httpServer: { stop: (closeActive?: boolean) => Promise<void> | void } | null
 function buildServer(): McpServer {
   const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION })
   registerTools(server)
+  registerResources(server)
   return server
 }
 
