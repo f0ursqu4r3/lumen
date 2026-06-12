@@ -4,6 +4,7 @@ import { watchDebounced } from '@vueuse/core'
 import type { IssueFilters } from '@/gitlab/issueParams'
 import type { SortKey, GroupKey } from '@/features/issues/lib/issueView'
 import type { ViewSlice } from '@/shared/composables/useSavedViews'
+import { FILTER_KEYS } from '@/shared/lib/issueFilterKeys'
 
 type State = NonNullable<IssueFilters['state']>
 type View = 'list' | 'board'
@@ -16,19 +17,9 @@ const asArray = (v: unknown): string[] =>
       : []
 const asString = (v: unknown): string => (typeof v === 'string' ? v : '')
 
-// URL keys that make up the persisted, per-project view-state slice. This is
-// the unit a "saved view" snapshots and what the auto-save mirrors.
-export const FILTER_KEYS = [
-  'state',
-  'label',
-  'assignee',
-  'author',
-  'q',
-  'sort',
-  'group',
-  'view',
-  'scope',
-] as const
+// The persisted, per-project view-state keys now live in a host-safe shared module
+// (the deep-link parser needs them too); re-exported here for existing callers.
+export { FILTER_KEYS }
 
 /** A snapshot of the view-defining query keys (what a saved view stores). */
 export type { ViewSlice }
