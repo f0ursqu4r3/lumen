@@ -28,7 +28,8 @@ export const DENSITY_PRESETS = {
 export const FONT_PRESETS = {
   default: "'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
   system: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-  rounded: "ui-rounded, 'SF Pro Rounded', 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
+  rounded:
+    "ui-rounded, 'SF Pro Rounded', 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
   classic: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
   geist: "'Geist Mono Variable', ui-monospace, monospace",
   code: "'SF Mono', Monaco, Consolas, 'Liberation Mono', ui-monospace, monospace",

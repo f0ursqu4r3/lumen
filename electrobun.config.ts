@@ -22,7 +22,7 @@ export default {
   app: {
     name: "Lumen",
     identifier: "com.kdougan.lumen",
-    version: "0.1.0",
+    version: "0.2.0",
     // Registers the lumen:// scheme on macOS (requires the app be in /Applications).
     urlSchemes: ["lumen"],
   },

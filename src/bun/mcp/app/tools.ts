@@ -96,8 +96,14 @@ export const appTools: McpTool[] = [
     description: 'Post a native desktop notification.',
     inputSchema: {
       title: z.string().max(NOTIFICATION_LIMITS.title * 2),
-      body: z.string().max(NOTIFICATION_LIMITS.body * 2).optional(),
-      subtitle: z.string().max(NOTIFICATION_LIMITS.subtitle * 2).optional(),
+      body: z
+        .string()
+        .max(NOTIFICATION_LIMITS.body * 2)
+        .optional(),
+      subtitle: z
+        .string()
+        .max(NOTIFICATION_LIMITS.subtitle * 2)
+        .optional(),
       silent: z.boolean().optional(),
     },
     handler: async (a) => {

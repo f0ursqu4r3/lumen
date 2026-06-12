@@ -21,9 +21,7 @@ describe('overridesToVars', () => {
     expect(overridesToVars({ radius: 'soft' })['--radius']).toBe('0.375rem')
     expect(overridesToVars({ radius: 'round' })['--radius']).toBe('0.625rem')
     expect(overridesToVars({ radius: 'plush' })['--radius']).toBe('0.875rem')
-    expect(overridesToVars({ density: 'condensed' })['--density']).toBe(
-      DENSITY_PRESETS.condensed,
-    )
+    expect(overridesToVars({ density: 'condensed' })['--density']).toBe(DENSITY_PRESETS.condensed)
     expect(overridesToVars({ density: 'compact' })['--density']).toBe(DENSITY_PRESETS.compact)
     expect(overridesToVars({ density: 'cozy' })['--density']).toBe(DENSITY_PRESETS.cozy)
     expect(overridesToVars({ density: 'spacious' })['--density']).toBe(DENSITY_PRESETS.spacious)

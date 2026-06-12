@@ -5,6 +5,166 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-12
+
+The first feature wave on top of the desktop port — a unified app shell, merge
+requests, a My Work dashboard, a command palette, an MCP server agents can
+connect to, a 16-theme engine, and a top-to-bottom **Chassis / Phosphor**
+restyle. Milestones are grouped newest first.
+
+### OS deep linking
+
+#### Added
+
+- A `lumen://` URL scheme (registered on macOS) opens issues, merge requests,
+  and views from outside the app. A pure parser/route-mapper feeds a host
+  open-url router that reuses an existing popout when one matches and queues
+  links that arrive before the app is ready (cold start); the webview applies
+  the resolved route client-side via a `lumen:deeplink` router.
+
+### Chassis & Phosphor restyle
+
+#### Changed
+
+- New **Chassis** visual identity — a hardware-instrument look: steel palette,
+  orange accent, seam shadows, plates, printed-label chips, squared badges, and
+  key-press buttons. Chassis is now the default theme.
+- A custom **ChassisBar** titlebar replaces the OS titlebar (`hiddenInset`) on
+  every window, with a drag region, wordmark, and a liveness lamp; traffic-light
+  spacing tuned for the macOS controls.
+
+#### Added
+
+- A **Phosphor** terminal idiom — bracketed statuses, glyph priorities,
+  de-chroma'd chips, and plates flattened to ruled rows — applied through a
+  `data-idiom` CSS layer and a `useIdiom` composable.
+
+### Window & session restore
+
+#### Added
+
+- **Restore on startup** (default on): the app captures window geometry and
+  reopens your windows and their routes on launch, gated by a safe-route
+  allowlist. The settings window opens centered on the current display. Toggle
+  in Settings → General.
+
+### Agent access — MCP server
+
+#### Added
+
+- An in-app **MCP server** (loopback + bearer token) exposing a GitLab tool
+  catalog — issues, merge requests, labels, milestones, users, and search —
+  alongside the app-control tools, with start/stop lifecycle and status / token
+  reveal & regenerate in settings.
+- One-click **Connect** cards wire **Claude Code** and **Codex** to the server
+  (Codex via `http_headers`); `~/.claude.json` is backed up before it's edited.
+- **Comment-edit** tools (own comments only) for issues and merge requests, and
+  **resource discovery** exposing app / issue / MR resources.
+
+#### Changed
+
+- MCP writes broadcast a cache invalidation to every window, so open issue views
+  refresh after an agent edits them.
+
+### Editable comments
+
+#### Added
+
+- Inline **edit your own comments** on issues and merge requests, backed by
+  note-update mutations.
+
+### Themes & Appearance
+
+#### Added
+
+- **16 selectable themes** with an Appearance gallery, plus per-theme override
+  controls (accent, radius, density, font). An anti-flash inline boot script
+  applies the theme before first paint, and theme changes sync across windows.
+
+#### Changed
+
+- `:root` is now the default theme (the `.dark` selector is retired); glows and
+  the canvas gradient are driven by the `--primary` token.
+
+### Settings window
+
+#### Changed
+
+- Settings moved from a modal into a dedicated, routed **window** (centered on
+  the current display) with a two-pane shell and a pane registry.
+
+#### Added
+
+- **Connection**, **Agent access (MCP)**, **Appearance**, **Data & cache**,
+  **About**, and **General** panes.
+
+### File attachments
+
+#### Added
+
+- **Attach files** by paste, drag-and-drop, or picker in the composer,
+  description, and comments. Uploads go through a host multipart handler to
+  GitLab's uploads endpoint; non-image attachments render as downloadable
+  file-cards, and a finished upload is never silently lost if its placeholder was
+  removed mid-flight.
+
+### Unified app shell
+
+#### Added
+
+- A consistent **app shell**: a global icon rail, a contextual top bar with
+  breadcrumbs, project **tabs** (Issues / Merge requests / Pipelines), and a
+  bottom **status dock**. Shared manual refresh across issues, MRs, and
+  pipelines; the issue save/revert control became a full-width docked bar.
+
+#### Changed
+
+- Retired the bespoke per-view list headers in favor of the shell's top bar.
+
+### My Work dashboard
+
+#### Added
+
+- **My Work** is the new home route — three lanes (assigned issues, assigned
+  MRs, review-requested MRs) with cross-project rows, each with its own loading /
+  empty / error state. The project picker moved to `/projects`; dashboard issue
+  rows open as a sheet over their project's list.
+
+### Merge requests
+
+#### Added
+
+- **Merge requests** browse + triage: a filterable list with saved views and
+  sort options, a detail view with discussions and reply, state badges
+  (draft / merged precedence), and unresolved-discussion notes. Jump to and
+  search merge requests from the command palette.
+
+### Command palette
+
+#### Added
+
+- A **command palette** navigator (combobox/listbox a11y): actions, views,
+  debounced current-project issue search, and MR jump, rendered as a sectioned
+  list with footer hints and keyboard navigation. Search results are kept out of
+  the persisted cache.
+
+### Issue details rail
+
+#### Added
+
+- A **progressive-disclosure details rail**: a field-descriptor registry with
+  visibility helpers, an Add-field menu, and a per-field hover **remove**
+  affordance, so the rail shows only the fields in use. Adds planning fields and
+  a confidential toggle.
+
+### Build & distribution
+
+#### Added
+
+- A production build script that stabilizes `.dmg` creation, and a
+  `version_bump.sh` that keeps the `package.json` and `electrobun.config.ts`
+  versions in sync.
+
 ## [0.1.0] - 2026-06-06
 
 Initial development of **Lumen**, a desktop GitLab issue tracker for self-hosted
