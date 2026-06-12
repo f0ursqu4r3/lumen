@@ -1,4 +1,4 @@
-import { parseLumenUrl, intentToLocation } from '../shared/lib/deepLink'
+import { parseLumenUrl, intentToLocation, type IssuesLocation } from '../shared/lib/deepLink'
 
 /** Capabilities the deep-link router needs from the host, injected so this stays testable. */
 export interface DeepLinkHost {
@@ -13,7 +13,7 @@ export interface DeepLinkHost {
 }
 
 /** Build the executeJavascript payload that dispatches a lumen:deeplink event in the webview. */
-export function buildDeepLinkJs(location: unknown): string {
+export function buildDeepLinkJs(location: IssuesLocation): string {
   return `window.dispatchEvent(new CustomEvent('lumen:deeplink',{detail:${JSON.stringify(location)}}))`
 }
 
