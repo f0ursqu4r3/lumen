@@ -207,7 +207,7 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       :class="
         idiom === 'terminal'
           ? 'text-muted-foreground'
-          : 'rounded-[3px] px-2 py-0.5 ring-1 ring-inset ring-white/10 hover:ring-white/25'
+          : 'h-5 rounded-[3px] px-2 ring-1 ring-inset ring-white/10 hover:ring-white/25'
       "
       :style="
         idiom === 'terminal'
