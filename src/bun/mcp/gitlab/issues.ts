@@ -40,6 +40,47 @@ const NOTE_M = `mutation($input:CreateNoteInput!){createNote(input:$input){note{
 const CURRENT_USER_Q = `{currentUser{username}}`
 const UPDATE_NOTE_M = `mutation($input:UpdateNoteInput!){updateNote(input:$input){note{id} errors}}`
 
+const unique = (values: readonly string[] | undefined): string[] =>
+  [...new Set((values ?? []).map((v) => v.trim()).filter(Boolean))]
+
+async function setIssueStatus(
+  project: string,
+  iid: string,
+  statusName: string,
+): Promise<{ ok: true; status: { name: string } | null } | { ok: false; error: string }> {
+  const idData = await gql<{
+    project: { workItems: { nodes: { id: string }[] } | null } | null
+  }>(WORK_ITEM_ID_Q, { p: project, iid })
+  const workItemId = idData.project?.workItems?.nodes?.[0]?.id
+  if (!workItemId) return { ok: false, error: `Issue ${iid} not found in ${project}.` }
+
+  const sData = await gql<{
+    namespace: { statuses: { nodes: { id: string; name: string }[] } | null } | null
+  }>(STATUSES_Q, { g: groupPath(project) })
+  const statuses = sData.namespace?.statuses?.nodes ?? []
+  const want = statusName.toLowerCase()
+  const match = statuses.find((s) => s.name.toLowerCase() === want)
+  if (!match) {
+    return {
+      ok: false,
+      error: `Unknown status "${statusName}". Available: ${statuses.map((s) => s.name).join(', ') || '(none)'}.`,
+    }
+  }
+
+  const data = await gql<{
+    workItemUpdate: {
+      errors: string[]
+      workItem: { widgets: { status?: { name: string } | null }[] } | null
+    } | null
+  }>(SET_STATUS_M, { id: workItemId, status: match.id })
+  const payload = data.workItemUpdate
+  if (!payload || payload.errors.length)
+    return { ok: false, error: payload?.errors.join('; ') || 'Status update failed.' }
+  const status =
+    payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
+  return { ok: true, status }
+}
+
 export const issueTools: McpTool[] = [
   {
     name: 'lumen_issues_list',
@@ -124,33 +165,63 @@ export const issueTools: McpTool[] = [
   {
     name: 'lumen_issue_update',
     description:
-      'Update an issue: title, description, state (close/reopen), labels (replace), assignees, milestone.',
+      'Update an issue: title, description, state (close/reopen), labels (replace/add/remove), assignees (replace/add/remove), milestone.',
     inputSchema: {
       project: z.string(),
       iid: iidParam,
       title: z.string().optional(),
       description: z.string().optional(),
       state: z.enum(['close', 'reopen']).optional(),
+      status: z.string().optional().describe('Work-item Status name, e.g. "In progress".'),
       labels: z.array(z.string()).optional().describe('Replaces all labels.'),
+      add_labels: z.array(z.string()).optional().describe('Label titles to add without replacing.'),
+      remove_labels: z
+        .array(z.string())
+        .optional()
+        .describe('Label titles to remove without replacing.'),
       assigneeUsernames: z.array(z.string()).optional(),
+      add_assignee: z.string().optional().describe('Username to add without replacing assignees.'),
+      remove_assignee: z
+        .string()
+        .optional()
+        .describe('Username to remove without replacing assignees.'),
       milestoneTitle: z.string().optional(),
     },
     handler: async (a) => {
       const input: Record<string, unknown> = { projectPath: a.project, iid: a.iid }
+      const addLabels = unique(a.add_labels as string[] | undefined)
+      const removeLabels = unique(a.remove_labels as string[] | undefined)
+      const addAssignee = unique(a.add_assignee ? [a.add_assignee as string] : undefined)
+      const removeAssignee = unique(a.remove_assignee ? [a.remove_assignee as string] : undefined)
+      if (a.labels && (addLabels.length || removeLabels.length))
+        return errorResult('Use either labels (replace) or add_labels/remove_labels, not both.')
+      if (a.assigneeUsernames && (addAssignee.length || removeAssignee.length))
+        return errorResult(
+          'Use either assigneeUsernames (replace) or add_assignee/remove_assignee, not both.',
+        )
+      const statusName = typeof a.status === 'string' ? a.status.trim() : ''
       if (a.title !== undefined) input.title = a.title
       if (a.description !== undefined) input.description = a.description
       if (a.state) input.stateEvent = a.state === 'close' ? 'CLOSE' : 'REOPEN'
       if (a.labels)
         input.labelIds = await resolveLabelIds(a.project as string, a.labels as string[])
+      if (addLabels.length) input.addLabelIds = await resolveLabelIds(a.project as string, addLabels)
+      if (removeLabels.length)
+        input.removeLabelIds = await resolveLabelIds(a.project as string, removeLabels)
       if (a.milestoneTitle)
         input.milestoneId = await resolveMilestoneId(
           a.project as string,
           a.milestoneTitle as string,
         )
-      const data = await gql<{
-        updateIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }
-      }>(UPDATE_M, { input })
-      if (data.updateIssue.errors.length) return errorResult(data.updateIssue.errors.join('; '))
+      let updated: { iid: string; webUrl?: string } | null = { iid: a.iid as string }
+      const hasIssueUpdate = Object.keys(input).some((key) => key !== 'projectPath' && key !== 'iid')
+      if (hasIssueUpdate) {
+        const data = await gql<{
+          updateIssue: { issue: { iid: string; webUrl: string } | null; errors: string[] }
+        }>(UPDATE_M, { input })
+        if (data.updateIssue.errors.length) return errorResult(data.updateIssue.errors.join('; '))
+        updated = data.updateIssue.issue
+      }
       // Assignees are not part of UpdateIssueInput — they go through the separate
       // issueSetAssignees mutation, which takes usernames directly (no id resolution).
       if (a.assigneeUsernames) {
@@ -160,8 +231,25 @@ export const issueTools: McpTool[] = [
         if (asg.issueSetAssignees.errors.length)
           return errorResult(asg.issueSetAssignees.errors.join('; '))
       }
+      for (const [assigneeUsernames, operationMode] of [
+        [addAssignee, 'APPEND'],
+        [removeAssignee, 'REMOVE'],
+      ] as const) {
+        if (!assigneeUsernames.length) continue
+        const asg = await gql<{ issueSetAssignees: { errors: string[] } }>(SET_ASSIGNEES_M, {
+          input: { projectPath: a.project, iid: a.iid, assigneeUsernames, operationMode },
+        })
+        if (asg.issueSetAssignees.errors.length)
+          return errorResult(asg.issueSetAssignees.errors.join('; '))
+      }
+      let status: { name: string } | null | undefined
+      if (statusName) {
+        const statusResult = await setIssueStatus(a.project as string, a.iid as string, statusName)
+        if (!statusResult.ok) return errorResult(statusResult.error)
+        status = statusResult.status
+      }
       emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
-      return text({ updated: data.updateIssue.issue })
+      return text({ updated, ...(status !== undefined ? { status } : {}) })
     },
   },
   {
@@ -174,36 +262,10 @@ export const issueTools: McpTool[] = [
       status: z.string().describe('Status name, e.g. "In progress".'),
     },
     handler: async (a) => {
-      const idData = await gql<{
-        project: { workItems: { nodes: { id: string }[] } | null } | null
-      }>(WORK_ITEM_ID_Q, { p: a.project, iid: a.iid })
-      const workItemId = idData.project?.workItems?.nodes?.[0]?.id
-      if (!workItemId) return errorResult(`Issue ${a.iid} not found in ${a.project}.`)
-
-      const sData = await gql<{
-        namespace: { statuses: { nodes: { id: string; name: string }[] } | null } | null
-      }>(STATUSES_Q, { g: groupPath(a.project as string) })
-      const statuses = sData.namespace?.statuses?.nodes ?? []
-      const want = (a.status as string).toLowerCase()
-      const match = statuses.find((s) => s.name.toLowerCase() === want)
-      if (!match)
-        return errorResult(
-          `Unknown status "${a.status}". Available: ${statuses.map((s) => s.name).join(', ') || '(none)'}.`,
-        )
-
-      const data = await gql<{
-        workItemUpdate: {
-          errors: string[]
-          workItem: { widgets: { status?: { name: string } | null }[] } | null
-        } | null
-      }>(SET_STATUS_M, { id: workItemId, status: match.id })
-      const payload = data.workItemUpdate
-      if (!payload || payload.errors.length)
-        return errorResult(payload?.errors.join('; ') || 'Status update failed.')
-      const status =
-        payload?.workItem?.widgets.find((w) => w && 'status' in w && w.status)?.status ?? null
+      const result = await setIssueStatus(a.project as string, a.iid as string, a.status as string)
+      if (!result.ok) return errorResult(result.error)
       emitInvalidate({ resource: 'issue', project: a.project as string, iid: a.iid as string })
-      return text({ updated: { iid: a.iid, status } })
+      return text({ updated: { iid: a.iid, status: result.status } })
     },
   },
   {

@@ -70,6 +70,11 @@ Project paths are full paths like `group/project` (23 tools total; 17 GitLab + 6
 - `lumen_labels_list`, `lumen_milestones_list`
 - `lumen_me`, `lumen_members_list`, `lumen_search` (project-scoped)
 
+`lumen_issue_update` supports open/close via `state`, work-item Status via
+`status`, full replacement with `labels` and `assigneeUsernames`, or narrow
+deltas with `add_labels`, `remove_labels`, `add_assignee`, and
+`remove_assignee`.
+
 ### App-control tools
 
 These tools read and drive the live Lumen desktop app. All `iid` values are

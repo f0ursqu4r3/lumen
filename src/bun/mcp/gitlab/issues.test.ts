@@ -312,18 +312,169 @@ describe('lumen_issue_update', () => {
   })
 
   it('sets assignees via the separate issueSetAssignees mutation with usernames directly', async () => {
-    c.gql
-      .mockResolvedValueOnce({ updateIssue: { issue: { iid: '5', webUrl: 'u' }, errors: [] } })
-      .mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
+    c.gql.mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
     await tool('lumen_issue_update').handler({
       project: 'g/p',
       iid: '5',
       assigneeUsernames: ['ana'],
     })
     expect(c.resolveUserIds).not.toHaveBeenCalled()
-    expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('issueSetAssignees'), {
+    expect(c.gql).toHaveBeenCalledWith(expect.stringContaining('issueSetAssignees'), {
       input: { projectPath: 'g/p', iid: '5', assigneeUsernames: ['ana'] },
     })
+  })
+
+  it('adds and removes labels without replacing all labels', async () => {
+    c.resolveLabelIds
+      .mockResolvedValueOnce(['gid://gitlab/Label/1'])
+      .mockResolvedValueOnce(['gid://gitlab/Label/2'])
+    c.gql.mockResolvedValue({ updateIssue: { issue: { iid: '5', webUrl: 'u' }, errors: [] } })
+    await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      add_labels: ['frontend'],
+      remove_labels: ['backend'],
+    })
+    expect(c.gql).toHaveBeenCalledWith(
+      expect.stringContaining('updateIssue'),
+      expect.objectContaining({
+        input: expect.objectContaining({
+          projectPath: 'g/p',
+          iid: '5',
+          addLabelIds: ['gid://gitlab/Label/1'],
+          removeLabelIds: ['gid://gitlab/Label/2'],
+        }),
+      }),
+    )
+    expect(c.gql.mock.calls[0][1].input.labelIds).toBeUndefined()
+  })
+
+  it('adds and removes assignees with append/remove operation modes', async () => {
+    c.gql
+      .mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
+      .mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
+    await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      add_assignee: 'ana',
+      remove_assignee: 'bob',
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(1, expect.stringContaining('issueSetAssignees'), {
+      input: {
+        projectPath: 'g/p',
+        iid: '5',
+        assigneeUsernames: ['ana'],
+        operationMode: 'APPEND',
+      },
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('issueSetAssignees'), {
+      input: {
+        projectPath: 'g/p',
+        iid: '5',
+        assigneeUsernames: ['bob'],
+        operationMode: 'REMOVE',
+      },
+    })
+  })
+
+  it('sets work-item status through the update tool', async () => {
+    c.gql
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/2', name: 'In progress' }] } },
+      })
+      .mockResolvedValueOnce({
+        workItemUpdate: {
+          errors: [],
+          workItem: {
+            widgets: [
+              { status: { id: 'gid://gitlab/Status/2', name: 'In progress', category: 'doing' } },
+            ],
+          },
+        },
+      })
+    const res = await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      status: 'in progress',
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(1, expect.stringContaining('workItems'), {
+      p: 'g/p',
+      iid: '5',
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(3, expect.stringContaining('workItemUpdate'), {
+      id: 'gid://gitlab/WorkItem/100',
+      status: 'gid://gitlab/Status/2',
+    })
+    expect(bodyText(res)).toContain('"name": "In progress"')
+  })
+
+  it('can combine title, label delta, assignee delta, and status in one update', async () => {
+    c.resolveLabelIds.mockResolvedValueOnce(['gid://gitlab/Label/1'])
+    c.gql
+      .mockResolvedValueOnce({ updateIssue: { issue: { iid: '5', webUrl: 'u' }, errors: [] } })
+      .mockResolvedValueOnce({ issueSetAssignees: { issue: { iid: '5' }, errors: [] } })
+      .mockResolvedValueOnce({
+        project: { workItems: { nodes: [{ id: 'gid://gitlab/WorkItem/100' }] } },
+      })
+      .mockResolvedValueOnce({
+        namespace: { statuses: { nodes: [{ id: 'gid://gitlab/Status/3', name: 'Done' }] } },
+      })
+      .mockResolvedValueOnce({
+        workItemUpdate: {
+          errors: [],
+          workItem: { widgets: [{ status: { id: 'gid://gitlab/Status/3', name: 'Done' } }] },
+        },
+      })
+    await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      title: 'New title',
+      add_labels: ['frontend'],
+      add_assignee: 'ana',
+      status: 'Done',
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(1, expect.stringContaining('updateIssue'), {
+      input: expect.objectContaining({ title: 'New title', addLabelIds: ['gid://gitlab/Label/1'] }),
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(2, expect.stringContaining('issueSetAssignees'), {
+      input: {
+        projectPath: 'g/p',
+        iid: '5',
+        assigneeUsernames: ['ana'],
+        operationMode: 'APPEND',
+      },
+    })
+    expect(c.gql).toHaveBeenNthCalledWith(5, expect.stringContaining('workItemUpdate'), {
+      id: 'gid://gitlab/WorkItem/100',
+      status: 'gid://gitlab/Status/3',
+    })
+  })
+
+  it('rejects mixing replace labels with add/remove label options', async () => {
+    const res = await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      labels: ['bug'],
+      add_labels: ['frontend'],
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('Use either labels')
+    expect(c.gql).not.toHaveBeenCalled()
+  })
+
+  it('rejects mixing replace assignees with add/remove assignee options', async () => {
+    const res = await tool('lumen_issue_update').handler({
+      project: 'g/p',
+      iid: '5',
+      assigneeUsernames: ['ana'],
+      remove_assignee: 'bob',
+    })
+    expect(res.isError).toBe(true)
+    expect(bodyText(res)).toContain('Use either assigneeUsernames')
+    expect(c.gql).not.toHaveBeenCalled()
   })
 
   it('emits an issue invalidate signal on success', async () => {
