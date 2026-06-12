@@ -2,7 +2,7 @@ import { parseLumenUrl, intentToLocation } from '../shared/lib/deepLink'
 
 /** Capabilities the deep-link router needs from the host, injected so this stays testable. */
 export interface DeepLinkHost {
-  /** Is a native popout window already open for this issue key (`${project}#${iid}`)? */
+  /** Is a native popout window already open for this issue key (`${fullPath}#${iid}`)? */
   hasIssueWindow: (key: string) => boolean
   /** Focus that popout window. */
   focusIssueWindow: (key: string) => void
@@ -17,13 +17,21 @@ export function buildDeepLinkJs(location: unknown): string {
   return `window.dispatchEvent(new CustomEvent('lumen:deeplink',{detail:${JSON.stringify(location)}}))`
 }
 
+/** The deep-link router seam stored by the host entrypoint. */
+export interface DeepLinkRouter {
+  /** Handle an incoming open-url. Buffers until the main window is ready. */
+  handleOpenUrl: (raw: string) => void
+  /** Mark the main webview mounted and replay any buffered links. Idempotent. */
+  markReady: () => void
+}
+
 /**
  * Routes Electrobun open-url events. An issue link whose popout is already open focuses that
  * window; otherwise the main window is focused and the route forwarded to its webview. Links
  * that arrive before the main webview has mounted (cold launch) are buffered and replayed on
  * markReady (driven by the first reportAppState from the main window).
  */
-export function createDeepLinkRouter(host: DeepLinkHost) {
+export function createDeepLinkRouter(host: DeepLinkHost): DeepLinkRouter {
   let mainReady = false
   const pending: string[] = []
 

@@ -34,6 +34,7 @@ describe('createDeepLinkRouter', () => {
     router.markReady()
     router.handleOpenUrl('lumen://issue/group/repo/42')
     expect(host.focusIssueWindow).toHaveBeenCalledWith('group/repo#42')
+    expect(host.focusMain).not.toHaveBeenCalled()
     expect(host.driveMain).not.toHaveBeenCalled()
   })
 
@@ -67,7 +68,21 @@ describe('createDeepLinkRouter', () => {
     expect(host.focusMain).not.toHaveBeenCalled()
     expect(host.driveMain).not.toHaveBeenCalled()
     router.markReady()
+    expect(host.focusMain).toHaveBeenCalled()
     expect(host.driveMain).toHaveBeenCalledTimes(1)
+  })
+
+  it('flushes multiple buffered links in order on markReady', () => {
+    const router = createDeepLinkRouter(host)
+    router.handleOpenUrl('lumen://app/current') // focus intent
+    router.handleOpenUrl('lumen://issue/group/repo/42') // issue intent
+    expect(host.focusMain).not.toHaveBeenCalled()
+    expect(host.driveMain).not.toHaveBeenCalled()
+    router.markReady()
+    // both flushed: focus intent → focusMain only; issue intent → focusMain + driveMain
+    expect(host.focusMain).toHaveBeenCalledTimes(2)
+    expect(host.driveMain).toHaveBeenCalledTimes(1)
+    expect(host.driveMain).toHaveBeenCalledWith(expect.stringContaining('"issue":"42"'))
   })
 
   it('markReady is idempotent', () => {
