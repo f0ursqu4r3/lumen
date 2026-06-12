@@ -15,6 +15,8 @@ const codesign = Boolean(process.env.ELECTROBUN_DEVELOPER_ID);
 const notarize =
   codesign &&
   Boolean(process.env.ELECTROBUN_APPLEID || process.env.ELECTROBUN_APPLEAPIKEY);
+const envArg = process.argv.find((arg) => arg.startsWith("--env="))?.split("=")[1];
+const isStable = envArg === "stable";
 
 export default {
   app: { name: "Lumen", identifier: "com.kdougan.lumen", version: "0.1.0" },
@@ -28,6 +30,7 @@ export default {
     mac: {
       bundleCEF: false,
       icons: "assets/macos/AppIcon.iconset",
+      createDmg: !isStable,
       codesign,
       notarize,
     },

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electrobun build",
+    "production": "bash scripts/build-production.sh",
     "dist": "vue-tsc --noEmit && vite build && electrobun build --env=canary",
     "sign-cert": "bash scripts/make-signing-cert.sh",
     "app:dev": "vite build && electrobun dev",
