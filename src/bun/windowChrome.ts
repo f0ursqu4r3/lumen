@@ -15,4 +15,5 @@
 // stock position instead.
 export const WINDOW_CHROME = {
   titleBarStyle: 'hiddenInset',
+  ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
 } as const

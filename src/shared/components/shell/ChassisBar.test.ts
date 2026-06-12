@@ -21,7 +21,7 @@ describe('ChassisBar', () => {
 
   it('reserves the macOS traffic-light zone', () => {
     const w = mount(ChassisBar)
-    expect(w.classes()).toContain('pl-[96px]')
+    expect(w.classes()).toContain('pl-18')
   })
 
   it('shows the engraved wordmark by default and a window title when given', () => {
