@@ -167,7 +167,7 @@ bunx electrobun build --env=stable      # → build\stable-win-x64\
 
 Don't use `bun run production` on Windows — it's a macOS bash script (an `iconutil` shim). The steps above are its Windows equivalent.
 
-No Windows box? A GitHub Actions workflow at [`.github/workflows/build-windows.yml`](.github/workflows/build-windows.yml) runs the same steps on a `windows-latest` runner — trigger it manually (**Actions → Build Windows → Run workflow**) or by pushing a `v*.*.*` tag, then download the `lumen-windows-x64` artifact. (Requires a GitHub remote; the unsigned `.exe` will trip SmartScreen on first launch.)
+No Windows machine? Build in a local Windows VM. There's intentionally no hosted CI for this: the build needs the GraphQL types generated from the live GitLab instance (`bun run codegen`, kept out of git), which a cloud runner can't reach. The unsigned `.exe` will trip SmartScreen on first launch.
 
 ## Design
 
