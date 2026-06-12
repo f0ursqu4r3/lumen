@@ -6,10 +6,11 @@ describe('overridesToVars', () => {
     expect(overridesToVars({})).toEqual({})
   })
 
-  it('maps accent to --primary and --ring', () => {
+  it('maps accent to --primary, --ring, and the Phosphor effect color', () => {
     expect(overridesToVars({ accent: 'oklch(0.7 0.13 264)' })).toEqual({
       '--primary': 'oklch(0.7 0.13 264)',
       '--ring': 'oklch(0.7 0.13 264)',
+      '--phosphor-effect': 'oklch(0.7 0.13 264)',
     })
   })
 

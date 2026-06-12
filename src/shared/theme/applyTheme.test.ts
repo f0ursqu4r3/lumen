@@ -24,8 +24,12 @@ describe('applyTheme', () => {
   it('applies override vars as inline custom properties and clears stale ones', () => {
     applyTheme(document, { themeId: 'chassis', overrides: { accent: 'oklch(0.7 0.13 264)' } })
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('oklch(0.7 0.13 264)')
+    expect(document.documentElement.style.getPropertyValue('--phosphor-effect')).toBe(
+      'oklch(0.7 0.13 264)',
+    )
     applyTheme(document, { themeId: 'chassis', overrides: {} })
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
+    expect(document.documentElement.style.getPropertyValue('--phosphor-effect')).toBe('')
   })
 
   it('sets data-idiom for a terminal theme and clears it on switch back', () => {

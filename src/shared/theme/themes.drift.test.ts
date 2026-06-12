@@ -73,6 +73,23 @@ describe('theme registry <-> CSS drift guard', () => {
     expect(stylesCss).toMatch(/:root[\s\S]*--primary:\s*oklch\(0\.69 0\.2 42\)/)
   })
 
+  it('derives the Phosphor readout color from the effect token', () => {
+    const block = blockFor('phosphor')
+    expect(block).toMatch(/--phosphor-effect:\s*oklch\(0\.87 0\.19 150\)/)
+    for (const token of [
+      '--foreground',
+      '--muted-foreground',
+      '--border',
+      '--accent',
+      '--sidebar-primary',
+      '--chart-1',
+    ]) {
+      expect(block, `phosphor ${token} should follow --phosphor-effect`).toMatch(
+        new RegExp(`${token}:[\\s\\S]*phosphor-`),
+      )
+    }
+  })
+
   // Regression guard: themes.css is @imported ABOVE the :root default block, so a
   // bare `[data-theme=…]` selector (specificity 0,1,0, equal to `:root`) loses on
   // source order and the theme never applies. Anchoring to `:root[data-theme=…]`

@@ -6,7 +6,14 @@ export type { ThemeState }
 export const THEME_KEY = 'lumen:theme'
 export const OVERRIDES_KEY = 'lumen:theme-overrides'
 
-const OVERRIDE_VARS = ['--primary', '--ring', '--radius', '--density', '--font-sans'] as const
+const OVERRIDE_VARS = [
+  '--primary',
+  '--ring',
+  '--phosphor-effect',
+  '--radius',
+  '--density',
+  '--font-sans',
+] as const
 
 /** Apply a theme + override delta to a document. Pure; no storage, no events. */
 export function applyTheme(doc: Document, state: ThemeState): void {

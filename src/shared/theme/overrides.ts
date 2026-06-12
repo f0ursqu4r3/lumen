@@ -1,5 +1,5 @@
 export interface ThemeOverrides {
-  accent?: string // raw oklch/hex string -> --primary, --ring
+  accent?: string // raw oklch/hex string -> --primary, --ring, Phosphor effect
   radius?: keyof typeof RADIUS_PRESETS
   density?: keyof typeof DENSITY_PRESETS
   font?: keyof typeof FONT_PRESETS
@@ -29,6 +29,7 @@ export function overridesToVars(o: ThemeOverrides): Record<string, string> {
   if (o.accent) {
     vars['--primary'] = o.accent
     vars['--ring'] = o.accent
+    vars['--phosphor-effect'] = o.accent
   }
   if (o.radius && o.radius in RADIUS_PRESETS) vars['--radius'] = RADIUS_PRESETS[o.radius]
   if (o.density && o.density in DENSITY_PRESETS) vars['--density'] = DENSITY_PRESETS[o.density]
