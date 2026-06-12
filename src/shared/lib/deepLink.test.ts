@@ -76,6 +76,27 @@ describe('parseLumenUrl', () => {
       iid: '1',
     })
   })
+
+  it('lowercases the kind so an uppercase host still routes', () => {
+    expect(parseLumenUrl('lumen://ISSUE/group/repo/42')).toEqual({
+      kind: 'issue',
+      project: 'group/repo',
+      iid: '42',
+    })
+  })
+
+  it('focuses for a project segment that starts with a dot', () => {
+    expect(parseLumenUrl('lumen://issue/.hidden/repo/42')).toEqual({ kind: 'focus' })
+  })
+
+  it('ignores a port in the authority (parses as the same issue link)', () => {
+    // The URL parser drops the port from hostname; the kind is still "issue".
+    expect(parseLumenUrl('lumen://issue:8080/group/repo/42')).toEqual({
+      kind: 'issue',
+      project: 'group/repo',
+      iid: '42',
+    })
+  })
 })
 
 describe('intentToLocation', () => {

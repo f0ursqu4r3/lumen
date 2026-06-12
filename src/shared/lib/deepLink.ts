@@ -24,7 +24,7 @@ const MAX_ARRAY = 20
 function cleanProject(segments: string[]): string | null {
   if (!segments.length) return null
   for (const s of segments) {
-    if (!SEGMENT.test(s) || s === '.' || s === '..') return null
+    if (!SEGMENT.test(s) || s.startsWith('.')) return null
   }
   return segments.join('/')
 }
@@ -56,7 +56,7 @@ export function parseLumenUrl(raw: string): DeepLinkIntent {
   }
   if (url.protocol !== 'lumen:') return FOCUS
 
-  const kind = url.hostname
+  const kind = url.hostname.toLowerCase()
   const segments = url.pathname.split('/').filter(Boolean)
 
   if (kind === 'issue') {
