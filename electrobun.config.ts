@@ -19,7 +19,13 @@ const envArg = process.argv.find((arg) => arg.startsWith("--env="))?.split("=")[
 const isStable = envArg === "stable";
 
 export default {
-  app: { name: "Lumen", identifier: "com.kdougan.lumen", version: "0.1.0" },
+  app: {
+    name: "Lumen",
+    identifier: "com.kdougan.lumen",
+    version: "0.1.0",
+    // Registers the lumen:// scheme on macOS (requires the app be in /Applications).
+    urlSchemes: ["lumen"],
+  },
   build: {
     bun: { entrypoint: "src/bun/index.ts" },
     views: { mainview: { entrypoint: "src/mainview/index.ts" } },

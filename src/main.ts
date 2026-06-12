@@ -6,6 +6,7 @@ import { rpc } from '@/shared/lib/rpc'
 import { createPersistedQueryClient } from '@/shared/lib/persist'
 import { installServerHealth } from '@/shared/composables/useSession'
 import { installAppStateReport } from '@/shared/composables/useAppStateReport'
+import { installDeepLinkRoute } from '@/shared/composables/useDeepLinkRoute'
 import { installMcpCacheSync } from '@/shared/composables/useMcpCacheSync'
 import { installThemeSync } from '@/shared/theme/installThemeSync'
 import { applyStoredTheme } from '@/shared/theme/applyTheme'
@@ -51,7 +52,10 @@ async function boot() {
   // MCP app-control + session-route reporting live only in the main window. The
   // main window is identified by isMain (it may now carry a restored route, so a
   // null route no longer distinguishes it). Popouts and settings get isMain=false.
-  if (isMain) installAppStateReport(router)
+  if (isMain) {
+    installAppStateReport(router)
+    installDeepLinkRoute(router)
+  }
   createApp(App).use(router).use(VueQueryPlugin, { queryClient }).mount('#app')
 }
 void boot().catch((err) => {

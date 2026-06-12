@@ -54,6 +54,7 @@ import {
   type Outcome,
 } from './serverHealth'
 import { cacheSnapshot, setHostActions, type WindowInfo } from './mcp/app/bridge'
+import { createDeepLinkRouter } from './deepLinkHost'
 // Relative on purpose: electrobun's host build doesn't resolve tsconfig "@/" paths
 // (the "@/" type-only imports above survive because they're erased before bundling).
 import { PROBE_QUERY } from '../shared/lib/gitlabQueries'
@@ -303,6 +304,7 @@ function buildRpc(opts: { route: string | null; isMain: boolean }) {
           if (opts.isMain) {
             cacheSnapshot(s)
             setMainRoute(s.route, s.view)
+            deepLink.markReady() // first report = main webview mounted; flush buffered links
           }
           return { ok: true }
         },
@@ -372,6 +374,25 @@ setHostActions({
     if (settingsWindow) out.push({ kind: 'settings' })
     return out
   },
+})
+
+// Route lumen:// deep links: focus an already-open issue popout, else focus the main
+// window and forward the route to its webview. Links that arrive before the main webview
+// mounts (cold launch) are buffered and replayed on the first reportAppState (markReady).
+const deepLink = createDeepLinkRouter({
+  hasIssueWindow: (key) => issueWindows.has(key),
+  focusIssueWindow: (key) => issueWindows.get(key)?.activate(),
+  focusMain: () => {
+    if (windows.has(win)) win.activate()
+  },
+  driveMain: (js) => {
+    if (!windows.has(win)) return { ok: false }
+    win.webview.executeJavascript(js)
+    return { ok: true }
+  },
+})
+Electrobun.events.on('open-url', (e) => {
+  deepLink.handleOpenUrl((e as { data: { url: string } }).data.url)
 })
 
 // Start the in-process MCP server iff the user enabled it in config. Off by
