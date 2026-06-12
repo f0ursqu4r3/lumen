@@ -225,13 +225,13 @@ const delay = computed(() => `${Math.min(props.index ?? 0, 14) * 26}ms`)
       <template v-else>{{ status.value }}</template>
     </button>
 
-    <span v-if="pills.length" class="relative z-10 hidden shrink-0 gap-1 lg:flex">
+    <span v-if="pills.length" class="relative z-10 hidden h-5 shrink-0 items-center gap-1 lg:flex">
       <button
         v-for="l in pills"
         :key="l.id"
         type="button"
         :title="`Filter: ${l.title}`"
-        class="cursor-pointer rounded-[3px] outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95"
+        class="inline-flex h-5 cursor-pointer items-center rounded-[3px] p-0 leading-none outline-none transition-[scale] focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-95"
         @click="filterLabel(l)"
       >
         <LabelChip :title="l.title" :color="l.color" />
