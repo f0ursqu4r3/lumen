@@ -14,7 +14,12 @@ export interface HostActions {
   openIssueWindow: (a: { fullPath: string; iid: string }) => { ok: boolean }
   openIssuesWindow: (a: { fullPath: string; iids: string[] }) => { ok: boolean }
   openSettingsWindow: () => { ok: boolean }
-  notify: (a: { title: string; body?: string; subtitle?: string; silent?: boolean }) => void
+  notify: (a: {
+    title: string
+    body?: string
+    subtitle?: string
+    silent?: boolean
+  }) => void | { ok: true }
   /** Run JS in the main window's webview; { ok: false } if it's gone. */
   driveMain: (js: string) => { ok: boolean }
   /** Run JS in every open window (main + popouts + pager). */

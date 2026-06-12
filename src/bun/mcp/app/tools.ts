@@ -3,6 +3,7 @@ import type { McpTool } from '../types'
 import { text, errorResult } from '../types'
 import { getSnapshot, getHostActions, buildCommandJs, type HostActions } from './bridge'
 import type { McpAppCommand } from '@/shared/lib/rpcContract'
+import { normalizeNotification, NOTIFICATION_LIMITS } from '../../notifications'
 
 const iid = z.string().regex(/^\d+$/, 'iid must be numeric')
 
@@ -94,20 +95,21 @@ export const appTools: McpTool[] = [
     name: 'lumen_app_notify',
     description: 'Post a native desktop notification.',
     inputSchema: {
-      title: z.string(),
-      body: z.string().optional(),
-      subtitle: z.string().optional(),
+      title: z.string().max(NOTIFICATION_LIMITS.title * 2),
+      body: z.string().max(NOTIFICATION_LIMITS.body * 2).optional(),
+      subtitle: z.string().max(NOTIFICATION_LIMITS.subtitle * 2).optional(),
       silent: z.boolean().optional(),
     },
     handler: async (a) => {
       const h = host()
       if (!h) return NO_BRIDGE
-      h.notify({
+      const notification = normalizeNotification({
         title: a.title as string,
         body: a.body as string | undefined,
         subtitle: a.subtitle as string | undefined,
         silent: a.silent as boolean | undefined,
       })
+      h.notify(notification)
       return text({ ok: true })
     },
   },

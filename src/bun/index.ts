@@ -35,6 +35,7 @@ import { issueWindowRoute, issuesWindowRoute } from './issueWindow'
 import { settingsWindowRoute } from './settingsWindow'
 import { buildAppMenu, DEVTOOLS_ACTION, SETTINGS_ACTION } from './menu'
 import { WINDOW_CHROME } from './windowChrome'
+import { showNotificationSafely } from './notifications'
 import {
   startMcpIfEnabled,
   stopMcp,
@@ -269,8 +270,12 @@ function buildRpc(opts: { route: string | null; isMain: boolean }) {
           return { ok: true }
         },
         showNotification: async ({ title, body, subtitle, silent }) => {
-          Utils.showNotification({ title, body, subtitle, silent })
-          return { ok: true }
+          return showNotificationSafely((notification) => Utils.showNotification(notification), {
+            title,
+            body,
+            subtitle,
+            silent,
+          })
         },
         openIssueWindow: async ({ fullPath, iid }) => openIssueWindow({ fullPath, iid }),
         openIssuesWindow: async ({ fullPath, iids }) => openIssuesWindow({ fullPath, iids }),
@@ -352,7 +357,7 @@ setHostActions({
   openIssueWindow,
   openIssuesWindow,
   openSettingsWindow,
-  notify: (a) => Utils.showNotification(a),
+  notify: (a) => showNotificationSafely((notification) => Utils.showNotification(notification), a),
   driveMain: (js) => {
     if (!windows.has(win)) return { ok: false } // main window closed
     win.webview.executeJavascript(js)

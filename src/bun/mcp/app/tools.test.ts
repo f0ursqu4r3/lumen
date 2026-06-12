@@ -136,6 +136,20 @@ describe('lumen_app_notify', () => {
       silent: true,
     })
   })
+
+  it('normalizes notification text before forwarding', async () => {
+    const host = stubHost()
+    await tool('lumen_app_notify').handler({
+      title: '  \n ',
+      body: ' body\ntext ',
+      subtitle: 'x'.repeat(200),
+    })
+    expect(host.notify).toHaveBeenCalledWith({
+      title: 'Lumen',
+      body: 'body text',
+      subtitle: expect.stringMatching(/^x+\.\.\.$/),
+    })
+  })
 })
 
 it('iid schemas reject non-numeric iids', () => {

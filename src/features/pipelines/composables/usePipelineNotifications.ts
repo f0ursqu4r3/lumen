@@ -64,12 +64,16 @@ function notify(p: Pipeline, projectLabel: string, href?: string) {
 
   // Only when we're not the active window: an OS notification on top.
   if (!isAppActive()) {
-    void rpc.showNotification({
-      title,
-      subtitle: where || undefined,
-      body: `#${p.iid}`,
-      // Let failures ring; successful runs land quietly.
-      silent: p.status !== 'FAILED',
-    })
+    void rpc
+      .showNotification({
+        title,
+        subtitle: where || undefined,
+        body: `#${p.iid}`,
+        // Let failures ring; successful runs land quietly.
+        silent: p.status !== 'FAILED',
+      })
+      .catch((e) => {
+        console.warn('OS notification failed', e)
+      })
   }
 }

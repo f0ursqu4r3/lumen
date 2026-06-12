@@ -77,6 +77,18 @@ describe('usePipelineNotifications', () => {
     )
   })
 
+  it('keeps the toast path intact when the OS notification fails', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    showNotification.mockRejectedValueOnce(new Error('native failed'))
+    const list = ref<Pipeline[]>([p({ id: 'a', status: 'FAILED' })])
+    usePipelineNotifications(list, ref('proj'), fakeWatch(['a']))
+    await nextTick()
+    await Promise.resolve()
+    expect(pushToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Pipeline failed' }))
+    expect(warn).toHaveBeenCalledWith('OS notification failed', expect.any(Error))
+    warn.mockRestore()
+  })
+
   it('shows only the toast (no OS notification) when the app IS active', async () => {
     isAppActive.mockReturnValue(true)
     const list = ref<Pipeline[]>([p({ id: 'a', status: 'SUCCESS' })])
