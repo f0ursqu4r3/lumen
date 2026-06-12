@@ -152,6 +152,23 @@ Notarization turns on automatically only when both the identity and Apple creds 
 xattr -dr com.apple.quarantine /path/to/Lumen.app
 ```
 
+## Building for Windows
+
+Electrobun **can't cross-compile** — the CLI builds for the OS it runs on (it maps `process.platform` to the target, and only ever produces an x64 Windows binary). A Windows `.exe` therefore has to be built **on Windows**; a Mac can't emit one. The config is already Windows-ready (`win: { bundleCEF: false }` in `electrobun.config.ts`).
+
+On a Windows machine with [Bun](https://bun.sh/) installed:
+
+```powershell
+bun install
+bunx vue-tsc --noEmit
+bunx vite build
+bunx electrobun build --env=stable      # → build\stable-win-x64\
+```
+
+Don't use `bun run production` on Windows — it's a macOS bash script (an `iconutil` shim). The steps above are its Windows equivalent.
+
+No Windows box? A GitHub Actions workflow at [`.github/workflows/build-windows.yml`](.github/workflows/build-windows.yml) runs the same steps on a `windows-latest` runner — trigger it manually (**Actions → Build Windows → Run workflow**) or by pushing a `v*.*.*` tag, then download the `lumen-windows-x64` artifact. (Requires a GitHub remote; the unsigned `.exe` will trip SmartScreen on first launch.)
+
 ## Design
 
 The visual language is documented in [`.impeccable.md`](.impeccable.md): a refined-dark, Linear-class aesthetic with an amber accent, **Hanken Grotesk** for UI text and **Geist Mono** for code and labels. UI primitives are shadcn-vue / [reka-ui](https://reka-ui.com/); styling is Tailwind CSS v4.
