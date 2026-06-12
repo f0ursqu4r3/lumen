@@ -82,7 +82,7 @@ onKeyStroke('ArrowRight', (e) => {
 // Pager buttons are segments in one pill — the same idiom as the list toolbar's
 // view toggle: borderless tiles inside a bordered, muted track.
 const navBtn =
-  'grid size-7 place-items-center rounded-[7px] text-muted-foreground transition-colors duration-150 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-40 disabled:hover:text-muted-foreground'
+  'grid size-7 place-items-center rounded-md text-muted-foreground transition-colors duration-150 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] disabled:opacity-40 disabled:hover:text-muted-foreground'
 </script>
 
 <template>

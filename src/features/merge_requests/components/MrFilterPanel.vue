@@ -63,7 +63,7 @@ const DRAFTS: { value: MrDraft; label: string }[] = [
             :key="d.value"
             type="button"
             :aria-pressed="draft === d.value"
-            class="rounded-[7px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
             :class="
               draft === d.value
                 ? 'bg-card text-foreground shadow-card ring-1 ring-border'

@@ -43,7 +43,10 @@ describe('AppearancePane', () => {
   it('accent swatches call setOverride with an accent', async () => {
     const w = mount(AppearancePane)
     await w.get('[data-test="customize-toggle"]').trigger('click')
-    await w.findAll('[data-test="accent-swatch"]')[1].trigger('click')
+    const swatches = w.findAll('[data-test="accent-swatch"]')
+    expect(swatches).toHaveLength(12)
+    expect(swatches.map((s) => s.attributes('aria-label'))).toContain('Magenta accent')
+    await swatches[1].trigger('click')
     expect(setOverride).toHaveBeenCalledWith(
       expect.objectContaining({ accent: expect.any(String) }),
     )
@@ -52,6 +55,12 @@ describe('AppearancePane', () => {
   it('radius/density/font segmented controls call setOverride', async () => {
     const w = mount(AppearancePane)
     await w.get('[data-test="customize-toggle"]').trigger('click')
+    expect(w.findAll('[data-test^="radius-"]')).toHaveLength(6)
+    expect(w.findAll('[data-test^="density-"]')).toHaveLength(6)
+    expect(w.findAll('[data-test^="font-"]')).toHaveLength(6)
+    expect(w.get('[data-test="radius-plush"]').exists()).toBe(true)
+    expect(w.get('[data-test="density-airy"]').exists()).toBe(true)
+    expect(w.get('[data-test="font-classic"]').exists()).toBe(true)
     await w.get('[data-test="radius-round"]').trigger('click')
     expect(setOverride).toHaveBeenCalledWith({ radius: 'round' })
     await w.get('[data-test="density-compact"]').trigger('click')

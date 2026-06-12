@@ -71,7 +71,7 @@ defineEmits<{
           :key="s.value"
           type="button"
           :aria-pressed="state === s.value"
-          class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          class="rounded-md px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             state === s.value
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'
@@ -140,7 +140,7 @@ defineEmits<{
           type="button"
           aria-label="List view"
           :aria-pressed="view === 'list'"
-          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          class="grid size-7 place-items-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             view === 'list'
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'
@@ -154,7 +154,7 @@ defineEmits<{
           type="button"
           aria-label="Board view"
           :aria-pressed="view === 'board'"
-          class="grid size-7 place-items-center rounded-[7px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          class="grid size-7 place-items-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             view === 'board'
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'

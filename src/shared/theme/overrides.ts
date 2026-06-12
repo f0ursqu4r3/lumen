@@ -7,21 +7,31 @@ export interface ThemeOverrides {
 
 export const RADIUS_PRESETS = {
   sharp: '0px',
+  tight: '0.125rem',
   default: '0.25rem',
+  soft: '0.375rem',
   round: '0.625rem',
+  plush: '0.875rem',
 } as const
 
 // --density scales list-row vertical padding + control heights ONLY (see styles.css).
 // The inline anti-flash script in index.html mirrors these maps — keep them in sync.
 export const DENSITY_PRESETS = {
-  comfortable: '1',
+  condensed: '0.7',
   compact: '0.8',
+  cozy: '0.9',
+  comfortable: '1',
+  spacious: '1.12',
+  airy: '1.25',
 } as const
 
 export const FONT_PRESETS = {
   default: "'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
   system: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+  rounded: "ui-rounded, 'SF Pro Rounded', 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif",
+  classic: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
   geist: "'Geist Mono Variable', ui-monospace, monospace",
+  code: "'SF Mono', Monaco, Consolas, 'Liberation Mono', ui-monospace, monospace",
 } as const
 
 export function overridesToVars(o: ThemeOverrides): Record<string, string> {

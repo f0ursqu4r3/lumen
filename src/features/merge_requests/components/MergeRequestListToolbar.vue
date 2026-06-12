@@ -52,7 +52,7 @@ const state = defineModel<MrState>('state', { required: true })
           :key="s.value"
           type="button"
           :aria-pressed="state === s.value"
-          class="rounded-[7px] px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
+          class="rounded-md px-3 py-1 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97]"
           :class="
             state === s.value
               ? 'bg-card text-foreground shadow-card ring-1 ring-border'

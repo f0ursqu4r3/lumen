@@ -20,12 +20,18 @@ const activeId = computed(() => themeId.value)
 
 const customizing = ref(false)
 const ACCENTS = [
-  'oklch(0.69 0.2 42)',
-  'oklch(0.7 0.13 264)',
-  'oklch(0.72 0.15 150)',
-  'oklch(0.62 0.2 22)',
-  'oklch(0.68 0.16 300)',
-  'oklch(0.72 0.12 195)',
+  { name: 'Orange', value: 'oklch(0.69 0.2 42)' },
+  { name: 'Gold', value: 'oklch(0.78 0.13 82)' },
+  { name: 'Lime', value: 'oklch(0.78 0.18 132)' },
+  { name: 'Green', value: 'oklch(0.72 0.15 150)' },
+  { name: 'Cyan', value: 'oklch(0.72 0.12 195)' },
+  { name: 'Sky', value: 'oklch(0.72 0.14 230)' },
+  { name: 'Indigo', value: 'oklch(0.7 0.13 264)' },
+  { name: 'Violet', value: 'oklch(0.68 0.16 300)' },
+  { name: 'Magenta', value: 'oklch(0.68 0.18 330)' },
+  { name: 'Rose', value: 'oklch(0.66 0.2 10)' },
+  { name: 'Red', value: 'oklch(0.62 0.2 22)' },
+  { name: 'White', value: 'oklch(0.9 0 0)' },
 ]
 const RADII = Object.keys(RADIUS_PRESETS) as (keyof typeof RADIUS_PRESETS)[]
 const DENSITIES = Object.keys(DENSITY_PRESETS) as (keyof typeof DENSITY_PRESETS)[]
@@ -82,24 +88,25 @@ const FONTS = Object.keys(FONT_PRESETS) as (keyof typeof FONT_PRESETS)[]
       <div v-if="customizing" class="space-y-4">
         <div class="space-y-1.5">
           <p class="field-label">Accent</p>
-          <div class="flex gap-1.5">
+          <div class="grid grid-cols-8 gap-1.5 sm:grid-cols-12">
             <button
               v-for="a in ACCENTS"
-              :key="a"
+              :key="a.value"
               type="button"
               data-test="accent-swatch"
               class="h-6 w-6 rounded-full border border-border focus-visible:ring-2 focus-visible:ring-primary"
-              :style="{ background: a }"
-              :aria-pressed="overrides.accent === a ? 'true' : 'false'"
-              :aria-label="`Accent ${a}`"
-              @click="setOverride({ accent: a })"
+              :style="{ background: a.value }"
+              :aria-pressed="overrides.accent === a.value ? 'true' : 'false'"
+              :aria-label="`${a.name} accent`"
+              :title="a.name"
+              @click="setOverride({ accent: a.value })"
             />
           </div>
         </div>
 
         <div class="space-y-1.5">
           <p class="field-label">Radius</p>
-          <div class="flex gap-1">
+          <div class="flex flex-wrap gap-1">
             <button
               v-for="r in RADII"
               :key="r"
@@ -116,7 +123,7 @@ const FONTS = Object.keys(FONT_PRESETS) as (keyof typeof FONT_PRESETS)[]
 
         <div class="space-y-1.5">
           <p class="field-label">Density</p>
-          <div class="flex gap-1">
+          <div class="flex flex-wrap gap-1">
             <button
               v-for="d in DENSITIES"
               :key="d"
@@ -133,7 +140,7 @@ const FONTS = Object.keys(FONT_PRESETS) as (keyof typeof FONT_PRESETS)[]
 
         <div class="space-y-1.5">
           <p class="field-label">Font</p>
-          <div class="flex gap-1">
+          <div class="flex flex-wrap gap-1">
             <button
               v-for="f in FONTS"
               :key="f"
